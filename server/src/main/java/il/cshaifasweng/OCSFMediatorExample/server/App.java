@@ -42,25 +42,15 @@ public class App
 
     private static SessionFactory getSessionFactory() throws HibernateException {
         Configuration configuration = new Configuration();
-        if(userinput == null) {
+        // Prompt for the password dynamically
+        if (userinput == null) {
             Scanner userInput = new Scanner(System.in);
-
             System.out.print("Enter the database password: ");
             userinput = userInput.nextLine();
-            System.out.print("entered password: " + userinput );
         }
-        else
-            configuration.setProperty("hibernate.connection.password", userinput);
-        // Add Meal and Customization entities
-        configuration.addAnnotatedClass(Meal.class);
-        configuration.addAnnotatedClass(Customization.class);
-        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                .applySettings(configuration.getProperties())
-                .build();
-        return configuration.buildSessionFactory(serviceRegistry);
-    }
-    private static SessionFactory getreadyfactory() throws HibernateException {
-        Configuration configuration = new Configuration();
+        configuration.setProperty("hibernate.connection.password", userinput);
+
+        configuration.getProperties().forEach((key, value) -> System.out.println(key + ": " + value));
         // Add Meal and Customization entities
         configuration.addAnnotatedClass(Meal.class);
         configuration.addAnnotatedClass(Customization.class);
@@ -70,10 +60,7 @@ public class App
         return configuration.buildSessionFactory(serviceRegistry);
     }
 
-    public byte[] readImage(String imagePath) throws IOException {
-        Path path = Paths.get(imagePath);
-        return Files.readAllBytes(path);
-    }
+
 
 
     static Path imagePath(String fileName) {

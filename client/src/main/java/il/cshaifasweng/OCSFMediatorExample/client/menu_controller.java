@@ -107,7 +107,7 @@ public class menu_controller {
 
     @Subscribe
     public void updateMealPrice(updatePrice updatePrice) {
-        System.out.println("changing price now!");
+        //System.out.println("changing price now!");
         String mealId = String.valueOf(updatePrice.getIdMeal());
         String newPrice = String.valueOf(updatePrice.getNewPrice());
         // Check if the mealId exists in the map
