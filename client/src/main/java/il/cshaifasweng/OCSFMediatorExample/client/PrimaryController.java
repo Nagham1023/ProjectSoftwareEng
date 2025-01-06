@@ -29,7 +29,7 @@ public class PrimaryController {
 	}
 	@Subscribe
 	public void mealEvent(updatePrice updateprice) {
-		System.out.println("We're in primary controller in mealEvent changing the list");
+		//System.out.println("We're in primary controller in mealEvent changing the list");
 
 		String mealId = String.valueOf(updateprice.getIdMeal());
 		String newPrice = String.valueOf(updateprice.getNewPrice());
@@ -44,7 +44,7 @@ public class PrimaryController {
 			if (meal.getId().equals(mealId)) {
 				meal.setPrice(newPrice);
 				updated = true;
-				System.out.println("Meal ID " + mealId + " updated to price: " + meal.getPrice());
+				//System.out.println("Meal ID " + mealId + " updated to price: " + meal.getPrice());
 				break;
 			}
 		}
