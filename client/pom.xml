@@ -14,32 +14,52 @@
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-base</artifactId>
-			<version>23.0.1</version>
+			<version>21.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-controls</artifactId>
-			<version>23.0.1</version>
+			<version>21.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-fxml</artifactId>
-			<version>23.0.1</version>
+			<version>21.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-graphics</artifactId>
-			<version>23.0.1</version>
+			<version>21.0.1</version>
 			<classifier>win</classifier>
 		</dependency>
+		<!--
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+			<version>21.0.1</version>
+			<classifier>linux</classifier>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+			<version>21.0.1</version>
+			<classifier>mac</classifier>
+		</dependency>
+		-->
 		<dependency>
 			<groupId>org.greenrobot</groupId>
 			<artifactId>eventbus</artifactId>
 			<version>3.2.0</version>
 		</dependency>
 		<dependency>
-			<groupId>il.cshaifasweng.OCSFMediatorExample</groupId>
+			<groupId>${groupId}</groupId>
 			<artifactId>entities</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>il.cshaifasweng.OCSFMediatorExample</groupId>
+			<artifactId>server</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 	<build>

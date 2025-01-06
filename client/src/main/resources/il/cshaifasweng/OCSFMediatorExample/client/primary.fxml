@@ -1,16 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.PrimaryController">
-   <children>
-      <Label text="Welcome" />
-      <Button mnemonicParsing="false" onAction="#sendWarning" text="Send me a warning!" />
-   </children>
-   <padding>
-      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-   </padding>
-</VBox>
+<AnchorPane prefHeight="400" prefWidth="600" style="-fx-background-color: #f8f5f1;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.PrimaryController">
+   <!-- Title -->
+   <Label layoutX="200" layoutY="50" style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" text="Flavor Res" />
+
+   <!-- Subtitle -->
+   <Label layoutX="180" layoutY="100" style="-fx-font-size: 16px; -fx-text-fill: #757575;" text="Where Flavor Meets Comfort" />
+
+   <!-- Buttons -->
+   <VBox alignment="CENTER" layoutX="200" layoutY="180" spacing="20">
+      <!-- Go to Menu Button -->
+      <Button onAction="#goToMenu" prefWidth="200" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10;" text="Go to Menu" />
+
+      <!-- Update Menu Button -->
+      <Button onAction="#goUpdateMenu" prefWidth="200" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10;" text="Add New Meal" />
+   </VBox>
+
+   <!-- Footer -->
+   <Label fx:id="copyr" layoutX="240" layoutY="360" style="-fx-font-size: 12px; -fx-text-fill: #BDBDBD;" text="© 2025 Flavor Res" />
+</AnchorPane>

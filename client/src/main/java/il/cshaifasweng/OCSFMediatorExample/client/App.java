@@ -1,5 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Customization;
+import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -10,9 +12,21 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Scanner;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.hibernate.Hibernate;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 
 /**
  * JavaFX App
@@ -24,7 +38,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-    	EventBus.getDefault().register(this);
+        //EventBus.getDefault().register(this);
     	client = SimpleClient.getClient();
     	client.openConnection();
         scene = new Scene(loadFXML("primary"), 640, 480);
@@ -43,14 +57,13 @@ public class App extends Application {
     
     
 
-    @Override
+    /*@Override
 	public void stop() throws Exception {
 		// TODO Auto-generated method stub
     	EventBus.getDefault().unregister(this);
 		super.stop();
-	}
-    
-    @Subscribe
+	}*/
+    /*@Subscribe
     public void onWarningEvent(WarningEvent event) {
     	Platform.runLater(() -> {
     		Alert alert = new Alert(AlertType.WARNING,
@@ -61,6 +74,24 @@ public class App extends Application {
         	alert.show();
     	});
     	
+    }*/
+    @Override
+    public void stop() {
+        System.out.println("Stopped");
+        try {
+
+            if (SimpleClient.getClient() != null) {
+                client = SimpleClient.getClient();
+                if (client.isConnected()) {
+                    System.out.println("Closing Client");
+                    client.sendToServer("remove client");
+                }
+                SimpleClient.getClient().closeConnection();
+                super.stop();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 	public static void main(String[] args) {

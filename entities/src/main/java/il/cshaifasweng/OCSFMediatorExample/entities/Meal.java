@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -16,7 +17,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "meals")
-public class Meal {
+public class Meal implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -26,6 +27,12 @@ public class Meal {
     private double price;
     private boolean isCompany;
     private boolean isDelivery;
+
+
+    @Lob
+    @Column(name = "image", columnDefinition = "MEDIUMBLOB") // Or LONGBLOB if needed
+    private byte[] image;
+
 
     @ManyToMany
     @JoinTable(
@@ -94,4 +101,13 @@ public class Meal {
     public void setCustomizations(List<Customization> customizations) {
         this.customizations = customizations;
     }
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
 }
