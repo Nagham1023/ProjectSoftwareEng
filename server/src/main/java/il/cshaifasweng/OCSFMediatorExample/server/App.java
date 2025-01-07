@@ -64,7 +64,8 @@ public class App
 
 
     static Path imagePath(String fileName) {
-        return Paths.get("C:\\ProjectSoftwareEng\\" + fileName);
+        return Paths.get("src/main/resources/images/" + fileName);
+
     }
 
     private static void generateData() throws Exception {
@@ -93,7 +94,7 @@ public class App
         burger.setPrice(8.00);
         burger.setCustomizations(Arrays.asList(moreLettuce));
         burger.setImage(Files.readAllBytes(imagePath("burger.jpg"))); // Add image
-        //System.out.println("Image size for " + burger.getName() + ": " + Files.readAllBytes(imagePath("burger.jpg")).length + " bytes");
+        System.out.println("Image size for " + burger.getName() + ": " + Files.readAllBytes(imagePath("burger.jpg")).length + " bytes");
 
         Meal spaghetti = new Meal();
         spaghetti.setName("Spaghetti");
