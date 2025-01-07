@@ -110,7 +110,7 @@ public class App
         spaghetti.setPrice(10.00);
         spaghetti.setCustomizations(Arrays.asList(extraCheese));
         //spaghetti.setImage(Files.readAllBytes(imagePath("spaghetti.jpg"))); // Add image
-        burger.setImage(loadImage("spaghetti.jpg")); // Updated call
+        spaghetti.setImage(loadImage("spaghetti.jpg")); // Updated call
 
         Meal avocadoSalad = new Meal();
         avocadoSalad.setName("Avocado Salad");
@@ -118,7 +118,7 @@ public class App
         avocadoSalad.setPrice(7.00);
         avocadoSalad.setCustomizations(Arrays.asList(moreOnion));
         //avocadoSalad.setImage(Files.readAllBytes(imagePath("avocado_salad.png"))); // Add image
-        burger.setImage(loadImage("avocado_salad.png")); // Updated call
+        avocadoSalad.setImage(loadImage("avocado_salad.png")); // Updated call
 
         Meal grills = new Meal();
         grills.setName("Grills");
@@ -126,7 +126,7 @@ public class App
         grills.setPrice(12.00);
         grills.setCustomizations(Arrays.asList(highSpicyLevel));
         //grills.setImage(Files.readAllBytes(imagePath("grills.jpg"))); // Add image
-        burger.setImage(loadImage("grills.jpg")); // Updated call
+        grills.setImage(loadImage("grills.jpg")); // Updated call
 
         Meal toastCheese = new Meal();
         toastCheese.setName("Toast Cheese");
@@ -134,7 +134,7 @@ public class App
         toastCheese.setPrice(5.00);
         toastCheese.setCustomizations(Arrays.asList(blackBread));
         //toastCheese.setImage(Files.readAllBytes(imagePath("toast_cheese.jpg"))); // Add image
-        burger.setImage(loadImage("toast_cheese.jpg")); // Updated call
+        toastCheese.setImage(loadImage("toast_cheese.jpg")); // Updated call
 
         // List of meals to add
         List<Meal> newMeals = Arrays.asList(burger, spaghetti, avocadoSalad, grills, toastCheese);
