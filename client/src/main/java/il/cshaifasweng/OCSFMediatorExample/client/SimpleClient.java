@@ -28,7 +28,7 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post(msg);
 		}
 		if (msg instanceof List<?>) { // Check if msg is a list
-			System.out.println("the message is a list");
+			//System.out.println("the message is a list");
 			List<?> list = (List<?>) msg;
 			if (!list.isEmpty() && list.get(0) instanceof mealEvent) { // Ensure it's a List<Meal>
 				System.out.println("list of meals");

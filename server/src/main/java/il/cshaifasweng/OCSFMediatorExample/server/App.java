@@ -18,6 +18,7 @@ import org.hibernate.service.ServiceRegistry;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -62,10 +63,16 @@ public class App
 
 
 
-
+    static byte[] loadImage(String fileName) throws IOException {
+        try (InputStream inputStream = App.class.getClassLoader().getResourceAsStream("images/" + fileName)) {
+            if (inputStream == null) {
+                throw new IOException("Resource not found: " + fileName);
+            }
+            return inputStream.readAllBytes();
+        }
+    }
     static Path imagePath(String fileName) {
         return Paths.get("src/main/resources/images/" + fileName);
-
     }
 
     private static void generateData() throws Exception {
@@ -93,36 +100,41 @@ public class App
         burger.setDescription("Juicy beef burger with fresh lettuce");
         burger.setPrice(8.00);
         burger.setCustomizations(Arrays.asList(moreLettuce));
-        burger.setImage(Files.readAllBytes(imagePath("burger.jpg"))); // Add image
-        System.out.println("Image size for " + burger.getName() + ": " + Files.readAllBytes(imagePath("burger.jpg")).length + " bytes");
+        //burger.setImage(Files.readAllBytes(imagePath("burger.jpg"))); // Add image
+        burger.setImage(loadImage("burger.jpg")); // Updated call
+        //System.out.println("Image size for " + burger.getName() + ": " + Files.readAllBytes(imagePath("burger.jpg")).length + " bytes");
 
         Meal spaghetti = new Meal();
         spaghetti.setName("Spaghetti");
         spaghetti.setDescription("Classic Italian spaghetti with cheese");
         spaghetti.setPrice(10.00);
         spaghetti.setCustomizations(Arrays.asList(extraCheese));
-        spaghetti.setImage(Files.readAllBytes(imagePath("spaghetti.jpg"))); // Add image
+        //spaghetti.setImage(Files.readAllBytes(imagePath("spaghetti.jpg"))); // Add image
+        burger.setImage(loadImage("spaghetti.jpg")); // Updated call
 
         Meal avocadoSalad = new Meal();
         avocadoSalad.setName("Avocado Salad");
         avocadoSalad.setDescription("Fresh avocado salad with onions");
         avocadoSalad.setPrice(7.00);
         avocadoSalad.setCustomizations(Arrays.asList(moreOnion));
-        avocadoSalad.setImage(Files.readAllBytes(imagePath("avocado_salad.png"))); // Add image
+        //avocadoSalad.setImage(Files.readAllBytes(imagePath("avocado_salad.png"))); // Add image
+        burger.setImage(loadImage("avocado_salad.png")); // Updated call
 
         Meal grills = new Meal();
         grills.setName("Grills");
         grills.setDescription("Mixed grilled meats with spices");
         grills.setPrice(12.00);
         grills.setCustomizations(Arrays.asList(highSpicyLevel));
-        grills.setImage(Files.readAllBytes(imagePath("grills.jpg"))); // Add image
+        //grills.setImage(Files.readAllBytes(imagePath("grills.jpg"))); // Add image
+        burger.setImage(loadImage("grills.jpg")); // Updated call
 
         Meal toastCheese = new Meal();
         toastCheese.setName("Toast Cheese");
         toastCheese.setDescription("Cheese toast with black bread");
         toastCheese.setPrice(5.00);
         toastCheese.setCustomizations(Arrays.asList(blackBread));
-        toastCheese.setImage(Files.readAllBytes(imagePath("toast_cheese.jpg"))); // Add image
+        //toastCheese.setImage(Files.readAllBytes(imagePath("toast_cheese.jpg"))); // Add image
+        burger.setImage(loadImage("toast_cheese.jpg")); // Updated call
 
         // List of meals to add
         List<Meal> newMeals = Arrays.asList(burger, spaghetti, avocadoSalad, grills, toastCheese);
