@@ -39,8 +39,8 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         //EventBus.getDefault().register(this);
-    	client = SimpleClient.getClient();
-    	client.openConnection();
+    	/*client = SimpleClient.getClient();
+    	client.openConnection();*/
         scene = new Scene(loadFXML("ipandport"), 640, 480);
         stage.setScene(scene);
         stage.show();
@@ -84,7 +84,7 @@ public class App extends Application {
             if (SimpleClient.getClient() != null) {
                 client = SimpleClient.getClient();
                 if (client.isConnected()) {
-                    System.out.println("Closing Client");
+                            System.out.println("Closing Client");
                     client.sendToServer("remove client");
                 }
                 SimpleClient.getClient().closeConnection();

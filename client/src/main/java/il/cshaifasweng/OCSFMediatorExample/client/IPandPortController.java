@@ -34,9 +34,8 @@ public class IPandPortController {
             SimpleClient.IP = ip;
             SimpleClient.Port = port;
             SimpleClient client = SimpleClient.getClient(); // Get the SimpleClient instance
-
-            client.openConnection(); // Attempt to connect to the server
-            App.setRoot("Primary");
+            client.openConnection();
+            App.setRoot("primary");
 
 
         } catch (NumberFormatException e) {
