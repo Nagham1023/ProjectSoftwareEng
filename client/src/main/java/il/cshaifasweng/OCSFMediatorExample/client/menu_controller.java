@@ -121,6 +121,16 @@ public class menu_controller {
         }
     }
 
+    @Subscribe
+    public void addnewmeal(mealEvent meal) {
+        System.out.println("adding new meal for this client");
+        Platform.runLater(() -> {
+            onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()), meal.getId(), meal.getImage());
+        });
+        System.out.println("added the new meal for this client");
+
+    }
+
     @FXML
     public void initialize() throws Exception {
         EventBus.getDefault().register(this);

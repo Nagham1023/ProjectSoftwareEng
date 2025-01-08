@@ -202,6 +202,27 @@ public class App
         // If meal with the given ID is not found
         //System.out.println("Meal with ID " + mealId + " not found.");
     }
+    public static void addMealToList(Meal newMeal) {
+        // Ensure meatlist is initialized
+        if (meatlist == null) {
+            meatlist = new ArrayList<>();
+        }
+
+        // Check if the meal already exists in the list (optional, if you want to avoid duplicates)
+        boolean isDuplicate = meatlist.stream()
+                .anyMatch(existingMeal -> existingMeal.getName().equalsIgnoreCase(newMeal.getName()) &&
+                        existingMeal.getDescription().equalsIgnoreCase(newMeal.getDescription()));
+
+        if (isDuplicate) {
+            System.out.println("Meal already exists in the list: " + newMeal.getName());
+        } else {
+            // Add the new meal to the list
+            meatlist.add(newMeal);
+            //System.out.println("Added new meal to the list: " + newMeal.getName());
+        }
+    }
+
+
 
     public static void updateMealPriceInDatabase(updatePrice updatePrice) {
         //System.out.println("Changing the price in database.");
@@ -249,6 +270,73 @@ public class App
         }
         //System.out.println("Finished updating the price in the database.");
     }
+    public static String AddNewMeal(mealEvent newMeal) {
+        // Extract data from the mealEvent object
+        String mealDisc = newMeal.getMealDisc();
+        byte[] mealImage = newMeal.getImage();
+        String mealName = newMeal.getMealName();
+        String mealPrice = newMeal.getPrice();
+
+        try {
+            // Ensure the session is open
+            if (session == null || !session.isOpen()) {
+                SessionFactory sessionFactory = getSessionFactory();
+                session = sessionFactory.openSession();
+            }
+
+            if (session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
+            }
+
+            session.beginTransaction();
+
+            // Check for duplicates in the database
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Meal> query = builder.createQuery(Meal.class);
+            query.from(Meal.class);
+            List<Meal> existingMeals = session.createQuery(query).getResultList();
+
+            boolean isDuplicate = existingMeals.stream()
+                    .anyMatch(existingMeal -> existingMeal.getName().equalsIgnoreCase(mealName) &&
+                            existingMeal.getDescription().equalsIgnoreCase(mealDisc));
+
+            if (isDuplicate) {
+                System.out.println("Meal already exists in the database: " + mealName);
+                return "exist";
+            } else {
+                // Create a new Meal entity and set its attributes
+                Meal newM = new Meal();
+                newM.setName(mealName);
+                newM.setDescription(mealDisc);
+                newM.setPrice(Double.parseDouble(mealPrice));
+                newM.setImage(mealImage);
+
+                // Save the meal to the database
+                session.save(newM);
+
+                // Add the meal to the local list
+                addMealToList(newM);
+
+                System.out.println("New meal added: " + mealName);
+            }
+
+            // Commit the transaction
+            session.getTransaction().commit();
+
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback(); // Rollback on error
+            }
+            e.printStackTrace();
+        } finally {
+            // Leave the session open for further operations
+            if (session != null && session.isOpen()) {
+                session.close(); // Close the session after operation
+            }
+        }
+        return "added";
+    }
+
 
 
 

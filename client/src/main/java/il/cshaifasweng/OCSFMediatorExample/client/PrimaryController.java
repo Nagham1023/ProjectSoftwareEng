@@ -28,6 +28,12 @@ public class PrimaryController {
 		client.sendToServer("add client");
 	}
 	@Subscribe
+	public void addnewmeal(mealEvent mealEvent) {
+		Platform.runLater(() -> {
+			meals.add(mealEvent);
+		});
+	}
+	@Subscribe
 	public void mealEvent(updatePrice updateprice) {
 		//System.out.println("We're in primary controller in mealEvent changing the list");
 

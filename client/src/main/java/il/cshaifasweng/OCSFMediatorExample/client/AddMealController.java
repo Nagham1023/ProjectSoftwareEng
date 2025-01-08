@@ -1,20 +1,32 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.image.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+import javax.imageio.ImageIO;
 import java.io.File;
+import java.nio.ByteBuffer;
+import java.util.Objects;
+
 
 public class AddMealController {
-
+    @FXML
+    private Label feedbackLabel;
     @FXML
     private TextField mealNameField; // Correct type for FXML mapping
 
@@ -29,37 +41,66 @@ public class AddMealController {
     private File selectedImageFile;
 
 
+    public static byte[] imageToByteArray(Image image) {
+        if (image == null) {
+            throw new IllegalArgumentException("Image cannot be null");
+        }
+
+        // Convert JavaFX Image to AWT BufferedImage
+        int width = (int) image.getWidth();
+        int height = (int) image.getHeight();
+        WritableImage writableImage = new WritableImage(width, height);
+        PixelReader pixelReader = image.getPixelReader();
+
+        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int argb = pixelReader.getArgb(x, y);
+                bufferedImage.setRGB(x, y, argb);
+            }
+        }
+
+        // Encode BufferedImage as PNG and write to ByteArrayOutputStream
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(bufferedImage, "png", outputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return outputStream.toByteArray();
+    }
+
     @FXML
     private void switchToPrimary() throws IOException {
         App.setRoot("primary");
     }
     @FXML
     public void onAddMealClicked() throws IOException {
-//        //mealEvent newmeal = new mealEvent(mealNameField.getText(),mealDescriptionField.getText(),mealPriceField.getText());
-//        try {
-//            //SimpleClient.getClient().sendToServer(newmeal);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            System.out.println("Failed to send data to the server!");
-//        }
-        //SimpleClient.getClient().sendToServer("newmeal");
-        //System.out.println("newmeal : " + newmeal.toString());
-        /*
-        String name = mealNameField.getText();
-        String description = mealDescriptionField.getText();
-        String price = mealPriceField.getText();
+        byte[] imageBytes = imageToByteArray(mealImageView.getImage());
+        mealEvent ME = new mealEvent(mealNameField.getText(),mealDescriptionField.getText(),mealPriceField.getText(),imageBytes);
+        SimpleClient client;
+        client = SimpleClient.getClient();
+        // Convert byte[] to InputStream
+        client.sendToServer(ME);
+    }
 
-        if (selectedImageFile == null) {
-            System.out.println("Please select an image!");
-            return;
+    @Subscribe
+    public void successorfail(String result)
+    {
+        if(Objects.equals(result, "added"))
+            Platform.runLater(() -> {
+                feedbackLabel.setText("Successfully added");
+                feedbackLabel.setStyle("-fx-text-fill: green;");
+            });
+        else
+        {
+            Platform.runLater(() -> {
+                feedbackLabel.setText("Failed to add");
+                feedbackLabel.setStyle("-fx-text-fill: red;");
+            });
         }
 
-        // TODO: Implement the logic to add the meal (e.g., update the menu or save to database)
-        System.out.println("Meal added:");
-        System.out.println("Name: " + name);
-        System.out.println("Description: " + description);
-        System.out.println("Price: " + price);
-        System.out.println("Image Path: " + selectedImageFile.getAbsolutePath());*/
     }
     @FXML
     public void onSelectImageClicked() {
@@ -82,6 +123,10 @@ public class AddMealController {
     @FXML
     void backToHome(ActionEvent event) throws IOException {
         App.setRoot("primary");
+    }
+    @FXML
+    void initialize() throws IOException {
+        EventBus.getDefault().register(this);
     }
 
 

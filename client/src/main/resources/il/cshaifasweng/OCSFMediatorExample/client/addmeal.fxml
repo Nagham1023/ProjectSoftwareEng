@@ -7,6 +7,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <VBox spacing="20" style="-fx-padding: 20; -fx-background-color: #f8f5f1;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AddMealController">
     <!-- Header with Back Arrow -->
@@ -30,4 +31,10 @@
 
     <!-- Add Meal Button -->
     <Button fx:id="addMealButton" onAction="#onAddMealClicked" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;" text="Add Meal" />
+
+    <!-- Feedback Label -->
+    <Label fx:id="feedbackLabel" style="-fx-text-fill: red; -fx-font-size: 14px;">
+      <font>
+         <Font name="System Bold" size="13.0" />
+      </font></Label>
 </VBox>

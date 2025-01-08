@@ -36,11 +36,13 @@ public class SimpleClient extends AbstractClient {
 			}
 		}
 		if (msg.getClass().equals(mealEvent.class)) {
-			//EventBus.getDefault().post(new WarningEvent((Warning) msg));
-			System.out.println("got a message !!!!");
+			EventBus.getDefault().post(msg);
 		}
 		if (msg.getClass().equals(Warning.class)) {
 			EventBus.getDefault().post(new WarningEvent((Warning) msg));
+		}
+		if(msg instanceof String) {
+			EventBus.getDefault().post(msg);
 		}
 
 	}

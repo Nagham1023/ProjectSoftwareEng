@@ -19,6 +19,13 @@ public class mealEvent implements Serializable {
         this.image = image;
 
     }
+    public mealEvent(String mealName, String mealDisc, String price, byte[] image) {
+        this.mealName = mealName;
+        this.mealDisc = mealDisc;
+        this.price = price;
+        this.image = image;
+
+    }
     public byte[] getImage() {
         return image;
     }

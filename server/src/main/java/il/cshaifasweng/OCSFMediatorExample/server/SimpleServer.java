@@ -27,9 +27,13 @@ public class SimpleServer extends AbstractServer {
 		System.out.println("Received message from client ");
 		String msgString = msg.toString();
 		if(msg instanceof mealEvent) {
-            //System.out.println("sent a message!");
-            //client.sendToClient(msg);
-            //sned to all!!!
+			//here we're adding new meal !!
+			//System.out.println("Received adding new mealEvent ");
+			String addResult = AddNewMeal((mealEvent) msg);//if "added" then successed if "exist" then failed bcs there is a meal like that
+			System.out.println("Added new mealEvent to the database");
+			sendToAll(msg);
+			sendToAll(addResult);
+
         }
 		if (msgString.startsWith("#warning")) {
 			Warning warning = new Warning("Warning from server!");
