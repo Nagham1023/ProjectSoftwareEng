@@ -1,23 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane prefHeight="600" prefWidth="800" style="-fx-background-color: #f8f5f1;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.menu_controller">
-    <content>
-        <VBox fx:id="menuContainer" spacing="20" style="-fx-padding: 20;">
-            <!-- Header with Back Arrow -->
-            <HBox spacing="10" style="-fx-alignment: center-left; -fx-padding: 10;">
-                <Button fx:id="backButton" onAction="#backToHome" style="-fx-font-size: 18px; -fx-text-fill: #4CAF50; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
-                <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" text="Flavor Res - Menu" />
-            </HBox>
+<StackPane prefHeight="600" prefWidth="800" style="-fx-background-color: #f8f5f1;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.menu_controller">
+    <!-- Main Scrollable Content -->
+    <ScrollPane fx:id="scrollPane" prefHeight="600" prefWidth="800">
+        <content>
+            <VBox fx:id="menuContainer" spacing="20" style="-fx-padding: 20;">
+                <!-- Header with Back Arrow -->
+                <HBox spacing="10" style="-fx-alignment: center-left; -fx-padding: 10;">
+                    <Button fx:id="backButton" onAction="#backToHome" style="-fx-font-size: 18px; -fx-text-fill: #4CAF50; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
+                    <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" text="Flavor Res - Menu" />
+                </HBox>
 
-            <!-- Content -->
-            <Pane />
-        </VBox>
-    </content>
-</ScrollPane>
+                <!-- Content -->
+                <Pane />
+            </VBox>
+        </content>
+    </ScrollPane>
+
+    <!-- Floating Arrow -->
+    <ImageView fx:id="scrollArrow" fitHeight="40.0" fitWidth="40.0" layoutX="500.0" layoutY="300.0" preserveRatio="true" style="-fx-alignment: center;" x="500.0">
+      <StackPane.margin>
+         <Insets top="400.0" />
+      </StackPane.margin></ImageView>
+</StackPane>

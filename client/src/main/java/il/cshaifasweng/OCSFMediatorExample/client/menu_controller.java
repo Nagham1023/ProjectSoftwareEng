@@ -4,6 +4,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.Customization;
 import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
 import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.updatePrice;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -11,11 +12,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.image.Image;
+import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -32,6 +35,13 @@ public class menu_controller {
     @FXML
     private VBox menuContainer; // Links to fx:id in FXML
     private Map<String, Label> mealPriceLabels = new HashMap<>();
+    @FXML
+    private ImageView scrollArrow;
+    @FXML
+    private ScrollPane scrollPane;
+    @FXML
+    private TranslateTransition arrowAnimation;
+
 
     // Method to handle Add Meal button click
     //@FXML
@@ -98,6 +108,7 @@ public class menu_controller {
             // Pass data to the Change Price Controller
             update_menu_controller controller = loader.getController();
             controller.setMealDetails(mealName, priceLabel,Id);
+
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -124,6 +135,7 @@ public class menu_controller {
     @Subscribe
     public void addnewmeal(mealEvent meal) {
         System.out.println("adding new meal for this client");
+        System.out.println("Meal's id is " + meal.getId());
         Platform.runLater(() -> {
             onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()), meal.getId(), meal.getImage());
         });
@@ -141,6 +153,38 @@ public class menu_controller {
         for (mealEvent meal : meals) {
             onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()),meal.getId(),meal.getImage());
         }
+
+        /******/
+        // Set the arrow image
+        scrollArrow.setImage(new Image(getClass().getResourceAsStream("/images/downarrow.png"))); // Update path as needed
+
+        // Position the arrow
+        //scrollArrow.setTranslateY(20); // Adjust to place it in the middle-bottom area
+        //scrollArrow.setTranslateX(0); // Adjust to place it in the middle-bottom area
+        scrollArrow.setVisible(true);
+        //scrollArrow.set
+
+        // Create arrow animation
+        arrowAnimation = new TranslateTransition(Duration.millis(500), scrollArrow);
+        arrowAnimation.setFromY(0);
+        arrowAnimation.setToY(30); // Move down by 10px
+        arrowAnimation.setCycleCount(TranslateTransition.INDEFINITE);
+        arrowAnimation.setAutoReverse(true);
+        arrowAnimation.play();
+
+        // Add scroll listener to hide the arrow when fully scrolled
+        scrollPane.vvalueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.doubleValue() == 1.0) {
+                arrowAnimation.stop();
+                scrollArrow.setVisible(false); // Hide the arrow when fully scrolled
+            } else {
+                arrowAnimation.play();
+                scrollArrow.setVisible(true); // Show the arrow when not fully scrolled
+            }
+        });
+
+
+        /*****/
     }
     @FXML
     void backToHome(ActionEvent event) throws IOException {

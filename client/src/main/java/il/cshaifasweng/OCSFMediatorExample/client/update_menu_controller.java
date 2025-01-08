@@ -32,6 +32,7 @@ public class update_menu_controller {
     private void updatePrice() {
         String newPrice = priceField.getText();
         if (newPrice != null && !newPrice.trim().isEmpty()) {
+            //System.out.println("im in to change price");
             SimpleClient client;
             client = SimpleClient.getClient();
             updatePrice uPrice = new updatePrice(Double.parseDouble(newPrice),Integer.parseInt(mealId));
@@ -43,5 +44,6 @@ public class update_menu_controller {
             //priceLabel.setText(newPrice + "₪");
             priceField.getScene().getWindow().hide(); // Close the window
         }
+        //else System.out.println("i cant enter to change price");
     }
 }

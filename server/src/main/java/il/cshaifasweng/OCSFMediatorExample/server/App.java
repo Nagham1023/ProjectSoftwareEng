@@ -317,7 +317,8 @@ public class App
                 // Add the meal to the local list
                 addMealToList(newM);
 
-                System.out.println("New meal added: " + mealName);
+                System.out.println("New meal added: " + mealName + " Id: " + newM.getId());
+                newMeal.setId(String.valueOf(newM.getId()));
             }
 
             // Commit the transaction

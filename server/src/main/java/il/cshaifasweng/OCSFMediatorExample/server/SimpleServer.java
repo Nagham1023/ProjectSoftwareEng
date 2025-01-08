@@ -7,6 +7,7 @@ import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Objects;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
@@ -31,8 +32,10 @@ public class SimpleServer extends AbstractServer {
 			//System.out.println("Received adding new mealEvent ");
 			String addResult = AddNewMeal((mealEvent) msg);//if "added" then successed if "exist" then failed bcs there is a meal like that
 			System.out.println("Added new mealEvent to the database");
-			sendToAll(msg);
 			sendToAll(addResult);
+			if(Objects.equals(addResult, "added")) {
+				sendToAll(msg);
+			}
 
         }
 		if (msgString.startsWith("#warning")) {
