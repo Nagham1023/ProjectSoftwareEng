@@ -1,16 +1,17 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.updatePrice;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
-import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.*;
@@ -96,8 +97,60 @@ public class SimpleServer extends AbstractServer {
 				}
 			}
 		}
+		else if (msg.toString().startsWith("Sort")) {
+			// Extract the method from the message
+			String method = msg.toString().substring(8); // Remove "Sort by " prefix
+
+			if (method.startsWith("Search by Restaurant")) {
+				String restaurantName = method.substring("Search by ".length());
+				List<Meal> meals = getMealsByRestaurant(restaurantName);
+				try {
+					client.sendToClient(meals);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			} else if (method.startsWith("Search by Ingredients")) {
+				System.out.print("Hello");
+				try {
+					String ingredients = "Lettuce";//example
+					var meals = getMealsByIngredient(ingredients);
+					client.sendToClient(meals);
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			} else {
+				System.out.println("Unknown search method.");
+			}
+		}
 
 	}
+	// Method to get meals by restaurant
+	private List<Meal> getMealsByRestaurant(String restaurantName) {
+
+		String query = "SELECT r FROM Resturant r LEFT JOIN FETCH r.meals WHERE r.resturant_Name = :restaurantName";
+		List<Resturant> resturant = App.Get_Resturant(query);
+		return resturant.get(0).getMeals();
+
+	}
+
+	// Method to get meals by ingredient
+	private List<Meal> getMealsByIngredient(String ingredient) throws Exception {
+		// Get all meals
+		var meals = App.GetAllMeals();
+
+		// Create a list to store meals that contain the ingredient in the description
+		List<Meal> mealsWithIngredient = new ArrayList<>();
+
+		// Iterate over all meals and check if the description contains the ingredient
+		for (Meal meal : meals) {
+			if (meal.getDescription() != null && meal.getDescription().toLowerCase().contains(ingredient.toLowerCase())) {
+				mealsWithIngredient.add(meal);
+			}
+		}
+
+		return mealsWithIngredient;
+	}
+
 	@Override
 	public void sendToAllClients(Object message) {
 		try {

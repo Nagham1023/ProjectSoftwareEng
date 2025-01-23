@@ -4,10 +4,7 @@ package il.cshaifasweng.OCSFMediatorExample.server;
 
 import java.io.IOException;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Customization;
-import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
-import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.updatePrice;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -392,6 +389,91 @@ public class App
             }
         }
     }
-        //server = new SimpleServer(3000);
-        //server.listen();
+
+    public static List<Resturant> Get_Resturant(String queryString) {
+        // Ensure the session is open
+        if (session == null || !session.isOpen()) {
+            try {
+                SessionFactory sessionFactory = getSessionFactory();
+                session = sessionFactory.openSession();
+            } catch (HibernateException e) {
+                System.err.println("Error initializing Hibernate session: " + e.getMessage());
+                return null;
+            }
+        }
+
+        List<Resturant> result = new ArrayList<>();
+        try {
+            // Begin the transaction for querying
+            session.beginTransaction();
+
+            // Create the query
+            org.hibernate.query.Query<Resturant> query = session.createQuery(queryString, Resturant.class);
+
+            // Execute the query and get the result list
+            result = query.getResultList();
+
+            // Commit the transaction
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            // Rollback the transaction if something went wrong
+            if (session.getTransaction() != null && session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
+            }
+            System.err.println("Error executing the query: " + e.getMessage());
+            e.printStackTrace();
+        }finally {
+            // Leave the session open for further operations
+            if (session != null && session.isOpen()) {
+                session.close(); // Close the session after operation
+            }
+        }
+
+        return result;
+    }
+
+    public static List<Meal> GetAllMeals() {
+        // Ensure the session is open
+        if (session == null || !session.isOpen()) {
+            try {
+                SessionFactory sessionFactory = getSessionFactory();
+                session = sessionFactory.openSession();
+            } catch (HibernateException e) {
+                System.err.println("Error initializing Hibernate session: " + e.getMessage());
+                return null;
+            }
+        }
+
+        List<Meal> result = new ArrayList<>();
+        try {
+            // Begin the transaction for querying
+            session.beginTransaction();
+
+            // Create a query to find all meals without any constraint
+            String queryString = "FROM Meal";  // No WHERE clause, fetch all meals
+            org.hibernate.query.Query<Meal> query = session.createQuery(queryString, Meal.class);
+
+            // Execute the query and get the result list
+            result = query.getResultList();
+
+            // Commit the transaction
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            // Rollback the transaction if something went wrong
+            if (session.getTransaction() != null && session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
+            }
+            System.err.println("Error executing the query: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // Ensure session is closed after use
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return result;
+    }
+
+
 }
