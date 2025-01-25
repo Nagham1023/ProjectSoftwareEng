@@ -1,17 +1,17 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.updatePrice;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.*;
@@ -37,6 +37,62 @@ public class SimpleServer extends AbstractServer {
 			if(Objects.equals(addResult, "added")) {
 				sendToAll(msg);
 			}
+
+		}
+		if(msg instanceof UserCheck) {
+			if(((UserCheck) msg).isState() == 1)//if login
+			{
+				try {
+					if (checkUser(((UserCheck) msg).getUsername(), ((UserCheck) msg).getPassword())) {
+						((UserCheck) msg).setRespond("Valid");
+						client.sendToClient(msg);
+					} else {
+						((UserCheck) msg).setRespond("Username or password incorrect");
+						client.sendToClient(msg);
+					}
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+			else if(((UserCheck) msg).isState() == 0) //if register
+			{
+				String response = AddNewUser((UserCheck) (msg));
+				((UserCheck) msg).setRespond(response);
+                try {
+                    client.sendToClient(msg);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+			else if(((UserCheck) msg).isState() == 2) //if forgetpass
+			{
+				try {
+					if (checkEmail(((UserCheck) msg))) {
+						((UserCheck) msg).setRespond("Valid");
+						client.sendToClient(msg);
+					} else {
+						((UserCheck) msg).setRespond("notValid");
+						client.sendToClient(msg);
+					}
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+			else if(((UserCheck) msg).isState() == 3) //if just a name check
+			{
+				try {
+					if (checkUserName(((UserCheck) msg).getUsername())) {
+						((UserCheck) msg).setRespond("notValid");
+						client.sendToClient(msg);
+					} else {
+						((UserCheck) msg).setRespond("Valid");
+						client.sendToClient(msg);
+					}
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+
 
         }
 		if (msgString.startsWith("#warning")) {
@@ -187,26 +243,8 @@ public class SimpleServer extends AbstractServer {
 		List<Resturant> resturant = App.Get_Resturant(query);
 		return resturant.get(0).getMeals();
 
+
 	}
-
-	// Method to get meals by ingredient
-	private List<Meal> getMealsByIngredient(String ingredient) throws Exception {
-		// Get all meals
-		var meals = App.GetAllMeals();
-
-		// Create a list to store meals that contain the ingredient in the description
-		List<Meal> mealsWithIngredient = new ArrayList<>();
-
-		// Iterate over all meals and check if the description contains the ingredient
-		for (Meal meal : meals) {
-			if (meal.getDescription() != null && meal.getDescription().toLowerCase().contains(ingredient.toLowerCase())) {
-				mealsWithIngredient.add(meal);
-			}
-		}
-
-		return mealsWithIngredient;
-	}
-
 	@Override
 	public void sendToAllClients(Object message) {
 		try {

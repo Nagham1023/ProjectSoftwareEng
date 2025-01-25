@@ -9,41 +9,37 @@
 <AnchorPane prefHeight="200.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.IPandPortController">
     <children>
         <!-- Connect Button -->
-        <Button layoutX="275.0" layoutY="150.0" mnemonicParsing="false" text="Connect"
-                onAction="#firstconnect" style="-fx-background-color: green; -fx-text-fill: white;"
-                prefWidth="120" prefHeight="40">
+        <Button layoutX="275.0" layoutY="150.0" mnemonicParsing="false" onAction="#firstconnect" prefHeight="40" prefWidth="120" style="-fx-background-color: green; -fx-text-fill: white;" text="Connect">
             <font>
                 <Font name="Calibri" size="16.0" />
             </font>
         </Button>
 
         <!-- Main Label -->
-        <Label layoutX="20.0" layoutY="20.0" text="Insert IP and Port:" style="-fx-font-weight: bold;">
+        <Label layoutX="20.0" layoutY="20.0" style="-fx-font-weight: bold;" text="Insert IP and Port:">
             <font>
                 <Font name="Calibri" size="16.0" />
             </font>
         </Label>
 
         <!-- IP Label -->
-        <Label layoutX="20.0" layoutY="70.0" text="IP:" style="-fx-font-weight: bold;">
+        <Label layoutX="20.0" layoutY="70.0" style="-fx-font-weight: bold;" text="IP:">
             <font>
                 <Font name="Calibri" size="14.0" />
             </font>
         </Label>
 
         <!-- Port Label -->
-        <Label layoutX="20.0" layoutY="110.0" text="Port:" style="-fx-font-weight: bold;">
+        <Label layoutX="20.0" layoutY="110.0" style="-fx-font-weight: bold;" text="Port:">
             <font>
                 <Font name="Calibri" size="14.0" />
             </font>
         </Label>
 
         <!-- IP TextField -->
-        <TextField fx:id="ipField" layoutX="70.0" layoutY="66.0" prefWidth="200" prefHeight="30"
-                   style="-fx-background-color: lightgreen; -fx-text-fill: black;" />
+        <TextField fx:id="ipField" layoutX="70.0" layoutY="66.0" prefHeight="30" prefWidth="200" style="-fx-background-color: lightgreen; -fx-text-fill: black;" text="127.0.0.1" />
 
         <!-- Port TextField -->
-        <TextField fx:id="portField" layoutX="70.0" layoutY="106.0" prefWidth="200" prefHeight="30"
-                   style="-fx-background-color: lightgreen; -fx-text-fill: black;" />
+        <TextField fx:id="portField" layoutX="70.0" layoutY="106.0" prefHeight="30" prefWidth="200" style="-fx-background-color: lightgreen; -fx-text-fill: black;" text="3000" />
     </children>
 </AnchorPane>

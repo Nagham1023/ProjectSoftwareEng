@@ -12,7 +12,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
@@ -27,13 +26,13 @@ import org.greenrobot.eventbus.Subscribe;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static il.cshaifasweng.OCSFMediatorExample.client.PrimaryController.meals;
 
 
 public class menu_controller {
+
     @FXML
     private VBox menuContainer; // Links to fx:id in FXML
     private Map<String, Label> mealPriceLabels = new HashMap<>();
@@ -45,6 +44,7 @@ public class menu_controller {
     private ScrollPane scrollPane;
     @FXML
     private TranslateTransition arrowAnimation;
+
     @FXML
     private Button Search_combo_box;
     @FXML
@@ -60,7 +60,9 @@ public class menu_controller {
     }
 
     // Method to handle Add Meal button click
-    public void onAddMealClicked(String mealName, String mealDescription, String mealPrice, String mealId, byte[] imageData) {
+
+    //@FXML
+    public void onAddMealClicked(String mealName,String mealDescription,String mealPrice,String mealId,byte[] imageData) {
         // Create a new meal row (HBox)
         HBox mealRow = new HBox(20);
         mealRow.setStyle("-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;");
@@ -69,6 +71,8 @@ public class menu_controller {
         Label idLabel = new Label(mealId);
         idLabel.setVisible(false); // Make it invisible
         idLabel.setManaged(false); // Ensure it doesn't take layout space
+
+
 
 
         // Meal Image
@@ -95,12 +99,12 @@ public class menu_controller {
         detailsBox.getChildren().addAll(nameLabel, descriptionLabel);
 
         // Meal Price
-        Label priceLabel = new Label(mealPrice + "₪");
+        Label priceLabel = new Label(mealPrice+"₪");
         priceLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #FF9800;");
 
         // Button to Change Price
         Button changePriceButton = new Button("Change Price");
-        changePriceButton.setOnAction(event -> openChangePricePage(nameLabel.getText(), priceLabel, idLabel.getText()));
+        changePriceButton.setOnAction(event -> openChangePricePage(nameLabel.getText(), priceLabel,idLabel.getText()));
 
         // Add components to mealRow
         mealRow.getChildren().addAll(imageView, detailsBox, priceLabel, changePriceButton);
@@ -110,8 +114,7 @@ public class menu_controller {
 
         mealPriceLabels.put(mealId, priceLabel);
     }
-
-    // Method to open the Change Price page
+    // Method to open the Search By page
     private void openSearchByPage() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/Search_by.fxml"));
@@ -124,7 +127,8 @@ public class menu_controller {
         }
     }
     // Method to open the Change Price page
-    private void openChangePricePage(String mealName, Label priceLabel, String Id) {
+
+    private void openChangePricePage(String mealName, Label priceLabel,String Id)
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/update_menu.fxml"));
             Stage stage = new Stage();
@@ -133,7 +137,7 @@ public class menu_controller {
 
             // Pass data to the Change Price Controller
             update_menu_controller controller = loader.getController();
-            controller.setMealDetails(mealName, priceLabel, Id);
+            controller.setMealDetails(mealName, priceLabel,Id);
 
             stage.show();
         } catch (IOException e) {
@@ -169,6 +173,7 @@ public class menu_controller {
 
     }
 
+
     @Subscribe
     public void ShowNewMeals(List<Meal> meals) {
         System.out.println("Refreshing menu content...");
@@ -198,16 +203,16 @@ public class menu_controller {
     }
 
 
+
     @FXML
     public void initialize() throws Exception {
         EventBus.getDefault().register(this);
-
-        if (meals == null)
+        if(meals == null)
             System.out.println("No meals found");
         else
             System.out.println(meals.toString());
         for (mealEvent meal : meals) {
-            onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()), meal.getId(), meal.getImage());
+            onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()),meal.getId(),meal.getImage());
         }
 
         /******/
@@ -257,7 +262,6 @@ public class menu_controller {
 
         /*****/
     }
-
     @FXML
     void backToHome(ActionEvent event) throws IOException {
             App.setRoot("primary");
