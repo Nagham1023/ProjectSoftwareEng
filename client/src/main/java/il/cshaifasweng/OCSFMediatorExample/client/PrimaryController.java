@@ -72,12 +72,12 @@ public class PrimaryController {
 	}
 	@FXML
 	void goToMenu(ActionEvent event) throws IOException {
-		App.setRoot("menu");
+            App.setRoot("menu");
 	}
 
 	@FXML
 	void goUpdateMenu(ActionEvent event) throws IOException {
-		App.setRoot("addmeal");
+            App.setRoot("addmeal");
 	}
 
 }

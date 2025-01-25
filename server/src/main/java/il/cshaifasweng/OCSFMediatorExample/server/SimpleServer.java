@@ -98,31 +98,87 @@ public class SimpleServer extends AbstractServer {
 			}
 		}
 		else if (msg.toString().startsWith("Sort")) {
-			// Extract the method from the message
-			String method = msg.toString().substring(8); // Remove "Sort by " prefix
+			// Extract categories from the message
+			var categories = processFilters(msg.toString());
 
-			if (method.startsWith("Search by Restaurant")) {
-				String restaurantName = method.substring("Search by ".length());
-				List<Meal> meals = getMealsByRestaurant(restaurantName);
+			// List to store all meals after filtering
+			List<Meal> allFilteredMeals = new ArrayList<>();
+
+			// Search by restaurant
+			for (String category : categories) {
+				if (isRestaurant(category)) {
+					List<Meal> meals = getMealsByRestaurant(category);
+					allFilteredMeals.addAll(meals);  // Add these meals to the list
+				}
+			}
+
+			// Search by ingredients
+			for (String category : categories) {
+				if (isIngredient(category)) {
+					try {
+						List<Meal> meals = getMealsByIngredient(category);
+						allFilteredMeals.addAll(meals);  // Add these meals to the list
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+
+			// If any meals were found, send them in a single message
+			if (!allFilteredMeals.isEmpty()) {
 				try {
-					client.sendToClient(meals);
-				}catch(Exception e){
+					client.sendToClient(allFilteredMeals);  // Send all filtered meals in one batch
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
-			} else if (method.startsWith("Search by Ingredients")) {
-				System.out.print("Hello");
+			} else {
+				System.out.println("No meals found for the given filters.");
+			}
+
+			// Handle reset case
+			if (msg.toString().startsWith("Sort Reset")) {
 				try {
-					String ingredients = "Lettuce";//example
-					var meals = getMealsByIngredient(ingredients);
+					var meals = App.GetAllMeals();
 					client.sendToClient(meals);
-				}catch(Exception e){
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			} else {
 				System.out.println("Unknown search method.");
 			}
 		}
+	}
 
+	public static List<String> processFilters(String filters) {
+		List<String> categories = new ArrayList<>();
+
+		// Split the message by line breaks
+		String[] lines = filters.split("\n");
+
+		// Iterate through each line and process the filters
+		for (String line : lines) {
+			if (line.isEmpty() || line.equals("Sort by")) {
+				continue; // Skip empty lines or the "Sort by" line
+			}
+
+			// Add each valid filter line to the categories list
+			categories.add(line.trim());
+		}
+
+		return categories;
+	}
+	// Method to check if the category is a restaurant
+	public boolean isRestaurant(String category) {
+		// List of known restaurants
+		List<String> restaurants = List.of("Restaurant 1", "Restaurant 2", "Restaurant 3");
+		return restaurants.contains(category);
+	}
+
+	// Method to check if the category is an ingredient
+	public boolean isIngredient(String category) {
+		// List of known ingredients
+		List<String> ingredients = List.of("Lettuce", "Cheese", "Meat");
+		return ingredients.contains(category);
 	}
 	// Method to get meals by restaurant
 	private List<Meal> getMealsByRestaurant(String restaurantName) {

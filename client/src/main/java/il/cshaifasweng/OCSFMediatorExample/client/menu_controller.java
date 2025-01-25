@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import com.mysql.cj.xdevapi.Client;
 import il.cshaifasweng.OCSFMediatorExample.entities.Customization;
 import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
 import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
@@ -39,34 +40,26 @@ public class menu_controller {
     @FXML
     private ImageView scrollArrow;
     @FXML
+    private ImageView loadingGif;
+    @FXML
     private ScrollPane scrollPane;
     @FXML
     private TranslateTransition arrowAnimation;
     @FXML
-    private ComboBox<String> Search_combo_box;
-
-    // Handle the button click
+    private Button Search_combo_box;
     @FXML
-    void Sort_meals(ActionEvent event) throws IOException {
-        // Get the selected value from the ComboBox
-        String selectedMethod = Search_combo_box.getValue();
-
-        if (selectedMethod != null) {
-            // Prepare the message to send to the server
-            String message = "Sort by " + selectedMethod;
-
-            // Call the method to send the message to the server
-            SimpleClient client;
-            client = SimpleClient.getClient();
-            client.sendToServer(message);
-        } else {
-            System.out.println("Please select a sorting method.");
-        }
+    private Button Reset_Button;
+    @FXML
+    void Reset_Menu(ActionEvent event) throws IOException {
+        SimpleClient.getClient().sendToServer("Sort Reset");
     }
 
+    @FXML
+    void Sort_meals(ActionEvent event) {
+        openSearchByPage();
+    }
 
     // Method to handle Add Meal button click
-    //@FXML
     public void onAddMealClicked(String mealName, String mealDescription, String mealPrice, String mealId, byte[] imageData) {
         // Create a new meal row (HBox)
         HBox mealRow = new HBox(20);
@@ -119,6 +112,18 @@ public class menu_controller {
     }
 
     // Method to open the Change Price page
+    private void openSearchByPage() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/Search_by.fxml"));
+            Stage stage = new Stage();
+            Scene scene = new Scene(loader.load());
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    // Method to open the Change Price page
     private void openChangePricePage(String mealName, Label priceLabel, String Id) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/update_menu.fxml"));
@@ -166,26 +171,32 @@ public class menu_controller {
 
     @Subscribe
     public void ShowNewMeals(List<Meal> meals) {
-        System.out.println("Hello i am here");
-        Platform.runLater(() -> {
-            // Clear the existing meals in the menu
-            menuContainer.getChildren().clear();
+        System.out.println("Refreshing menu content...");
 
-            // Check if the meals list is not null or empty
+        Platform.runLater(() -> {
+            // Remove only the meal rows, assuming meals are added as HBox nodes
+            menuContainer.getChildren().removeIf(node -> {
+                // Remove only meal rows (e.g., HBox with meal details)
+                return node instanceof HBox && node != menuContainer.getChildren().get(0);
+            });
+
+            // Add new meals to the menu
             if (meals != null && !meals.isEmpty()) {
-                // Loop through each meal and add it to the menu
                 for (Meal meal : meals) {
-                    // Assuming you have a method like onAddMealClicked to handle adding meals
-                    onAddMealClicked(meal.getName(), meal.getDescription(), String.valueOf(meal.getPrice()), String.valueOf(meal.getId()), meal.getImage());
+                    onAddMealClicked(
+                            meal.getName(),
+                            meal.getDescription(),
+                            String.valueOf(meal.getPrice()),
+                            String.valueOf(meal.getId()),
+                            meal.getImage()
+                    );
                 }
             } else {
-                // If there are no meals, show a message or handle it accordingly
                 System.out.println("No new meals to display.");
             }
         });
-
-
     }
+
 
     @FXML
     public void initialize() throws Exception {
@@ -216,7 +227,22 @@ public class menu_controller {
         arrowAnimation.setCycleCount(TranslateTransition.INDEFINITE);
         arrowAnimation.setAutoReverse(true);
         arrowAnimation.play();
+        // Load the Loading.gif image
+        loadingGif.setImage(new Image(getClass().getResourceAsStream("/images/Loading.gif")));
+        loadingGif.setVisible(true); // Initially show the loading GIF
 
+        // Simulate loading delay (or replace this with actual loading logic)
+        new Thread(() -> {
+            try {
+                Thread.sleep(10000); // Simulate a 3-second loading delay
+                Platform.runLater(() -> {
+                    loadingGif.setVisible(false); // Hide the loading GIF
+                    scrollPane.setVisible(true); // Show the main content
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
         // Add scroll listener to hide the arrow when fully scrolled
         scrollPane.vvalueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.doubleValue() == 1.0) {
@@ -227,7 +253,6 @@ public class menu_controller {
                 scrollArrow.setVisible(true); // Show the arrow when not fully scrolled
             }
         });
-        Search_combo_box.getItems().addAll("Search by Restaurant 1", "Search by Restaurant 2", "Search by Restaurant 3", "Search by Ingredients");
 
 
         /*****/
@@ -235,12 +260,6 @@ public class menu_controller {
 
     @FXML
     void backToHome(ActionEvent event) throws IOException {
-        Platform.runLater(() -> {
-            try {
-                App.setRoot("primary");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+            App.setRoot("primary");
     }
 }
