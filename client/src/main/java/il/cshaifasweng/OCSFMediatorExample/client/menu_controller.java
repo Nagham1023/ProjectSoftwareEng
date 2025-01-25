@@ -22,7 +22,7 @@ import javafx.scene.image.Image;
 import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
+import java.util.List;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -128,7 +128,7 @@ public class menu_controller {
     }
     // Method to open the Change Price page
 
-    private void openChangePricePage(String mealName, Label priceLabel,String Id)
+    private void openChangePricePage(String mealName, Label priceLabel,String Id){
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/update_menu.fxml"));
             Stage stage = new Stage();
