@@ -243,6 +243,23 @@ public class SimpleServer extends AbstractServer {
 
 
 	}
+	// Method to get meals by ingredient
+	private List<Meal> getMealsByIngredient(String ingredient) throws Exception {
+		// Get all meals
+		var meals = App.GetAllMeals();
+
+		// Create a list to store meals that contain the ingredient in the description
+		List<Meal> mealsWithIngredient = new ArrayList<>();
+
+		// Iterate over all meals and check if the description contains the ingredient
+		for (Meal meal : meals) {
+			if (meal.getDescription() != null && meal.getDescription().toLowerCase().contains(ingredient.toLowerCase())) {
+				mealsWithIngredient.add(meal);
+			}
+		}
+
+		return mealsWithIngredient;
+	}
 	@Override
 	public void sendToAllClients(Object message) {
 		try {
