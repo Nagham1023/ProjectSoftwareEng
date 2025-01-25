@@ -1,12 +1,9 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
-import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.updatePrice;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.greenrobot.eventbus.EventBus;
 
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 
 import java.util.List;
 
@@ -23,37 +20,32 @@ public class SimpleClient extends AbstractClient {
 	@Override
 	protected void handleMessageFromServer(Object msg) {
 		System.out.println("got a message from server " + msg);
-		if (msg instanceof updatePrice) {
+		if(msg instanceof updatePrice) {
 			System.out.println("the message is an update price");
 			EventBus.getDefault().post(msg);
 		}
-		if (msg instanceof List<?>) { // Check if the message is a list
-			List<?> list = (List<?>) msg;
-
-			if (!list.isEmpty()) {
-				if (list.get(0) instanceof mealEvent) { // Ensure it's a list of meals
-					System.out.println("List of meals received.");
-					EventBus.getDefault().post(msg);
-				} else if (list.get(0) instanceof Meal) { // If the list contains Meal objects
-					System.out.println("Meals found:");
-					for (Object obj : list) {
-						Meal meal = (Meal) obj;
-						System.out.println("Meal: " + meal.getName() + " - " + meal.getDescription());
-					}
-					EventBus.getDefault().post(msg);
-				}
-			}
-			if (msg.getClass().equals(mealEvent.class)) {
-				EventBus.getDefault().post(msg);
-			}
-			if (msg.getClass().equals(Warning.class)) {
-				EventBus.getDefault().post(new WarningEvent((Warning) msg));
-			}
-			if (msg instanceof String) {
-				EventBus.getDefault().post(msg);
-			}
-
+		if(msg instanceof UserCheck)
+		{
+			EventBus.getDefault().post(msg);
 		}
+		if (msg instanceof List<?>) { // Check if msg is a list
+			//System.out.println("the message is a list");
+			List<?> list = (List<?>) msg;
+			if (!list.isEmpty() && list.get(0) instanceof mealEvent) { // Ensure it's a List<Meal>
+				System.out.println("list of meals");
+				EventBus.getDefault().post(msg);
+			}
+		}
+		if (msg.getClass().equals(mealEvent.class)) {
+			EventBus.getDefault().post(msg);
+		}
+		if (msg.getClass().equals(Warning.class)) {
+			EventBus.getDefault().post(new WarningEvent((Warning) msg));
+		}
+		if(msg instanceof String) {
+			EventBus.getDefault().post(msg);
+		}
+
 	}
 
 	public static SimpleClient getClient() {
@@ -62,4 +54,5 @@ public class SimpleClient extends AbstractClient {
 		}
 		return client;
 	}
+
 }
