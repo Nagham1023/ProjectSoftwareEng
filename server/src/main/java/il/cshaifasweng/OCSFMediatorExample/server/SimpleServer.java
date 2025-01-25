@@ -153,6 +153,96 @@ public class SimpleServer extends AbstractServer {
 				}
 			}
 		}
+		else if (msg.toString().startsWith("Sort")) {
+			// Extract categories from the message
+			var categories = processFilters(msg.toString());
+
+			// List to store all meals after filtering
+			List<Meal> allFilteredMeals = new ArrayList<>();
+
+			// Search by restaurant
+			for (String category : categories) {
+				if (isRestaurant(category)) {
+					List<Meal> meals = getMealsByRestaurant(category);
+					allFilteredMeals.addAll(meals);  // Add these meals to the list
+				}
+			}
+
+			// Search by ingredients
+			for (String category : categories) {
+				if (isIngredient(category)) {
+					try {
+						List<Meal> meals = getMealsByIngredient(category);
+						allFilteredMeals.addAll(meals);  // Add these meals to the list
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+
+			// If any meals were found, send them in a single message
+			if (!allFilteredMeals.isEmpty()) {
+				try {
+					client.sendToClient(allFilteredMeals);  // Send all filtered meals in one batch
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else {
+				System.out.println("No meals found for the given filters.");
+			}
+
+			// Handle reset case
+			if (msg.toString().startsWith("Sort Reset")) {
+				try {
+					var meals = App.GetAllMeals();
+					client.sendToClient(meals);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else {
+				System.out.println("Unknown search method.");
+			}
+		}
+	}
+
+	public static List<String> processFilters(String filters) {
+		List<String> categories = new ArrayList<>();
+
+		// Split the message by line breaks
+		String[] lines = filters.split("\n");
+
+		// Iterate through each line and process the filters
+		for (String line : lines) {
+			if (line.isEmpty() || line.equals("Sort by")) {
+				continue; // Skip empty lines or the "Sort by" line
+			}
+
+			// Add each valid filter line to the categories list
+			categories.add(line.trim());
+		}
+
+		return categories;
+	}
+	// Method to check if the category is a restaurant
+	public boolean isRestaurant(String category) {
+		// List of known restaurants
+		List<String> restaurants = List.of("Restaurant 1", "Restaurant 2", "Restaurant 3");
+		return restaurants.contains(category);
+	}
+
+	// Method to check if the category is an ingredient
+	public boolean isIngredient(String category) {
+		// List of known ingredients
+		List<String> ingredients = List.of("Lettuce", "Cheese", "Meat");
+		return ingredients.contains(category);
+	}
+	// Method to get meals by restaurant
+	private List<Meal> getMealsByRestaurant(String restaurantName) {
+
+		String query = "SELECT r FROM Resturant r LEFT JOIN FETCH r.meals WHERE r.resturant_Name = :restaurantName";
+		List<Resturant> resturant = App.Get_Resturant(query);
+		return resturant.get(0).getMeals();
+
 
 	}
 	@Override

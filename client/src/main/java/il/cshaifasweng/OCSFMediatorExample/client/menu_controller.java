@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import com.mysql.cj.xdevapi.Client;
 import il.cshaifasweng.OCSFMediatorExample.entities.Customization;
 import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
 import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
@@ -38,12 +39,28 @@ public class menu_controller {
     @FXML
     private ImageView scrollArrow;
     @FXML
+    private ImageView loadingGif;
+    @FXML
     private ScrollPane scrollPane;
     @FXML
     private TranslateTransition arrowAnimation;
 
+    @FXML
+    private Button Search_combo_box;
+    @FXML
+    private Button Reset_Button;
+    @FXML
+    void Reset_Menu(ActionEvent event) throws IOException {
+        SimpleClient.getClient().sendToServer("Sort Reset");
+    }
+
+    @FXML
+    void Sort_meals(ActionEvent event) {
+        openSearchByPage();
+    }
 
     // Method to handle Add Meal button click
+
     //@FXML
     public void onAddMealClicked(String mealName,String mealDescription,String mealPrice,String mealId,byte[] imageData) {
         // Create a new meal row (HBox)
@@ -97,8 +114,21 @@ public class menu_controller {
 
         mealPriceLabels.put(mealId, priceLabel);
     }
+    // Method to open the Search By page
+    private void openSearchByPage() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/Search_by.fxml"));
+            Stage stage = new Stage();
+            Scene scene = new Scene(loader.load());
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     // Method to open the Change Price page
-    private void openChangePricePage(String mealName, Label priceLabel,String Id) {
+
+    private void openChangePricePage(String mealName, Label priceLabel,String Id)
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/update_menu.fxml"));
             Stage stage = new Stage();
@@ -143,6 +173,37 @@ public class menu_controller {
 
     }
 
+
+    @Subscribe
+    public void ShowNewMeals(List<Meal> meals) {
+        System.out.println("Refreshing menu content...");
+
+        Platform.runLater(() -> {
+            // Remove only the meal rows, assuming meals are added as HBox nodes
+            menuContainer.getChildren().removeIf(node -> {
+                // Remove only meal rows (e.g., HBox with meal details)
+                return node instanceof HBox && node != menuContainer.getChildren().get(0);
+            });
+
+            // Add new meals to the menu
+            if (meals != null && !meals.isEmpty()) {
+                for (Meal meal : meals) {
+                    onAddMealClicked(
+                            meal.getName(),
+                            meal.getDescription(),
+                            String.valueOf(meal.getPrice()),
+                            String.valueOf(meal.getId()),
+                            meal.getImage()
+                    );
+                }
+            } else {
+                System.out.println("No new meals to display.");
+            }
+        });
+    }
+
+
+
     @FXML
     public void initialize() throws Exception {
         EventBus.getDefault().register(this);
@@ -171,7 +232,22 @@ public class menu_controller {
         arrowAnimation.setCycleCount(TranslateTransition.INDEFINITE);
         arrowAnimation.setAutoReverse(true);
         arrowAnimation.play();
+        // Load the Loading.gif image
+        loadingGif.setImage(new Image(getClass().getResourceAsStream("/images/Loading.gif")));
+        loadingGif.setVisible(true); // Initially show the loading GIF
 
+        // Simulate loading delay (or replace this with actual loading logic)
+        new Thread(() -> {
+            try {
+                Thread.sleep(10000); // Simulate a 3-second loading delay
+                Platform.runLater(() -> {
+                    loadingGif.setVisible(false); // Hide the loading GIF
+                    scrollPane.setVisible(true); // Show the main content
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
         // Add scroll listener to hide the arrow when fully scrolled
         scrollPane.vvalueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.doubleValue() == 1.0) {
@@ -188,6 +264,6 @@ public class menu_controller {
     }
     @FXML
     void backToHome(ActionEvent event) throws IOException {
-        App.setRoot("primary");
+            App.setRoot("primary");
     }
 }
