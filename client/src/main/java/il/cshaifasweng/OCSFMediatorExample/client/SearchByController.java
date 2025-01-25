@@ -35,7 +35,7 @@ public class SearchByController {
     private Button ApplyFilterButton;
 
     @FXML
-    void Apply_filter(javafx.event.ActionEvent event) throws IOException {
+    void Apply_filter(javafx.event.ActionEvent event) throws IOException  {
         StringBuilder selectedFilters = new StringBuilder("Sort by \n");
 
         // Check which checkboxes are selected
