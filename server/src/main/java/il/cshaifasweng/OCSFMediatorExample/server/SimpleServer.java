@@ -1,17 +1,15 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
-import il.cshaifasweng.OCSFMediatorExample.entities.updatePrice;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
-import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.*;
