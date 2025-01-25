@@ -94,7 +94,6 @@ public class menu_controller {
 
         // Add mealRow to menuContainer
         menuContainer.getChildren().add(mealRow);
-
         mealPriceLabels.put(mealId, priceLabel);
     }
     // Method to open the Change Price page
@@ -157,12 +156,7 @@ public class menu_controller {
         /******/
         // Set the arrow image
         scrollArrow.setImage(new Image(getClass().getResourceAsStream("/images/downarrow.png"))); // Update path as needed
-
-        // Position the arrow
-        //scrollArrow.setTranslateY(20); // Adjust to place it in the middle-bottom area
-        //scrollArrow.setTranslateX(0); // Adjust to place it in the middle-bottom area
         scrollArrow.setVisible(true);
-        //scrollArrow.set
 
         // Create arrow animation
         arrowAnimation = new TranslateTransition(Duration.millis(500), scrollArrow);
@@ -182,8 +176,7 @@ public class menu_controller {
                 scrollArrow.setVisible(true); // Show the arrow when not fully scrolled
             }
         });
-
-
+        
         /*****/
     }
     @FXML

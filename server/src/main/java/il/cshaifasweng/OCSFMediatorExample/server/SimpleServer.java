@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.updatePrice;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
@@ -36,6 +37,62 @@ public class SimpleServer extends AbstractServer {
 			if(Objects.equals(addResult, "added")) {
 				sendToAll(msg);
 			}
+
+		}
+		if(msg instanceof UserCheck) {
+			if(((UserCheck) msg).isState() == 1)//if login
+			{
+				try {
+					if (checkUser(((UserCheck) msg).getUsername(), ((UserCheck) msg).getPassword())) {
+						((UserCheck) msg).setRespond("Valid");
+						client.sendToClient(msg);
+					} else {
+						((UserCheck) msg).setRespond("Username or password incorrect");
+						client.sendToClient(msg);
+					}
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+			else if(((UserCheck) msg).isState() == 0) //if register
+			{
+				String response = AddNewUser((UserCheck) (msg));
+				((UserCheck) msg).setRespond(response);
+                try {
+                    client.sendToClient(msg);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+			else if(((UserCheck) msg).isState() == 2) //if forgetpass
+			{
+				try {
+					if (checkEmail(((UserCheck) msg))) {
+						((UserCheck) msg).setRespond("Valid");
+						client.sendToClient(msg);
+					} else {
+						((UserCheck) msg).setRespond("notValid");
+						client.sendToClient(msg);
+					}
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+			else if(((UserCheck) msg).isState() == 3) //if just a name check
+			{
+				try {
+					if (checkUserName(((UserCheck) msg).getUsername())) {
+						((UserCheck) msg).setRespond("notValid");
+						client.sendToClient(msg);
+					} else {
+						((UserCheck) msg).setRespond("Valid");
+						client.sendToClient(msg);
+					}
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+
 
         }
 		if (msgString.startsWith("#warning")) {

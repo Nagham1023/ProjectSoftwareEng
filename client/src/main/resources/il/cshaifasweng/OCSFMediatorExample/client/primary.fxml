@@ -19,6 +19,7 @@
 
       <!-- Update Menu Button -->
       <Button onAction="#goUpdateMenu" prefWidth="200" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10;" text="Add New Meal" />
+      <Button onAction="#goToLogin" prefWidth="200" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10;" text="Login" />
    </VBox>
 
    <!-- Footer -->

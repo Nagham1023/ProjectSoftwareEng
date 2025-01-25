@@ -1,12 +1,9 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
-import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.updatePrice;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.greenrobot.eventbus.EventBus;
 
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 
 import java.util.List;
 
@@ -25,6 +22,10 @@ public class SimpleClient extends AbstractClient {
 		System.out.println("got a message from server " + msg);
 		if(msg instanceof updatePrice) {
 			System.out.println("the message is an update price");
+			EventBus.getDefault().post(msg);
+		}
+		if(msg instanceof UserCheck)
+		{
 			EventBus.getDefault().post(msg);
 		}
 		if (msg instanceof List<?>) { // Check if msg is a list

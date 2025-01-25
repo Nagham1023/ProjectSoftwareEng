@@ -41,7 +41,7 @@ public class App extends Application {
         //EventBus.getDefault().register(this);
     	/*client = SimpleClient.getClient();
     	client.openConnection();*/
-        scene = new Scene(loadFXML("ipandport"), 640, 480);
+        scene = new Scene(loadFXML("ipandport"), 1000, 600);
         stage.setScene(scene);
         stage.show();
     }
