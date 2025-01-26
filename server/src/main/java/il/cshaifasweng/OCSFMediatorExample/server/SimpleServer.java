@@ -12,7 +12,8 @@ import java.util.Objects;
 
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
-import static il.cshaifasweng.OCSFMediatorExample.server.App.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.*;
 
 public class SimpleServer extends AbstractServer {
 
@@ -193,7 +194,7 @@ public class SimpleServer extends AbstractServer {
 			// Handle reset case
 			if (msg.toString().startsWith("Sort Reset")) {
 				try {
-					var meals = App.GetAllMeals();
+					var meals = MealsDB.GetAllMeals();
 					client.sendToClient(meals);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -247,7 +248,7 @@ public class SimpleServer extends AbstractServer {
 	// Method to get meals by ingredient
 	private List<Meal> getMealsByIngredient(String ingredient) throws Exception {
 		// Get all meals
-		var meals = App.GetAllMeals();
+		var meals = MealsDB.GetAllMeals();
 
 		// Create a list to store meals that contain the ingredient in the description
 		List<Meal> mealsWithIngredient = new ArrayList<>();

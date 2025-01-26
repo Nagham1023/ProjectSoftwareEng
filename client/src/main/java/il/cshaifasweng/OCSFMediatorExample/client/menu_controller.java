@@ -176,19 +176,18 @@ public class menu_controller {
 
 
     @Subscribe
-    public void ShowNewMeals(List<Meal> meals) {
+    public void ShowNewMeals(List<Meal> avMeals) {
+
         System.out.println("Refreshing menu content...");
 
         Platform.runLater(() -> {
-            // Remove only the meal rows, assuming meals are added as HBox nodes
             menuContainer.getChildren().removeIf(node -> {
-                // Remove only meal rows (e.g., HBox with meal details)
                 return node instanceof HBox && node != menuContainer.getChildren().get(0);
             });
 
             // Add new meals to the menu
-            if (meals != null && !meals.isEmpty()) {
-                for (Meal meal : meals) {
+            if (avMeals != null && !avMeals.isEmpty()) {
+                for (Meal meal : avMeals) {
                     onAddMealClicked(
                             meal.getName(),
                             meal.getDescription(),

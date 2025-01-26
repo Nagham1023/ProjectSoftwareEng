@@ -13,6 +13,7 @@ public class SimpleClient extends AbstractClient {
 	public static String IP = "127.0.0.1";
 	public static int Port = 3000;
 	private static UserCheck UserClient = null;
+	private static boolean logged = false;
 
 	private SimpleClient(String host, int port) {
 		super(host, port)	;
@@ -55,6 +56,13 @@ public class SimpleClient extends AbstractClient {
 		}
 		return client;
 	}
+	public static boolean isClientConnected(){
+		boolean temp = logged;
+        if(!logged){
+			logged = true;
+		}
+		return temp;
+    }
 	public static boolean isLog() {
         return UserClient != null;
 	}
