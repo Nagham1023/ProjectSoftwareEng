@@ -22,10 +22,11 @@ import javafx.scene.image.Image;
 import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import java.util.List;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static il.cshaifasweng.OCSFMediatorExample.client.PrimaryController.meals;

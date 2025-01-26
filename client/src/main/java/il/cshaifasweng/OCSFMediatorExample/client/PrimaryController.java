@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
+import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.updatePrice;
 import javafx.application.Platform;
@@ -26,6 +27,11 @@ public class PrimaryController {
 		EventBus.getDefault().register(this);
 		client = SimpleClient.getClient();
 		client.sendToServer("add client");
+		if(SimpleClient.isLog())
+		{
+			UserCheck user = SimpleClient.getUser();
+			copyr.setText("logged into "+user.getUsername() + "with role "+user.getRole());
+		}
 	}
 	@Subscribe
 	public void addnewmeal(mealEvent mealEvent) {

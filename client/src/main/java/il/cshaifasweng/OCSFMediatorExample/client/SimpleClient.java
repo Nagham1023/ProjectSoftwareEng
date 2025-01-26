@@ -12,6 +12,7 @@ public class SimpleClient extends AbstractClient {
 	private static SimpleClient client = null;
 	public static String IP = "127.0.0.1";
 	public static int Port = 3000;
+	private static UserCheck UserClient = null;
 
 	private SimpleClient(String host, int port) {
 		super(host, port)	;
@@ -53,6 +54,15 @@ public class SimpleClient extends AbstractClient {
 			client = new SimpleClient(IP, Port);
 		}
 		return client;
+	}
+	public static boolean isLog() {
+        return UserClient != null;
+	}
+	public static UserCheck getUser() {
+		return UserClient;
+	}
+	public static void setUser(UserCheck user) {
+		UserClient = user;
 	}
 
 }

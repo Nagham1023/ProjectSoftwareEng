@@ -90,6 +90,7 @@ public class LoginController {
         if(Objects.equals(response.getRespond(), "Valid") && response.isState() == 1) {
             Platform.runLater(() -> {
                 try {
+                    SimpleClient.setUser(response);
                     App.setRoot("primary");
                 } catch (IOException e) {
                     throw new RuntimeException(e);

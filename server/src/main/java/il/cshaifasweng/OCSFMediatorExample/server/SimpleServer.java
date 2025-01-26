@@ -42,6 +42,7 @@ public class SimpleServer extends AbstractServer {
 			{
 				try {
 					if (checkUser(((UserCheck) msg).getUsername(), ((UserCheck) msg).getPassword())) {
+						getUserInfo((UserCheck) msg); //to update it's info so we can save them.
 						((UserCheck) msg).setRespond("Valid");
 						client.sendToClient(msg);
 					} else {

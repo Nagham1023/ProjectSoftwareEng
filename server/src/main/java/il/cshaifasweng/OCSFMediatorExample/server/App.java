@@ -283,6 +283,35 @@ public class App
 
         return count > 0;
     }
+    public static void getUserInfo(UserCheck us) throws Exception {
+        if (session == null || !session.isOpen()) {
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+        }
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Users> query = builder.createQuery(Users.class);
+        Root<Users> root = query.from(Users.class);
+
+        query.select(root)
+                .where(
+                        builder.and(
+                                builder.equal(root.get("username"), us.getUsername())
+                        )
+                );
+        Users user = session.createQuery(query).uniqueResult();
+        if (session != null && session.isOpen()) {
+            session.close(); // Close the session after operation
+        }
+        if(user != null) {
+            us.setEmail(user.getEmail());
+            us.setUsername(user.getUsername());
+            us.setPassword(user.getPassword());
+            us.setAge(user.getAge());
+            us.setGender(user.getGender());
+            us.setId(user.getId());
+            us.setRole(user.getRole());
+        }
+    }
 
     public static void updateMealPriceById(int mealId, double newPrice) {
         // Check if the meatlist is initialized
