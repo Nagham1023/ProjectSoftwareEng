@@ -18,20 +18,29 @@ import org.greenrobot.eventbus.Subscribe;
 
 public class PrimaryController {
 	public static List<mealEvent> meals;
-
 	@FXML
 	private Label copyr;
 	@FXML
 	void initialize() throws IOException {
-		SimpleClient client;
-		EventBus.getDefault().register(this);
-		client = SimpleClient.getClient();
-		client.sendToServer("add client");
-		if(SimpleClient.isLog())
+
+		Platform.runLater(()->
 		{
-			UserCheck user = SimpleClient.getUser();
-			copyr.setText("logged into "+user.getUsername() + "with role "+user.getRole());
-		}
+			SimpleClient client;
+			boolean temp = SimpleClient.isClientConnected();
+			EventBus.getDefault().register(this);
+			client = SimpleClient.getClient();
+			if (!temp) {
+                try {
+                    client.sendToServer("add client");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+			if (SimpleClient.isLog()) {
+				UserCheck user = SimpleClient.getUser();
+				copyr.setText("logged into " + user.getUsername() + " with role " + user.getRole());
+			}
+		});
 	}
 	@Subscribe
 	public void addnewmeal(mealEvent mealEvent) {
@@ -56,7 +65,6 @@ public class PrimaryController {
 			if (meal.getId().equals(mealId)) {
 				meal.setPrice(newPrice);
 				updated = true;
-				//System.out.println("Meal ID " + mealId + " updated to price: " + meal.getPrice());
 				break;
 			}
 		}
