@@ -69,8 +69,8 @@ public class App
         try {
             server = new SimpleServer(3000);
             server.listen();
-            //generateData();
-            //printAllData();
+            generateData();
+            printAllData();
             printAllUsers();
         } catch (Exception exception) {
             System.err.println("An error occurred, changes have been rolled back.");
