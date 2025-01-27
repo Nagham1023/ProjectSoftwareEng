@@ -23,19 +23,19 @@ public class PrimaryController {
 	@FXML
 	void initialize() throws IOException {
 
-		Platform.runLater(()->
+		Platform.runLater(() ->
 		{
 			SimpleClient client;
 			boolean temp = SimpleClient.isClientConnected();
 			EventBus.getDefault().register(this);
 			client = SimpleClient.getClient();
 			if (!temp) {
-                try {
-                    client.sendToServer("add client");
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+				try {
+					client.sendToServer("add client");
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
 			if (SimpleClient.isLog()) {
 				UserCheck user = SimpleClient.getUser();
 				copyr.setText("logged into " + user.getUsername() + " with role " + user.getRole());
@@ -43,50 +43,26 @@ public class PrimaryController {
 		});
 	}
 	@Subscribe
-	public void addnewmeal(mealEvent mealEvent) {
-		Platform.runLater(() -> {
-			meals.add(mealEvent);
-		});
-	}
-	@Subscribe
-	public void mealEvent(updatePrice updateprice) {
-		//System.out.println("We're in primary controller in mealEvent changing the list");
-
-		String mealId = String.valueOf(updateprice.getIdMeal());
-		String newPrice = String.valueOf(updateprice.getNewPrice());
-
-		if (meals == null) {
-			System.out.println("Meals list is null. Cannot update price.");
-			return;
-		}
-
-		boolean updated = false;
-		for (mealEvent meal : meals) {
-			if (meal.getId().equals(mealId)) {
-				meal.setPrice(newPrice);
-				updated = true;
-				break;
-			}
-		}
-
-		if (updated) {
-			Platform.runLater(() -> {
-				System.out.println("UI update logic executed for Meal ID " + mealId);
-			});
-		} else {
-			System.out.println("Meal ID " + mealId + " not found in the list.");
-		}
-	}
-	@Subscribe
 	public void gotMeals(List<mealEvent> event) {
-		Platform.runLater(() -> {
-			meals = event;
-		});
-
+		meals = event;
 	}
+
 	@FXML
 	void goToMenu(ActionEvent event) throws IOException {
-            App.setRoot("menu");
+		SimpleClient client = SimpleClient.getClient();
+		client.sendToServer("toMenuPage");
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        Platform.runLater(()->{
+            try {
+                App.setRoot("menu");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 	}
 	@FXML
 	void goToLogin(ActionEvent event) throws IOException {

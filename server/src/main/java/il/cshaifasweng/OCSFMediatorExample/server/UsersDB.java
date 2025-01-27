@@ -51,12 +51,9 @@ public class UsersDB {
             SessionFactory sessionFactory = getSessionFactory();
             session = sessionFactory.openSession();
         }
-        //CriteriaBuilder builder = session.getCriteriaBuilder();
-        //CriteriaQuery<Long> query = builder.createQuery(Long.class);
-        //Root<Users> root = query.from(Users.class);
-        List<Users> root = session.createQuery("FROM Users", Users.class).list();
-        int count = root.toArray().length;
-/*
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Long> query = builder.createQuery(Long.class);
+        Root<Users> root = query.from(Users.class);
         query.select(builder.count(root))
                 .where(
                         builder.and(
@@ -65,7 +62,7 @@ public class UsersDB {
                         )
                 );
 
-        Long count = session.createQuery(query).getSingleResult();*/
+        Long count = session.createQuery(query).getSingleResult();
         if (session != null && session.isOpen()) {
             session.close(); // Close the session after operation
         }

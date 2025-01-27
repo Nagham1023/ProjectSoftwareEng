@@ -60,9 +60,6 @@ public class menu_controller {
         openSearchByPage();
     }
 
-    // Method to handle Add Meal button click
-
-    //@FXML
     public void onAddMealClicked(String mealName,String mealDescription,String mealPrice,String mealId,byte[] imageData) {
         // Create a new meal row (HBox)
         HBox mealRow = new HBox(20);
@@ -115,7 +112,7 @@ public class menu_controller {
 
         mealPriceLabels.put(mealId, priceLabel);
     }
-    // Method to open the Search By page
+
     private void openSearchByPage() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/Search_by.fxml"));
@@ -127,7 +124,6 @@ public class menu_controller {
             e.printStackTrace();
         }
     }
-    // Method to open the Change Price page
 
     private void openChangePricePage(String mealName, Label priceLabel,String Id){
         try {
@@ -202,18 +198,15 @@ public class menu_controller {
         });
     }
 
-
-
     @FXML
     public void initialize() throws Exception {
         EventBus.getDefault().register(this);
         if(meals == null)
             System.out.println("No meals found");
         else
-            System.out.println(meals.toString());
-        for (mealEvent meal : meals) {
-            onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()),meal.getId(),meal.getImage());
-        }
+            for (mealEvent meal : meals) {
+                onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()),meal.getId(),meal.getImage());
+            }
 
         /******/
         // Set the arrow image
