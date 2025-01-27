@@ -38,6 +38,14 @@ public class SimpleServer extends AbstractServer {
 			}
 
 		}
+		if(msg instanceof String && msgString.equals("toMenuPage")) {
+            try {
+                client.sendToClient(getmealEvent());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        }
 		if(msg instanceof UserCheck) {
 			if(((UserCheck) msg).isState() == 1)//if login
 			{
@@ -120,11 +128,11 @@ public class SimpleServer extends AbstractServer {
 			Subscribers.add(client);
 			SubscribedClient connection = new SubscribedClient(client);
 			SubscribersList.add(connection);
-            try {
+            /*try {
 				client.sendToClient(getmealEvent());
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            }
+            }*/
 
 			try {
 				client.sendToClient("client added successfully");
