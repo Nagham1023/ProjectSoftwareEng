@@ -28,6 +28,16 @@ public class SimpleServer extends AbstractServer {
 	protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
 		System.out.println("Received message from client ");
 		String msgString = msg.toString();
+
+		if (msg instanceof String && msg.equals("getAllRestaurants")) {try {
+			RestaurantDB restaurantDB = new RestaurantDB(); // יצירת אובייקט בסיס נתונים לדוגמה
+			RestaurantList restaurantList = new RestaurantList();
+			restaurantList.setRestaurantList(restaurantDB.getAllRestaurants()); // העברת הרשימה
+			client.sendToClient(restaurantList); // שליחת אובייקט RestaurantList ללקוח
+			} catch (IOException e) {
+				e.printStackTrace();
+			}}
+
 		if(msg instanceof mealEvent) {
 			//here we're adding new meal !!
 			//System.out.println("Received adding new mealEvent ");
@@ -37,16 +47,16 @@ public class SimpleServer extends AbstractServer {
 			if(Objects.equals(addResult, "added")) {
 				sendToAll(msg);
 			}
-
 		}
+
 		if(msg instanceof String && msgString.equals("toMenuPage")) {
             try {
                 client.sendToClient(getmealEvent());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
         }
+
 		if(msg instanceof UserCheck) {
 			if(((UserCheck) msg).isState() == 1)//if login
 			{
@@ -259,16 +269,16 @@ public class SimpleServer extends AbstractServer {
 	// Method to get meals by restaurant
 	private List<Meal> getMealsByRestaurant(String restaurantName) {
 
-		String query = "SELECT r FROM Resturant r LEFT JOIN FETCH r.meals WHERE r.resturant_Name = :restaurantName";
-		List<Resturant> resturant = App.Get_Resturant(query);
-		return resturant.get(0).getMeals();
+		String query = "SELECT r FROM Restaurant r LEFT JOIN FETCH r.meals WHERE r.restaurant_Name = :restaurantName";
+		List<Restaurant> restaurant = App.Get_Restaurant(query);
+		return restaurant.get(0).getMeals();
 	}
 	// Method to get meals by restaurant
 	private List<Complain> getComplainssByRestaurant(String restaurantName) {
 		// hala not sure!
-		String query = "SELECT r FROM complainsForRes r.complains WHERE r.resturant_Name = :restaurantName";
-		List<Resturant> resturant = App.Get_Resturant(query);
-		return resturant.get(0).getComplains();
+		String query = "SELECT r FROM complainsForRes r.complains WHERE r.restaurant_Name = :restaurantName";
+		List<Restaurant> restaurant = App.Get_Restaurant(query);
+		return restaurant.get(0).getComplains();
 	}
 
 	// Method to get meals by ingredient

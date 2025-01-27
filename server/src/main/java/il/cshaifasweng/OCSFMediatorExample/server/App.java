@@ -16,6 +16,7 @@ import java.util.Scanner;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.printAllUsers;
 
 public class App 
@@ -23,7 +24,6 @@ public class App
 
     private static Session session;
     private static String userinput = null;
-    public static List<Complain> complainslist;
 
 
     public static SessionFactory getSessionFactory() throws HibernateException {
@@ -80,7 +80,7 @@ public class App
             exception.printStackTrace();
         }
     }
-    public static List<Resturant> Get_Resturant(String queryString) {
+    public static List<Restaurant> Get_Restaurant(String queryString) {
         // Ensure the session is open
         if (session == null || !session.isOpen()) {
             try {
@@ -92,13 +92,13 @@ public class App
             }
         }
 
-        List<Resturant> result = new ArrayList<>();
+        List<Restaurant> result = new ArrayList<>();
         try {
             // Begin the transaction for querying
             session.beginTransaction();
 
             // Create the query
-            org.hibernate.query.Query<Resturant> query = session.createQuery(queryString, Resturant.class);
+            org.hibernate.query.Query<Restaurant> query = session.createQuery(queryString, Restaurant.class);
 
             // Execute the query and get the result list
             result = query.getResultList();

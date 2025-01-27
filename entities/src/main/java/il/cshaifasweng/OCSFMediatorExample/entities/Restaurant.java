@@ -1,5 +1,4 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
-
 import javax.persistence.*;
 import java.util.List;
 
@@ -22,6 +21,11 @@ public class Restaurant {
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Meal> meals;
+
+    @OneToMany(mappedBy = "complainsForRes")
+    private List<Complain> complains;
+
+
 
     // Default constructor
     public Restaurant() {
@@ -74,6 +78,11 @@ public class Restaurant {
 
     public void setMeals(List<Meal> meals) {
         this.meals = meals;
+    }
+
+    public List<Complain> getComplains() {return complains;}
+    public void setComplains(List<Complain> complains) {
+        this.complains = complains;
     }
 
     @Override

@@ -40,7 +40,7 @@ public class ComplainDB {
         String tell_complain = newComplain.getTell();
         Date date_complain = newComplain.getDate();
         Time time_complain = newComplain.getTime();
-        Resturant resturant_complain = newComplain.getRestaurant();
+        Restaurant restaurant_complain = newComplain.getRestaurant();
 
         try {
             // Ensure the session is open
@@ -61,7 +61,7 @@ public class ComplainDB {
             newComp.setTell(tell_complain);
             newComp.setDate(date_complain);
             newComplain.setTime(time_complain);
-            newComplain.setRestaurant(resturant_complain);
+            newComplain.setRestaurant(restaurant_complain);
 
             // Save the complain to the database
             session.save(newComp);

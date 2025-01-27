@@ -54,7 +54,7 @@
             <Font name="System Bold Italic" size="24.0" />
          </font>
       </Button>
-    <Button layoutX="55.0" layoutY="422.0" mnemonicParsing="false" prefHeight="88.0" prefWidth="206.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Choose Branch" textFill="#fbebf4" onAction="#handleChooseBranchClick">
+    <Button layoutX="55.0" layoutY="422.0" mnemonicParsing="false" onAction="#handleChooseBranchClick" prefHeight="88.0" prefWidth="206.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Choose Branch" textFill="#fbebf4">
          <font>
             <Font name="System Bold Italic" size="24.0" />
          </font>
@@ -64,7 +64,7 @@
             <Font name="System Bold Italic" size="20.0" />
          </font>
       </Button>
-    <Button layoutX="322.0" layoutY="321.0" mnemonicParsing="false" prefHeight="88.0" prefWidth="206.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px; -fx-border-image-width: 20px;" text="Complaints" textFill="#fbebf4">
+    <Button layoutX="322.0" layoutY="321.0" mnemonicParsing="false" onAction="#clickedOnComplaints" prefHeight="88.0" prefWidth="206.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px; -fx-border-image-width: 20px;" text="Complaints" textFill="#fbebf4">
          <font>
             <Font name="System Bold Italic" size="23.0" />
          </font>
