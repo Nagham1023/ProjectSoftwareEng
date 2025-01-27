@@ -2,7 +2,9 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "resturants")
@@ -16,6 +18,11 @@ public class Resturant {
 
     @OneToMany(mappedBy = "resturant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Meal> meals;
+
+    @OneToMany(mappedBy = "complainsForRes")
+    private List<Complain> complains;
+
+
 
     // Getters and setters
     public int getId() {
@@ -41,4 +48,7 @@ public class Resturant {
     public void setMeals(List<Meal> meals) {
         this.meals = meals;
     }
+    public List<Complain> getComplains() {return complains;}
+    public void setComplains(List<Complain> complains) {}
+
 }

@@ -5,7 +5,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalTime;
 import java.util.ResourceBundle;
-
+import il.cshaifasweng.OCSFMediatorExample.entities.Resturant;
 import il.cshaifasweng.OCSFMediatorExample.entities.complainEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
 import javafx.event.ActionEvent;
@@ -13,7 +13,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-
 import static il.cshaifasweng.OCSFMediatorExample.client.AddMealController.imageToByteArray;
 
 public class AddComplainController {
@@ -23,6 +22,7 @@ public class AddComplainController {
     String tell;
     Date date;
     Time time;
+    Resturant restaurant;
 
     @FXML
     private ResourceBundle resources;
@@ -82,6 +82,7 @@ public class AddComplainController {
         assert textFieldName != null : "fx:id=\"textFieldName\" was not injected: check your FXML file 'addcomplain.fxml'.";
     }
 
+
     @FXML
     void ComplainButton(ActionEvent event) {
         ComplainKind = "Complaint";
@@ -121,7 +122,7 @@ public class AddComplainController {
         LocalTime now = LocalTime.now(); // Get the current time
         time = Time.valueOf(now);        // Convert LocalTime to java.sql.Time
 
-        complainEvent complainEvent = new complainEvent(ComplainKind,textFieldName.getText(),textFieldEmail.getText(),textAreaTellUs.getText(),date,time);
+        complainEvent complainEvent = new complainEvent(ComplainKind,textFieldName.getText(),textFieldEmail.getText(),textAreaTellUs.getText(),date,time,restaurant);
 
         SimpleClient client;
         client = SimpleClient.getClient();

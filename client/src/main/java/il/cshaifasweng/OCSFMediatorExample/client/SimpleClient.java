@@ -30,6 +30,10 @@ public class SimpleClient extends AbstractClient {
 		{
 			EventBus.getDefault().post(msg);
 		}
+		if(msg instanceof complainEvent) {
+			System.out.println("the message is an adding complaint");
+			EventBus.getDefault().post(msg);
+		}
 		if (msg instanceof List<?>) { // Check if msg is a list
 			//System.out.println("the message is a list");
 			List<?> list = (List<?>) msg;
@@ -55,6 +59,7 @@ public class SimpleClient extends AbstractClient {
 		if(msg instanceof String) {
 			EventBus.getDefault().post(msg);
 		}
+
 
 	}
 

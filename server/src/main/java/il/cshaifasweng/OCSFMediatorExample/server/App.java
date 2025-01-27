@@ -23,6 +23,8 @@ public class App
 
     private static Session session;
     private static String userinput = null;
+    public static List<Complain> complainslist;
+
 
     public static SessionFactory getSessionFactory() throws HibernateException {
         Configuration configuration = new Configuration();
@@ -36,6 +38,7 @@ public class App
 
         configuration.getProperties().forEach((key, value) -> System.out.println(key + ": " + value));
         // Add Meal and Customization entities
+        configuration.addAnnotatedClass(Complain.class);
         configuration.addAnnotatedClass(Meal.class);
         configuration.addAnnotatedClass(Customization.class);
         configuration.addAnnotatedClass(Users.class);
