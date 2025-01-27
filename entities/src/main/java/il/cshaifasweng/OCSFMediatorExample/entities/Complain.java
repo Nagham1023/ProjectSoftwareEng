@@ -30,6 +30,10 @@ public class Complain implements Serializable {
     private Date date_complain;
     private Time time_complain;
 
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id")
+    private Resturant restaurant;
+
 
     public int getId() {
         return id;
@@ -80,4 +84,6 @@ public class Complain implements Serializable {
     public Time getTime() {return time_complain;}
 
     public void setTime(Time time) {this.time_complain = time;}
+    public Resturant getRestaurant() {return restaurant;}
+    public void setRestaurant(Resturant restaurant) {this.restaurant = restaurant;}
 }

@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
+import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.addComplainIntoDatabase;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.*;
 
@@ -211,6 +212,17 @@ public class SimpleServer extends AbstractServer {
 				System.out.println("Unknown search method.");
 			}
 		}
+		if (msg instanceof complainEvent) {
+			//here we're adding new complain !!
+			System.out.println("Received adding new complainEvent ");
+			try {
+				addComplainIntoDatabase((complainEvent) msg);
+				client.sendToClient(msg);
+				sendToAll(msg);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 	public static List<String> processFilters(String filters) {
@@ -250,9 +262,15 @@ public class SimpleServer extends AbstractServer {
 		String query = "SELECT r FROM Resturant r LEFT JOIN FETCH r.meals WHERE r.resturant_Name = :restaurantName";
 		List<Resturant> resturant = App.Get_Resturant(query);
 		return resturant.get(0).getMeals();
-
-
 	}
+	// Method to get meals by restaurant
+	private List<Complain> getComplainssByRestaurant(String restaurantName) {
+		// hala not sure!
+		String query = "SELECT r FROM complainsForRes r.complains WHERE r.resturant_Name = :restaurantName";
+		List<Resturant> resturant = App.Get_Resturant(query);
+		return resturant.get(0).getComplains();
+	}
+
 	// Method to get meals by ingredient
 	private List<Meal> getMealsByIngredient(String ingredient) throws Exception {
 		// Get all meals
