@@ -17,9 +17,6 @@ public class complainEvent implements Serializable {
     private String tell_complain;
     private Date date_complain;
     private Time time_complain;
-
-    @ManyToOne
-    @JoinColumn(name = "restaurant_id")
     private Restaurant restaurant;
 
 

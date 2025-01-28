@@ -1,10 +1,12 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.ReportRequest;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -15,7 +17,10 @@ import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.addComplainIntoDatabase;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.ReportDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.*;
 
+import il.cshaifasweng.OCSFMediatorExample.server.RevenueReport;
 public class SimpleServer extends AbstractServer {
 
 	private static ArrayList<SubscribedClient> SubscribersList = new ArrayList<>();
@@ -28,17 +33,15 @@ public class SimpleServer extends AbstractServer {
 	protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
 		System.out.println("Received message from client ");
 		String msgString = msg.toString();
-
-		if (msg instanceof String && msg.equals("getAllRestaurants")) {try {
-			RestaurantDB restaurantDB = new RestaurantDB(); // יצירת אובייקט בסיס נתונים לדוגמה
-			RestaurantList restaurantList = new RestaurantList();
-			restaurantList.setRestaurantList(restaurantDB.getAllRestaurants()); // העברת הרשימה
-			client.sendToClient(restaurantList); // שליחת אובייקט RestaurantList ללקוח
-			} catch (IOException e) {
-				e.printStackTrace();
-			}}
-
-		if(msg instanceof mealEvent) {
+        if (msg instanceof String && msg.equals("getAllRestaurants")) {try {
+            RestaurantDB restaurantDB = new RestaurantDB(); // create new instance of dataBase manager
+            RestaurantList restaurantList = new RestaurantList();
+            restaurantList.setRestaurantList(restaurantDB.getAllRestaurants()); // Set list to send
+            client.sendToClient(restaurantList); // send to client
+        } catch (IOException e) {
+            e.printStackTrace();
+        }}
+        if(msg instanceof mealEvent) {
 			//here we're adding new meal !!
 			//System.out.println("Received adding new mealEvent ");
 			String addResult = AddNewMeal((mealEvent) msg);//if "added" then successed if "exist" then failed bcs there is a meal like that
@@ -47,14 +50,15 @@ public class SimpleServer extends AbstractServer {
 			if(Objects.equals(addResult, "added")) {
 				sendToAll(msg);
 			}
-		}
 
+		}
 		if(msg instanceof String && msgString.equals("toMenuPage")) {
             try {
                 client.sendToClient(getmealEvent());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+
         }
 
 		if(msg instanceof UserCheck) {
@@ -122,6 +126,37 @@ public class SimpleServer extends AbstractServer {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+		if (msg instanceof ReportRequest) {
+
+			ReportRequest reportRequest = (ReportRequest) msg;
+
+			// Get the report type (revenue report in this case)
+			String reportType = reportRequest.getReportType();
+			String response = "";
+
+			// Use a switch to handle different report types (we only have revenue report for now)
+			switch (reportType) {
+				case "revenueReport":
+					// Generate the revenue report (assuming 'month', 'restaurantName', and 'timeFrame' are part of the request)
+					RevenueReport revenueReport = new RevenueReport();
+					response = revenueReport.generate(reportRequest.getDate(), reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame());
+					break;
+
+				// You can add more cases here for other report types in the future
+
+				default:
+					response = "Invalid report type: " + reportType;
+			}
+
+			// Send the response message to the client (it can be a string with the report content)
+			String message = "ReportResponse\n" + response;
+			try {
+				client.sendToClient(message);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+
 		}
 		if (msg instanceof updatePrice) {
 			System.out.println("Received update price message from client ");
@@ -272,13 +307,6 @@ public class SimpleServer extends AbstractServer {
 		String query = "SELECT r FROM Restaurant r LEFT JOIN FETCH r.meals WHERE r.restaurant_Name = :restaurantName";
 		List<Restaurant> restaurant = App.Get_Restaurant(query);
 		return restaurant.get(0).getMeals();
-	}
-	// Method to get meals by restaurant
-	private List<Complain> getComplainssByRestaurant(String restaurantName) {
-		// hala not sure!
-		String query = "SELECT r FROM complainsForRes r.complains WHERE r.restaurant_Name = :restaurantName";
-		List<Restaurant> restaurant = App.Get_Restaurant(query);
-		return restaurant.get(0).getComplains();
 	}
 
 	// Method to get meals by ingredient

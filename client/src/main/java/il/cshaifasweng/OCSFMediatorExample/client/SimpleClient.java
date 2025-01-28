@@ -54,16 +54,32 @@ public class SimpleClient extends AbstractClient {
 		if (msg.getClass().equals(Warning.class)) {
 			EventBus.getDefault().post(new WarningEvent((Warning) msg));
 		}
-		if (msg instanceof String) {
-			EventBus.getDefault().post(msg);
-		}
+		// Check if the message starts with "ReportResponse"
+		if(msg instanceof String) {
+			String message = (String) msg;
+			if (message.startsWith("ReportResponse")) {
+				// Split the message by "\n" to extract the report content
+				String[] parts = message.split("\n", 2); // Limit to 2 splits
+				if (parts.length == 2) {
+					String report = parts[1]; // The actual report content
+					System.out.println("Received report: " + report);
 
-		if (msg instanceof RestaurantList) {
-			RestaurantList restaurantList = (RestaurantList) msg;
-			// הדפסת השמות של המסעדות
-			System.out.println("Received restaurant list: " + restaurantList.toString());
-			EventBus.getDefault().post(restaurantList);
+
+					// Publish the event to the EventBus
+					EventBus.getDefault().post(new ReportResponseEvent(report));
+				} else {
+					System.err.println("Malformed report response from server.");
+				}
+			} else {
+				System.out.println("Unhandled message: " + message);
+			}
 		}
+        if (msg instanceof RestaurantList) {
+            RestaurantList restaurantList = (RestaurantList) msg;
+            //print restaurants names
+            System.out.println("Received restaurant list: " + restaurantList.toString());
+            EventBus.getDefault().post(restaurantList);
+        }
 	}
 
 	public static SimpleClient getClient() {

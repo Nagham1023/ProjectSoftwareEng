@@ -17,6 +17,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+
 @Entity
 @Table(name = "complains")
 public class Complain implements Serializable {
@@ -29,6 +30,7 @@ public class Complain implements Serializable {
     private String tell_complain;
     private Date date_complain;
     private Time time_complain;
+    private String status_complaint;
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id")
