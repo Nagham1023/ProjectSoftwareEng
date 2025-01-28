@@ -23,13 +23,13 @@ public class SearchByController {
     private CheckBox Meat_check;
 
     @FXML
-    private CheckBox Resturant1_check;
+    private CheckBox Restaurant1_check;
 
     @FXML
-    private CheckBox Resturant2_check;
+    private CheckBox Restaurant2_check;
 
     @FXML
-    private CheckBox Resturant3_check;
+    private CheckBox Restaurant3_check;
 
     @FXML
     private Button ApplyFilterButton;
@@ -39,13 +39,13 @@ public class SearchByController {
         StringBuilder selectedFilters = new StringBuilder("Sort by \n");
 
         // Check which checkboxes are selected
-        if (Resturant1_check.isSelected()) {
+        if (Restaurant1_check.isSelected()) {
             selectedFilters.append("Restaurant 1\n");
         }
-        if (Resturant2_check.isSelected()) {
+        if (Restaurant2_check.isSelected()) {
             selectedFilters.append("Restaurant 2\n");
         }
-        if (Resturant3_check.isSelected()) {
+        if (Restaurant3_check.isSelected()) {
             selectedFilters.append("Restaurant 3\n");
         }
         if (Lettuce_check.isSelected()) {

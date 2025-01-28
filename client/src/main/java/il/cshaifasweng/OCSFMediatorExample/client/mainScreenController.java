@@ -24,7 +24,12 @@ public class mainScreenController {
         System.out.println("link clicked");
         Desktop.getDesktop().browse(new URI("https://www.instagram.com/mamas_kitchen2025/"));
     }
+    @FXML
+    void clickedOnComplaints(ActionEvent event)throws IOException {
+        App.setRoot("addcomplain");
+    }
 
+    @FXML
     // Method to handle the button click for transitioning to the restaurant list
     public void handleChooseBranchClick(ActionEvent event) throws IOException {
         /*
@@ -58,6 +63,7 @@ public class mainScreenController {
         }*/
         App.setRoot("RestaurantList");
     }
+
 
 
 }

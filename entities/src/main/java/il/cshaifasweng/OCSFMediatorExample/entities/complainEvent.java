@@ -20,10 +20,10 @@ public class complainEvent implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id")
-    private Resturant restaurant;
+    private Restaurant restaurant;
 
 
-    public complainEvent(String kind, String name, String email, String tell,int id,Date date,Time time, Resturant restaurant) {
+    public complainEvent(String kind, String name, String email, String tell,int id,Date date,Time time, Restaurant restaurant) {
         this.kind_complain = kind;
         this.name_complain = name;
         this.email_complain = email;
@@ -34,7 +34,7 @@ public class complainEvent implements Serializable {
         this.restaurant = restaurant;
     }
 
-    public complainEvent(String kind, String name, String email, String tell,Date date,Time time, Resturant restaurant) {
+    public complainEvent(String kind, String name, String email, String tell,Date date,Time time, Restaurant restaurant) {
         this.kind_complain = kind;
         this.name_complain = name;
         this.email_complain = email;
@@ -94,8 +94,8 @@ public class complainEvent implements Serializable {
     public Time getTime() {return time_complain;}
 
     public void setTime(Time time) {this.time_complain = time;}
-    public Resturant getRestaurant() {return restaurant;}
-    public void setRestaurant(Resturant restaurant) {this.restaurant = restaurant;}
+    public Restaurant getRestaurant() {return restaurant;}
+    public void setRestaurant(Restaurant restaurant) {this.restaurant = restaurant;}
 
     @Override
     public String toString() {

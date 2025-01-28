@@ -22,15 +22,14 @@ public class SimpleClient extends AbstractClient {
 	@Override
 	protected void handleMessageFromServer(Object msg) {
 		System.out.println("got a message from server " + msg);
-		if(msg instanceof updatePrice) {
+		if (msg instanceof updatePrice) {
 			System.out.println("the message is an update price");
 			EventBus.getDefault().post(msg);
 		}
-		if(msg instanceof UserCheck)
-		{
+		if (msg instanceof UserCheck) {
 			EventBus.getDefault().post(msg);
 		}
-		if(msg instanceof complainEvent) {
+		if (msg instanceof complainEvent) {
 			System.out.println("the message is an adding complaint");
 			EventBus.getDefault().post(msg);
 		}
@@ -40,8 +39,7 @@ public class SimpleClient extends AbstractClient {
 			if (!list.isEmpty() && list.get(0) instanceof mealEvent) { // Ensure it's a List<Meal>
 				System.out.println("list of meals");
 				EventBus.getDefault().post(msg);
-			}
-			else if (list.get(0) instanceof Meal) { // If the list contains Meal objects
+			} else if (list.get(0) instanceof Meal) { // If the list contains Meal objects
 				System.out.println("Meals found:");
 				for (Object obj : list) {
 					Meal meal = (Meal) obj;
@@ -56,11 +54,16 @@ public class SimpleClient extends AbstractClient {
 		if (msg.getClass().equals(Warning.class)) {
 			EventBus.getDefault().post(new WarningEvent((Warning) msg));
 		}
-		if(msg instanceof String) {
+		if (msg instanceof String) {
 			EventBus.getDefault().post(msg);
 		}
 
-
+		if (msg instanceof RestaurantList) {
+			RestaurantList restaurantList = (RestaurantList) msg;
+			// הדפסת השמות של המסעדות
+			System.out.println("Received restaurant list: " + restaurantList.toString());
+			EventBus.getDefault().post(restaurantList);
+		}
 	}
 
 	public static SimpleClient getClient() {

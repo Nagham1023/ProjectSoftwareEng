@@ -32,7 +32,7 @@ public class Complain implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id")
-    private Resturant restaurant;
+    private Restaurant restaurant;
 
 
     public int getId() {
@@ -84,6 +84,6 @@ public class Complain implements Serializable {
     public Time getTime() {return time_complain;}
 
     public void setTime(Time time) {this.time_complain = time;}
-    public Resturant getRestaurant() {return restaurant;}
-    public void setRestaurant(Resturant restaurant) {this.restaurant = restaurant;}
+    public Restaurant getRestaurant() {return restaurant;}
+    public void setRestaurant(Restaurant restaurant) {this.restaurant = restaurant;}
 }
