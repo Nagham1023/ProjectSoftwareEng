@@ -1,10 +1,11 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 
 @Entity
 @Table(name = "restaurants")
-public class Restaurant {
+public class Restaurant implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,10 +23,13 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Meal> meals;
 
-    @OneToMany(mappedBy = "complainsForRes")
+    @OneToMany(mappedBy = "restaurant")
     private List<Complain> complains;
 
 
+
+   // @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+   // private List<Order> orders;
 
     // Default constructor
     public Restaurant() {
@@ -72,7 +76,7 @@ public class Restaurant {
         this.phoneNumber = phoneNumber;
     }
 
-    public List<Meal> getMeals() {
+   public List<Meal> getMeals() {
         return meals;
     }
 

@@ -3,7 +3,7 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RestaurantList {
+public class RestaurantList{
 
     private List<Restaurant> restaurantList;
 

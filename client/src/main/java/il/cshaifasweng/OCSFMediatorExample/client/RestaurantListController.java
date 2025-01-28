@@ -1,7 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Restaurant;
-import il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB;
+import il.cshaifasweng.OCSFMediatorExample.entities.RestaurantList;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
@@ -12,6 +12,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,34 +28,29 @@ import java.util.List;
         @FXML
         private ScrollPane scrollPane;
 
-        @FXML
-        private RestaurantDB restaurantServer;
 
 
         // No-argument constructor for FXMLLoader
         public RestaurantListController() {
         }
 
-        // Method to set the restaurant server
-        public void setRestaurantServer(RestaurantDB restaurantServer) {
-            this.restaurantServer = restaurantServer;
-        }
 
         @FXML
         public void initialize() {
+            EventBus.getDefault().register(this);
+            SimpleClient client = SimpleClient.getClient();
             try {
-                setRestaurantServer(new RestaurantDB());
-                updateRestaurantList();
+                client.sendToServer("getAllRestaurants");
             } catch (Exception e) {
                 e.printStackTrace(); // In a real application, log this error or show an error message to the user
             }
         }
 
-        @FXML
-        public void updateRestaurantList() {
-            if (restaurantServer != null) {
+        @Subscribe
+        public void updateRestaurantList(RestaurantList restaurantList) {
+            if (restaurantList != null) {
 //                restaurantListContainer.getChildren().clear();  // Clear existing content
-                List<Restaurant> restaurants = restaurantServer.getAllRestaurants();
+                List<Restaurant> restaurants = restaurantList.getRestaurantList();
 
                 System.out.println("Number of restaurants: " + restaurants.size());
 
