@@ -37,6 +37,7 @@ public class SimpleServer extends AbstractServer {
             RestaurantDB restaurantDB = new RestaurantDB(); // create new instance of dataBase manager
             RestaurantList restaurantList = new RestaurantList();
             restaurantList.setRestaurantList(restaurantDB.getAllRestaurants()); // Set list to send
+			System.out.println(restaurantList.getRestaurantList());
             client.sendToClient(restaurantList); // send to client
         } catch (IOException e) {
             e.printStackTrace();
@@ -62,6 +63,7 @@ public class SimpleServer extends AbstractServer {
         }
 
 		if(msg instanceof UserCheck) {
+			System.out.println(((UserCheck) msg).getUsername());
 			if(((UserCheck) msg).isState() == 1)//if login
 			{
 				try {
@@ -101,8 +103,7 @@ public class SimpleServer extends AbstractServer {
 					throw new RuntimeException(e);
 				}
 			}
-			else if(((UserCheck) msg).isState() == 3) //if just a name check
-			{
+			else if(((UserCheck) msg).isState() == 3) {//if just a name check
 				try {
 					if (checkUserName(((UserCheck) msg).getUsername())) {
 						((UserCheck) msg).setRespond("notValid");
