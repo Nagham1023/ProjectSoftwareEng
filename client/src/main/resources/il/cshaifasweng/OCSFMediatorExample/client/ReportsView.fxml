@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+
+<SplitPane dividerPositions="0.17755169018706923" orientation="VERTICAL" prefHeight="611.0" prefWidth="779.0" style="-fx-background-color: #FFF5F9;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReportsViewController">
+   <items>
+      <StackPane maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="94.0" prefWidth="778.0" style="-fx-background-color: #FFF5F9;">
+         <children>
+            <ComboBox fx:id="timeStamp" editable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="173.0" promptText="Choose time stamp" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 5 10; -fx-min-width: 150;" StackPane.alignment="TOP_LEFT" />
+            <ComboBox fx:id="reportType" editable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="172.0" promptText="choose histograma" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 5 10; -fx-min-width: 150;" StackPane.alignment="TOP_RIGHT" />
+            <Button fx:id="generate" alignment="CENTER_RIGHT" contentDisplay="TOP" mnemonicParsing="false" onAction="#handleCellClick" prefHeight="5.0" prefWidth="150.0" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 5 10; -fx-min-width: 150;" text="generate" textAlignment="JUSTIFY" textFill="#333333" textOverrun="WORD_ELLIPSIS" wrapText="true">
+               <font>
+                  <Font name="System Italic" size="14.0" />
+               </font></Button>
+            <ComboBox fx:id="restaurant_name" editable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="26.0" prefWidth="184.0" promptText="Choose restaurant name" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 5 10; -fx-min-width: 150;" StackPane.alignment="TOP_CENTER" />
+         </children>
+      </StackPane>
+      <StackPane fx:id="chartArea" prefHeight="489.0" prefWidth="778.0" style="-fx-background-color: #FFF5F9;" />
+   </items>
+</SplitPane>
