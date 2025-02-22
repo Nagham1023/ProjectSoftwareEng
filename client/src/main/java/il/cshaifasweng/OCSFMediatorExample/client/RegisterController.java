@@ -110,11 +110,13 @@ public class RegisterController {
     }
     @FXML
     void toLogin() {
-        try {
-            App.setRoot("login");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            Platform.runLater(() -> {
+                try {
+                    App.setRoot("login");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
     }
     @Subscribe
     public void RegisterRespond(UserCheck response) throws IOException {
