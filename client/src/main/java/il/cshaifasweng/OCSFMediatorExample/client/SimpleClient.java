@@ -34,12 +34,13 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post(msg);
 		}
 		if (msg instanceof List<?>) { // Check if msg is a list
-			//System.out.println("the message is a list");
+			System.out.println("the message is a list");
 			List<?> list = (List<?>) msg;
 			if (!list.isEmpty() && list.get(0) instanceof mealEvent) { // Ensure it's a List<Meal>
 				System.out.println("list of meals");
 				EventBus.getDefault().post(msg);
-			} else if (list.get(0) instanceof Meal) { // If the list contains Meal objects
+			}
+			else if (list.get(0) instanceof Meal) { // If the list contains Meal objects
 				System.out.println("Meals found:");
 				for (Object obj : list) {
 					Meal meal = (Meal) obj;

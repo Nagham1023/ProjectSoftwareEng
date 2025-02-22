@@ -1,20 +1,63 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+import java.io.IOException;
+import java.util.Objects;
 
 import java.awt.*;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 public class mainScreenController {
     @FXML
     private ImageView imageView;  // Ensure this ImageView is the one defined in your FXML
+    @FXML
+    private ImageView restaurantLogo;
+    @FXML
+    private ImageView instaIcon;
 
     @FXML
-    public void initialize() {
+    public void initialize() throws IOException{
+        //restaurantLogo.setImage(new Image(getClass().getResourceAsStream("/il/cshaifasweng/OCSFMediatorExample/client/images/mamas_kitchen_final.png")));
+        //instaIcon.setImage(new Image(getClass().getResourceAsStream("/il/cshaifasweng/OCSFMediatorExample/client/images/instaIcon.png")));
+        SimpleClient client;
+        boolean temp = SimpleClient.isClientConnected();
+        EventBus.getDefault().register(this);
+        client = SimpleClient.getClient();
+        if (!temp) {
+            try {
+                client.sendToServer("add client");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+//        Platform.runLater(() ->
+//        {
+//            SimpleClient client;
+//            boolean temp = SimpleClient.isClientConnected();
+//            EventBus.getDefault().register(this);
+//            client = SimpleClient.getClient();
+//            if (!temp) {
+//                try {
+//                    client.sendToServer("add client");
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//            //if (SimpleClient.isLog()) {
+//               // UserCheck user = SimpleClient.getUser();
+//               // copyr.setText("logged into " + user.getUsername() + " with role " + user.getRole());
+//            //}
+//        });
         // Load the image
 //        imageView.setImage(new Image(getClass().getResourceAsStream("/images/mamas_kitchen_final.png"))); // Update path as needed
 
@@ -62,6 +105,14 @@ public class mainScreenController {
             e.printStackTrace(); // Print stack trace or handle the exception appropriately
         }*/
         App.setRoot("RestaurantList");
+    }
+    @FXML
+    void goToLogin(ActionEvent event) throws IOException {
+        App.setRoot("login");
+    }
+    @Subscribe  // Add this annotation
+    public void handleEvent(WarningEvent event) {  // Replace with actual event type
+        // Handle event here
     }
 
 
