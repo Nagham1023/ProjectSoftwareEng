@@ -6,7 +6,11 @@ import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 
 import java.io.IOException;
+
+import java.time.LocalDateTime;
+
 import java.time.LocalDate;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +37,14 @@ public class SimpleServer extends AbstractServer {
 	protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
 		System.out.println("Received message from client ");
 		String msgString = msg.toString();
+
+		if(msg instanceof ReservationEvent) {
+			ReservationEvent reservation = (ReservationEvent) msg;
+			if(check_Available_Reservation(reservation)){
+
+			}
+		}
+		if(msg instanceof mealEvent) {
         if (msg instanceof String && msg.equals("getAllRestaurants")) {try {
             RestaurantDB restaurantDB = new RestaurantDB(); // create new instance of dataBase manager
             RestaurantList restaurantList = new RestaurantList();
@@ -270,6 +282,44 @@ public class SimpleServer extends AbstractServer {
 			}
 		}
 	}
+	//method to check if the reservation date is available
+	private boolean check_Available_Reservation(ReservationEvent reservation) {
+		String restaurantName = reservation.getRestaurantName();
+		LocalDateTime requestedTime = reservation.getReservationDateTime();
+
+		// Fetch tables for the given restaurant
+		List<TableNode> tables = getTablesByRestaurant(restaurantName);
+
+		for (TableNode table : tables) {
+			List<LocalDateTime> startTimes = table.getReservationStartTimes();
+			List<LocalDateTime> endTimes = table.getReservationEndTimes();
+
+			for (int i = 0; i < startTimes.size(); i++) {
+				LocalDateTime start = startTimes.get(i);
+				LocalDateTime end = endTimes.get(i);
+
+				// Check if the requested time overlaps with an existing reservation
+				if (!requestedTime.isBefore(start) && requestedTime.isBefore(end)) {
+					return false; // The time slot is occupied
+				}
+			}
+		}
+
+		return true; // Reservation is available
+	}
+	// Method to get tables by restaurant
+	private List<TableNode> getTablesByRestaurant(String restaurantName) {
+		String query = "SELECT r FROM Restaurant r LEFT JOIN FETCH r.tables WHERE r.restaurantName = :restaurantName";
+		List<Restaurant> restaurantList = App.Get_Resturant(query);
+
+		if (restaurantList.isEmpty()) {
+			return new ArrayList<>(); // Return an empty list if no restaurant is found
+		}
+
+		// Return the tables from the first restaurant
+		return restaurantList.get(0).getTables();
+	}
+
 
 	public static List<String> processFilters(String filters) {
 		List<String> categories = new ArrayList<>();
@@ -305,6 +355,7 @@ public class SimpleServer extends AbstractServer {
 	// Method to get meals by restaurant
 	private List<Meal> getMealsByRestaurant(String restaurantName) {
 
+
 		String query = "SELECT r FROM Restaurant r LEFT JOIN FETCH r.meals WHERE r.restaurant_Name = :restaurantName";
 		List<Restaurant> restaurant = App.Get_Restaurant(query);
 		return restaurant.get(0).getMeals();
@@ -327,6 +378,7 @@ public class SimpleServer extends AbstractServer {
 
 		return mealsWithIngredient;
 	}
+
 	@Override
 	public void sendToAllClients(Object message) {
 		try {

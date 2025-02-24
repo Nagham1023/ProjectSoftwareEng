@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReservationController">
+    <children>
+        <DatePicker fx:id="datePicker" layoutX="50" layoutY="50" />
+
+        <ComboBox fx:id="hourComboBox" layoutX="50" layoutY="100" prefWidth="80" promptText="Hours" />
+        <ComboBox fx:id="minuteComboBox" layoutX="140" layoutY="100" prefWidth="80" promptText="Min" />
+
+        <Button fx:id="confirmButton" layoutX="50.0" layoutY="150.0" onAction="#handleConfirm" text="Confirm" />
+      <Label layoutX="176.0" layoutY="14.0" prefHeight="17.0" prefWidth="174.0" text="Pick your reservation details" />
+    </children>
+</AnchorPane>

@@ -1,16 +1,36 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
+
+
 import javax.persistence.*;
+
 import java.io.Serializable;
+
 import java.util.List;
 
 @Entity
 @Table(name = "restaurants")
+
 public class Restaurant implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+
+    private String restaurantName;
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TableNode> tables;
+
+    @ManyToMany  // Many-to-many relationship with Meal
+    @JoinTable(
+            name = "restaurant_meals",
+            joinColumns = @JoinColumn(name = "restaurant_id"),
+            inverseJoinColumns = @JoinColumn(name = "meal_id")
+    )
+    private List<Meal> meals;
+
+    // Getters and Setters
     @Column(name = "restaurant_name", nullable = false)
     private String restaurantName;
 
@@ -44,6 +64,7 @@ public class Restaurant implements Serializable {
     }
 
     // Getters and setters
+
     public int getId() {
         return id;
     }
@@ -59,6 +80,17 @@ public class Restaurant implements Serializable {
     public void setRestaurantName(String restaurantName) {
         this.restaurantName = restaurantName;
     }
+
+
+    public List<TableNode> getTables() {
+        return tables;
+    }
+
+    public void setTables(List<TableNode> tables) {
+        this.tables = tables;
+    }
+
+    public List<Meal> getMeals() {
 
     public String getImagePath() {
         return imagePath;
@@ -77,6 +109,7 @@ public class Restaurant implements Serializable {
     }
 
    public List<Meal> getMeals() {
+
         return meals;
     }
 
@@ -98,4 +131,5 @@ public class Restaurant implements Serializable {
                 ", PhoneNumber='" + getPhoneNumber() + '\'' +
                 '}';
     }
+
 }
