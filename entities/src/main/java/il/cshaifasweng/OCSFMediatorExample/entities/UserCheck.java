@@ -10,6 +10,8 @@ public class UserCheck implements Serializable {
     private String email;
     private int age;
     private String gender;
+    private Long id;
+    private String role;
 
     private String respond;
     private int state; //1 if login, 0 if register , 2 if forget pass, 3 if username check
@@ -72,6 +74,18 @@ public class UserCheck implements Serializable {
     }
     public void setGender(String gender) {
         this.gender = gender;
+    }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public String getRole() {
+        return role;
+    }
+    public void setRole(String role) {
+        this.role = role;
     }
 
 }

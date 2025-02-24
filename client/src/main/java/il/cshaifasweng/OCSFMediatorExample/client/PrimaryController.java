@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
+import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.updatePrice;
 import javafx.application.Platform;
@@ -17,60 +18,35 @@ import org.greenrobot.eventbus.Subscribe;
 
 public class PrimaryController {
 	public static List<mealEvent> meals;
-
 	@FXML
 	private Label copyr;
 	@FXML
 	void initialize() throws IOException {
-		SimpleClient client;
-		EventBus.getDefault().register(this);
-		client = SimpleClient.getClient();
-		client.sendToServer("add client");
-	}
-	@Subscribe
-	public void addnewmeal(mealEvent mealEvent) {
-		Platform.runLater(() -> {
-			meals.add(mealEvent);
-		});
 
-	}
-	@Subscribe
-	public void mealEvent(updatePrice updateprice) {
-		//System.out.println("We're in primary controller in mealEvent changing the list");
-
-		String mealId = String.valueOf(updateprice.getIdMeal());
-		String newPrice = String.valueOf(updateprice.getNewPrice());
-
-		if (meals == null) {
-			System.out.println("Meals list is null. Cannot update price.");
-			return;
-		}
-
-		boolean updated = false;
-		for (mealEvent meal : meals) {
-			if (meal.getId().equals(mealId)) {
-				meal.setPrice(newPrice);
-				updated = true;
-				//System.out.println("Meal ID " + mealId + " updated to price: " + meal.getPrice());
-				break;
+		Platform.runLater(() ->
+		{
+			SimpleClient client;
+			boolean temp = SimpleClient.isClientConnected();
+			EventBus.getDefault().register(this);
+			client = SimpleClient.getClient();
+			if (!temp) {
+				try {
+					client.sendToServer("add client");
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
-		}
-
-		if (updated) {
-			Platform.runLater(() -> {
-				System.out.println("UI update logic executed for Meal ID " + mealId);
-			});
-		} else {
-			System.out.println("Meal ID " + mealId + " not found in the list.");
-		}
+			if (SimpleClient.isLog()) {
+				UserCheck user = SimpleClient.getUser();
+				copyr.setText("logged into " + user.getUsername() + " with role " + user.getRole());
+			}
+		});
 	}
 	@Subscribe
 	public void gotMeals(List<mealEvent> event) {
-		Platform.runLater(() -> {
-			meals = event;
-		});
-
+		meals = event;
 	}
+
 	@FXML
 	void goToMenu(ActionEvent event) throws IOException {
 		Platform.runLater(() -> {

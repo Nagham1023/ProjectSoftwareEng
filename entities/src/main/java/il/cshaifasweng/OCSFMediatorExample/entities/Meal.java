@@ -33,6 +33,9 @@ public class Meal implements Serializable {
     @Column(name = "image", columnDefinition = "MEDIUMBLOB") // Or LONGBLOB if needed
     private byte[] image;
 
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id")
+    private Restaurant restaurant;
 
     @ManyToMany
     @JoinTable(

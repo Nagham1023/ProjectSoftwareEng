@@ -22,10 +22,11 @@ import javafx.scene.image.Image;
 import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import java.util.List;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static il.cshaifasweng.OCSFMediatorExample.client.PrimaryController.meals;
@@ -59,9 +60,6 @@ public class menu_controller {
         openSearchByPage();
     }
 
-    // Method to handle Add Meal button click
-
-    //@FXML
     public void onAddMealClicked(String mealName,String mealDescription,String mealPrice,String mealId,byte[] imageData) {
         // Create a new meal row (HBox)
         HBox mealRow = new HBox(20);
@@ -114,7 +112,7 @@ public class menu_controller {
 
         mealPriceLabels.put(mealId, priceLabel);
     }
-    // Method to open the Search By page
+
     private void openSearchByPage() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/Search_by.fxml"));
@@ -126,7 +124,6 @@ public class menu_controller {
             e.printStackTrace();
         }
     }
-    // Method to open the Change Price page
 
     private void openChangePricePage(String mealName, Label priceLabel,String Id){
         try {
@@ -175,19 +172,18 @@ public class menu_controller {
 
 
     @Subscribe
-    public void ShowNewMeals(List<Meal> meals) {
+    public void ShowNewMeals(List<Meal> avMeals) {
+
         System.out.println("Refreshing menu content...");
 
         Platform.runLater(() -> {
-            // Remove only the meal rows, assuming meals are added as HBox nodes
             menuContainer.getChildren().removeIf(node -> {
-                // Remove only meal rows (e.g., HBox with meal details)
                 return node instanceof HBox && node != menuContainer.getChildren().get(0);
             });
 
             // Add new meals to the menu
-            if (meals != null && !meals.isEmpty()) {
-                for (Meal meal : meals) {
+            if (avMeals != null && !avMeals.isEmpty()) {
+                for (Meal meal : avMeals) {
                     onAddMealClicked(
                             meal.getName(),
                             meal.getDescription(),
@@ -202,18 +198,15 @@ public class menu_controller {
         });
     }
 
-
-
     @FXML
     public void initialize() throws Exception {
         EventBus.getDefault().register(this);
         if(meals == null)
             System.out.println("No meals found");
         else
-            System.out.println(meals.toString());
-        for (mealEvent meal : meals) {
-            onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()),meal.getId(),meal.getImage());
-        }
+            for (mealEvent meal : meals) {
+                onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()),meal.getId(),meal.getImage());
+            }
 
         /******/
         // Set the arrow image

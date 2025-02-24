@@ -165,7 +165,7 @@ public class RegisterController {
                     stage.setTitle("Validate Your Account");
                     stage.setScene(new Scene(root));
                     stage.show();
-                    String title = "Account Validation Code Mama-Resturant";
+                    String title = "Account Validation Code Mama-Restaurant";
                     String body = "Hello " + usernameField.getText() + ",\n\n"
                             + "Thank you for registering with us!\n\n"
                             + "Your account validation code is: " + ValidationCode + "\n\n"

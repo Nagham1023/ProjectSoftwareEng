@@ -84,13 +84,20 @@ public class LoginController {
         UserCheck user = new UserCheck(usernameField.getText(), hiddenPassword,1);
         SimpleClient client = SimpleClient.getClient();
         client.sendToServer(user);
+        try {
+            App.setRoot("worker_screen");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
     @Subscribe
     public void LoginResponse(UserCheck response) {
         if(Objects.equals(response.getRespond(), "Valid") && response.isState() == 1) {
             Platform.runLater(() -> {
                 try {
-                    App.setRoot("primary");
+                    SimpleClient.setUser(response);
+                    App.setRoot("worker_screen");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

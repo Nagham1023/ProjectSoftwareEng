@@ -1,6 +1,8 @@
 
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Time;
@@ -15,9 +17,10 @@ public class complainEvent implements Serializable {
     private String tell_complain;
     private Date date_complain;
     private Time time_complain;
+    private Restaurant restaurant;
 
 
-    public complainEvent(String kind, String name, String email, String tell,int id,Date date,Time time) {
+    public complainEvent(String kind, String name, String email, String tell,int id,Date date,Time time, Restaurant restaurant) {
         this.kind_complain = kind;
         this.name_complain = name;
         this.email_complain = email;
@@ -25,15 +28,17 @@ public class complainEvent implements Serializable {
         this.id = id;
         this.date_complain = date;
         this.time_complain = time;
+        this.restaurant = restaurant;
     }
 
-    public complainEvent(String kind, String name, String email, String tell,Date date,Time time) {
+    public complainEvent(String kind, String name, String email, String tell,Date date,Time time, Restaurant restaurant) {
         this.kind_complain = kind;
         this.name_complain = name;
         this.email_complain = email;
         this.tell_complain = tell;
         this.date_complain = date;
         this.time_complain = time;
+        this.restaurant = restaurant;
     }
 
 
@@ -86,6 +91,8 @@ public class complainEvent implements Serializable {
     public Time getTime() {return time_complain;}
 
     public void setTime(Time time) {this.time_complain = time;}
+    public Restaurant getRestaurant() {return restaurant;}
+    public void setRestaurant(Restaurant restaurant) {this.restaurant = restaurant;}
 
     @Override
     public String toString() {
@@ -96,6 +103,7 @@ public class complainEvent implements Serializable {
                 ", tell_complain=" + tell_complain + '\'' +
                 ", date_complain=" + date_complain + '\'' +
                 ", time_complain=" + time_complain + '\'' +
+                ", restaurant=" + restaurant + '\'' +
                 ", Id='" + id + '\'' +
                 '}';
     }

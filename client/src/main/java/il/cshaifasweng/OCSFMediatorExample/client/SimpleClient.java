@@ -12,6 +12,8 @@ public class SimpleClient extends AbstractClient {
 	private static SimpleClient client = null;
 	public static String IP = "127.0.0.1";
 	public static int Port = 3000;
+	private static UserCheck UserClient = null;
+	private static boolean logged = false;
 
 	private SimpleClient(String host, int port) {
 		super(host, port)	;
@@ -20,12 +22,15 @@ public class SimpleClient extends AbstractClient {
 	@Override
 	protected void handleMessageFromServer(Object msg) {
 		System.out.println("got a message from server " + msg);
-		if(msg instanceof updatePrice) {
+		if (msg instanceof updatePrice) {
 			System.out.println("the message is an update price");
 			EventBus.getDefault().post(msg);
 		}
-		if(msg instanceof UserCheck)
-		{
+		if (msg instanceof UserCheck) {
+			EventBus.getDefault().post(msg);
+		}
+		if (msg instanceof complainEvent) {
+			System.out.println("the message is an adding complaint");
 			EventBus.getDefault().post(msg);
 		}
 		if (msg instanceof List<?>) { // Check if msg is a list
@@ -34,8 +39,7 @@ public class SimpleClient extends AbstractClient {
 			if (!list.isEmpty() && list.get(0) instanceof mealEvent) { // Ensure it's a List<Meal>
 				System.out.println("list of meals");
 				EventBus.getDefault().post(msg);
-			}
-			else if (list.get(0) instanceof Meal) { // If the list contains Meal objects
+			} else if (list.get(0) instanceof Meal) { // If the list contains Meal objects
 				System.out.println("Meals found:");
 				for (Object obj : list) {
 					Meal meal = (Meal) obj;
@@ -50,10 +54,32 @@ public class SimpleClient extends AbstractClient {
 		if (msg.getClass().equals(Warning.class)) {
 			EventBus.getDefault().post(new WarningEvent((Warning) msg));
 		}
+		// Check if the message starts with "ReportResponse"
 		if(msg instanceof String) {
-			EventBus.getDefault().post(msg);
-		}
+			String message = (String) msg;
+			if (message.startsWith("ReportResponse")) {
+				// Split the message by "\n" to extract the report content
+				String[] parts = message.split("\n", 2); // Limit to 2 splits
+				if (parts.length == 2) {
+					String report = parts[1]; // The actual report content
+					System.out.println("Received report: " + report);
 
+
+					// Publish the event to the EventBus
+					EventBus.getDefault().post(new ReportResponseEvent(report));
+				} else {
+					System.err.println("Malformed report response from server.");
+				}
+			} else {
+				System.out.println("Unhandled message: " + message);
+			}
+		}
+        if (msg instanceof RestaurantList) {
+            RestaurantList restaurantList = (RestaurantList) msg;
+            //print restaurants names
+            System.out.println("Received restaurant list: " + restaurantList.toString());
+            EventBus.getDefault().post(restaurantList);
+        }
 	}
 
 	public static SimpleClient getClient() {
@@ -61,6 +87,22 @@ public class SimpleClient extends AbstractClient {
 			client = new SimpleClient(IP, Port);
 		}
 		return client;
+	}
+	public static boolean isClientConnected(){
+		boolean temp = logged;
+        if(!logged){
+			logged = true;
+		}
+		return temp;
+    }
+	public static boolean isLog() {
+        return UserClient != null;
+	}
+	public static UserCheck getUser() {
+		return UserClient;
+	}
+	public static void setUser(UserCheck user) {
+		UserClient = user;
 	}
 
 }
