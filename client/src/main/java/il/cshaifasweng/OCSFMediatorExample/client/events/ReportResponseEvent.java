@@ -1,4 +1,4 @@
-package il.cshaifasweng.OCSFMediatorExample.client;
+package il.cshaifasweng.OCSFMediatorExample.client.events;
 
 import java.io.Serializable;
 import java.time.LocalTime;

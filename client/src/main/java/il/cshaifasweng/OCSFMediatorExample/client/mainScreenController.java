@@ -1,17 +1,13 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
-import javafx.application.Platform;
+import il.cshaifasweng.OCSFMediatorExample.client.events.WarningEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
-import java.util.Objects;
 
 import java.awt.*;
 import java.net.URI;

@@ -1,4 +1,4 @@
-package il.cshaifasweng.OCSFMediatorExample.client;
+package il.cshaifasweng.OCSFMediatorExample.client.events;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 public class WarningEvent {

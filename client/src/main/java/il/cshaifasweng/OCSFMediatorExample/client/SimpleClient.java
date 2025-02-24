@@ -1,5 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.client.events.ReportResponseEvent;
+import il.cshaifasweng.OCSFMediatorExample.client.events.WarningEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.greenrobot.eventbus.EventBus;
 
@@ -77,6 +79,7 @@ public class SimpleClient extends AbstractClient {
 		}
         if (msg instanceof RestaurantList) {
             RestaurantList restaurantList = (RestaurantList) msg;
+
             //print restaurants names
             System.out.println("Received restaurant list: " + restaurantList.toString());
             EventBus.getDefault().post(restaurantList);
