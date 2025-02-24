@@ -1,16 +1,11 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
-
 import il.cshaifasweng.OCSFMediatorExample.entities.ReportRequest;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
-
 import java.io.IOException;
-
 import java.time.LocalDateTime;
-
 import java.time.LocalDate;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,12 +35,12 @@ public class SimpleServer extends AbstractServer {
 		String msgString = msg.toString();
 
 		ReservationEvent reservation;
-		if (msg instanceof ReservationEvent) {
-			reservation = (ReservationEvent) msg;
-			if (check_Available_Reservation(reservation)) {
-
+			if (msg instanceof ReservationEvent) {
+				reservation = (ReservationEvent) msg;
+				if (check_Available_Reservation(reservation)) {
+				}
 			}
-		}
+
 			if (msg instanceof String && msg.equals("getAllRestaurants")) {
 				try {
 					RestaurantDB restaurantDB = new RestaurantDB(); // create new instance of dataBase manager
@@ -66,15 +61,14 @@ public class SimpleServer extends AbstractServer {
 				if (Objects.equals(addResult, "added")) {
 					sendToAll(msg);
 				}
-
 			}
+
 			if (msg instanceof String && msgString.equals("toMenuPage")) {
 				try {
 					client.sendToClient(getmealEvent());
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
-
 			}
 
 			if (msg instanceof UserCheck) {
@@ -128,9 +122,20 @@ public class SimpleServer extends AbstractServer {
 						throw new RuntimeException(e);
 					}
 				}
-
-
 			}
+
+			if (msg instanceof complainEvent) {
+				//here we're adding new complain !!
+				System.out.println("Received adding new complainEvent ");
+				try {
+					addComplainIntoDatabase((complainEvent) msg);
+					client.sendToClient(msg);
+					sendToAll(msg);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
 			if (msgString.startsWith("#warning")) {
 				Warning warning = new Warning("Warning from server!");
 				try {
@@ -140,6 +145,7 @@ public class SimpleServer extends AbstractServer {
 					e.printStackTrace();
 				}
 			}
+
 			if (msg instanceof ReportRequest) {
 
 				ReportRequest reportRequest = (ReportRequest) msg;
@@ -169,8 +175,8 @@ public class SimpleServer extends AbstractServer {
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
-
 			}
+
 			if (msg instanceof updatePrice) {
 				System.out.println("Received update price message from client ");
 				//sendToAllClients(msg);
@@ -265,17 +271,6 @@ public class SimpleServer extends AbstractServer {
 					}
 				} else {
 					System.out.println("Unknown search method.");
-				}
-			}
-			if (msg instanceof complainEvent) {
-				//here we're adding new complain !!
-				System.out.println("Received adding new complainEvent ");
-				try {
-					addComplainIntoDatabase((complainEvent) msg);
-					client.sendToClient(msg);
-					sendToAll(msg);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
 				}
 			}
 		}

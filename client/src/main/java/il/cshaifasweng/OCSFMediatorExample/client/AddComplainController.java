@@ -25,6 +25,8 @@ public class AddComplainController {
     Date date;
     Time time;
     Restaurant restaurant=null;
+    String status="needReplay";
+
 
     @FXML
     private ResourceBundle resources;
@@ -137,7 +139,7 @@ public class AddComplainController {
         LocalTime now = LocalTime.now(); // Get the current time
         time = Time.valueOf(now);        // Convert LocalTime to java.sql.Time
 
-        complainEvent complainEvent = new complainEvent(ComplainKind,textFieldName.getText(),textFieldEmail.getText(),textAreaTellUs.getText(),date,time,restaurant);
+        complainEvent complainEvent = new complainEvent(ComplainKind,textFieldName.getText(),textFieldEmail.getText(),textAreaTellUs.getText(),date,time,restaurant,status);
 
         SimpleClient client;
         client = SimpleClient.getClient();

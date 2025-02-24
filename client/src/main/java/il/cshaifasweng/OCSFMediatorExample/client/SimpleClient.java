@@ -1,12 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
-
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.greenrobot.eventbus.EventBus;
-
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
-
 import java.util.List;
-
 public class SimpleClient extends AbstractClient {
 
 	private static SimpleClient client = null;
