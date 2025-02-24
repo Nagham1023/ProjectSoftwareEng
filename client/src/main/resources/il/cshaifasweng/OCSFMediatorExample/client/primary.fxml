@@ -13,12 +13,13 @@
    <Label layoutX="180" layoutY="100" style="-fx-font-size: 16px; -fx-text-fill: #757575;" text="Where Flavor Meets Comfort" />
 
    <!-- Buttons -->
-   <VBox alignment="CENTER" layoutX="200" layoutY="180" spacing="20">
+   <VBox alignment="CENTER" layoutX="200" layoutY="130.0" prefHeight="214.0" prefWidth="200.0" spacing="20">
       <!-- Go to Menu Button -->
       <Button onAction="#goToMenu" prefWidth="200" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10;" text="Go to Menu" />
 
       <!-- Update Menu Button -->
       <Button onAction="#goUpdateMenu" prefWidth="200" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10;" text="Add New Meal" />
+      <Button onAction="#goToReservation" prefWidth="200" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10;" text="Reservation" />
       <Button onAction="#goToLogin" prefWidth="200" style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 10;" text="Login" />
    </VBox>
 

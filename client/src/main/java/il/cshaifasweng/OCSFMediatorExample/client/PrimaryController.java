@@ -32,6 +32,7 @@ public class PrimaryController {
 		Platform.runLater(() -> {
 			meals.add(mealEvent);
 		});
+
 	}
 	@Subscribe
 	public void mealEvent(updatePrice updateprice) {
@@ -72,15 +73,43 @@ public class PrimaryController {
 	}
 	@FXML
 	void goToMenu(ActionEvent event) throws IOException {
-            App.setRoot("menu");
+		Platform.runLater(() -> {
+            try {
+                App.setRoot("menu");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 	}
 	@FXML
 	void goToLogin(ActionEvent event) throws IOException {
-		App.setRoot("login");
+		Platform.runLater(() -> {
+            try {
+                App.setRoot("login");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 	}
 	@FXML
 	void goUpdateMenu(ActionEvent event) throws IOException {
-            App.setRoot("addmeal");
+		Platform.runLater(() -> {
+            try {
+                App.setRoot("addmeal");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+	}
+	@FXML
+	void goToReservation(ActionEvent event) {
+		Platform.runLater(() -> {
+            try {
+                App.setRoot("Reservation");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
 	}
 
 }
