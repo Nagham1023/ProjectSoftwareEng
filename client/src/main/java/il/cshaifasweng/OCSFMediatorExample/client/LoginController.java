@@ -84,11 +84,6 @@ public class LoginController {
         UserCheck user = new UserCheck(usernameField.getText(), hiddenPassword,1);
         SimpleClient client = SimpleClient.getClient();
         client.sendToServer(user);
-        try {
-            App.setRoot("worker_screen");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
     }
     @Subscribe
@@ -107,6 +102,11 @@ public class LoginController {
         {
             Platform.runLater(() -> {
                 respondField.setText(response.getRespond());
+                    try {
+                        App.setRoot("worker_screen");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
             });
         }
     }

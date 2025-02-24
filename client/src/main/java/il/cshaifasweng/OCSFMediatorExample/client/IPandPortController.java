@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -35,7 +36,13 @@ public class IPandPortController {
             SimpleClient.Port = port;
             SimpleClient client = SimpleClient.getClient(); // Get the SimpleClient instance
             client.openConnection();
-            App.setRoot("primary");
+            Platform.runLater(() -> {
+                try {
+                    App.setRoot("mainScreen");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
 
         } catch (NumberFormatException e) {

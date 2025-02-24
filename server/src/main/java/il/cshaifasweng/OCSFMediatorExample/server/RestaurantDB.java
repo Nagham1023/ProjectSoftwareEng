@@ -24,7 +24,7 @@ public class RestaurantDB {
 
     private void initializeSampleRestaurants() {
         restaurants.add(new Restaurant(1, "Haifa", "images/restaurant.jpg", "04-9944871"));
-        restaurants.add(new Restaurant(2, "Tel Aviv", "images/restaurant.jpg", "04-9825625"));
+        restaurants.add(new Restaurant(2, "Nazareth", "images/restaurant.jpg", "04-9825625"));
         restaurants.add(new Restaurant(3, "Old Aco", "images/restaurant.jpg", "04-9458712"));
         restaurants.add(new Restaurant(4, "Tamra", "images/restaurant.jpg", "04-9944321"));
     }

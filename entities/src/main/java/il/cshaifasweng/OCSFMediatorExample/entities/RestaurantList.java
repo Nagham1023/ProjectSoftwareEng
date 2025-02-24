@@ -1,9 +1,10 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RestaurantList{
+public class RestaurantList implements Serializable {
 
     private List<Restaurant> restaurantList;
 

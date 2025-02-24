@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.client.events.ReportResponseEvent;
 import javafx.application.Platform; // Add this import
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

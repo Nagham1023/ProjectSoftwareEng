@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.client.events.ReportResponseEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform; // Add this import
 import javafx.fxml.FXML;
@@ -9,7 +10,6 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -17,7 +17,6 @@ import org.greenrobot.eventbus.Subscribe;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class ReportsViewController {
@@ -50,6 +49,7 @@ public class ReportsViewController {
         SimpleClient client = SimpleClient.getClient();
         try {
             client.sendToServer("getAllRestaurants");
+            System.out.println("here first");
         } catch (Exception e) {
             e.printStackTrace(); // In a real application, log this error or show an error message to the user
         }
@@ -188,6 +188,7 @@ public class ReportsViewController {
     @Subscribe
     public void fillComboBox(RestaurantList restaurantList) {
         restaurant_name.getItems().clear();
+        System.out.println("here");
         List<Restaurant> restaurants = restaurantList.getRestaurantList();
         List<String> restaurantNames = new ArrayList<>();
         for (Restaurant restaurant : restaurants) {
