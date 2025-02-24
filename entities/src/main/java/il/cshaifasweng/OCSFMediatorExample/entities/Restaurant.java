@@ -1,10 +1,20 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
-
-
 import javax.persistence.*;
-
 import java.io.Serializable;
-
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 
 @Entity
@@ -17,7 +27,7 @@ public class Restaurant implements Serializable {
     private int id;
 
 
-    private String restaurantName;
+   // private String restaurantName;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TableNode> tables;
@@ -31,7 +41,8 @@ public class Restaurant implements Serializable {
     private List<Meal> meals;
 
     // Getters and Setters
-
+    @Column(name = "restaurant_name", nullable = false)
+    private String restaurantName;
 
     @Column(name = "image_path")
     private String imagePath;
@@ -39,13 +50,16 @@ public class Restaurant implements Serializable {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+//    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    private List<Meal> meals;
 
-    @OneToMany(mappedBy = "restaurant")
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Complain> complains;
 
 
-    // @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    // private List<Order> orders;
+
+   // @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+   // private List<Order> orders;
 
     // Default constructor
     public Restaurant() {
@@ -87,6 +101,7 @@ public class Restaurant implements Serializable {
     }
 
 
+
     public String getImagePath() {
         return imagePath;
     }
@@ -103,8 +118,7 @@ public class Restaurant implements Serializable {
         this.phoneNumber = phoneNumber;
     }
 
-    public List<Meal> getMeals() {
-
+   public List<Meal> getMeals() {
         return meals;
     }
 
@@ -112,10 +126,7 @@ public class Restaurant implements Serializable {
         this.meals = meals;
     }
 
-    public List<Complain> getComplains() {
-        return complains;
-    }
-
+    public List<Complain> getComplains() {return complains;}
     public void setComplains(List<Complain> complains) {
         this.complains = complains;
     }
@@ -129,6 +140,5 @@ public class Restaurant implements Serializable {
                 ", PhoneNumber='" + getPhoneNumber() + '\'' +
                 '}';
     }
+
 }
-
-
