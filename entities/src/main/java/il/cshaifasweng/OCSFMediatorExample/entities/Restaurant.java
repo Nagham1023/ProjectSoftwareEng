@@ -31,8 +31,7 @@ public class Restaurant implements Serializable {
     private List<Meal> meals;
 
     // Getters and Setters
-    @Column(name = "restaurant_name", nullable = false)
-    private String restaurantName;
+
 
     @Column(name = "image_path")
     private String imagePath;
@@ -40,16 +39,13 @@ public class Restaurant implements Serializable {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Meal> meals;
 
     @OneToMany(mappedBy = "restaurant")
     private List<Complain> complains;
 
 
-
-   // @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-   // private List<Order> orders;
+    // @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // private List<Order> orders;
 
     // Default constructor
     public Restaurant() {
@@ -90,7 +86,6 @@ public class Restaurant implements Serializable {
         this.tables = tables;
     }
 
-    public List<Meal> getMeals() {
 
     public String getImagePath() {
         return imagePath;
@@ -108,7 +103,7 @@ public class Restaurant implements Serializable {
         this.phoneNumber = phoneNumber;
     }
 
-   public List<Meal> getMeals() {
+    public List<Meal> getMeals() {
 
         return meals;
     }
@@ -117,7 +112,10 @@ public class Restaurant implements Serializable {
         this.meals = meals;
     }
 
-    public List<Complain> getComplains() {return complains;}
+    public List<Complain> getComplains() {
+        return complains;
+    }
+
     public void setComplains(List<Complain> complains) {
         this.complains = complains;
     }
@@ -131,5 +129,6 @@ public class Restaurant implements Serializable {
                 ", PhoneNumber='" + getPhoneNumber() + '\'' +
                 '}';
     }
-
 }
+
+
