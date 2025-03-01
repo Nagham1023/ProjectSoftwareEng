@@ -5,9 +5,11 @@ import il.cshaifasweng.OCSFMediatorExample.entities.Users;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
+import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.util.Arrays;
 import java.util.List;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
@@ -46,6 +48,96 @@ public class UsersDB {
 
         return users;
     }
+    public static boolean checkAndUpdateUserSignInStatus(String username) throws Exception {
+        Session session = null;
+        try {
+            // Open a session if it's not already open
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+
+            // Begin a transaction
+            session.beginTransaction();
+
+            // Create a Criteria query to find the user by username
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Users> query = builder.createQuery(Users.class);
+            Root<Users> root = query.from(Users.class);
+            query.select(root).where(builder.equal(root.get("username"), username));
+
+            // Execute the query to get the user
+            Users user = session.createQuery(query).uniqueResult();
+
+            if (user != null) {
+                // Check if the user is signed in
+                if (!user.getSigned()) {
+                    // If not signed in, update the status to true
+                    user.setSigned(true); // Assuming there's a setSigned(boolean) method in the Users class
+
+                    // Save the updated user to the database
+                    session.update(user);
+                    session.getTransaction().commit();
+                    return false; // User was not signed in, but now they are
+                } else {
+                    // User is already signed in
+                    return true;
+                }
+            } else {
+                // User not found
+                return false;
+            }
+        } catch (Exception e) {
+            if (session != null && session.getTransaction() != null) {
+                session.getTransaction().rollback(); // Rollback in case of an error
+            }
+            throw e; // Re-throw the exception
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close(); // Close the session
+            }
+        }
+    }
+    public static void SignOut(UserCheck us) throws Exception {
+        Session session = null;
+        try {
+            // Open a session if it's not already open
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+
+            // Begin a transaction
+            session.beginTransaction();
+
+            // Create a Criteria query to find the user by username
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Users> query = builder.createQuery(Users.class);
+            Root<Users> root = query.from(Users.class);
+            query.select(root).where(builder.equal(root.get("username"), us.getUsername()));
+
+            // Execute the query to get the user
+            Users user = session.createQuery(query).uniqueResult();
+
+            if (user != null) {
+                // Check if the user is signed in
+                    // If not signed in, update the status to true
+                    user.setSigned(false); // Assuming there's a setSigned(boolean) method in the Users class
+
+                    // Save the updated user to the database
+                    session.update(user);
+                    session.getTransaction().commit();
+            } else {
+                // User not found
+                return;
+            }
+        } catch (Exception e) {
+            if (session != null && session.getTransaction() != null) {
+                session.getTransaction().rollback(); // Rollback in case of an error
+            }
+            throw e; // Re-throw the exception
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close(); // Close the session
+            }
+        }
+    }
     public static boolean checkUser(String username, String password) throws Exception {
         if (session == null || !session.isOpen()) {
             SessionFactory sessionFactory = getSessionFactory();
@@ -66,7 +158,6 @@ public class UsersDB {
         if (session != null && session.isOpen()) {
             session.close(); // Close the session after operation
         }
-
         return count > 0;
     }
     public static boolean checkEmail(UserCheck us) throws Exception {
@@ -226,5 +317,51 @@ public class UsersDB {
             System.err.println("An error occurred while fetching users: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public static void generateBasicUser() throws Exception {
+                // Helper function to read image as byte[]
+                if (session == null || !session.isOpen()) { // hala added to Ensure session is opened before calling generateOrders().
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+        }
+
+            session.beginTransaction(); // Start a transaction
+            try {
+            // Create orders
+            Users nagham = new Users();
+            nagham.setRole("CompanyManager");
+            nagham.setEmail("naghammnsor@gmail.com");
+            nagham.setPassword("NaghamYes");
+            nagham.setUsername("naghamTheManager");
+            nagham.setGender("other");
+            nagham.setAge(22);
+
+
+
+            // List of Orders to add
+            List<Users> newOrders = Arrays.asList(nagham);
+
+            // Fetch existing meals from the database
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Users> query = builder.createQuery(Users.class);
+            query.from(Users.class);
+            List<Users> existingMeals = session.createQuery(query).getResultList();
+
+            // Save customizations
+            session.save(nagham);
+            session.flush();
+            session.getTransaction().commit(); // Commit the transaction
+
+        } catch (Exception e) {
+            // Rollback transaction in case of an error
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
+            e.printStackTrace();
+            throw new Exception("An error occurred while generating the user.", e);
+        }
+        // Do not close the session here; keep it open for further operations
+
     }
 }
