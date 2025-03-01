@@ -59,6 +59,7 @@ public class App
         configuration.addAnnotatedClass(Users.class);
         configuration.addAnnotatedClass(Order.class);
         configuration.addAnnotatedClass(Restaurant.class);
+        configuration.addAnnotatedClass(TableNode.class);
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySettings(configuration.getProperties())
                 .build();
@@ -109,10 +110,10 @@ public class App
         one.setRestaurantName("Nazareth");
 
         // Create Order details
-        two.setDate(LocalDate.parse("2025-02-07"));
+        two.setDate(LocalDate.parse("2025-01-07"));
         two.setTotal_price(150);
         two.setRestaurantName("Nazareth");
-        three.setDate(LocalDate.parse("2025-02-10"));
+        three.setDate(LocalDate.parse("2025-01-10"));
         three.setTotal_price(150);
         three.setRestaurantName("Nazareth");
         four.setDate(LocalDate.parse("2025-01-17"));
@@ -201,56 +202,7 @@ public class App
 
     }
 
-    private static void generateRestaurants() throws Exception {
-        // Helper function to read image as byte[]
-        if (session == null || !session.isOpen()) { // hala added to Ensure session is opened before calling generateOrders().
-            SessionFactory sessionFactory = getSessionFactory();
-            session = sessionFactory.openSession();
-        }
-
-        session.beginTransaction();
-        try {
-            // Create restaurant instances
-            Restaurant nazareth = new Restaurant();
-            nazareth.setRestaurantName("Nazareth");
-            nazareth.setImagePath("nazareth.jpg");
-            nazareth.setPhoneNumber("123-456-7890");
-
-            Restaurant haifa = new Restaurant();
-            haifa.setRestaurantName("Haifa");
-            haifa.setImagePath("haifa.jpg");
-            haifa.setPhoneNumber("234-567-8901");
-
-            Restaurant telAviv = new Restaurant();
-            telAviv.setRestaurantName("Tel Aviv");
-            telAviv.setImagePath("telaviv.jpg");
-            telAviv.setPhoneNumber("345-678-9012");
-
-//            Restaurant jerusalem = new Restaurant();
-//            jerusalem.setRestaurantName("Jerusalem");
-//            jerusalem.setImagePath("jerusalem.jpg");
-//            jerusalem.setPhoneNumber("456-789-0123");
-
-            // Save restaurants to the database
-            session.save(nazareth);
-            session.save(haifa);
-            session.save(telAviv);
-//            session.save(jerusalem);
-
-            session.flush();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            // Rollback transaction in case of an error
-            if (session.getTransaction() != null) {
-                session.getTransaction().rollback();
-            }
-            e.printStackTrace();
-            throw new Exception("An error occurred while generating the user.", e);
-        }
-    }
-
-
-    private static SimpleServer server;
+	private static SimpleServer server;
     public static void main( String[] args ) throws IOException
     {
         try {
@@ -260,8 +212,7 @@ public class App
             printAllData();
             printAllUsers();
             generateOrders();
-            //generateRestaurants();
-            generateBasicUser();
+            //generateBasicUser();
         } catch (Exception exception) {
             System.err.println("An error occurred, changes have been rolled back.");
             exception.printStackTrace();

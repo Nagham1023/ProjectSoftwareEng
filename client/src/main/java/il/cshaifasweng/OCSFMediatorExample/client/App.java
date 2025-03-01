@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Customization;
 import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
+import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -27,6 +28,9 @@ import org.hibernate.service.ServiceRegistry;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.getUser;
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.isLog;
 
 /**
  * JavaFX App
@@ -84,7 +88,13 @@ public class App extends Application {
             if (SimpleClient.getClient() != null) {
                 client = SimpleClient.getClient();
                 if (client.isConnected()) {
-                            System.out.println("Closing Client");
+                    System.out.println("Closing Clientttt");
+                    if(isLog()) {
+                        System.out.println("Logging out");
+                        UserCheck us = getUser();
+                        us.setState(4);
+                        client.sendToServer(us);
+                    }
                     client.sendToServer("remove client");
                 }
                 SimpleClient.getClient().closeConnection();

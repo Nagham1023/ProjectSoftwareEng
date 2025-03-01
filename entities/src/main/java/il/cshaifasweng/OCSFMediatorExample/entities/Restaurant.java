@@ -44,8 +44,8 @@ public class Restaurant implements Serializable {
     private List<Complain> complains;
 
 
-    // @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    // private List<Order> orders;
+    //@OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    //private List<Order> orders;
 
     // Default constructor
     public Restaurant() {

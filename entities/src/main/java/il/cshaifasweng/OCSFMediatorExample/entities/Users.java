@@ -36,11 +36,18 @@ public class Users implements Serializable {
     @Column(nullable = false)
     private String role;
 
+    private boolean isSigned = false; //true if signed else false .
+
+
     // Getters and Setters
 
     public Long getId() {
         return id;
     }
+    public boolean getSigned() {
+        return isSigned;
+    }
+    public void setSigned(boolean signed) { isSigned = signed;}
 
     public void setId(Long id) {
         this.id = id;
