@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.client.events.WarningEvent;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.image.ImageView;
@@ -109,6 +110,16 @@ public class mainScreenController {
     @Subscribe  // Add this annotation
     public void handleEvent(WarningEvent event) {  // Replace with actual event type
         // Handle event here
+    }
+    @FXML
+    void goToReservation(ActionEvent event) {
+        Platform.runLater(() -> {
+            try {
+                App.setRoot("Reservation");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
 

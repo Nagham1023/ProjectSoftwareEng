@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReservationEvent implements Serializable {
+public class DifferentResrvation implements Serializable {
     private String restaurantName;
     private LocalDateTime reservationDateTime; // Single reservation time
     private int seats;
@@ -13,14 +13,14 @@ public class ReservationEvent implements Serializable {
     private List<LocalDateTime> availableTimeSlots; // New field for multiple time slots
 
     // Constructor for single reservation
-    public ReservationEvent(String restaurantName, LocalDateTime reservationDateTime, int seats, boolean isInside) {
+    public DifferentResrvation(String restaurantName, LocalDateTime reservationDateTime, int seats, boolean isInside) {
         this.restaurantName = restaurantName;
         this.reservationDateTime = reservationDateTime;
         this.seats = seats;
         this.isInside = isInside;
     }
     // Constructor for single reservation
-    public ReservationEvent(String restaurantName, int seats, boolean isInside) {
+    public DifferentResrvation(String restaurantName, int seats, boolean isInside) {
         this.restaurantName = restaurantName;
         this.reservationDateTime = null;
         this.seats = seats;
@@ -29,7 +29,7 @@ public class ReservationEvent implements Serializable {
     }
 
     // Constructor for multiple time slots
-    public ReservationEvent(String restaurantName, int seats, boolean isInside, List<LocalDateTime> availableTimeSlots) {
+    public DifferentResrvation(String restaurantName, int seats, boolean isInside, List<LocalDateTime> availableTimeSlots) {
         this.restaurantName = restaurantName;
         this.seats = seats;
         this.isInside = isInside;
