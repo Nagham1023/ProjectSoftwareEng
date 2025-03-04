@@ -102,11 +102,6 @@ public class LoginController {
         {
             Platform.runLater(() -> {
                 respondField.setText(response.getRespond());
-                    try {
-                        App.setRoot("worker_screen");
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
             });
         }
     }

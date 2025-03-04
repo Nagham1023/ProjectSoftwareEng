@@ -14,7 +14,7 @@ public class UserCheck implements Serializable {
     private String role;
 
     private String respond;
-    private int state; //1 if login, 0 if register , 2 if forget pass, 3 if username check
+    private int state; //1 if login, 0 if register , 2 if forget pass, 3 if username check,4 if logout
     public UserCheck() {}
     public UserCheck(String username, String password,int state) {
         this.username = username;

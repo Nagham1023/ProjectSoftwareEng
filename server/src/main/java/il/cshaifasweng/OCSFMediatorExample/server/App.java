@@ -82,7 +82,6 @@ public class App {
         }
     }
 
-    //for my developing
     private static void generateOrders() throws Exception {
         // Helper function to read image as byte[]
         if (session == null || !session.isOpen()) { // hala added to Ensure session is opened before calling generateOrders().
@@ -153,6 +152,7 @@ public class App {
 
 
     }
+
 
     private static void generateBasicUser() throws Exception {
         // Helper function to read image as byte[]
@@ -264,6 +264,7 @@ public class App {
             throw new Exception("An error occurred while generating restaurants.", e);
         }
     }
+
 
     private static SimpleServer server;
 

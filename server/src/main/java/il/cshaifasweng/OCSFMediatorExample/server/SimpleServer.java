@@ -274,9 +274,14 @@ public class SimpleServer extends AbstractServer {
             if (((UserCheck) msg).isState() == 1)//if login
             {
                 try {
+
                     if (checkUser(((UserCheck) msg).getUsername(), ((UserCheck) msg).getPassword())) {
-                        getUserInfo((UserCheck) msg); //to update it's info so we can save them.
-                        ((UserCheck) msg).setRespond("Valid");
+                        if(!checkAndUpdateUserSignInStatus(((UserCheck) msg).getUsername())) {
+                            getUserInfo((UserCheck) msg); //to update it's info so we can save them.
+                            //send to singin to the user
+                            ((UserCheck) msg).setRespond("Valid");
+                        }
+                        else ((UserCheck) msg).setRespond("Already Signed in");
                         client.sendToClient(msg);
                     } else {
                         ((UserCheck) msg).setRespond("Username or password incorrect");
@@ -316,6 +321,15 @@ public class SimpleServer extends AbstractServer {
                         ((UserCheck) msg).setRespond("Valid");
                         client.sendToClient(msg);
                     }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else if (((UserCheck) msg).isState() == 4)
+            {
+                try {
+                    //System.out.println("Logging out from the database");
+                    SignOut((UserCheck) msg);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -375,6 +389,7 @@ public class SimpleServer extends AbstractServer {
             }
 
         } else if (msg.toString().startsWith("add client")) {
+            System.out.println("Adding client");
             Subscribers.add(client);
             SubscribedClient connection = new SubscribedClient(client);
             SubscribersList.add(connection);
