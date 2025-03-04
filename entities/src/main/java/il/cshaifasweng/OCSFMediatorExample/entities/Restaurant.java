@@ -1,21 +1,17 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
-
 import javax.persistence.*;
-
 import java.io.Serializable;
-
+import java.time.LocalTime;
 import java.util.List;
 
 @Entity
 @Table(name = "restaurants")
-
 public class Restaurant implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
 
     private String restaurantName;
 
@@ -30,33 +26,33 @@ public class Restaurant implements Serializable {
     )
     private List<Meal> meals;
 
-    // Getters and Setters
-
-
     @Column(name = "image_path")
     private String imagePath;
 
     @Column(name = "phone_number")
     private String phoneNumber;
 
-
     @OneToMany(mappedBy = "restaurant")
     private List<Complain> complains;
 
+    @Column(name = "opening_time")
+    private LocalTime openingTime; // New attribute for opening time
 
-    // @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    // private List<Order> orders;
+    @Column(name = "closing_time")
+    private LocalTime closingTime; // New attribute for closing time
 
     // Default constructor
     public Restaurant() {
     }
 
     // Constructor with parameters
-    public Restaurant(int id, String restaurantName, String imagePath, String phoneNumber) {
+    public Restaurant(int id, String restaurantName, String imagePath, String phoneNumber, LocalTime openingTime, LocalTime closingTime) {
         this.id = id;
         this.restaurantName = restaurantName;
         this.imagePath = imagePath;
         this.phoneNumber = phoneNumber;
+        this.openingTime = openingTime;
+        this.closingTime = closingTime;
     }
 
     // Getters and setters
@@ -77,7 +73,6 @@ public class Restaurant implements Serializable {
         this.restaurantName = restaurantName;
     }
 
-
     public List<TableNode> getTables() {
         return tables;
     }
@@ -85,7 +80,6 @@ public class Restaurant implements Serializable {
     public void setTables(List<TableNode> tables) {
         this.tables = tables;
     }
-
 
     public String getImagePath() {
         return imagePath;
@@ -104,7 +98,6 @@ public class Restaurant implements Serializable {
     }
 
     public List<Meal> getMeals() {
-
         return meals;
     }
 
@@ -120,15 +113,31 @@ public class Restaurant implements Serializable {
         this.complains = complains;
     }
 
+    public LocalTime getOpeningTime() {
+        return openingTime;
+    }
+
+    public void setOpeningTime(LocalTime openingTime) {
+        this.openingTime = openingTime;
+    }
+
+    public LocalTime getClosingTime() {
+        return closingTime;
+    }
+
+    public void setClosingTime(LocalTime closingTime) {
+        this.closingTime = closingTime;
+    }
+
     @Override
     public String toString() {
-        return "Restaurant" +
-                "ID='" + getId() + '\'' +
-                ", RestaurantName='" + getRestaurantName() + '\'' +
-                ", IMG='" + getImagePath() + '\'' +
-                ", PhoneNumber='" + getPhoneNumber() + '\'' +
+        return "Restaurant{" +
+                "id=" + id +
+                ", restaurantName='" + restaurantName + '\'' +
+                ", imagePath='" + imagePath + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", openingTime=" + openingTime +
+                ", closingTime=" + closingTime +
                 '}';
     }
 }
-
-

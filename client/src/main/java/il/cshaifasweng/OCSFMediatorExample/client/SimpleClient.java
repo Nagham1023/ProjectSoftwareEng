@@ -7,6 +7,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
 
+import java.time.LocalTime;
 import java.util.List;
 
 public class SimpleClient extends AbstractClient {
@@ -49,9 +50,17 @@ public class SimpleClient extends AbstractClient {
 					System.out.println("Meal: " + meal.getName() + " - " + meal.getDescription());
 				}
 				EventBus.getDefault().post(msg);
+			}else if(list.get(0) instanceof ReservationEvent){
+				EventBus.getDefault().post(msg);
 			}
 		}
+		if(msg.getClass().equals(DifferentResrvation.class)){
+			EventBus.getDefault().post(msg);
+		}
 		if (msg.getClass().equals(mealEvent.class)) {
+			EventBus.getDefault().post(msg);
+		}
+		if (msg.getClass().equals(RestaurantList.class)) {
 			EventBus.getDefault().post(msg);
 		}
 		if (msg.getClass().equals(Warning.class)) {
@@ -73,6 +82,8 @@ public class SimpleClient extends AbstractClient {
 				} else {
 					System.err.println("Malformed report response from server.");
 				}
+			} else if (message.equals("Reservation confirmed successfully.")) {
+				EventBus.getDefault().post(msg);
 			} else {
 				System.out.println("Unhandled message: " + message);
 			}
@@ -84,6 +95,7 @@ public class SimpleClient extends AbstractClient {
             System.out.println("Received restaurant list: " + restaurantList.toString());
             EventBus.getDefault().post(restaurantList);
         }
+
 	}
 
 	public static SimpleClient getClient() {

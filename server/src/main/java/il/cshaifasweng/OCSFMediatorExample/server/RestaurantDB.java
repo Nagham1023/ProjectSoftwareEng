@@ -16,18 +16,18 @@ public class RestaurantDB {
 
     public RestaurantDB() {
         restaurants = new ArrayList<>();
-        initializeSampleRestaurants();
+        //initializeSampleRestaurants();
     }
 
     /*************/
     /**From here all the functions have to update and talk with the database*/
 
-    private void initializeSampleRestaurants() {
-        restaurants.add(new Restaurant(1, "Haifa", "images/restaurant.jpg", "04-9944871"));
-        restaurants.add(new Restaurant(2, "Nazareth", "images/restaurant.jpg", "04-9825625"));
-        restaurants.add(new Restaurant(3, "Old Aco", "images/restaurant.jpg", "04-9458712"));
-        restaurants.add(new Restaurant(4, "Tamra", "images/restaurant.jpg", "04-9944321"));
-    }
+//    private void initializeSampleRestaurants() {
+//        restaurants.add(new Restaurant(1, "Haifa", "images/restaurant.jpg", "04-9944871"));
+//        restaurants.add(new Restaurant(2, "Nazareth", "images/restaurant.jpg", "04-9825625"));
+//        restaurants.add(new Restaurant(3, "Old Aco", "images/restaurant.jpg", "04-9458712"));
+//        restaurants.add(new Restaurant(4, "Tamra", "images/restaurant.jpg", "04-9944321"));
+//    }
 
     public List<Restaurant> getAllRestaurants() {
         return new ArrayList<>(restaurants);  // Return a copy to avoid external modifications

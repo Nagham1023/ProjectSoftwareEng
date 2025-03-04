@@ -1,8 +1,13 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
+import org.hibernate.annotations.BatchSize;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "tables")
@@ -20,11 +25,11 @@ public class TableNode {
     private int capacity;
     private String status; // "reserved", "available", "occupied"
 
-    @ElementCollection
-    private List<LocalDateTime> reservationStartTimes;
+    @ElementCollection(fetch = FetchType.LAZY) // Changed to LAZY
+    private List<LocalDateTime> reservationStartTimes = new ArrayList<>();
 
-    @ElementCollection
-    private List<LocalDateTime> reservationEndTimes;
+    @ElementCollection(fetch = FetchType.LAZY) // Changed to LAZY
+    private List<LocalDateTime> reservationEndTimes = new ArrayList<>();
 
     @Transient
     private TableNode next; // This is not stored in the database
@@ -95,8 +100,6 @@ public class TableNode {
     public void setReservationEndTimes(List<LocalDateTime> reservationEndTimes) {
         this.reservationEndTimes = reservationEndTimes;
     }
-
-
 
     public TableNode getNext() {
         return next;
