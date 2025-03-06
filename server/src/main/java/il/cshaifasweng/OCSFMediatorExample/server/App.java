@@ -201,17 +201,16 @@ public class App {
     }
 
     private static void generateRestaurants() throws Exception {
-        if(getAllRestaurants() != null) {
+        if(getAllRestaurants() != null && !getAllRestaurants().isEmpty()) {
             System.out.println("there are restaurants in the database");
             return;
         }
-
+        else
+            System.out.println("no restaurants in the database");
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
 
-
-            // Step 4: Create new restaurant instances with opening and closing times
             LocalTime openingTime = LocalTime.of(10, 0); // 10:00 AM
             LocalTime closingTime = LocalTime.of(22, 0); // 10:00 PM
 
@@ -254,9 +253,6 @@ public class App {
             haifa.setMeals(haifaMeals);
 
 
-
-
-            // Step 5: Save restaurants to the database
             session.save(nazareth);
             session.save(haifa);
             session.save(telAviv);
