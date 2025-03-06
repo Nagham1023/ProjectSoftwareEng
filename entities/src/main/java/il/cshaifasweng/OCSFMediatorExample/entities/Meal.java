@@ -33,9 +33,8 @@ public class Meal implements Serializable {
     @Column(name = "image", columnDefinition = "MEDIUMBLOB") // Or LONGBLOB if needed
     private byte[] image;
 
-    //@ManyToOne
-    //@JoinColumn(name = "restaurant_id")
-    //private Restaurant restaurant;
+    @ManyToMany(mappedBy = "meals") // Inverse side of the relationship
+    private List<Restaurant> restaurants;
 
     @ManyToMany
     @JoinTable(
@@ -111,6 +110,13 @@ public class Meal implements Serializable {
 
     public void setImage(byte[] image) {
         this.image = image;
+    }
+    public List<Restaurant> getRestaurants() {
+        return restaurants;
+    }
+
+    public void setRestaurants(List<Restaurant> restaurants) {
+        this.restaurants = restaurants;
     }
 
 }

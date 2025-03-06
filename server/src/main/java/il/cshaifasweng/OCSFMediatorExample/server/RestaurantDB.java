@@ -1,6 +1,10 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
 import il.cshaifasweng.OCSFMediatorExample.entities.Restaurant;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,10 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
 
 
 public class RestaurantDB {
-    private List<Restaurant> restaurants;
+    private static List<Restaurant> restaurants;
+    private static Session session;
 
 
     public RestaurantDB() {
@@ -29,10 +35,49 @@ public class RestaurantDB {
 //        restaurants.add(new Restaurant(4, "Tamra", "images/restaurant.jpg", "04-9944321"));
 //    }
 
-    public List<Restaurant> getAllRestaurants() {
-        return new ArrayList<>(restaurants);  // Return a copy to avoid external modifications
-    }
+    public static List<Restaurant> getAllRestaurants() {
+        // Ensure the session is open
+        if (session == null || !session.isOpen()) {
+            try {
+                SessionFactory sessionFactory = getSessionFactory();
+                session = sessionFactory.openSession();
+            } catch (HibernateException e) {
+                System.err.println("Error initializing Hibernate session: " + e.getMessage());
+                return null;
+            }
+        }
 
+        List<Restaurant> result = new ArrayList<>();
+        try {
+            // Begin the transaction for querying
+            session.beginTransaction();
+
+            // Create a query to find all meals without any constraint
+            String queryString = "FROM Restaurant";  // No WHERE clause, fetch all meals
+            org.hibernate.query.Query<Restaurant> query = session.createQuery(queryString, Restaurant.class);
+
+            // Execute the query and get the result list
+            result = query.getResultList();
+            restaurants = result;
+
+            // Commit the transaction
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            // Rollback the transaction if something went wrong
+            if (session.getTransaction() != null && session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
+            }
+            System.err.println("Error executing the query: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            // Ensure session is closed after use
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+
+        return result;
+    }
     // Deletes a restaurant by its ID
     public void deleteRestaurant(int restaurantId) {
         boolean changed = restaurants.removeIf(restaurant -> restaurant.getId() == restaurantId);
