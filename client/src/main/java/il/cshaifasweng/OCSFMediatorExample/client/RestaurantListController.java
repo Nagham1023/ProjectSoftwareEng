@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import com.mysql.cj.xdevapi.Client;
 import il.cshaifasweng.OCSFMediatorExample.entities.Restaurant;
 import il.cshaifasweng.OCSFMediatorExample.entities.RestaurantList;
 import javafx.application.Platform;
@@ -20,16 +21,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-    public class RestaurantListController {
-        @FXML
-        private Button backButton;
+import static il.cshaifasweng.OCSFMediatorExample.client.menu_controller.branchName;
 
-        @FXML
-        private VBox restaurantListContainer;
+public class RestaurantListController {
+    @FXML
+    private VBox restaurantListContainer;
 
-        @FXML
-        private ScrollPane scrollPane;
+    @FXML
+    private Button backButton;
 
+    private HBox backButtonContainer; // To store the back button row
 
 
         // No-argument constructor for FXMLLoader
@@ -39,6 +40,7 @@ import java.util.List;
 
         @FXML
         public void initialize() {
+            backButtonContainer = (HBox) backButton.getParent();
             EventBus.getDefault().register(this);
             SimpleClient client = SimpleClient.getClient();
             try {
@@ -73,56 +75,77 @@ import java.util.List;
             }
         }
 
-        private void addRestaurantToUI(Restaurant restaurant) {
-            HBox restaurantRow = new HBox(15); // 15px spacing between elements
-            restaurantRow.setStyle("-fx-background-color: #fbebf4; -fx-border-color: #e0e0e0; -fx-border-width: 2; -fx-border-radius: 20; -fx-background-radius: 20; -fx-padding: 20; -fx-arc-width: 500;");
-            restaurantRow.setPrefWidth(Control.USE_COMPUTED_SIZE); // Use computed size for width
-            restaurantRow.setFillHeight(true);
-
-            // Ensure the image URL is valid or set a default
-            String image_path = restaurant.getImagePath();
-            if (image_path == null || image_path.isEmpty()) {
-                image_path = getClass().getResourceAsStream("/images/downarrow.png").toString(); // Specify a default image path
-            }
-
-            // Create an image view with error handling
-            ImageView imageView = new ImageView();
-            try (InputStream inputStream = getClass().getResourceAsStream("/images/" + image_path)) {
-                if (inputStream != null) {
-                    Image image = new Image(inputStream); // true to load in background
-                    imageView.setImage(image);
-                    imageView.setFitHeight(300);
-                    imageView.setFitWidth(300);
-                    imageView.setPreserveRatio(true);
-                } else {
-                    System.err.println("Image not found: " + "/images/" + image_path);
-                    imageView.setImage(new Image(getClass().getResourceAsStream("/images/downarrow.png")));
-                }
-            } catch (Exception e) {
-                System.err.println("Error loading image: " + e.getMessage());
-                imageView.setImage(new Image(getClass().getResourceAsStream("/images/downarrow.png")));
-            }
-
-            VBox detailsVBox = new VBox(5);
-            detailsVBox.setAlignment(Pos.CENTER_LEFT);
-
-            Label nameLabel = new Label(restaurant.getRestaurantName());
-            nameLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #832018;");
-            nameLabel.setOnMouseClicked(event -> nameLabel.setStyle("-fx-font-size: 25px; -fx-text-fill: #832018;"));
-            nameLabel.setOnMouseClicked(event -> nameLabel.setStyle("-fx-font-size: 25px; -fx-text-fill: #832018;"));
-            nameLabel.setWrapText(true);
-
-            Label phoneLabel = new Label("Phone: " + restaurant.getPhoneNumber());
-            phoneLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #832018;");
-
-            detailsVBox.getChildren().addAll(nameLabel, phoneLabel);
-            restaurantRow.getChildren().addAll(imageView, detailsVBox);
-            restaurantListContainer.getChildren().add(restaurantRow);
-
-            restaurantRow.setOnMouseClicked(event -> viewRestaurantMenu(restaurant));
+    private void addRestaurantToUI(Restaurant restaurant) {
+        // Ensure the back button remains at the top
+        if (!restaurantListContainer.getChildren().contains(backButtonContainer)) {
+            restaurantListContainer.getChildren().add(0, backButtonContainer);
         }
 
+        // Create a new HBox for the restaurant row
+        HBox restaurantRow = new HBox(15);
+        restaurantRow.setStyle("-fx-background-color: #fbebf4; -fx-border-color: #e0e0e0; -fx-border-width: 2; -fx-border-radius: 20; -fx-background-radius: 20; -fx-padding: 20;");
+        restaurantRow.setPrefWidth(Control.USE_COMPUTED_SIZE);
+        restaurantRow.setFillHeight(true);
+
+        // Load restaurant image
+        String image_path = restaurant.getImagePath();
+        if (image_path == null || image_path.isEmpty()) {
+            image_path = "downarrow.png"; // Default image
+        }
+
+        ImageView imageView = new ImageView();
+        try (InputStream inputStream = getClass().getResourceAsStream("/images/" + image_path)) {
+            if (inputStream != null) {
+                Image image = new Image(inputStream);
+                imageView.setImage(image);
+                imageView.setFitHeight(300);
+                imageView.setFitWidth(300);
+                imageView.setPreserveRatio(true);
+            } else {
+                System.err.println("Image not found: " + image_path);
+                imageView.setImage(new Image(getClass().getResourceAsStream("/images/downarrow.png")));
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading image: " + e.getMessage());
+            imageView.setImage(new Image(getClass().getResourceAsStream("/images/downarrow.png")));
+        }
+
+        // Create a VBox for restaurant details
+        VBox detailsVBox = new VBox(5);
+        detailsVBox.setAlignment(Pos.CENTER_LEFT);
+
+        // Add restaurant name
+        Label nameLabel = new Label(restaurant.getRestaurantName());
+        nameLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #832018;");
+        nameLabel.setWrapText(true);
+
+        // Add phone number
+        Label phoneLabel = new Label("Phone: " + restaurant.getPhoneNumber());
+        phoneLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #832018;");
+
+        // Add details to the VBox
+        detailsVBox.getChildren().addAll(nameLabel, phoneLabel);
+
+        // Add image and details to the restaurant row
+        restaurantRow.getChildren().addAll(imageView, detailsVBox);
+
+        // Add the restaurant row to the restaurantListContainer
+        restaurantListContainer.getChildren().add(restaurantRow);
+
+        // Set click event for the restaurant row
+        restaurantRow.setOnMouseClicked(event -> viewRestaurantMenu(restaurant));
+    }
+
     private void viewRestaurantMenu(Restaurant restaurant) {
+        SimpleClient client = SimpleClient.getClient();
+        try {
+            //client.sendToServer("menu"+restaurant.getRestaurantName());
+            branchName = restaurant.getRestaurantName();
+            App.setRoot("menu");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         System.out.println("Opening menu for " + restaurant.getRestaurantName());
     }
     @FXML

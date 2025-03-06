@@ -268,6 +268,18 @@ public class SimpleServer extends AbstractServer {
             }
 
         }
+        if (msg instanceof String && msgString.startsWith("menu")) {
+            String branch = msgString.substring(4);
+            System.out.println("getting a menu to " + branch);
+            try {
+                List<Meal> ml = getmealsb(branch);
+                MealsList sending = new MealsList(ml);
+                client.sendToClient(sending);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        }
 
         if (msg instanceof UserCheck) {
             System.out.println(((UserCheck) msg).getUsername());
@@ -466,7 +478,8 @@ public class SimpleServer extends AbstractServer {
             if (msg.toString().startsWith("Sort Reset")) {
                 try {
                     var meals = MealsDB.GetAllMeals();
-                    client.sendToClient(meals);
+                    MealsList ml = new MealsList(meals);
+                    client.sendToClient(ml);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

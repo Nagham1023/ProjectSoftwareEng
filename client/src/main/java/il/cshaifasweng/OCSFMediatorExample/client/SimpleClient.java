@@ -36,6 +36,9 @@ public class SimpleClient extends AbstractClient {
 			System.out.println("the message is an adding complaint");
 			EventBus.getDefault().post(msg);
 		}
+		if(msg instanceof MealsList) {
+			EventBus.getDefault().post(msg);
+		}
 		if (msg instanceof List<?>) { // Check if msg is a list
 			System.out.println("the message is a list");
 			List<?> list = (List<?>) msg;
