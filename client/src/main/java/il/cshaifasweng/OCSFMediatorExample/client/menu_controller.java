@@ -1,10 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import com.mysql.cj.xdevapi.Client;
-import il.cshaifasweng.OCSFMediatorExample.entities.Customization;
-import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
-import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.updatePrice;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -29,11 +26,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static il.cshaifasweng.OCSFMediatorExample.client.PrimaryController.meals;
 
 
 public class menu_controller {
 
+    List<mealEvent> meals;
+    public static String branchName;
     @FXML
     private VBox menuContainer; // Links to fx:id in FXML
     private Map<String, Label> mealPriceLabels = new HashMap<>();
@@ -50,6 +48,10 @@ public class menu_controller {
     private Button Search_combo_box;
     @FXML
     private Button Reset_Button;
+
+    @FXML
+    private Label textmenu;
+
     @FXML
     void Reset_Menu(ActionEvent event) throws IOException {
         SimpleClient.getClient().sendToServer("Sort Reset");
@@ -198,15 +200,47 @@ public class menu_controller {
         });
     }
 
+    @Subscribe
+    public void Getmeals(MealsList avMeals) {
+
+        Platform.runLater(() -> {
+            menuContainer.getChildren().removeIf(node -> {
+                return node instanceof HBox && node != menuContainer.getChildren().get(0);
+            });
+
+            // Add new meals to the menu
+            if (avMeals.getMeals() != null && !avMeals.getMeals().isEmpty()) {
+                for (Meal meal : avMeals.getMeals()) {
+                    onAddMealClicked(
+                            meal.getName(),
+                            meal.getDescription(),
+                            String.valueOf(meal.getPrice()),
+                            String.valueOf(meal.getId()),
+                            meal.getImage()
+                    );
+                }
+            } else {
+                System.out.println("No new meals to display.");
+            }
+        });
+    }
+
     @FXML
     public void initialize() throws Exception {
         EventBus.getDefault().register(this);
+        SimpleClient client = SimpleClient.getClient();
+        System.out.println("sending menu to "+branchName);
+        client.sendToServer("menu"+branchName);
+
         if(meals == null)
             System.out.println("No meals found");
         else
             for (mealEvent meal : meals) {
                 onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()),meal.getId(),meal.getImage());
             }
+
+
+        textmenu.setText("Menu of "+branchName);
 
         /******/
         // Set the arrow image
@@ -257,6 +291,6 @@ public class menu_controller {
     }
     @FXML
     void backToHome(ActionEvent event) throws IOException {
-            App.setRoot("primary");
+            App.setRoot("RestaurantList");
     }
 }

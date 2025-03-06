@@ -248,7 +248,7 @@ public class App {
                 telavivMeals.add(meal);
                 i++;
             }
-            telAviv.setMeals(telavivMeals);
+                telAviv.setMeals(telavivMeals);
             nazareth.setMeals(nazarethMeals);
             haifa.setMeals(haifaMeals);
 

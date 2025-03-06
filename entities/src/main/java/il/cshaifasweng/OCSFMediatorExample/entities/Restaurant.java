@@ -18,11 +18,11 @@ public class Restaurant implements Serializable {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TableNode> tables;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.EAGER) // Change to EAGER
     @JoinTable(
-            name = "restaurant_meals", // Name of the join table
-            joinColumns = @JoinColumn(name = "restaurant_id"), // Column for Restaurant
-            inverseJoinColumns = @JoinColumn(name = "meal_id") // Column for Meal
+            name = "restaurant_meals",
+            joinColumns = @JoinColumn(name = "restaurant_id"),
+            inverseJoinColumns = @JoinColumn(name = "meal_id")
     )
     private List<Meal> meals;
 

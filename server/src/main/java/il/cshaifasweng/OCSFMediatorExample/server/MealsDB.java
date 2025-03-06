@@ -1,13 +1,11 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Customization;
-import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
-import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.updatePrice;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.hibernate.*;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -333,6 +331,52 @@ public class MealsDB {
             result.add(event);
         }
         return result;
+    }
+    public static List<mealEvent> getmealEventbranched(List<Meal> meals) throws Exception {
+        List<mealEvent> result = new ArrayList<>();
+        for (Meal meal : meals) {
+            mealEvent event = new mealEvent(meal.getName(),meal.getDescription(),String.valueOf(meal.getPrice()), String.valueOf(meal.getId()),meal.getImage());
+            result.add(event);
+        }
+        return result;
+    }
+    public static List<Meal> getmealsb(String branchName) throws Exception {
+        List<Meal> meals = new ArrayList<>();
+
+        // Open a session if it's not already open
+        if (session == null || !session.isOpen()) {
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+        }
+
+        // Create a criteria query to find the restaurant by name
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<Restaurant> query = builder.createQuery(Restaurant.class);
+        Root<Restaurant> root = query.from(Restaurant.class);
+
+        query.select(root)
+                .where(
+                        builder.and(
+                                builder.equal(root.get("restaurantName"), branchName)
+                        )
+                );
+
+        // Execute the query and get the restaurant
+        Restaurant Branch = session.createQuery(query).uniqueResult();
+
+        // Initialize the meals collection before closing the session
+        if (Branch != null) {
+            Hibernate.initialize(Branch.getMeals()); // Force initialization
+            meals = Branch.getMeals();
+        }
+
+        // Close the session after the operation
+        if (session != null && session.isOpen()) {
+            session.close();
+        }
+
+
+        return meals;
     }
 
     public static List<Meal> GetAllMeals() {

@@ -3,6 +3,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -28,6 +29,8 @@ public class LoginController {
 
     @FXML
     private ImageView lockimg;
+    @FXML
+    private Button back;
 
 
     @FXML
@@ -51,6 +54,14 @@ public class LoginController {
         passimg.setImage(new Image(getClass().getResourceAsStream("/images/show_password.png")));
         passwordField2.setVisible(false);
 
+    }
+    @FXML
+    void backToHome() {
+        try {
+            App.setRoot("mainScreen");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     @FXML
     void passShowClick() {

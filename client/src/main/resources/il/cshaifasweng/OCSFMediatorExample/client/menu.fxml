@@ -23,7 +23,7 @@
                 <!-- Header with Back Arrow -->
                 <HBox spacing="10" style="-fx-alignment: center-left; -fx-padding: 10;">
                     <Button fx:id="backButton" onAction="#backToHome" style="-fx-font-size: 18px; -fx-text-fill: #4CAF50; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
-                    <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" text="Flavor Res - Menu" />
+                    <Label fx:id="textmenu" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" text="Flavor Res - Menu" />
                <Button fx:id="Search_combo_box" mnemonicParsing="false" onAction="#Sort_meals" text="Search By">
                   <font>
                      <Font name="Arial Bold Italic" size="14.0" />

@@ -12,11 +12,14 @@
    <children>
       <AnchorPane layoutX="0.0" prefHeight="600.0" prefWidth="500.0" style="-fx-background-color: #c59dea;">
          <children>
-                  <ImageView fx:id="imglogo" fitHeight="429.0" fitWidth="293.0" layoutX="108.0" layoutY="137.0" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="imglogo" fitHeight="429.0" fitWidth="293.0" layoutX="108.0" layoutY="137.0" pickOnBounds="true" preserveRatio="true" />
+            <!-- White Arrow Back Button -->
+            <Button fx:id="back" layoutX="14.0" layoutY="14.0" onAction="#backToHome" style="-fx-font-size: 24px; -fx-text-fill: white;                            -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
          </children>
       </AnchorPane>
       <AnchorPane layoutX="478.0" prefHeight="600.0" prefWidth="544.0" style="-fx-background-color: whitfbebf4e;">
          <children>
+
             <Label layoutX="193.0" layoutY="29.0" text="Welcome">
                <font>
                   <Font name="System Bold" size="40.0" />
