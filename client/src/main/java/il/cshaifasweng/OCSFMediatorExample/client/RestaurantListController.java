@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Restaurant;
 import il.cshaifasweng.OCSFMediatorExample.entities.RestaurantList;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Control;
@@ -16,6 +17,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
     public class RestaurantListController {
@@ -52,24 +54,25 @@ import java.util.List;
 //                restaurantListContainer.getChildren().clear();  // Clear existing content
                 List<Restaurant> restaurants = restaurantList.getRestaurantList();
 
-                System.out.println("Number of restaurants: " + restaurants.size());
+                //System.out.println("Number of restaurants: " + restaurants.size());
 
-                for (Restaurant restaurant : restaurants) {
-                    String restaurantDetails = "Restaurant" +
-                            " ID='" + restaurant.getId() + '\'' +
-                            ", RestaurantName='" + restaurant.getRestaurantName() + '\'' +
-                            ", IMG='" + restaurant.getImagePath() + '\'' +
-                            ", PhoneNumber='" + restaurant.getPhoneNumber() + '\'' +
-                            '}';
-                    System.out.println(restaurantDetails);
-                    addRestaurantToUI(restaurant);
-                }
+                Platform.runLater(() -> {
+                    restaurantListContainer.getChildren().clear();  // Clear existing content
+
+                    for (Restaurant restaurant : restaurants) {
+                        String restaurantDetails = "Restaurant" +
+                                " ID='" + restaurant.getId() + '\'' +
+                                ", RestaurantName='" + restaurant.getRestaurantName() + '\'' +
+                                ", IMG='" + restaurant.getImagePath() + '\'' +
+                                ", PhoneNumber='" + restaurant.getPhoneNumber() + '\'' +
+                                '}';
+                        //System.out.println(restaurantDetails);
+                        addRestaurantToUI(restaurant);
+                    }
+                });
             }
         }
 
-
-
-        @FXML
         private void addRestaurantToUI(Restaurant restaurant) {
             HBox restaurantRow = new HBox(15); // 15px spacing between elements
             restaurantRow.setStyle("-fx-background-color: #fbebf4; -fx-border-color: #e0e0e0; -fx-border-width: 2; -fx-border-radius: 20; -fx-background-radius: 20; -fx-padding: 20; -fx-arc-width: 500;");
@@ -79,21 +82,25 @@ import java.util.List;
             // Ensure the image URL is valid or set a default
             String image_path = restaurant.getImagePath();
             if (image_path == null || image_path.isEmpty()) {
-                image_path = "server/src/main/resources/images/restaurant.jpg"; // Specify a default image path
+                image_path = getClass().getResourceAsStream("/images/downarrow.png").toString(); // Specify a default image path
             }
 
             // Create an image view with error handling
             ImageView imageView = new ImageView();
-            try {
-                Image image = new Image(image_path, true); // true to load in background
-                imageView.setImage(image);
-                imageView.setFitHeight(100);
-                imageView.setFitWidth(100);
-                imageView.setPreserveRatio(true);
+            try (InputStream inputStream = getClass().getResourceAsStream("/images/" + image_path)) {
+                if (inputStream != null) {
+                    Image image = new Image(inputStream); // true to load in background
+                    imageView.setImage(image);
+                    imageView.setFitHeight(300);
+                    imageView.setFitWidth(300);
+                    imageView.setPreserveRatio(true);
+                } else {
+                    System.err.println("Image not found: " + "/images/" + image_path);
+                    imageView.setImage(new Image(getClass().getResourceAsStream("/images/downarrow.png")));
+                }
             } catch (Exception e) {
                 System.err.println("Error loading image: " + e.getMessage());
-                // Set a default image if the original fails to load
-                imageView.setImage(new Image("server/src/main/resources/images/restaurant.jpg"));
+                imageView.setImage(new Image(getClass().getResourceAsStream("/images/downarrow.png")));
             }
 
             VBox detailsVBox = new VBox(5);
@@ -114,27 +121,12 @@ import java.util.List;
 
             restaurantRow.setOnMouseClicked(event -> viewRestaurantMenu(restaurant));
         }
-    @FXML
-    private void viewRestaurantMenu(Restaurant restaurant) {   //to add when we doing the menu
-        // go to restaurant's menu
 
+    private void viewRestaurantMenu(Restaurant restaurant) {
         System.out.println("Opening menu for " + restaurant.getRestaurantName());
     }
-//        @FXML
-//        void backToHome(ActionEvent event) throws IOException {
-//            Platform.runLater(() -> {
-//                System.out.println("Back button pressed");
-//                try {
-//                    App.setRoot("mainScreen");
-//                } catch (IOException e) {
-//                    System.err.println("Failed to load the mainScreen.fxml");
-//                    e.printStackTrace();
-//                }
-//            });
-//        }
     @FXML
     void backToHome2() throws IOException {
-            System.out.println("Back to Home");
         App.setRoot("mainScreen");
     }
 }
