@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.getAllRestaurants;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.printAllUsers;
 
 public class App {
@@ -200,31 +201,15 @@ public class App {
     }
 
     private static void generateRestaurants() throws Exception {
+        if(getAllRestaurants() != null) {
+            System.out.println("there are restaurants in the database");
+            return;
+        }
+
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
-            // Step 1: Delete dependent rows in `tablenode_reservationendtimes` and `tablenode_reservationstarttimes`
-            Query<?> deleteReservationEndTimesQuery = session.createNativeQuery(
-                    "DELETE FROM tablenode_reservationendtimes"
-            );
-            int deletedReservationEndTimesCount = deleteReservationEndTimesQuery.executeUpdate();
-            System.out.println("Deleted " + deletedReservationEndTimesCount + " rows from tablenode_reservationendtimes.");
 
-            Query<?> deleteReservationStartTimesQuery = session.createNativeQuery(
-                    "DELETE FROM tablenode_reservationstarttimes"
-            );
-            int deletedReservationStartTimesCount = deleteReservationStartTimesQuery.executeUpdate();
-            System.out.println("Deleted " + deletedReservationStartTimesCount + " rows from tablenode_reservationstarttimes.");
-
-            // Step 2: Delete all existing tables
-            Query<?> deleteTablesQuery = session.createQuery("DELETE FROM TableNode");
-            int deletedTablesCount = deleteTablesQuery.executeUpdate();
-            System.out.println("Deleted " + deletedTablesCount + " existing tables.");
-
-            // Step 3: Delete all existing restaurants
-            Query<?> deleteRestaurantsQuery = session.createQuery("DELETE FROM Restaurant");
-            int deletedRestaurantsCount = deleteRestaurantsQuery.executeUpdate();
-            System.out.println("Deleted " + deletedRestaurantsCount + " existing restaurants.");
 
             // Step 4: Create new restaurant instances with opening and closing times
             LocalTime openingTime = LocalTime.of(10, 0); // 10:00 AM
@@ -250,6 +235,26 @@ public class App {
             telAviv.setPhoneNumber("345-678-9012");
             telAviv.setOpeningTime(openingTime);
             telAviv.setClosingTime(closingTime);
+
+            List<Meal> meals = getAllMeals();
+            int i = 0;
+            List<Meal> nazarethMeals = new ArrayList<>();
+            List<Meal> haifaMeals = new ArrayList<>();
+            List<Meal> telavivMeals = new ArrayList<>();
+            for (Meal meal : meals) {
+                if (i % 2 == 0)
+                    nazarethMeals.add(meal);
+                if(i% 3 ==0)
+                    haifaMeals.add(meal);
+                telavivMeals.add(meal);
+                i++;
+            }
+            telAviv.setMeals(telavivMeals);
+            nazareth.setMeals(nazarethMeals);
+            haifa.setMeals(haifaMeals);
+
+
+
 
             // Step 5: Save restaurants to the database
             session.save(nazareth);
@@ -277,6 +282,7 @@ public class App {
             printAllUsers();
             //generateOrders();
             generateRestaurants();
+
             initializeSampleTables();
             //generateBasicUser();
         } catch (Exception exception) {
