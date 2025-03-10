@@ -15,7 +15,7 @@
 <?import javafx.scene.paint.Stop?>
 <?import javafx.scene.text.Font?>
 
-<StackPane prefHeight="600" prefWidth="800" style="-fx-background-color: #f8f5f1;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.menu_controller">
+<StackPane fx:id="stackPane" prefHeight="600" prefWidth="800" style="-fx-background-color: #f8f5f1;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.menu_controller">
     <!-- Main Scrollable Content -->
     <ScrollPane fx:id="scrollPane" prefHeight="600" prefWidth="800">
         <content>
@@ -24,52 +24,52 @@
                 <HBox spacing="10" style="-fx-alignment: center-left; -fx-padding: 10;">
                     <Button fx:id="backButton" onAction="#backToHome" style="-fx-font-size: 18px; -fx-text-fill: #4CAF50; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
                     <Label fx:id="textmenu" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" text="Flavor Res - Menu" />
-               <Button fx:id="Search_combo_box" mnemonicParsing="false" onAction="#Sort_meals" text="Search By">
-                  <font>
-                     <Font name="Arial Bold Italic" size="14.0" />
-                  </font>
-                  <textFill>
-                     <LinearGradient endX="0.6161137440758294" endY="0.09478672985782" startY="0.5355450236966824">
-                        <stops>
-                           <Stop>
-                              <color>
-                                 <Color />
-                              </color>
-                           </Stop>
-                           <Stop offset="1.0">
-                              <color>
-                                 <Color red="0.08627451211214066" green="0.9490196108818054" blue="0.007843137718737125" />
-                              </color>
-                           </Stop>
-                        </stops>
-                     </LinearGradient>
-                  </textFill>
-               </Button>
-               <Button fx:id="Reset_Button" mnemonicParsing="false" onAction="#Reset_Menu" text="Reset">
-                  <font>
-                     <Font name="Arial Bold Italic" size="14.0" />
-                  </font>
-                  <effect>
-                     <ColorAdjust />
-                  </effect>
-                  <textFill>
-                     <LinearGradient endX="0.6161137440758294" endY="0.09478672985782" startY="0.5355450236966824">
-                        <stops>
-                           <Stop>
-                              <color>
-                                 <Color />
-                              </color>
-                           </Stop>
-                           <Stop offset="1.0">
-                              <color>
-                                 <Color red="0.08627451211214066" green="0.9490196108818054" blue="0.007843137718737125" />
-                              </color>
-                           </Stop>
-                        </stops>
-                     </LinearGradient>
-                  </textFill>
-               </Button>
-               <ImageView fx:id="loadingGif" fitHeight="106.0" fitWidth="131.0" pickOnBounds="true" preserveRatio="true" />
+                    <Button fx:id="Search_combo_box" mnemonicParsing="false" onAction="#showSearchOptionsDialog" text="Search By">
+                        <font>
+                            <Font name="Arial Bold Italic" size="14.0" />
+                        </font>
+                        <textFill>
+                            <LinearGradient endX="0.6161137440758294" endY="0.09478672985782" startY="0.5355450236966824">
+                                <stops>
+                                    <Stop>
+                                        <color>
+                                            <Color />
+                                        </color>
+                                    </Stop>
+                                    <Stop offset="1.0">
+                                        <color>
+                                            <Color red="0.08627451211214066" green="0.9490196108818054" blue="0.007843137718737125" />
+                                        </color>
+                                    </Stop>
+                                </stops>
+                            </LinearGradient>
+                        </textFill>
+                    </Button>
+                    <Button fx:id="Reset_Button" mnemonicParsing="false" onAction="#Reset_Menu" text="Reset">
+                        <font>
+                            <Font name="Arial Bold Italic" size="14.0" />
+                        </font>
+                        <effect>
+                            <ColorAdjust />
+                        </effect>
+                        <textFill>
+                            <LinearGradient endX="0.6161137440758294" endY="0.09478672985782" startY="0.5355450236966824">
+                                <stops>
+                                    <Stop>
+                                        <color>
+                                            <Color />
+                                        </color>
+                                    </Stop>
+                                    <Stop offset="1.0">
+                                        <color>
+                                            <Color red="0.08627451211214066" green="0.9490196108818054" blue="0.007843137718737125" />
+                                        </color>
+                                    </Stop>
+                                </stops>
+                            </LinearGradient>
+                        </textFill>
+                    </Button>
+                    <ImageView fx:id="loadingGif" fitHeight="106.0" fitWidth="131.0" pickOnBounds="true" preserveRatio="true" />
                 </HBox>
 
                 <!-- Content -->
@@ -80,7 +80,8 @@
 
     <!-- Floating Arrow -->
     <ImageView fx:id="scrollArrow" fitHeight="40.0" fitWidth="40.0" layoutX="500.0" layoutY="300.0" preserveRatio="true" style="-fx-alignment: center;" x="500.0">
-      <StackPane.margin>
-         <Insets top="400.0" />
-      </StackPane.margin></ImageView>
+        <StackPane.margin>
+            <Insets top="400.0" />
+        </StackPane.margin>
+    </ImageView>
 </StackPane>

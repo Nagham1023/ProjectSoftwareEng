@@ -60,6 +60,8 @@ public class App {
         configuration.addAnnotatedClass(Order.class);
         configuration.addAnnotatedClass(Restaurant.class);
         configuration.addAnnotatedClass(TableNode.class);
+        configuration.addAnnotatedClass(ReservationSave.class);
+
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySettings(configuration.getProperties())
                 .build();
@@ -248,7 +250,7 @@ public class App {
                 telavivMeals.add(meal);
                 i++;
             }
-                telAviv.setMeals(telavivMeals);
+            telAviv.setMeals(telavivMeals);
             nazareth.setMeals(nazarethMeals);
             haifa.setMeals(haifaMeals);
 
@@ -273,12 +275,12 @@ public class App {
         try {
             server = new SimpleServer(3000);
             server.listen();
+            deleteAllTablesAndRelatedData();
             generateData();
             printAllData();
             printAllUsers();
             //generateOrders();
             generateRestaurants();
-
             initializeSampleTables();
             //generateBasicUser();
         } catch (Exception exception) {
@@ -286,46 +288,68 @@ public class App {
             exception.printStackTrace();
         }
     }
-
-    private static void initializeSampleTables() {
-        List<Integer> capacities = Arrays.asList(2, 3, 4);
-        Random random = new Random();
-
+    public static void deleteAllTablesAndRelatedData() {
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction(); // Start the transaction
 
-            // Step 1: Delete dependent rows in `tablenode_reservationendtimes` and `tablenode_reservationstarttimes`
-            // Delete from `tablenode_reservationendtimes`
+            // Step 1: Delete dependent rows in `reservation_save_tables`
+            Query<?> deleteReservationSaveTablesQuery = session.createNativeQuery(
+                    "DELETE FROM reservation_save_tables WHERE table_id IN (SELECT tableID FROM tables)"
+            );
+            int deletedReservationSaveTablesCount = deleteReservationSaveTablesQuery.executeUpdate();
+            System.out.println("Deleted " + deletedReservationSaveTablesCount + " rows from reservation_save_tables.");
+
+            // Step 2: Delete dependent rows in `tablenode_reservationendtimes`
             Query<?> deleteEndTimesQuery = session.createNativeQuery(
                     "DELETE FROM tablenode_reservationendtimes WHERE TableNode_tableID IN (SELECT tableID FROM tables)"
             );
             int deletedEndTimesCount = deleteEndTimesQuery.executeUpdate();
             System.out.println("Deleted " + deletedEndTimesCount + " rows from tablenode_reservationendtimes.");
 
-            // Delete from `tablenode_reservationstarttimes`
+            // Step 3: Delete dependent rows in `tablenode_reservationstarttimes`
             Query<?> deleteStartTimesQuery = session.createNativeQuery(
                     "DELETE FROM tablenode_reservationstarttimes WHERE TableNode_tableID IN (SELECT tableID FROM tables)"
             );
             int deletedStartTimesCount = deleteStartTimesQuery.executeUpdate();
             System.out.println("Deleted " + deletedStartTimesCount + " rows from tablenode_reservationstarttimes.");
 
-            // Step 2: Delete all existing tables
+            // Step 4: Delete all existing tables
             Query<?> deleteTablesQuery = session.createQuery("DELETE FROM TableNode");
             int deletedTablesCount = deleteTablesQuery.executeUpdate();
             System.out.println("Deleted " + deletedTablesCount + " existing tables.");
 
-            // Step 3: Fetch all restaurants
+            session.getTransaction().commit(); // Commit the transaction
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Handle exceptions (e.g., rollback transaction if needed)
+        }
+    }    private static void initializeSampleTables() {
+        List<Integer> capacities = Arrays.asList(2, 3, 4);
+        Random random = new Random();
+
+        try (Session session = getSessionFactory().openSession()) {
+            session.beginTransaction(); // Start the transaction
+
+            // Check if tables already exist in the database
+            Query<Long> tableCountQuery = session.createQuery("SELECT COUNT(*) FROM TableNode", Long.class);
+            long tableCount = tableCountQuery.uniqueResult();
+
+            if (tableCount > 0) {
+                System.out.println("Tables already exist in the database. Skipping sample table generation.");
+                return; // Exit the method if tables exist
+            }
+
+            // Step 1: Fetch all restaurants
             Query<Restaurant> query = session.createQuery("FROM Restaurant", Restaurant.class);
             List<Restaurant> restaurants = query.getResultList();
             System.out.println("The restaurants that will have tables are: " + restaurants);
 
-            // Step 4: Create sample tables for each restaurant
+            // Step 2: Create sample tables for each restaurant
             for (Restaurant restaurant : restaurants) {
                 List<TableNode> tables = new ArrayList<>();
-                for (int i = 0; i < 15; i++) { // Add 4 tables for each restaurant
+                for (int i = 0; i < 15; i++) { // Add 15 tables for each restaurant
                     // Randomly choose capacity (2, 3, or 4)
                     int capacity = capacities.get(random.nextInt(capacities.size()));
-
 
                     TableNode table = new TableNode(restaurant, random.nextBoolean(), capacity, "available");
                     tables.add(table);
@@ -333,12 +357,12 @@ public class App {
                     session.save(table);
                 }
 
-
                 // Save the tables in the restaurant
                 restaurant.setTables(tables);
             }
 
             session.getTransaction().commit(); // Commit the transaction after saving tables
+            System.out.println("Sample tables generated successfully.");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -350,14 +374,16 @@ public class App {
         try (Session session = getSessionFactory().openSession()) { // Auto-closing session
             session.beginTransaction();
 
-            org.hibernate.query.Query<Restaurant> query = session.createQuery(
-                    queryString + " LEFT JOIN FETCH r.tables", Restaurant.class
-            );
-
-            // Bind the named parameter
-            query.setParameter("restaurantName", restaurantName);
+            org.hibernate.query.Query<Restaurant> query = session.createQuery(queryString, Restaurant.class);
+            query.setParameter("restaurantName", restaurantName); // Bind the named parameter
 
             result = query.getResultList();
+
+            // Initialize the tables collection for each restaurant
+            for (Restaurant restaurant : result) {
+                Hibernate.initialize(restaurant.getTables()); // Force initialization of the tables collection
+            }
+
             session.getTransaction().commit();
         } catch (Exception e) {
             System.err.println("Error executing the query: " + e.getMessage());
@@ -366,5 +392,42 @@ public class App {
 
         return result;
     }
-
+//    public static void relateMealsWithRestaurants() throws Exception {
+//        // Example data generation
+//        List<Meal> meals = getAllMeals();  // Assuming this method generates the list of meals
+//        List<Restaurant> restaurants = getAllRestaurants();  // Assuming this method generates the list of restaurants
+//
+//        Random random = new Random();
+//
+//        // Relate each restaurant to a random subset of meals
+//        for (Restaurant restaurant : restaurants) {
+//            // Select a random number of meals for this restaurant (let's say between 1 and all meals)
+//            int numMealsForRestaurant = random.nextInt(meals.size()) + 1;  // Random number between 1 and meals.size()
+//
+//            // Randomly select meals for this restaurant
+//            for (int i = 0; i < numMealsForRestaurant; i++) {
+//                // Randomly pick a meal from the list of meals
+//                Meal randomMeal = meals.get(random.nextInt(meals.size()));  // Get a random meal from the list
+//
+//                // Initialize the restaurants collection if it's lazily loaded
+//                Hibernate.initialize(randomMeal.getRestaurants());
+//
+//                // Check if this meal is already related to any restaurant
+//                if (randomMeal.getRestaurants() != null && !randomMeal.getRestaurants().isEmpty()) {
+//                    // Skip meal if it is already related to a restaurant
+//                    continue;
+//                }
+//
+//                // Add the meal to the restaurant's meals list, if not already added
+//                if (!restaurant.getMeals().contains(randomMeal)) {
+//                    restaurant.getMeals().add(randomMeal);
+//                }
+//
+//                // Add the restaurant to the meal's restaurants list, if not already added
+//                if (!randomMeal.getRestaurants().contains(restaurant)) {
+//                    randomMeal.getRestaurants().add(restaurant);
+//                }
+//            }
+//        }
+//    }
 }

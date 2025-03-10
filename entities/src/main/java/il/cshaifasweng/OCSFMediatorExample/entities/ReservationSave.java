@@ -1,24 +1,39 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
-import java.io.Serializable;
+import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
-public class FinalReservationEvent implements Serializable {
+@Entity
+@Table(name = "reservation_saves")
+public class ReservationSave {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private int reservationSaveID; // Unique ID for the reservation save
+
     private String restaurantName;
     private LocalDateTime reservationDateTime;
     private int seats;
-    private boolean isInside; // New attribute for inside/outside reservation
+    private boolean isInside;
 
-    private String fullName; // New field for user's full name
+    private String fullName;
+    private String phoneNumber;
+    private String email;
 
-    private String phoneNumber; // New field for user's phone number
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "reservation_save_tables", // Join table to map reservations to tables
+            joinColumns = @JoinColumn(name = "reservation_save_id"),
+            inverseJoinColumns = @JoinColumn(name = "table_id")
+    )
+    private List<TableNode> tables; // List of tables associated with this reservation
 
-    private String email; // New field for user's email
+    // Constructors
+    public ReservationSave() {}
 
-
-    // Constructor with all fields
-    public FinalReservationEvent(String restaurantName, LocalDateTime reservationDateTime, int seats, boolean isInside,
-                                 String fullName, String phoneNumber, String email) {
+    public ReservationSave(String restaurantName, LocalDateTime reservationDateTime, int seats, boolean isInside,
+                           String fullName, String phoneNumber, String email, List<TableNode> tables) {
         this.restaurantName = restaurantName;
         this.reservationDateTime = reservationDateTime;
         this.seats = seats;
@@ -26,9 +41,18 @@ public class FinalReservationEvent implements Serializable {
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.email = email;
+        this.tables = tables;
     }
 
     // Getters and Setters
+    public int getReservationSaveID() {
+        return reservationSaveID;
+    }
+
+    public void setReservationSaveID(int reservationSaveID) {
+        this.reservationSaveID = reservationSaveID;
+    }
+
     public String getRestaurantName() {
         return restaurantName;
     }
@@ -61,8 +85,8 @@ public class FinalReservationEvent implements Serializable {
         return isInside;
     }
 
-    public void setInside(boolean isInside) {
-        this.isInside = isInside;
+    public void setInside(boolean inside) {
+        isInside = inside;
     }
 
     public String getFullName() {
@@ -89,13 +113,26 @@ public class FinalReservationEvent implements Serializable {
         this.email = email;
     }
 
+    public List<TableNode> getTables() {
+        return tables;
+    }
+
+    public void setTables(List<TableNode> tables) {
+        this.tables = tables;
+    }
+
     @Override
     public String toString() {
-        return "ReservationEvent{" +
-                "restaurantName='" + restaurantName + '\'' +
+        return "ReservationSave{" +
+                "reservationSaveID=" + reservationSaveID +
+                ", restaurantName='" + restaurantName + '\'' +
                 ", reservationDateTime=" + reservationDateTime +
                 ", seats=" + seats +
                 ", isInside=" + isInside +
+                ", fullName='" + fullName + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", email='" + email + '\'' +
+                ", tables=" + tables +
                 '}';
     }
 }
