@@ -428,14 +428,16 @@ public class ReservationController {
 
                 // Display the result with emojis
                 String resultMessage = String.format(
-                        "Reservation Details:\n\n" +
-                                "Name: %s %s\n" +
-                                "Phone: %s %s\n" +
-                                "Email: %s %s\n" +
-                                "Output Availability: %s",
-                        fullName, isValid ? "✅" : "❌",
-                        phoneNumber, isValid ? "✅" : "❌",
-                        email, isEmailSent ? "✅" : "❌"
+                        """
+                                Reservation Details:
+                               \s
+                                Name: %s\s
+                                Phone: %s\s
+                                Email: %s\s
+                               \s""",
+                        fullName,
+                        phoneNumber,
+                        email
                 );
 
                 showAlert("Reservation Status", resultMessage);
