@@ -148,6 +148,9 @@ public class RestaurantListController {
 
         System.out.println("Opening menu for " + restaurant.getRestaurantName());
     }
+    public static String getBranchName(){
+            return branchName;
+    }
     @FXML
     void backToHome2() throws IOException {
         App.setRoot("mainScreen");

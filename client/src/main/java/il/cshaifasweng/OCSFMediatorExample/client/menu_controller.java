@@ -1,6 +1,5 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import com.mysql.cj.xdevapi.Client;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
@@ -8,30 +7,35 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.image.Image;
 import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import javafx.geometry.Insets;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
 
 public class menu_controller {
 
     List<mealEvent> meals;
     public static String branchName;
+
+    // Menu-related fields
     @FXML
     private VBox menuContainer; // Links to fx:id in FXML
     private Map<String, Label> mealPriceLabels = new HashMap<>();
@@ -45,6 +49,9 @@ public class menu_controller {
     private TranslateTransition arrowAnimation;
 
     @FXML
+    private StackPane stackPane; // Inject the AnchorPane from the FXML file
+
+    @FXML
     private Button Search_combo_box;
     @FXML
     private Button Reset_Button;
@@ -52,14 +59,104 @@ public class menu_controller {
     @FXML
     private Label textmenu;
 
+    // Search-related fields (moved from SearchByController)
+
+    @FXML
+    private Label Error_Label; // Label for error messages
+
+    private List<String> restaurantNames;
+    private List<String> customizationNames;
+
     @FXML
     void Reset_Menu(ActionEvent event) throws IOException {
-        SimpleClient.getClient().sendToServer("Sort Reset");
+        startLoading();
+        List<String> list = new ArrayList<>();
+        list.add(branchName);
+        SimpleClient.getClient().sendToServer(new SearchOptions(list,branchName));
     }
 
     @FXML
     void Sort_meals(ActionEvent event) {
-        openSearchByPage();
+        // Show the search options UI
+        createDynamicCheckBoxes(); // Populate the checkboxes
+    }
+
+    @FXML
+    void Apply_filter(ActionEvent event) throws IOException {
+        Platform.runLater(()->{
+            startLoading();
+        });
+        List<String> selectedRestaurants = new ArrayList<>(); // List for selected restaurants
+        List<String> selectedCustomizations = new ArrayList<>(); // List for selected customizations
+
+        // If no filters are selected, show an error message
+        if (selectedRestaurants.isEmpty() && selectedCustomizations.isEmpty()) {
+            showAlert("Error", "Please select at least one filter.");
+        } else {
+            // Display the selected filters
+            System.out.println("Selected Restaurants: " + selectedRestaurants);
+            System.out.println("Selected Customizations: " + selectedCustomizations);
+
+            // Create a new SearchOptions object with separate restaurant and customization filters
+            SearchOptions searchOptions = new SearchOptions(selectedRestaurants, selectedCustomizations, branchName);
+
+            // Send the SearchOptions object to the server
+            SimpleClient.getClient().sendToServer(searchOptions);
+
+        }
+    }
+
+    @Subscribe
+    public void putSearchOptions(SearchOptions options) {
+        // Handle the event sent from the server
+        restaurantNames = options.getRestaurantNames();
+        customizationNames = options.getCustomizationNames();
+        createDynamicCheckBoxes();
+        stopLoading();
+    }
+
+    private void createDynamicCheckBoxes() {
+        Platform.runLater(() -> {
+            startLoading();
+            if (restaurantNames != null && !restaurantNames.isEmpty()) {
+                for (String option : restaurantNames) {
+                    // Add a tag "restaurant" to each restaurant checkbox
+                    CheckBox checkBox = new CheckBox(option);
+                    checkBox.setUserData("restaurant");  // Mark checkbox as restaurant
+                }
+            } else {
+                showAlert("Error", "No restaurants available.");
+            }
+
+            if (customizationNames != null && !customizationNames.isEmpty()) {
+                for (String option : customizationNames) {
+                    // Add a tag "customization" to each customization checkbox
+                    CheckBox checkBox = new CheckBox(option);
+                    checkBox.setUserData("customization");  // Mark checkbox as customization
+                }
+            } else {
+                showAlert("Error", "No customizations available.");
+            }
+            stopLoading();
+        });
+
+
+    }
+
+    private void showAlert(String title, String message) {
+        startLoading();
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+        stopLoading();
+    }
+
+    @FXML
+    void backToHome(ActionEvent event) throws IOException {
+        stopLoading();
+        App.setRoot("RestaurantList");
     }
 
     public void onAddMealClicked(String mealName,String mealDescription,String mealPrice,String mealId,byte[] imageData) {
@@ -115,18 +212,6 @@ public class menu_controller {
         mealPriceLabels.put(mealId, priceLabel);
     }
 
-    private void openSearchByPage() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/Search_by.fxml"));
-            Stage stage = new Stage();
-            Scene scene = new Scene(loader.load());
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void openChangePricePage(String mealName, Label priceLabel,String Id){
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/update_menu.fxml"));
@@ -144,92 +229,14 @@ public class menu_controller {
         }
     }
 
-
-    @Subscribe
-    public void updateMealPrice(updatePrice updatePrice) {
-        //System.out.println("changing price now!");
-        String mealId = String.valueOf(updatePrice.getIdMeal());
-        String newPrice = String.valueOf(updatePrice.getNewPrice());
-        // Check if the mealId exists in the map
-        Label priceLabel = mealPriceLabels.get(mealId);
-        if (priceLabel != null) {
-            Platform.runLater(() -> {
-                priceLabel.setText(newPrice + "₪");
-            });
-        } else {
-            System.out.println("Meal with ID " + mealId + " not found.");
-        }
-    }
-
-    @Subscribe
-    public void addnewmeal(mealEvent meal) {
-        System.out.println("adding new meal for this client");
-        System.out.println("Meal's id is " + meal.getId());
-        Platform.runLater(() -> {
-            onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()), meal.getId(), meal.getImage());
-        });
-        System.out.println("added the new meal for this client");
-
-    }
-
-
-    @Subscribe
-    public void ShowNewMeals(List<Meal> avMeals) {
-
-        System.out.println("Refreshing menu content...");
-
-        Platform.runLater(() -> {
-            menuContainer.getChildren().removeIf(node -> {
-                return node instanceof HBox && node != menuContainer.getChildren().get(0);
-            });
-
-            // Add new meals to the menu
-            if (avMeals != null && !avMeals.isEmpty()) {
-                for (Meal meal : avMeals) {
-                    onAddMealClicked(
-                            meal.getName(),
-                            meal.getDescription(),
-                            String.valueOf(meal.getPrice()),
-                            String.valueOf(meal.getId()),
-                            meal.getImage()
-                    );
-                }
-            } else {
-                System.out.println("No new meals to display.");
-            }
-        });
-    }
-
-    @Subscribe
-    public void Getmeals(MealsList avMeals) {
-
-        Platform.runLater(() -> {
-            menuContainer.getChildren().removeIf(node -> {
-                return node instanceof HBox && node != menuContainer.getChildren().get(0);
-            });
-
-            // Add new meals to the menu
-            if (avMeals.getMeals() != null && !avMeals.getMeals().isEmpty()) {
-                for (Meal meal : avMeals.getMeals()) {
-                    onAddMealClicked(
-                            meal.getName(),
-                            meal.getDescription(),
-                            String.valueOf(meal.getPrice()),
-                            String.valueOf(meal.getId()),
-                            meal.getImage()
-                    );
-                }
-            } else {
-                System.out.println("No new meals to display.");
-            }
-        });
-    }
-
     @FXML
     public void initialize() throws Exception {
         EventBus.getDefault().register(this);
         SimpleClient client = SimpleClient.getClient();
         System.out.println("sending menu to "+branchName);
+        // Load the Loading.gif image
+        loadingGif.setImage(new Image(getClass().getResourceAsStream("/images/Loading.gif")));
+        startLoading();
         client.sendToServer("menu"+branchName);
 
         if(meals == null)
@@ -239,7 +246,11 @@ public class menu_controller {
                 onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()),meal.getId(),meal.getImage());
             }
 
-
+        try {
+            SimpleClient.getClient().sendToServer("Fetching SearchBy Options");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         textmenu.setText("Menu of "+branchName);
 
         /******/
@@ -259,9 +270,6 @@ public class menu_controller {
         arrowAnimation.setCycleCount(TranslateTransition.INDEFINITE);
         arrowAnimation.setAutoReverse(true);
         arrowAnimation.play();
-        // Load the Loading.gif image
-        loadingGif.setImage(new Image(getClass().getResourceAsStream("/images/Loading.gif")));
-        loadingGif.setVisible(true); // Initially show the loading GIF
 
         // Simulate loading delay (or replace this with actual loading logic)
         new Thread(() -> {
@@ -289,8 +297,159 @@ public class menu_controller {
 
         /*****/
     }
+
+    @Subscribe
+    public void Getmeals(MealsList avMeals) {
+
+        Platform.runLater(() -> {
+            menuContainer.getChildren().removeIf(node -> {
+                return node instanceof HBox && node != menuContainer.getChildren().get(0);
+            });
+
+            // Add new meals to the menu
+            if (avMeals.getMeals() != null && !avMeals.getMeals().isEmpty()) {
+                for (Meal meal : avMeals.getMeals()) {
+                    onAddMealClicked(
+                            meal.getName(),
+                            meal.getDescription(),
+                            String.valueOf(meal.getPrice()),
+                            String.valueOf(meal.getId()),
+                            meal.getImage()
+                    );
+                }
+            } else {
+                System.out.println("No new meals to display.");
+            }
+            stopLoading();
+        });
+    }
+
+    @Subscribe
+    public void addnewmeal(mealEvent meal) {
+        System.out.println("adding new meal for this client");
+        System.out.println("Meal's id is " + meal.getId());
+        Platform.runLater(() -> {
+            onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()), meal.getId(), meal.getImage());
+        });
+        System.out.println("added the new meal for this client");
+
+    }
+
+    @Subscribe
+    public void updateMealPrice(updatePrice updatePrice) {
+        //System.out.println("changing price now!");
+        String mealId = String.valueOf(updatePrice.getIdMeal());
+        String newPrice = String.valueOf(updatePrice.getNewPrice());
+        // Check if the mealId exists in the map
+        Label priceLabel = mealPriceLabels.get(mealId);
+        if (priceLabel != null) {
+            Platform.runLater(() -> {
+                priceLabel.setText(newPrice + "₪");
+            });
+        } else {
+            System.out.println("Meal with ID " + mealId + " not found.");
+        }
+    }
+
+
     @FXML
-    void backToHome(ActionEvent event) throws IOException {
-            App.setRoot("RestaurantList");
+    void showSearchOptionsDialog(ActionEvent event) {
+        startLoading();
+        // Create a new Dialog
+        Dialog<Void> dialog = new Dialog<>();
+        dialog.setTitle("Search Options");
+
+        // Set a minimum width for the dialog
+        dialog.getDialogPane().setMinWidth(400); // Adjust the width as needed
+
+        // Create a VBox to hold the search options
+        VBox dialogContent = new VBox(10);
+        dialogContent.setPadding(new Insets(20));
+
+        // Add checkboxes for restaurants
+        if (restaurantNames != null && !restaurantNames.isEmpty()) {
+            for (String option : restaurantNames) {
+                CheckBox checkBox = new CheckBox(option);
+                checkBox.setUserData("restaurant"); // Mark checkbox as restaurant
+                checkBox.setWrapText(true); // Allow text to wrap
+                dialogContent.getChildren().add(checkBox);
+            }
+        } else {
+            dialogContent.getChildren().add(new Label("No restaurants available."));
+        }
+
+        // Add checkboxes for customizations
+        if (customizationNames != null && !customizationNames.isEmpty()) {
+            for (String option : customizationNames) {
+                CheckBox checkBox = new CheckBox(option);
+                checkBox.setUserData("customization"); // Mark checkbox as customization
+                checkBox.setWrapText(true); // Allow text to wrap
+                dialogContent.getChildren().add(checkBox);
+            }
+        } else {
+            dialogContent.getChildren().add(new Label("No customizations available."));
+        }
+
+        // Add a ScrollPane to make the content scrollable
+        ScrollPane scrollPane = new ScrollPane(dialogContent);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setPrefHeight(200); // Set a fixed height for the scrollable area
+
+        // Add the ScrollPane to the Dialog
+        dialog.getDialogPane().setContent(scrollPane);
+
+        // Add an "Apply Filter" button
+        ButtonType applyFilterButtonType = new ButtonType("Apply Filter", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().add(applyFilterButtonType);
+
+        // Handle the "Apply Filter" button click
+        dialog.setResultConverter(buttonType -> {
+            if (buttonType == applyFilterButtonType) {
+                // Collect selected filters
+                List<String> selectedRestaurants = new ArrayList<>();
+                List<String> selectedCustomizations = new ArrayList<>();
+
+                for (javafx.scene.Node node : dialogContent.getChildren()) {
+                    if (node instanceof CheckBox) {
+                        CheckBox checkBox = (CheckBox) node;
+                        if (checkBox.isSelected()) {
+                            if ("restaurant".equals(checkBox.getUserData())) {
+                                selectedRestaurants.add(checkBox.getText());
+                            } else if ("customization".equals(checkBox.getUserData())) {
+                                selectedCustomizations.add(checkBox.getText());
+                            }
+                        }
+                    }
+                }
+
+                // Send the selected filters to the server
+                SearchOptions searchOptions = new SearchOptions(selectedRestaurants, selectedCustomizations, branchName);
+                try {
+                    SimpleClient.getClient().sendToServer(searchOptions);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        });
+
+        // Show the Dialog
+        dialog.showAndWait();
+        stopLoading();
+    }
+
+    private void startLoading() {
+        Platform.runLater(() -> {
+            loadingGif.setVisible(true);
+            stackPane.setDisable(true); // Disable all UI components
+        });
+    }
+
+    // Hide loading animation and enable UI
+    private void stopLoading() {
+        Platform.runLater(() -> {
+            loadingGif.setVisible(false);
+            stackPane.setDisable(false); // Enable all UI components
+        });
     }
 }
