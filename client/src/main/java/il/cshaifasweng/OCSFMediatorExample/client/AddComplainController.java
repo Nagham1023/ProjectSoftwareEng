@@ -100,6 +100,8 @@ public class AddComplainController {
     }
     @FXML
     void ComplainButton(ActionEvent event) {
+
+
         ComplainKind = "Complaint";
         FeedbackButton.setDisable(true);
         SuggestionButton.setDisable(true);
