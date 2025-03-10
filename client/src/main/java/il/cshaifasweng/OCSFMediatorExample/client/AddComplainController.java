@@ -4,27 +4,33 @@ import java.net.URL;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import il.cshaifasweng.OCSFMediatorExample.entities.Restaurant;
+import il.cshaifasweng.OCSFMediatorExample.entities.RestaurantList;
 import il.cshaifasweng.OCSFMediatorExample.entities.complainEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import static il.cshaifasweng.OCSFMediatorExample.client.AddMealController.imageToByteArray;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+
 
 public class AddComplainController {
-    String ComplainKind=null;
+    String ComplainKind = null;
     String name;
     String email;
     String tell;
     Date date;
     Time time;
-    Restaurant restaurant=null;
+    Restaurant restaurant_chosen = null;
+    String status = "do";
+
 
     @FXML
     private ResourceBundle resources;
@@ -42,8 +48,7 @@ public class AddComplainController {
     private Button SuggestionButton;
 
     @FXML
-    private ChoiceBox<?> branchesList;
-    // need to fill this list with the branches's names
+    private ComboBox<String> branchesList;
 
     @FXML
     private Button backButton;
@@ -69,59 +74,48 @@ public class AddComplainController {
     @FXML
     private TextField textFieldName;
 
+    private String nameValue = "";
+    private RestaurantList restaurantList;
+
 
     @FXML
-    void initialize() {
-        assert ComplainButton != null : "fx:id=\"ComplainButton\" was not injected: check your FXML file 'addcomplain.fxml'.";
-        assert FeedbackButton != null : "fx:id=\"FeedbackButton\" was not injected: check your FXML file 'addcomplain.fxml'.";
-        assert SuggestionButton != null : "fx:id=\"SuggestionButton\" was not injected: check your FXML file 'addcomplain.fxml'.";
-        assert backButton != null : "fx:id=\"backButton\" was not injected: check your FXML file 'addcomplain.fxml'.";
-        assert branchesList != null : "fx:id=\"branchesList\" was not injected: check your FXML file 'addcomplain.fxml'.";
-        fetchBranchesFromServer();
-        assert checkLabel != null : "fx:id=\"checkLabel\" was not injected: check your FXML file 'addcomplain.fxml'.";
-        assert datePicker != null : "fx:id=\"datePicker\" was not injected: check your FXML file 'addcomplain.fxml'.";
-        assert logoImage != null : "fx:id=\"logoImage\" was not injected: check your FXML file 'addcomplain.fxml'.";
-        assert sendButton != null : "fx:id=\"sendButton\" was not injected: check your FXML file 'addcomplain.fxml'.";
-        assert textAreaTellUs != null : "fx:id=\"textAreaTellUs\" was not injected: check your FXML file 'addcomplain.fxml'.";
-        assert textFieldEmail != null : "fx:id=\"textFieldEmail\" was not injected: check your FXML file 'addcomplain.fxml'.";
-        assert textFieldName != null : "fx:id=\"textFieldName\" was not injected: check your FXML file 'addcomplain.fxml'.";
-    }
-
-    // Fetch the restaurant branches from the server
-    private void fetchBranchesFromServer() {
+    public void initialize() {
+        EventBus.getDefault().register(this);
         SimpleClient client = SimpleClient.getClient();
         try {
-            // Send request to get all restaurants
             client.sendToServer("getAllRestaurants");
-            // Handle server response (you'll need to process it in `handleMessageFromServer`)
-        } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("here first");
+        } catch (Exception e) {
+            e.printStackTrace(); // In a real application, log this error or show an error message to the user
         }
     }
+
     @FXML
-    void ComplainButton(ActionEvent event) {
-
-
+    private void ComplainButton(ActionEvent event) throws IOException {
         ComplainKind = "Complaint";
-        FeedbackButton.setDisable(true);
-        SuggestionButton.setDisable(true);
+        ComplainButton.setStyle("-fx-background-color: #C76A58;");
+        FeedbackButton.setStyle("-fx-background-color: #832018;");
+        SuggestionButton.setStyle("-fx-background-color:  #832018;");
+
     }
     @FXML
-    void FeedbackButton(ActionEvent event) {
+    private void FeedbackButton(ActionEvent event) throws IOException {
         ComplainKind = "Feedback";
-        ComplainButton.setDisable(true);
-        SuggestionButton.setDisable(true);
+        ComplainButton.setStyle("-fx-background-color: #832018;");
+        FeedbackButton.setStyle("-fx-background-color: #C76A58;");
+        SuggestionButton.setStyle("-fx-background-color:  #832018;");
     }
     @FXML
-    void SuggestionButton(ActionEvent event) {
+    private void SuggestionButton(ActionEvent event) throws IOException {
         ComplainKind = "Suggestion";
-        ComplainButton.setDisable(true);
-        FeedbackButton.setDisable(true);
+        ComplainButton.setStyle("-fx-background-color: #832018;");
+        FeedbackButton.setStyle("-fx-background-color: #832018;");
+        SuggestionButton.setStyle("-fx-background-color:  #C76A58;");
     }
 
     @FXML
-    void sendButton(ActionEvent event) {
-        if(ComplainKind==null||textFieldName.getText()==null||textFieldEmail.getText()==null||textAreaTellUs.getText()==null||date==null||restaurant==null){
+    private void sendButton(ActionEvent event) throws IOException {
+        if(ComplainKind==null||textFieldName.getText()==null||textFieldEmail.getText()==null||textAreaTellUs.getText()==null||date==null||nameValue==null){
             checkLabel.setText("There is at least one field empty!");
         }
         else {
@@ -134,26 +128,45 @@ public class AddComplainController {
         }
     }
     @FXML
-    public void sendAndSaveComplain() throws IOException {
+    private void sendAndSaveComplain() throws IOException {
 
         LocalTime now = LocalTime.now(); // Get the current time
         time = Time.valueOf(now);        // Convert LocalTime to java.sql.Time
-
-        complainEvent complainEvent = new complainEvent(ComplainKind,textFieldName.getText(),textFieldEmail.getText(),textAreaTellUs.getText(),date,time,restaurant);
-
+        getRestaurantByName(restaurantList);
+        complainEvent complainEvent = new complainEvent(ComplainKind,textFieldName.getText(),textFieldEmail.getText(),textAreaTellUs.getText(),date,time,status,"", restaurant_chosen);
         SimpleClient client;
         client = SimpleClient.getClient();
         client.sendToServer(complainEvent);
     }
     @FXML
-    void backButton(ActionEvent event)throws IOException {
+    private void backButton(ActionEvent event)throws IOException {
         App.setRoot("mainScreen");
     }
+
+    @Subscribe
+    public void fillComboBox(RestaurantList restaurantList) {
+        branchesList.getItems().clear();
+        System.out.println("here");
+        List<Restaurant> restaurants = restaurantList.getRestaurantList();
+        List<String> branches_List = new ArrayList<>();
+        for (Restaurant restaurant : restaurants) {
+            branchesList.getItems().add(restaurant.getRestaurantName()); // Add each restaurant name
+        }
+    }
+
+    @Subscribe
+    public void getRestaurantByName(RestaurantList restaurantList) {
+
+        nameValue=branchesList.getValue();
+        List<Restaurant> restaurants = restaurantList.getRestaurantList();
+        for (Restaurant restaurant : restaurants) {
+            if (restaurant.getRestaurantName().equals(nameValue)) {
+                restaurant_chosen = restaurant;
+            }
+        }
+
+    }
+
+
+
 }
-
-
-
-
-
-
-

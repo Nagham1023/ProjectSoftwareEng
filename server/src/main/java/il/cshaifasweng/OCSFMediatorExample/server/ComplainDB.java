@@ -40,6 +40,8 @@ public class ComplainDB {
         String tell_complain = newComplain.getTell();
         Date date_complain = newComplain.getDate();
         Time time_complain = newComplain.getTime();
+        String status_complain = newComplain.getStatus();
+        String response_complaint = newComplain.getResponse();
         Restaurant restaurant_complain = newComplain.getRestaurant();
 
         try {
@@ -60,8 +62,11 @@ public class ComplainDB {
             newComp.setEmail(email_complain);
             newComp.setTell(tell_complain);
             newComp.setDate(date_complain);
-            newComplain.setTime(time_complain);
-            newComplain.setRestaurant(restaurant_complain);
+            newComp.setTime(time_complain);
+            newComp.setRestaurant(restaurant_complain);
+            newComp.setStatus(status_complain);
+            newComp.setResponse(response_complaint);
+
 
             // Save the complain to the database
             session.save(newComp);
