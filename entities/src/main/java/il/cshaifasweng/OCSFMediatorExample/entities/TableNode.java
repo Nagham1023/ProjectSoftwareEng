@@ -1,8 +1,10 @@
+
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,11 +13,12 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tables")
-public class TableNode {
+public class TableNode implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int tableID;
+
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)

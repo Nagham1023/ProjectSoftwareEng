@@ -75,26 +75,26 @@ public class SimpleServer extends AbstractServer {
                 // Iterate through all time slots from the current time to the closing time
                 List<LocalDateTime> availableTimeSlots = new ArrayList<>();
                 System.out.println("*********************************************");
-                System.out.println("the opening hour is: "+start);
-                System.out.println("the closing hour is: "+closingTime);
-                System.out.println("the start time is: "+ startTime);
+                System.out.println("the opening hour is: " + start);
+                System.out.println("the closing hour is: " + closingTime);
+                System.out.println("the start time is: " + startTime);
                 System.out.println("*********************************************");
 
 
                 while (startTime.toLocalTime().isBefore(closingTime)) {
 
-                        // Check if tables are available for this time slot
-                        System.out.println("*********************************************");
-                        System.out.println("checking this tims slot: "+ startTime);
-                        System.out.println("*********************************************");
-                        List<TableNode> tablesForSlot = getAvailableTables(reservation.getRestaurantName(), startTime, reservation.getSeats(), reservation.isInside());
+                    // Check if tables are available for this time slot
+                    System.out.println("*********************************************");
+                    System.out.println("checking this tims slot: " + startTime);
+                    System.out.println("*********************************************");
+                    List<TableNode> tablesForSlot = getAvailableTables(reservation.getRestaurantName(), startTime, reservation.getSeats(), reservation.isInside());
 
-                        if (!tablesForSlot.isEmpty()) {
-                            // If tables are available, add the time slot to the list
-                            availableTimeSlots.add(startTime);
-                        }else{
-                            System.out.println("there is no availale tables for this slot -"+startTime);
-                        }
+                    if (!tablesForSlot.isEmpty()) {
+                        // If tables are available, add the time slot to the list
+                        availableTimeSlots.add(startTime);
+                    } else {
+                        System.out.println("there is no availale tables for this slot -" + startTime);
+                    }
 
                     // Move to the next time slot (e.g., increment by 1 hour)
                     startTime = startTime.plusMinutes(30);
@@ -111,8 +111,7 @@ public class SimpleServer extends AbstractServer {
 
                     try {
                         // Create a new ReservationEvent with all available time slots
-                        DifferentResrvation available_Reservation_for_client = new DifferentResrvation(
-                                reservation.getRestaurantName(), // Use the restaurant name from the event
+                        DifferentResrvation available_Reservation_for_client = new DifferentResrvation(reservation.getRestaurantName(), // Use the restaurant name from the event
                                 reservation.getSeats(),         // Use the number of seats from the event
                                 reservation.isInside(),          // Use the inside/outside preference from the event
                                 availableTimeSlots         // Pass all available time slots
@@ -157,8 +156,7 @@ public class SimpleServer extends AbstractServer {
                     System.out.println("*********************************************");
 
                     // Define restaurant opening and closing times
-                    LocalTime closingTime = getRestaurantByName(event.getRestaurantName()).getClosingTime();// 10:00 PM
-
+                    LocalTime closingTime = getRestaurantByName(event.getRestaurantName()).getClosingTime(); // 10:00 PM
                     LocalTime start = getRestaurantByName(event.getRestaurantName()).getOpeningTime(); // e.g., 10:00 AM
                     LocalDate currentDate = event.getReservationDateTime().toLocalDate(); // Get the current date
                     LocalDateTime startTime = LocalDateTime.of(currentDate, start); // Combine date and time
@@ -166,9 +164,7 @@ public class SimpleServer extends AbstractServer {
                     // Iterate through all time slots from the current time to the closing time
                     List<LocalDateTime> availableTimeSlots = new ArrayList<>();
 
-
                     while (startTime.toLocalTime().isBefore(closingTime)) {
-
                         // Check if tables are available for this time slot
                         List<TableNode> tablesForSlot = getAvailableTables(event.getRestaurantName(), startTime, event.getSeats(), event.isInside());
 
@@ -192,8 +188,7 @@ public class SimpleServer extends AbstractServer {
 
                         try {
                             // Create a new ReservationEvent with all available time slots
-                            ReservationEvent available_Reservation_for_client = new ReservationEvent(
-                                    event.getRestaurantName(), // Use the restaurant name from the event
+                            ReservationEvent available_Reservation_for_client = new ReservationEvent(event.getRestaurantName(), // Use the restaurant name from the event
                                     event.getSeats(),         // Use the number of seats from the event
                                     event.isInside(),          // Use the inside/outside preference from the event
                                     availableTimeSlots         // Pass all available time slots
@@ -220,7 +215,6 @@ public class SimpleServer extends AbstractServer {
                             throw new RuntimeException(e);
                         }
                     }
-
                 } else {
                     System.out.println("*********************************************");
                     System.out.println("The available tables are: " + availableTables);
@@ -229,6 +223,14 @@ public class SimpleServer extends AbstractServer {
                     // Assign tables to the reservation
                     assignTablesToReservation(availableTables, event.getReservationDateTime(), event.isInside());
                     printAllTablesInRestaurant(event.getRestaurantName());
+
+                    // Create a new ReservationSave entity to save the reservation and tables
+                    ReservationSave reservationSave = new ReservationSave(event.getRestaurantName(), event.getReservationDateTime(), event.getSeats(), event.isInside(), event.getFullName(), event.getPhoneNumber(), event.getEmail(), availableTables);
+
+                    // Save the reservation to the database
+                    saveReservationToDatabase(reservationSave);
+
+                    printAllReservationSaves();
                     // Notify the client that the reservation was successful
                     System.out.println("Reservation confirmed successfully.");
                     client.sendToClient("Reservation confirmed successfully.");
@@ -288,12 +290,11 @@ public class SimpleServer extends AbstractServer {
                 try {
 
                     if (checkUser(((UserCheck) msg).getUsername(), ((UserCheck) msg).getPassword())) {
-                        if(!checkAndUpdateUserSignInStatus(((UserCheck) msg).getUsername())) {
+                        if (!checkAndUpdateUserSignInStatus(((UserCheck) msg).getUsername())) {
                             getUserInfo((UserCheck) msg); //to update it's info so we can save them.
                             //send to singin to the user
                             ((UserCheck) msg).setRespond("Valid");
-                        }
-                        else ((UserCheck) msg).setRespond("Already Signed in");
+                        } else ((UserCheck) msg).setRespond("Already Signed in");
                         client.sendToClient(msg);
                     } else {
                         ((UserCheck) msg).setRespond("Username or password incorrect");
@@ -336,9 +337,7 @@ public class SimpleServer extends AbstractServer {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            }
-            else if (((UserCheck) msg).isState() == 4)
-            {
+            } else if (((UserCheck) msg).isState() == 4) {
                 try {
                     //System.out.println("Logging out from the database");
                     SignOut((UserCheck) msg);
@@ -400,7 +399,8 @@ public class SimpleServer extends AbstractServer {
                 throw new RuntimeException(e);
             }
 
-        } else if (msg.toString().startsWith("add client")) {
+        }
+        else if (msg.toString().startsWith("add client")) {
             System.out.println("Adding client");
             Subscribers.add(client);
             SubscribedClient connection = new SubscribedClient(client);
@@ -416,7 +416,8 @@ public class SimpleServer extends AbstractServer {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        } else if (msg.toString().startsWith("remove client")) {
+        }
+        else if (msg.toString().startsWith("remove client")) {
             System.out.println("Deleting client");
             if (!Subscribers.isEmpty()) {
                 Iterator<ConnectionToClient> iterator = Subscribers.iterator();
@@ -436,57 +437,139 @@ public class SimpleServer extends AbstractServer {
                     }
                 }
             }
-        } else if (msg.toString().startsWith("Sort")) {
-            // Extract categories from the message
-            var categories = processFilters(msg.toString());
+        }
+        else if (msg instanceof SearchOptions) {
+            try{
+                System.out.println("*************************************");
+                // Extract categories from the message
+                SearchOptions options = (SearchOptions) msg;
+                var categories = options.getRestaurantNames();
 
-            // List to store all meals after filtering
-            List<Meal> allFilteredMeals = new ArrayList<>();
+                System.out.println("Received SearchOptions message");
+                System.out.println("Branch Name: " + options.getBranchName());
+                System.out.println("Restaurant Names: " + options.getRestaurantNames());
+                System.out.println("Customization Names: " + options.getCustomizationNames());
 
-            // Search by restaurant
-            for (String category : categories) {
-                if (isRestaurant(category)) {
-                    List<Meal> meals = getMealsByRestaurant(category);
-                    allFilteredMeals.addAll(meals);  // Add these meals to the list
-                }
-            }
+                // Retrieve current meals based on branch name
+                List<Meal> currentMeals = getRestaurantByName(options.getBranchName()).getMeals();
+                System.out.println("Current meals for branch " + options.getBranchName() + ": " + currentMeals.size());
 
-            // Search by ingredients
-            for (String category : categories) {
-                if (isIngredient(category)) {
+                // Handle reset option: Send all meals if no filters are applied
+                if (options.getCustomizationNames().isEmpty() && options.getRestaurantNames().isEmpty()) {
+                    System.out.println("No filters applied. Sending all meals.");
                     try {
-                        List<Meal> meals = getMealsByIngredient(category);
-                        allFilteredMeals.addAll(meals);  // Add these meals to the list
+                        client.sendToClient(currentMeals);
+                        return;
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        e.printStackTrace();
                     }
                 }
-            }
 
-            // If any meals were found, send them in a single message
-            if (!allFilteredMeals.isEmpty()) {
+                // List to store all meals after filtering
+                List<Meal> allFilteredMeals = new ArrayList<>();
+
+                // Search by restaurant
+                for (String category : categories) {
+                    System.out.println("Searching meals by restaurant: " + category);
+                    List<Meal> meals = getMealsByRestaurant(category);
+                    System.out.println("Meals found for restaurant " + category + ": " + meals.size());
+                    allFilteredMeals.addAll(meals);  // Add these meals to the list
+                }
+
+                categories = options.getCustomizationNames();
+
+                // Search by ingredients
+                for (String category : categories) {
+                    try {
+                        System.out.println("Searching meals by ingredient: " + category);
+                        List<Meal> meals = getMealsByIngredient(category);
+                        System.out.println("Meals found with ingredient " + category + ": " + meals.size());
+                        allFilteredMeals.addAll(meals);  // Add these meals to the list
+                    } catch (Exception e) {
+                        System.out.println("Error retrieving meals by ingredient: " + category);
+                        e.printStackTrace();
+                    }
+                }
+
+                // Combine the current meals with the filtered meals, but only keep those present in both lists
+                List<Meal> combinedMeals = new ArrayList<>();
+
+                System.out.println("Total meals in currentMeals: " + currentMeals.size());
+                System.out.println("Total meals in allFilteredMeals: " + allFilteredMeals.size());
+                // Use an iterator to safely remove elements while iterating
+                Iterator<Meal> iterator = allFilteredMeals.iterator();
+                while (iterator.hasNext()) {
+                    Meal meal = iterator.next();
+                    boolean flag = false;
+                    for(Meal ml : currentMeals){
+                        if(ml.getName().equals(meal.getName())){
+                            flag = true;
+                        }
+                    }
+                    if (!flag) {
+                        iterator.remove(); // Safely remove the meal from allFilteredMeals
+                    }
+                }
+
+                // Now, allFilteredMeals contains only meals that are also in currentMeals
+                combinedMeals = allFilteredMeals;
+                // Remove duplicates (based on name)
+                // Step 2: Remove duplicate meals (based on name) from combinedMeals
+                Set<String> uniqueMealNames = new HashSet<>();
+                for (int i = 0; i < combinedMeals.size(); i++) {
+                    Meal meal = combinedMeals.get(i);
+                    if (!uniqueMealNames.add(meal.getName())) {
+                        combinedMeals.remove(i); // Remove duplicate meal
+                        i--; // Adjust the index after removal
+                    }
+                }
+                System.out.println("Total meals in intersection (combinedMeals): " + combinedMeals.size());
+                MealsList totalMeals = new MealsList(combinedMeals);
+                // Send the combined meals list in a MealsList object to the client
                 try {
-                    client.sendToClient(allFilteredMeals);  // Send all filtered meals in one batch
+                    System.out.println("Sending " + totalMeals.getMeals().size() + " meals to client.");
+                    client.sendToClient(totalMeals);  // Send the combined meals list in one message
                 } catch (Exception e) {
+                    System.out.println("Error sending meals to client.");
                     e.printStackTrace();
                 }
-            } else {
-                System.out.println("No meals found for the given filters.");
-            }
-
-            // Handle reset case
-            if (msg.toString().startsWith("Sort Reset")) {
-                try {
-                    var meals = MealsDB.GetAllMeals();
-                    MealsList ml = new MealsList(meals);
-                    client.sendToClient(ml);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("Unknown search method.");
+                System.out.println("*************************************");
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
+        else if (msg.toString().equals("Fetching SearchBy Options")) {
+            try {
+                // Fetch all restaurants
+                List<Restaurant> restaurants = getAllRestaurants();
+                List<String> restaurantNames = new ArrayList<>();
+                for (Restaurant restaurant : restaurants) {
+                    restaurantNames.add(restaurant.getRestaurantName());
+                }
+
+                // Fetch all customizations
+                List<Customization> customizations = getAllCustomizations();
+                List<String> customizationNames = new ArrayList<>();
+                for (Customization customization : customizations) {
+                    customizationNames.add(customization.getName());
+                }
+
+                // Remove duplicates (if necessary)
+                restaurantNames = new ArrayList<>(new HashSet<>(restaurantNames));
+                customizationNames = new ArrayList<>(new HashSet<>(customizationNames));
+
+                // Create SearchOptions object with both restaurant and customization lists
+                SearchOptions response = new SearchOptions(restaurantNames, customizationNames);
+
+                // Send response back to client
+                client.sendToClient(response);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
         if (msg instanceof complainEvent) {
             //here we're adding new complain !!
             System.out.println("Received adding new complainEvent ");
@@ -508,9 +591,7 @@ public class SimpleServer extends AbstractServer {
             session.beginTransaction();
 
             // Create a query to fetch the restaurant by name
-            Query<Restaurant> query = session.createQuery(
-                    "FROM Restaurant WHERE restaurantName = :restaurantName", Restaurant.class
-            );
+            Query<Restaurant> query = session.createQuery("FROM Restaurant WHERE restaurantName = :restaurantName", Restaurant.class);
             query.setParameter("restaurantName", restaurantName);
 
             // Execute the query and get the result
@@ -532,10 +613,7 @@ public class SimpleServer extends AbstractServer {
             session.beginTransaction();
 
             // Fetch tables for the restaurant that match the inside/outside preference
-            Query<TableNode> query = session.createQuery(
-                    "SELECT t FROM TableNode t WHERE t.restaurant.restaurantName = :restaurantName AND t.isInside = :isInside",
-                    TableNode.class
-            );
+            Query<TableNode> query = session.createQuery("SELECT t FROM TableNode t WHERE t.restaurant.restaurantName = :restaurantName AND t.isInside = :isInside", TableNode.class);
             query.setParameter("restaurantName", restaurantName);
             query.setParameter("isInside", isInside);
             List<TableNode> tables = query.getResultList();
@@ -615,10 +693,7 @@ public class SimpleServer extends AbstractServer {
         int totalSeatsAllocated = 0;
         System.out.println("\nSelected Tables:");
         for (TableNode table : selectedTables) {
-            System.out.println("Table ID: " + table.getTableID() +
-                    ", Capacity: " + table.getCapacity() +
-                    ", Status: " + table.getStatus() +
-                    ", Available: " + isTableAvailable(table, reservationDateTime));
+            System.out.println("Table ID: " + table.getTableID() + ", Capacity: " + table.getCapacity() + ", Status: " + table.getStatus() + ", Available: " + isTableAvailable(table, reservationDateTime));
             totalSeatsAllocated += table.getCapacity();
         }
 
@@ -712,9 +787,7 @@ public class SimpleServer extends AbstractServer {
             System.out.println("Valid reservation time range: " + startTime + " to " + endTime);
 
             // Iterate over 15-minute time slots within the valid range
-            for (LocalTime currentTimeSlot = startTime;
-                 currentTimeSlot.isBefore(endTime) || currentTimeSlot.equals(endTime);
-                 currentTimeSlot = currentTimeSlot.plusMinutes(15)) {
+            for (LocalTime currentTimeSlot = startTime; currentTimeSlot.isBefore(endTime) || currentTimeSlot.equals(endTime); currentTimeSlot = currentTimeSlot.plusMinutes(15)) {
 
                 LocalTime nextTimeSlot = currentTimeSlot.plusMinutes(15);
                 boolean isAvailable = false;
@@ -842,46 +915,31 @@ public class SimpleServer extends AbstractServer {
     }
 
 
-    public static List<String> processFilters(String filters) {
-        List<String> categories = new ArrayList<>();
-
-        // Split the message by line breaks
-        String[] lines = filters.split("\n");
-
-        // Iterate through each line and process the filters
-        for (String line : lines) {
-            if (line.isEmpty() || line.equals("Sort by")) {
-                continue; // Skip empty lines or the "Sort by" line
-            }
-
-            // Add each valid filter line to the categories list
-            categories.add(line.trim());
-        }
-
-        return categories;
-    }
-
-    // Method to check if the category is a restaurant
-    public boolean isRestaurant(String category) {
-        // List of known restaurants
-        List<String> restaurants = List.of("Restaurant 1", "Restaurant 2", "Restaurant 3");
-        return restaurants.contains(category);
-    }
-
-    // Method to check if the category is an ingredient
-    public boolean isIngredient(String category) {
-        // List of known ingredients
-        List<String> ingredients = List.of("Lettuce", "Cheese", "Meat");
-        return ingredients.contains(category);
-    }
-
     // Method to get meals by restaurant
     private List<Meal> getMealsByRestaurant(String restaurantName) {
-        String query = "SELECT r FROM Restaurant r LEFT JOIN FETCH r.meals WHERE r.restaurant_Name = :restaurantName";
-        List<Restaurant> restaurant = App.Get_Restaurant(query, restaurantName);
-        return restaurant.get(0).getMeals();
-    }
+        // Fetch the restaurant with meals (avoid fetching tables in the same query)
+        String query = "SELECT r FROM Restaurant r " +
+                "LEFT JOIN FETCH r.meals " + // Fetch meals
+                "WHERE r.restaurantName = :restaurantName";
 
+        List<Restaurant> restaurants = App.Get_Restaurant(query, restaurantName);
+
+        if (restaurants.isEmpty()) {
+            System.out.println("No restaurant found with name: " + restaurantName);
+            return new ArrayList<>(); // Return an empty list if no restaurant is found
+        }
+
+        // Get the restaurant
+        Restaurant restaurant = restaurants.get(0);
+
+        // Initialize the tables collection lazily (if needed)
+        if (restaurant.getTables() != null) {
+            Hibernate.initialize(restaurant.getTables()); // Force initialization of the tables collection
+        }
+
+        // Return the meals
+        return restaurant.getMeals();
+    }
     // Method to get meals by ingredient
     private List<Meal> getMealsByIngredient(String ingredient) throws Exception {
         // Get all meals
@@ -926,10 +984,7 @@ public class SimpleServer extends AbstractServer {
             session.beginTransaction();
 
             // Fetch all tables for the specified restaurant
-            Query<TableNode> query = session.createQuery(
-                    "SELECT t FROM TableNode t WHERE t.restaurant.restaurantName = :restaurantName",
-                    TableNode.class
-            );
+            Query<TableNode> query = session.createQuery("SELECT t FROM TableNode t WHERE t.restaurant.restaurantName = :restaurantName", TableNode.class);
             query.setParameter("restaurantName", restaurantName);
             List<TableNode> tables = query.getResultList();
 
@@ -991,5 +1046,80 @@ public class SimpleServer extends AbstractServer {
         }
     }
 
+    public List<Customization> getAllCustomizations() {
+        try (Session session = App.getSessionFactory().openSession()) {
+            session.beginTransaction();
+
+            // Fetch all customizations from the database
+            Query<Customization> query = session.createQuery("FROM Customization", Customization.class);
+            List<Customization> customizations = query.getResultList();
+
+            session.getTransaction().commit();
+
+            // Return a copy of the list to avoid external modifications
+            return new ArrayList<>(customizations);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Return an empty list in case of an error
+            return new ArrayList<>();
+        }
+    }
+
+    private void saveReservationToDatabase(ReservationSave reservationSave) {
+        try (Session session = App.getSessionFactory().openSession()) {
+            // Begin a transaction
+            session.beginTransaction();
+
+            // Save the reservation
+            session.save(reservationSave);
+
+            // Commit the transaction
+            session.getTransaction().commit();
+            System.out.println("Reservation saved successfully with ID: " + reservationSave.getReservationSaveID());
+        } catch (Exception e) {
+
+            System.err.println("Failed to save reservation to the database:");
+            e.printStackTrace();
+            throw new RuntimeException("Failed to save reservation to the database.", e);
+        }
+    }
+
+    public void printAllReservationSaves() {
+        Session session = App.getSessionFactory().openSession();
+
+        try {
+            session.beginTransaction();
+
+            // Fetch all ReservationSave entities from the database
+            List<ReservationSave> reservationSaves = session.createQuery("FROM ReservationSave", ReservationSave.class).list();
+
+            // Print each ReservationSave entity
+            System.out.println("*********************************************");
+            System.out.println("All ReservationSave Entities in the Database:");
+            System.out.println("*********************************************");
+            for (ReservationSave reservationSave : reservationSaves) {
+                System.out.println("ReservationSave ID: " + reservationSave.getReservationSaveID());
+                System.out.println("Restaurant Name: " + reservationSave.getRestaurantName());
+                System.out.println("Reservation Date and Time: " + reservationSave.getReservationDateTime());
+                System.out.println("Number of Seats: " + reservationSave.getSeats());
+                System.out.println("Is Inside: " + reservationSave.isInside());
+                System.out.println("Full Name: " + reservationSave.getFullName());
+                System.out.println("Phone Number: " + reservationSave.getPhoneNumber());
+                System.out.println("Email: " + reservationSave.getEmail());
+
+                // Print associated tables
+                System.out.println("Associated Tables:");
+                for (TableNode table : reservationSave.getTables()) {
+                    System.out.println("  - Table ID: " + table.getTableID() + ", Capacity: " + table.getCapacity() + ", Status: " + table.getStatus());
+                }
+                System.out.println("---------------------------------------------");
+            }
+
+            session.getTransaction().commit();
+        } catch (Exception e) {
+
+            throw new RuntimeException("Failed to fetch and print ReservationSave entities.", e);
+        }
+    }
 
 }

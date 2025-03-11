@@ -33,7 +33,7 @@ public class Meal implements Serializable {
     @Column(name = "image", columnDefinition = "MEDIUMBLOB") // Or LONGBLOB if needed
     private byte[] image;
 
-    @ManyToMany(mappedBy = "meals") // Inverse side of the relationship
+    @ManyToMany(mappedBy = "meals",fetch = FetchType.EAGER) // Inverse side of the relationship
     private List<Restaurant> restaurants;
 
     @ManyToMany

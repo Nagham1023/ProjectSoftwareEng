@@ -7,11 +7,14 @@ import il.cshaifasweng.OCSFMediatorExample.entities.RestaurantList;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.util.Pair;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -20,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 public class ReservationController {
     @FXML
@@ -180,16 +184,11 @@ public class ReservationController {
                 // No available reservations at the requested time, show a message
                 showAlert("No Available Reservations", "There are no available reservations for the selected time.\nPlease check alternative time slots.");
             } else {
+                showAlert("No Available Reservations", "There are no available reservations for the selected time.\nHere are different available time slots");
                 double layoutY = 200.0; // Starting Y position for the buttons
 
                 List<LocalDateTime> availableTimeSlots = availableReservations.getAvailableTimeSlots(); // Now correctly using LocalDateTime
 
-                // Inform the user that the requested time isn't available, but suggest alternatives
-                Label suggestionLabel = new Label("Alternative time slots available for " + availableReservations.getRestaurantName() + ":");
-                suggestionLabel.setLayoutX(50.0);
-                suggestionLabel.setLayoutY(layoutY);
-                anchorPane.getChildren().add(suggestionLabel);
-                layoutY += 25.0; // Move Y position down for buttons
 
                 for (LocalDateTime timeSlot : availableTimeSlots) {
                     // Create a button for each available time slot
@@ -290,26 +289,33 @@ public class ReservationController {
     }
 
     private void clearAllFields() {
-        // Reset the date picker
-        datePicker.setValue(null);
+        Platform.runLater(()->{
+            // Reset the date picker
+            datePicker.setValue(null);
 
-        // Reset the hour and minute combo boxes
-        hourComboBox.getSelectionModel().clearSelection();
-        minuteComboBox.getSelectionModel().clearSelection();
+            // Reset the hour and minute combo boxes
+            hourComboBox.getSelectionModel().clearSelection();
+            minuteComboBox.getSelectionModel().clearSelection();
 
-        hourComboBox.setAccessibleText("Hour");
-        minuteComboBox.setAccessibleText("Minute");
-        // Clear the seats text field
-        seatsTextField.clear();
-        seatsTextField.setAccessibleText("Seats");
-        // Reset the inside/outside combo box
-        insideOutsideComboBox.getSelectionModel().clearSelection();
-        insideOutsideComboBox.setAccessibleText("Inside");
-        // Clear the restaurant combo box
-        restaurantsComboBox.getSelectionModel().clearSelection();
-        restaurantsComboBox.setAccessibleText("Pick a Restaurant");
-        // Clear any additional UI elements (e.g., buttons, labels, etc.)
-        anchorPane.getChildren().removeIf(node -> node.getId() != null && node.getId().equals("reservationButton"));
+            // Set placeholder text for combo boxes
+            hourComboBox.setPromptText("Hour");
+            minuteComboBox.setPromptText("Minute");
+
+            // Clear the seats text field and set placeholder text
+            seatsTextField.clear();
+            seatsTextField.setPromptText("Seats");
+
+            // Reset the inside/outside combo box
+            insideOutsideComboBox.getSelectionModel().clearSelection();
+            insideOutsideComboBox.setPromptText("Inside");
+
+            // Clear the restaurant combo box
+            restaurantsComboBox.getSelectionModel().clearSelection();
+            restaurantsComboBox.setPromptText("Pick a Restaurant");
+
+            // Clear any additional UI elements (e.g., buttons, labels, etc.)
+            anchorPane.getChildren().removeIf(node -> node.getId() != null && node.getId().equals("reservationButton"));
+        });
     }
 
     private void showAlert(String title, String message) {
@@ -320,35 +326,168 @@ public class ReservationController {
         alert.showAndWait();
     }
 
-    // Method to handle button clicks for available times
     private void handleTimeButtonClick(String buttonText) throws IOException {
-        // Extract information from the button's text
-        String[] parts = buttonText.split(", "); // Split the button text by ", "
-        String datePart = parts[0].replace("Date: ", ""); // Extract date
-        String timePart = parts[1].replace("Time: ", ""); // Extract time
-        String restaurantPart = parts[2].replace("Restaurant: ", ""); // Extract restaurant name
-        String seatsPart = parts[3].replace("Seats: ", ""); // Extract seats
-        String insideOutsidePart = parts[4]; // Extract inside/outside
+        boolean reservationSuccessful = false;
 
-        // Parse the extracted information
-        LocalDate selectedDate = LocalDate.parse(datePart); // Parse date
-        LocalTime selectedTime = LocalTime.parse(timePart); // Parse time
-        String restaurantName = restaurantPart; // Restaurant name
-        int seats = Integer.parseInt(seatsPart); // Parse seats
-        boolean isInside = insideOutsidePart.equals("Inside"); // Check if inside
+        while (!reservationSuccessful) {
+            // Extract information from the button's text
+            String[] parts = buttonText.split(", "); // Split the button text by ", "
+            String datePart = parts[0].replace("Date: ", ""); // Extract date
+            String timePart = parts[1].replace("Time: ", ""); // Extract time
+            String restaurantPart = parts[2].replace("Restaurant: ", ""); // Extract restaurant name
+            String seatsPart = parts[3].replace("Seats: ", ""); // Extract seats
+            String insideOutsidePart = parts[4]; // Extract inside/outside
 
-        // Update the UI with the selected time
-        hourComboBox.getSelectionModel().select(selectedTime.getHour());
-        minuteComboBox.getSelectionModel().select(selectedTime.getMinute());
+            // Parse the extracted information
+            LocalDate selectedDate = LocalDate.parse(datePart); // Parse date
+            LocalTime selectedTime = LocalTime.parse(timePart); // Parse time
+            String restaurantName = restaurantPart; // Restaurant name
+            int seats = Integer.parseInt(seatsPart); // Parse seats
+            boolean isInside = insideOutsidePart.equals("Inside"); // Check if inside
 
-        // Create the final reservation date and time
-        LocalDateTime selectedDateTime = LocalDateTime.of(selectedDate, selectedTime);
+            // Create the final reservation date and time
+            LocalDateTime selectedDateTime = LocalDateTime.of(selectedDate, selectedTime);
 
-        // Create FinalReservationEvent with isInside
-        FinalReservationEvent finalReservationEvent = new FinalReservationEvent(restaurantName, selectedDateTime, seats, isInside);
-        SimpleClient.getClient().sendToServer(finalReservationEvent);
-        startLoading();
+            // Show a dialog for user details
+            Dialog<Pair<String, String>> dialog = new Dialog<>();
+            dialog.setTitle("User Details");
+            dialog.setHeaderText("Please enter your details to confirm the reservation.");
+
+            // Set the button types (OK and Cancel)
+            ButtonType confirmButtonType = new ButtonType("Confirm", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(confirmButtonType, ButtonType.CANCEL);
+
+            // Create the input fields
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+
+            TextField fullNameField = new TextField();
+            fullNameField.setPromptText("Full Name");
+            TextField phoneNumberField = new TextField();
+            phoneNumberField.setPromptText("Phone Number");
+            TextField emailField = new TextField();
+            emailField.setPromptText("Email");
+
+            grid.add(new Label("Full Name:"), 0, 0);
+            grid.add(fullNameField, 1, 0);
+            grid.add(new Label("Phone Number:"), 0, 1);
+            grid.add(phoneNumberField, 1, 1);
+            grid.add(new Label("Email:"), 0, 2);
+            grid.add(emailField, 1, 2);
+
+            dialog.getDialogPane().setContent(grid);
+
+            // Enable the Confirm button only when all fields are filled
+            Node confirmButton = dialog.getDialogPane().lookupButton(confirmButtonType);
+            confirmButton.setDisable(true);
+
+            // Add listeners to enable the Confirm button when all fields are filled
+            fullNameField.textProperty().addListener((observable, oldValue, newValue) -> {
+                confirmButton.setDisable(newValue.trim().isEmpty() || phoneNumberField.getText().trim().isEmpty() || emailField.getText().trim().isEmpty());
+            });
+            phoneNumberField.textProperty().addListener((observable, oldValue, newValue) -> {
+                confirmButton.setDisable(newValue.trim().isEmpty() || fullNameField.getText().trim().isEmpty() || emailField.getText().trim().isEmpty());
+            });
+            emailField.textProperty().addListener((observable, oldValue, newValue) -> {
+                confirmButton.setDisable(newValue.trim().isEmpty() || fullNameField.getText().trim().isEmpty() || phoneNumberField.getText().trim().isEmpty());
+            });
+
+            // Convert the result to a Pair when the Confirm button is clicked
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == confirmButtonType) {
+                    return new Pair<>(fullNameField.getText(), phoneNumberField.getText() + "|" + emailField.getText());
+                }
+                return null;
+            });
+
+            // Show the dialog and process the result
+            Optional<Pair<String, String>> result = dialog.showAndWait();
+
+            if (result.isPresent()) {
+                String fullName = result.get().getKey();
+                String[] contactDetails = result.get().getValue().split("\\|");
+                String phoneNumber = contactDetails[0];
+                String email = contactDetails[1];
+
+                // Validate user inputs
+                boolean isValid = validateUserInputs(fullName, phoneNumber, email);
+
+                if (!isValid) {
+                    showAlert("Invalid Input", "Please check your name, phone number, and email.");
+                    continue; // Retry the reservation process
+                }
+
+                // Send verification email
+                boolean isEmailSent = sendVerificationEmail(email);
+
+                if (!isEmailSent) {
+                    showAlert("Email Error", "Failed to send verification email. Please try again.");
+                    continue; // Retry the reservation process
+                }
+
+                // Display the result with emojis
+                String resultMessage = String.format(
+                        """
+                                Reservation Details:
+                               \s
+                                Name: %s\s
+                                Phone: %s\s
+                                Email: %s\s
+                               \s""",
+                        fullName,
+                        phoneNumber,
+                        email
+                );
+
+                showAlert("Reservation Status", resultMessage);
+
+                // Create FinalReservationEvent with user details
+                FinalReservationEvent finalReservationEvent = new FinalReservationEvent(
+                        restaurantName, selectedDateTime, seats, isInside, fullName, phoneNumber, email
+                );
+
+                // Send the reservation to the server
+                try {
+                    SimpleClient.getClient().sendToServer(finalReservationEvent);
+                    reservationSuccessful = true; // Mark reservation as successful
+                } catch (IOException e) {
+                    showAlert("Error", "Failed to send reservation to the server. Please try again.");
+                    e.printStackTrace();
+                }
+            } else {
+                // User clicked Cancel, exit the loop
+                break;
+            }
+        }
     }
+    // Helper method to validate user inputs
+    private boolean validateUserInputs(String fullName, String phoneNumber, String email) {
+        // Validate full name (non-empty and contains only letters and spaces)
+        if (fullName == null || fullName.trim().isEmpty() || !fullName.matches("[a-zA-Z\\s]+")) {
+            return false;
+        }
+
+        // Validate phone number (10 digits)
+        if (phoneNumber == null || phoneNumber.trim().isEmpty() || !phoneNumber.matches("\\d{10}")) {
+            return false;
+        }
+
+        // Validate email (basic format check)
+        if (email == null || email.trim().isEmpty() || !email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+            return false;
+        }
+
+        return true;
+    }
+
+    // Helper method to send a verification email
+    private boolean sendVerificationEmail(String email) {
+        // Simulate sending an email (replace with actual email sending logic)
+        System.out.println("Sending verification email to: " + email);
+        return true; // Assume email is sent successfully
+    }
+
 
     @FXML
     void backToHome(ActionEvent event) throws IOException {

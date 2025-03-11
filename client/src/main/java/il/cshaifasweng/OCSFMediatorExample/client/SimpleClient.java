@@ -69,6 +69,9 @@ public class SimpleClient extends AbstractClient {
 		if (msg.getClass().equals(Warning.class)) {
 			EventBus.getDefault().post(new WarningEvent((Warning) msg));
 		}
+		if(msg instanceof SearchOptions){
+			EventBus.getDefault().post(msg);
+		}
 		// Check if the message starts with "ReportResponse"
 		if(msg instanceof String) {
 			String message = (String) msg;
