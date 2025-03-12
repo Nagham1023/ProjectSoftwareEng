@@ -31,6 +31,8 @@ public class Complain implements Serializable {
     private Date date_complain;
     private Time time_complain;
     private String status_complaint;
+    private String response_complaint;
+
 
     @ManyToOne
     @JoinColumn(name = "restaurant_id")
@@ -40,7 +42,6 @@ public class Complain implements Serializable {
     public int getId() {
         return id;
     }
-
     public void setId(int id) {
         this.id = id;
     }
@@ -48,7 +49,6 @@ public class Complain implements Serializable {
     public String getName() {
         return name_complain;
     }
-
     public void setName(String name) {
         this.name_complain = name;
     }
@@ -56,7 +56,6 @@ public class Complain implements Serializable {
     public String getKind() {
         return kind_complain;
     }
-
     public void setKind(String kind) {
         this.kind_complain = kind;
     }
@@ -64,7 +63,6 @@ public class Complain implements Serializable {
     public String getEmail() {
         return email_complain;
     }
-
     public void setEmail(String email) {
         this.email_complain = email;
     }
@@ -72,7 +70,6 @@ public class Complain implements Serializable {
     public String getTell() {
         return tell_complain;
     }
-
     public void setTell(String tell) {
         this.tell_complain = tell;
     }
@@ -80,12 +77,18 @@ public class Complain implements Serializable {
     public Date getDate() {
         return date_complain;
     }
-
     public void setDate(Date date) {this.date_complain = date;}
 
     public Time getTime() {return time_complain;}
-
     public void setTime(Time time) {this.time_complain = time;}
+
     public Restaurant getRestaurant() {return restaurant;}
     public void setRestaurant(Restaurant restaurant) {this.restaurant = restaurant;}
+
+    public String getStatus() {return status_complaint;}
+    public void setStatus(String status) {this.status_complaint = status;}
+
+    public String getResponse() {return response_complaint;}
+    public void setResponse(String response) {this.response_complaint=response;}
+
 }
