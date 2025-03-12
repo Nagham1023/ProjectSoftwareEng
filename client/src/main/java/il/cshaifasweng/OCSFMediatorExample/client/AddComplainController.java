@@ -127,9 +127,9 @@ public class AddComplainController {
             }
         }
     }
-    @FXML
+    @Subscribe
     private void sendAndSaveComplain() throws IOException {
-
+        getRestaurantByName(restaurantList);
         LocalTime now = LocalTime.now(); // Get the current time
         time = Time.valueOf(now);        // Convert LocalTime to java.sql.Time
         getRestaurantByName(restaurantList);
