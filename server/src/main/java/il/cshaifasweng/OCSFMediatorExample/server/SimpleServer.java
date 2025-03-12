@@ -81,7 +81,7 @@ public class SimpleServer extends AbstractServer {
                 System.out.println("*********************************************");
 
 
-                while (startTime.toLocalTime().isBefore(closingTime)) {
+                while (startTime.toLocalTime().isBefore(closingTime.minusMinutes(30))) {
 
                     // Check if tables are available for this time slot
                     System.out.println("*********************************************");
@@ -89,7 +89,7 @@ public class SimpleServer extends AbstractServer {
                     System.out.println("*********************************************");
                     List<TableNode> tablesForSlot = getAvailableTables(reservation.getRestaurantName(), startTime, reservation.getSeats(), reservation.isInside());
 
-                    if (!tablesForSlot.isEmpty()) {
+                    if (!tablesForSlot.isEmpty()&&startTime.isAfter(LocalDateTime.now())) {
                         // If tables are available, add the time slot to the list
                         availableTimeSlots.add(startTime);
                     } else {
@@ -766,10 +766,7 @@ public class SimpleServer extends AbstractServer {
 
             // Validate that the requested reservation time is within business hours
             LocalTime requestedLocalTime = requestedTime.toLocalTime();
-            if (requestedLocalTime.isBefore(openingTime) || requestedLocalTime.isAfter(closingTime)) {
-                System.out.println("Requested time is outside of business hours!");
-                return availableReservations; // Return empty list
-            }
+
 
             // Fetch tables for the restaurant
             System.out.println("Fetching tables for restaurant: " + restaurantName);
@@ -788,7 +785,10 @@ public class SimpleServer extends AbstractServer {
 
             // Iterate over 15-minute time slots within the valid range
             for (LocalTime currentTimeSlot = startTime; currentTimeSlot.isBefore(endTime) || currentTimeSlot.equals(endTime); currentTimeSlot = currentTimeSlot.plusMinutes(15)) {
-
+                if (currentTimeSlot.isBefore(openingTime) || currentTimeSlot.isAfter(closingTime)) {
+                    System.out.println("Requested time is outside of business hours!");
+                    continue;
+                }
                 LocalTime nextTimeSlot = currentTimeSlot.plusMinutes(15);
                 boolean isAvailable = false;
                 int totalAvailableSeats = 0;
@@ -942,20 +942,33 @@ public class SimpleServer extends AbstractServer {
     }
     // Method to get meals by ingredient
     private List<Meal> getMealsByIngredient(String ingredient) throws Exception {
-        // Get all meals
-        var meals = MealsDB.GetAllMeals();
+        try (Session session = App.getSessionFactory().openSession()) {
+            session.beginTransaction();
 
-        // Create a list to store meals that contain the ingredient in the description
-        List<Meal> mealsWithIngredient = new ArrayList<>();
+            // Get all meals (detached)
+            var meals = MealsDB.GetAllMeals();
 
-        // Iterate over all meals and check if the description contains the ingredient
-        for (Meal meal : meals) {
-            if (meal.getDescription() != null && meal.getDescription().toLowerCase().contains(ingredient.toLowerCase())) {
-                mealsWithIngredient.add(meal);
+            // Create a list to store meals that contain the ingredient in the description
+            List<Meal> mealsWithIngredient = new ArrayList<>();
+
+            // Iterate over all meals and reattach them to the session
+            for (Meal meal : meals) {
+                session.update(meal); // Reattach the meal to the session
+                Hibernate.initialize(meal.getCustomizations()); // Initialize the collection
+                List<Customization> customizations = meal.getCustomizations();
+                for(Customization customization : customizations) {
+                    if(customization.getName().equals(ingredient)){
+                        mealsWithIngredient.add(meal);
+                    }
+                }
             }
-        }
 
-        return mealsWithIngredient;
+            session.getTransaction().commit();
+            return mealsWithIngredient;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     @Override
