@@ -7,9 +7,10 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.image.ImageView?>
-<ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReservationController">
+<?import javafx.scene.layout.AnchorPane?>
+
+<ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReservationController">
     <content>
         <AnchorPane fx:id="anchorPane" prefHeight="600.0" prefWidth="600.0">
             <children>
@@ -17,17 +18,17 @@
                 <DatePicker fx:id="datePicker" layoutX="50" layoutY="50" />
 
                 <!-- Time Selection -->
-                <ComboBox fx:id="hourComboBox" layoutX="50" layoutY="100" prefWidth="80" promptText="Hours" />
-                <ComboBox fx:id="minuteComboBox" layoutX="140" layoutY="100" prefWidth="80" promptText="Min" />
+                <ComboBox fx:id="hourComboBox" layoutX="50.0" layoutY="100.0" prefWidth="80" />
+                <ComboBox fx:id="minuteComboBox" layoutX="140" layoutY="100" prefWidth="80" />
 
                 <!-- Restaurant Selection -->
-                <ComboBox fx:id="restaurantsComboBox" layoutX="232.0" layoutY="100.0" prefWidth="150.0" promptText="Pick a Restaurant" />
+                <ComboBox fx:id="restaurantsComboBox" layoutX="232.0" layoutY="100.0" prefWidth="150.0" />
 
                 <!-- Seat Input -->
-                <TextField fx:id="seatsTextField" layoutX="400.0" layoutY="100.0" prefWidth="100.0" promptText="Seats" />
+                <TextField fx:id="seatsTextField" layoutX="400.0" layoutY="100.0" prefWidth="100.0" />
 
                 <!-- Inside/Outside Selection -->
-                <ComboBox fx:id="insideOutsideComboBox" layoutX="416.0" layoutY="135.0" prefWidth="150.0" promptText="Inside/Outside">
+                <ComboBox fx:id="insideOutsideComboBox" layoutX="391.0" layoutY="169.0" prefWidth="150.0">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
                         </FXCollections>
@@ -35,7 +36,7 @@
                 </ComboBox>
 
                 <!-- Confirm Button -->
-                <Button fx:id="confirmButton" layoutX="271.0" layoutY="354.0" onAction="#handleConfirm" text="Confirm" />
+                <Button fx:id="confirmButton" layoutX="435.0" layoutY="288.0" onAction="#handleConfirm" text="Confirm" />
 
                 <!-- Back Button -->
                 <Button fx:id="backButton" layoutX="10.0" layoutY="10.0" onAction="#backToHome" style="-fx-font-size: 18px; -fx-text-fill: #4CAF50; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
@@ -44,7 +45,12 @@
                 <Label layoutX="176.0" layoutY="14.0" prefHeight="17.0" prefWidth="174.0" text="Pick your reservation details" />
 
                 <!-- Loading GIF -->
-                <ImageView fx:id="loadingGif" layoutX="176.0" layoutY="100.0" fitWidth="100" fitHeight="100" visible="false" />
+                <ImageView fx:id="loadingGif" fitHeight="100" fitWidth="100" layoutX="176.0" layoutY="100.0" visible="false" />
+            <Label layoutX="76.0" layoutY="83.0" text="Hours" />
+            <Label layoutX="446.0" layoutY="150.0" text="Inside/Outside" />
+            <Label layoutX="436.0" layoutY="83.0" text="Seats" />
+            <Label layoutX="262.0" layoutY="83.0" text="Pick a Restaurant" />
+            <Label layoutX="170.0" layoutY="83.0" text="Min" />
             </children>
         </AnchorPane>
     </content>

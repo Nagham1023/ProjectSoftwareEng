@@ -275,7 +275,6 @@ public class App {
         try {
             server = new SimpleServer(3000);
             server.listen();
-            deleteAllTablesAndRelatedData();
             generateData();
             printAllData();
             printAllUsers();
@@ -323,7 +322,9 @@ public class App {
             e.printStackTrace();
             // Handle exceptions (e.g., rollback transaction if needed)
         }
-    }    private static void initializeSampleTables() {
+    }
+
+    private static void initializeSampleTables() {
         List<Integer> capacities = Arrays.asList(2, 3, 4);
         Random random = new Random();
 
