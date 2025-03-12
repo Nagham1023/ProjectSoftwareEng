@@ -24,7 +24,7 @@ import java.util.List;
 
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
-import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.addComplainIntoDatabase;
+import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.ReportDB.*;
@@ -251,6 +251,16 @@ public class SimpleServer extends AbstractServer {
                 e.printStackTrace();
             }
         }
+        if (msg instanceof String && msg.equals("getAllComplaints")) {
+            try {
+                ComplainList complist = new ComplainList();
+                complist.setComplainList(getAllComplains()); // Set list to send
+                System.out.println(complist.getComplainList());
+                client.sendToClient(complist); // send to client
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         if (msg instanceof mealEvent) {
             //here we're adding new meal !!
             //System.out.println("Received adding new mealEvent ");
@@ -393,6 +403,18 @@ public class SimpleServer extends AbstractServer {
             //sendToAllClients(msg);
             try {
                 updateMealPriceInDatabase((updatePrice) msg);
+                client.sendToClient(msg);
+                sendToAll(msg);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+        if (msg instanceof updateResponse) {
+            System.out.println("Received a response message from client ");
+            //sendToAllClients(msg);
+            try {
+                updateComplainResponseInDatabase((updateResponse) msg);
                 client.sendToClient(msg);
                 sendToAll(msg);
             } catch (IOException e) {
@@ -1052,6 +1074,24 @@ public class SimpleServer extends AbstractServer {
 
             // Return a copy of the list to avoid external modifications
             return new ArrayList<>(restaurants);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Return an empty list in case of an error
+            return new ArrayList<>();
+        }
+    }
+    public List<Complain> getAllComplains() {
+        try (Session session = App.getSessionFactory().openSession()) {
+            session.beginTransaction();
+
+            // Fetch all the complains from the database
+            Query<Complain> query = session.createQuery("FROM Complain ", Complain.class);
+            List<Complain> COMPS = query.getResultList();
+
+            session.getTransaction().commit();
+
+            // Return a copy of the list to avoid external modifications
+            return new ArrayList<>(COMPS);
         } catch (Exception e) {
             e.printStackTrace();
             // Return an empty list in case of an error

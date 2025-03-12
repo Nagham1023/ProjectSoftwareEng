@@ -32,6 +32,13 @@ public class SimpleClient extends AbstractClient {
 		if (msg instanceof UserCheck) {
 			EventBus.getDefault().post(msg);
 		}
+		if (msg instanceof ComplainList) {
+			System.out.println("the message is an adding complaint");
+			ComplainList complainList = (ComplainList) msg;
+			//print restaurants names
+			System.out.println("Received restaurant list: " + complainList.toString());
+			EventBus.getDefault().post(complainList);
+		}
 		if (msg instanceof complainEvent) {
 			System.out.println("the message is an adding complaint");
 			EventBus.getDefault().post(msg);

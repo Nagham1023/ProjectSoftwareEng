@@ -46,6 +46,10 @@ public class complainEvent implements Serializable {
         this.restaurant = restaurant;
     }
 
+    public complainEvent() {
+
+    }
+
 
     public int getId() {
         return id;
