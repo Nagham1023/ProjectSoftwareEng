@@ -42,6 +42,10 @@ public class CartPageController {
     @FXML
     private Label cartTitle;
 
+
+    @FXML
+    private Button clearCartButton;
+
     @FXML
     private StackPane stackPane;
     @FXML
@@ -233,6 +237,8 @@ public class CartPageController {
 
 
     private void emptyCart(){
+        clearCartButton.setDisable(true);
+        clearCartButton.setVisible(false);
         emptyCartPane.setVisible(true);
         emptyCartPane.setManaged(true);
         emptyCartImage.setImage(new Image(getClass().getResourceAsStream("/images/emptycart.png")));
@@ -261,15 +267,20 @@ public class CartPageController {
         emptyCartPane.setVisible(false);
         emptyCartPane.setMouseTransparent(true); // Let clicks pass through
         mealsNum.setText("("+numberOfMeals+")");
-        if(numberOfMeals == 0)
+        if(numberOfMeals == 0) {
             emptyCart();
+        }
         else {
+            clearCartButton.setDisable(false);
+            clearCartButton.setVisible(true);
             continueButton.setOnAction(event -> openOrderSummary());
             for(MealInTheCart meal : listOfMeals)
             {
                 addMealToCart(meal);
             }
         }
+
+
     }
     private void openOrderSummary() {
         // Initialize order details string
