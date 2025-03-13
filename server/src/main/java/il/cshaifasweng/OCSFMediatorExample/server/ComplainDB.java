@@ -72,6 +72,9 @@ public class ComplainDB {
         //System.out.println("Changing the price in database.");
         int Idcomp = updateResponse.getIdComplain();
         String newRes = updateResponse.getnewResponse();
+        String emailComp = updateResponse.getEmailComplain();
+        String orderNum = updateResponse.getOrderNumber();
+        double refund = updateResponse.getRefundAmount();
 
         try {
             if (session == null || !session.isOpen()) {
@@ -92,10 +95,13 @@ public class ComplainDB {
             complainEvent complain = session.get(complainEvent.class, Idcomp);
             if (complain != null) {
                 //System.out.println("Found Meal: " + meal.getName() + " with current price: " + meal.getPrice());
-                complain.setResponse(newRes); // Update the price
+                complain.setResponse(newRes); // Update the response
+                complain.setStatus("Done");
                 session.update(complain); // Persist the changes
                 session.getTransaction().commit(); // Commit the transaction
                 updateCompResponseById(Idcomp, newRes);
+                sendResToEmail(emailComp, newRes);
+                giveBackTheRefund(orderNum,refund);
             }
         } catch (Exception e) {
             //System.out.println("An error occurred during the update operation.");
@@ -111,21 +117,49 @@ public class ComplainDB {
         }
     }
 
+    public static void  giveBackTheRefund(String orderNum,double refund) {
+        // Check if the meatlist is initialized
+        if (orderNum == null || refund == 0) {
+            System.out.println("no need to give back the refund");
+            return;
+        }
+        else {
+
+            // neeeeeeeeeeeeed tooooooooooooooo dooooooooooooooooo
+            // send back the refund to the card that paied on the order with this order num
+
+        }
+
+
+    }
+
+    public static void sendResToEmail(String emailComp, String newRes) {
+        // Check if the meatlist is initialized
+        if (emailComp == null || newRes == null) {
+            System.out.println("Something empty or not initialized.");
+            return;
+        }
+
+        // neeeeeeeeeeeeed tooooooooooooooo dooooooooooooooooo
+        // send new res to the email emailComp
+
+    }
+
     public static void updateCompResponseById(int Idcomp, String newRes) {
         // Check if the meatlist is initialized
         if (complainslist == null || complainslist.isEmpty()) {
-            System.out.println("The meal list is empty or not initialized.");
+            System.out.println("Something is empty or not initialized.");
             return;
         }
         // Search for the comp with the given ID
         for (Complain complain : complainslist) {
             if (complain.getId() == Idcomp) {
                 complain.setResponse(newRes);
+                complain.setStatus("Done");
                 System.out.println("Complain ID " + Idcomp + " the response: " + complain.getResponse());
                 return; // Exit the loop after updating
             }
         }
-
     }
 
     public static String addComplainIntoDatabase(complainEvent newComplain) {
@@ -139,6 +173,8 @@ public class ComplainDB {
         String status_complain = newComplain.getStatus();
         String response_complaint = newComplain.getResponse();
         Restaurant restaurant_complain = newComplain.getRestaurant();
+        String orderNum = newComplain.getOrderNum();
+        double refund = newComplain.getRefund();
 
         try {
             // Ensure the session is open
@@ -162,6 +198,8 @@ public class ComplainDB {
             newComp.setRestaurant(restaurant_complain);
             newComp.setStatus(status_complain);
             newComp.setResponse(response_complaint);
+            newComp.setOurderNum(orderNum);
+            newComp.setRefund(refund);
 
 
             // Save the complain to the database

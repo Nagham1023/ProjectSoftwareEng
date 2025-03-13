@@ -32,6 +32,9 @@ public class Complain implements Serializable {
     private Time time_complain;
     private String status_complaint;
     private String response_complaint;
+    private String ourderNum_complain = "";
+    private double refund_complain = 0;
+
 
 
     @ManyToOne
@@ -90,5 +93,11 @@ public class Complain implements Serializable {
 
     public String getResponse() {return response_complaint;}
     public void setResponse(String response) {this.response_complaint=response;}
+
+    public String getOurderNum() {return ourderNum_complain;}
+    public void setOurderNum(String ourderNum) {this.ourderNum_complain = ourderNum;}
+
+    public double getRefund() {return refund_complain;}
+    public void setRefund(double refund) {this.refund_complain = refund;}
 
 }

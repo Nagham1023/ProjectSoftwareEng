@@ -91,5 +91,6 @@
       </Button>
       <Label fx:id="checkLabel" alignment="CENTER" layoutX="166.0" layoutY="363.0" prefHeight="25.0" prefWidth="279.0" />
       <ComboBox fx:id="branchesList" layoutX="408.0" layoutY="194.0" prefHeight="25.0" prefWidth="175.0" promptText="Choose restaurant name" />
+      <TextField fx:id="textFieldOrderNum" layoutX="330.0" layoutY="348.0" prefHeight="28.0" prefWidth="189.0" promptText="Enter order number to complain" style="-fx-border-color: #832018;" />
    </children>
 </AnchorPane>

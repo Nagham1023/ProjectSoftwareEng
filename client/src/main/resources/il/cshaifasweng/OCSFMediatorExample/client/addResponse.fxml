@@ -5,12 +5,13 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox spacing="20" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AddResponseController">
+<VBox prefHeight="323.0" prefWidth="357.0" spacing="20" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AddResponseController">
 
     <Label fx:id="ClientNameLabel" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Client Name" />
 
 
-    <TextField fx:id="responseField" promptText="Enter a good response" />
+    <TextField fx:id="responseField" prefHeight="141.0" prefWidth="291.0" promptText="Enter a good response" />
+   <TextField fx:id="refundField" prefHeight="25.0" prefWidth="313.0" promptText="Enter the refund amount" />
 
 
     <Button fx:id="sendResponse" onAction="#SendResponse" text="send response" />

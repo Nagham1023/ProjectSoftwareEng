@@ -29,10 +29,17 @@ public class AddResponseController {
     @FXML // fx:id="responseField"
     private TextField responseField; // Value injected by FXMLLoader
 
+    @FXML // fx:id="refundField"
+    private TextField refundField;
+
     @FXML // fx:id="sendResponse"
     private Button sendResponse; // Value injected by FXMLLoader
 
     private String idComplain;
+    private String emailComplain;
+    private String ordernumComplain="";
+    private String refundValue;
+
 
 
 
@@ -46,25 +53,33 @@ public class AddResponseController {
     }
 
     // Set complain details
-    public void setCompDetails(String clientName,String idComplain) {
+    public void setCompDetails(String clientName,String idComplain,String kind,String emailComplain,String ordernum) {
         this.ClientNameLabel.setText("Response to: " + clientName);
         this.idComplain = idComplain;
+        this.emailComplain = emailComplain;
+        this.ordernumComplain = ordernum;
+
+        if (kind=="Complain")
+            refundField.setVisible(true);
+        else
+            refundField.setVisible(false);
     }
 
     @FXML
     private void SendResponse() {
         String newResponse = responseField.getText();
-        if (newResponse != null && !newResponse.trim().isEmpty()) {
+        refundValue=refundField.getText();
+        double refund=Double.parseDouble(refundValue);
+        if (newResponse != null && !newResponse.trim().isEmpty() && refundValue != null && !refundValue.trim().isEmpty()) {
             //System.out.println("im in to change price");
             SimpleClient client;
             client = SimpleClient.getClient();
-            updateResponse uResponse = new updateResponse(newResponse,idComplain);
+            updateResponse uResponse = new updateResponse(newResponse,idComplain,emailComplain,ordernumComplain,refund);
             try {
                 client.sendToServer(uResponse);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            //priceLabel.setText(newPrice + "₪");
             responseField.getScene().getWindow().hide(); // Close the window
         }
     }
