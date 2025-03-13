@@ -1,0 +1,21 @@
+/* Default state: white background with no checkmark */
+.check-box {
+    -fx-background-color: white;
+    -fx-text-fill: #333; /* Text color when unchecked */
+}
+
+/* Selected state: background becomes b20d34, checkmark turns white */
+.check-box:selected {
+    -fx-background-color: #b20d34;
+}
+
+/* Make the checkmark (V) white when selected */
+.check-box .check-mark {
+    -fx-fill: white;
+}
+
+/* Optional: Add border to make it look more like a traditional checkbox */
+.check-box .check-box-inner {
+    -fx-border-color: #b20d34; /* Border color for the checkbox */
+    -fx-border-width: 2px;
+}
