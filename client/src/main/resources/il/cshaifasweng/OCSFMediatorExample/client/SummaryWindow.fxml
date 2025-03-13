@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox alignment="CENTER" spacing="20" style="-fx-background-color: white; -fx-padding: 20;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.OrderSummaryController">
+    <!-- Title Label -->
+    <Label fx:id="orderSummaryTitle" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #b70236;" text="Order Summary" />
+
+    <!-- Scrollable Meal Details -->
+    <ScrollPane fitToWidth="true" style="-fx-background: transparent; -fx-padding: 0;">
+        <VBox fx:id="mealDetailsContainer" alignment="CENTER" spacing="10" style="-fx-background-color: #f2f2f2; -fx-padding: 10; -fx-border-radius: 5px; -fx-border-color: #d1d1d1;">
+            <!-- Meal details (image, name, quantity) will be added here dynamically -->
+        </VBox>
+    </ScrollPane>
+
+    <!-- Order summary label (order details text) -->
+    <Label fx:id="orderItemsLabel" style="-fx-font-size: 18px;" />
+
+    <!-- Total amount label -->
+    <Label fx:id="totalAmountLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+
+    <!-- Close button -->
+    <Button fx:id="CheckOutbtn" onAction="#CheckOut" style="-fx-background-color: #fff3f6; -fx-text-fill: #be0035; -fx-font-size: 16px; -fx-font-weight: bold;" text="Go to Checkout" />
+
+</VBox>

@@ -1,48 +1,63 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import javafx.geometry.Insets;
-
+import org.hibernate.Hibernate;
+import org.hibernate.Session;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static il.cshaifasweng.OCSFMediatorExample.client.CartPageController.*;
 
 public class menu_controller {
 
     List<mealEvent> meals;
     public static String branchName;
 
+
+    @FXML
+    private ImageView cartIcon1;
     // Menu-related fields
     @FXML
     private VBox menuContainer; // Links to fx:id in FXML
-    private Map<String, Label> mealPriceLabels = new HashMap<>();
+
+    private Map<String, Button> addToCartButtons = new HashMap<>();
+
     @FXML
     private ImageView scrollArrow;
     @FXML
-    private ImageView loadingGif;
+    private ImageView cartIcon;
     @FXML
     private ScrollPane scrollPane;
     @FXML
@@ -68,8 +83,12 @@ public class menu_controller {
     private List<String> customizationNames;
 
     @FXML
+    private Label cartItemCount;
+    private final List<String> cart = new ArrayList<>();
+
+    @FXML
     void Reset_Menu(ActionEvent event) throws IOException {
-        startLoading();
+        //startLoading();
         List<String> list = new ArrayList<>();
         list.add(branchName);
         SimpleClient.getClient().sendToServer(new SearchOptions(list,branchName));
@@ -83,9 +102,9 @@ public class menu_controller {
 
     @FXML
     void Apply_filter(ActionEvent event) throws IOException {
-        Platform.runLater(()->{
+        /*Platform.runLater(()->{
             startLoading();
-        });
+        });*/
         List<String> selectedRestaurants = new ArrayList<>(); // List for selected restaurants
         List<String> selectedCustomizations = new ArrayList<>(); // List for selected customizations
 
@@ -112,12 +131,12 @@ public class menu_controller {
         restaurantNames = options.getRestaurantNames();
         customizationNames = options.getCustomizationNames();
         createDynamicCheckBoxes();
-        stopLoading();
+        //stopLoading();
     }
 
     private void createDynamicCheckBoxes() {
         Platform.runLater(() -> {
-            startLoading();
+            //startLoading();
             if (restaurantNames != null && !restaurantNames.isEmpty()) {
                 for (String option : restaurantNames) {
                     // Add a tag "restaurant" to each restaurant checkbox
@@ -137,35 +156,119 @@ public class menu_controller {
             } else {
                 showAlert("Error", "No customizations available.");
             }
-            stopLoading();
+            //stopLoading();
         });
 
 
     }
 
     private void showAlert(String title, String message) {
-        startLoading();
+        //startLoading();
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-        stopLoading();
+        //stopLoading();
     }
+
+
 
     @FXML
     void backToHome(ActionEvent event) throws IOException {
-        stopLoading();
+        //stopLoading();
         App.setRoot("RestaurantList");
     }
 
-    public void onAddMealClicked(String mealName,String mealDescription,String mealPrice,String mealId,byte[] imageData) {
+    private void onMealAdded() {
+        System.out.println("Meal added to cart!");
+        // You can update the cart counter here
+    }
+    private void openMealPopup(Meal meal) {
+        try {
+            // Load popup FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("meal_popup.fxml"));
+            Parent root = loader.load();
+
+            // Get the controller and set meal details
+            meal_popup_controller popupController = loader.getController();
+            popupController.setMealDetails(
+                    meal.getName(),
+                    meal.getDescription(),
+                    meal.getPrice(),
+                    meal.getImage(),
+                    meal.getCustomizations(),
+                    meal,
+                    this::updateCart
+            );
+
+
+            Stage mainStage = (Stage) stackPane.getScene().getWindow();
+            ColorAdjust blur = new ColorAdjust();
+            blur.setBrightness(-0.7);  // Simulate blur effect
+            mainStage.getScene().getRoot().setEffect(blur);
+
+
+            // Create a new popup stage (modal window)
+            Stage popupStage = new Stage();
+            popupStage.setTitle("Meal Details");
+            popupStage.setScene(new Scene(root));
+
+            // Make the popup window undecorated (no frame) BEFORE it is shown
+            popupStage.initStyle(StageStyle.UTILITY); // This must be done before showing the window
+
+            // Make popup modal (disable interaction with main window)
+            popupStage.initModality(Modality.APPLICATION_MODAL);
+            popupStage.initOwner(mainStage); // Link popup to the main window
+
+            // Remove blur effect when popup is closed
+            popupStage.setOnHiding(event -> mainStage.getScene().getRoot().setEffect(null));
+
+            // Show popup
+            popupStage.showAndWait();  // Wait until the popup is closed
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateCart() {
+        // Iterate through the list of meals to check for duplicates
+        for (int i = 0; i < listOfMeals.size(); i++) {
+            MealInTheCart currentMeal = listOfMeals.get(i);
+
+            // Check if this meal has already been merged with another
+            for (int j = i + 1; j < listOfMeals.size(); j++) {
+                MealInTheCart nextMeal = listOfMeals.get(j);
+
+                // If both meals have the same ID, merge them
+                if (currentMeal.getMeal().getId() == nextMeal.getMeal().getId()) {
+                    // Merge quantities
+                    currentMeal.setQuantity(currentMeal.getQuantity() + nextMeal.getQuantity());
+
+                    // Remove the duplicate meal
+                    listOfMeals.remove(j);
+
+
+                    j--;
+                }
+            }
+        }
+        if(numberOfMeals != listOfMeals.size()) {
+            numberOfMeals = listOfMeals.size();
+            updateCartBadge();
+        }
+    }
+
+
+
+    public void onAddMealClicked(Meal meal) {
         // Create a new meal row (HBox)
         HBox mealRow = new HBox(20);
-        mealRow.setStyle("-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;");
+        mealRow.setStyle("-fx-background-color: #ffffff; -fx-border-color: #000000; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;");
 
         // Hidden Label to store meal ID
-        Label idLabel = new Label(mealId);
+        Label idLabel = new Label(String.valueOf(meal.getId()));
         idLabel.setVisible(false); // Make it invisible
         idLabel.setManaged(false); // Ensure it doesn't take layout space
 
@@ -175,8 +278,8 @@ public class menu_controller {
         // Meal Image
         ImageView imageView = new ImageView();
 
-        if (imageData != null) {
-            Image image = new Image(new ByteArrayInputStream(imageData));
+        if (meal.getImage() != null) {
+            Image image = new Image(new ByteArrayInputStream(meal.getImage()));
             imageView = new ImageView(image);
             // Add imageView to your UI
         } else {
@@ -187,30 +290,114 @@ public class menu_controller {
         imageView.setFitWidth(80);
         imageView.setPreserveRatio(true);
 
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(20);  // Set the roundness of the corners
+        clip.setArcHeight(20);
+        clip.setWidth(imageView.getFitWidth());
+        clip.setHeight(imageView.getFitHeight());
+        imageView.setClip(clip);
+
         // Meal Details
         VBox detailsBox = new VBox(5);
-        Label nameLabel = new Label(mealName);
+        Label nameLabel = new Label(meal.getName());
         nameLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-        Label descriptionLabel = new Label(mealDescription);
+        Label descriptionLabel = new Label(meal.getDescription());
         descriptionLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #757575;");
         detailsBox.getChildren().addAll(nameLabel, descriptionLabel);
 
         // Meal Price
-        Label priceLabel = new Label(mealPrice+"₪");
-        priceLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #FF9800;");
+        Label priceLabel = new Label(meal.getPrice()+"₪");
+        priceLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #b70236;");
 
         // Button to Change Price
-        Button changePriceButton = new Button("Change Price");
-        changePriceButton.setOnAction(event -> openChangePricePage(nameLabel.getText(), priceLabel,idLabel.getText()));
+        Button addToCartBTN = new Button("Add to Cart");
+        addToCartBTN.setStyle("-fx-background-color: #222222; -fx-text-fill: #f3f3f3; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
+
+        //changePriceButton.setOnAction(event -> openChangePricePage(nameLabel.getText(), priceLabel,idLabel.getText()));
+        addToCartBTN.setOnAction(event ->
+                {
+                    /*if(Objects.equals(addToCartBTN.getText(), "Add to Cart")) {
+                        addToCartBTN.setText("Added!");
+                        addToCartBTN.setDisable(true);
+                        listOfMeals.add(meal);
+                        numberOfMeals++;
+                        updateCartBadge();
+                    }*/
+                    openMealPopup(meal);
+                }
+        );
 
         // Add components to mealRow
-        mealRow.getChildren().addAll(imageView, detailsBox, priceLabel, changePriceButton);
+        mealRow.getChildren().addAll(imageView, detailsBox, priceLabel, addToCartBTN);
 
         // Add mealRow to menuContainer
         menuContainer.getChildren().add(mealRow);
 
-        mealPriceLabels.put(mealId, priceLabel);
+        addToCartButtons.put(String.valueOf(meal.getId()), addToCartBTN);
+        //mealPriceLabels.put(String.valueOf(meal.getId()), priceLabel);
     }
+
+
+    private void updateCartBadge() {
+        if (numberOfMeals > 0) {
+            playCartSound();
+            cartItemCount.setVisible(true);
+            cartItemCount.setText(String.valueOf(numberOfMeals));
+
+            // Show the fire GIF animation
+            cartIcon1.setImage(new Image(getClass().getResourceAsStream("/images/fire.gif")));
+            cartIcon1.setVisible(true);
+
+            // Play sound effect
+
+            // Hide the GIF after 2 seconds
+            PauseTransition pause = new PauseTransition(Duration.seconds(1));
+            pause.setOnFinished(event -> cartIcon1.setVisible(false)); // Hide the GIF
+            pause.play();
+
+        } else {
+            cartItemCount.setVisible(false);
+            cartIcon1.setVisible(false); // Ensure the image is hidden when no items
+        }
+    }
+    private void initalizeCartBadge() {
+        if (numberOfMeals > 0) {
+            cartItemCount.setVisible(true);
+            cartItemCount.setText(String.valueOf(numberOfMeals));
+
+            // Show the fire GIF animation
+
+
+        } else {
+            cartItemCount.setVisible(false);
+            cartIcon1.setVisible(false); // Ensure the image is hidden when no items
+        }
+    }
+
+    private void playCartSound() {
+        try {
+            // Create a Media object for the sound file
+            String soundPath = getClass().getResource("/images/added.mp3").toString();
+            Media sound = new Media(soundPath);
+
+            // Create a MediaPlayer for playing the sound
+            MediaPlayer mediaPlayer = new MediaPlayer(sound);
+
+            // Set the starting time (in seconds)
+            mediaPlayer.setOnReady(() -> {
+                mediaPlayer.seek(Duration.seconds(0.7)); // Start the sound from 3 seconds
+                mediaPlayer.play();
+            });
+
+            // Optional: Adjust volume (0.0 to 1.0)
+            mediaPlayer.setVolume(0.5);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     private void openChangePricePage(String mealName, Label priceLabel,String Id){
         try {
@@ -235,16 +422,36 @@ public class menu_controller {
         SimpleClient client = SimpleClient.getClient();
         System.out.println("sending menu to "+branchName);
         // Load the Loading.gif image
-        loadingGif.setImage(new Image(getClass().getResourceAsStream("/images/Loading.gif")));
-        startLoading();
+        cartIcon.setImage(new Image(getClass().getResourceAsStream("/images/carticon.png")));
+        cartItemCount.setOnMouseClicked(event -> {
+            try {
+                App.setRoot("Cart_page");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        cartIcon.setOnMouseClicked(event -> {
+            try {
+                App.setRoot("Cart_page");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        cartIcon1.setOnMouseClicked(event -> {
+            try {
+                App.setRoot("Cart_page");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        //startLoading();
+        initalizeCartBadge();
         client.sendToServer("menu"+branchName);
 
-        if(meals == null)
-            System.out.println("No meals found");
-        else
-            for (mealEvent meal : meals) {
-                onAddMealClicked(meal.getMealName(), meal.getMealDisc(), String.valueOf(meal.getPrice()),meal.getId(),meal.getImage());
-            }
+        /***/
+
+        /***/
+
 
         try {
             SimpleClient.getClient().sendToServer("Fetching SearchBy Options");
@@ -276,7 +483,7 @@ public class menu_controller {
             try {
                 Thread.sleep(10000); // Simulate a 3-second loading delay
                 Platform.runLater(() -> {
-                    loadingGif.setVisible(false); // Hide the loading GIF
+                    //loadingGif.setVisible(false); // Hide the loading GIF
                     scrollPane.setVisible(true); // Show the main content
                 });
             } catch (InterruptedException e) {
@@ -309,21 +516,17 @@ public class menu_controller {
             // Add new meals to the menu
             if (avMeals.getMeals() != null && !avMeals.getMeals().isEmpty()) {
                 for (Meal meal : avMeals.getMeals()) {
-                    onAddMealClicked(
-                            meal.getName(),
-                            meal.getDescription(),
-                            String.valueOf(meal.getPrice()),
-                            String.valueOf(meal.getId()),
-                            meal.getImage()
-                    );
+                    onAddMealClicked(meal);
                 }
             } else {
                 System.out.println("No new meals to display.");
             }
-            stopLoading();
+            //stopLoading();
+
+
         });
     }
-
+/*
     @Subscribe
     public void addnewmeal(mealEvent meal) {
         System.out.println("adding new meal for this client");
@@ -333,9 +536,9 @@ public class menu_controller {
         });
         System.out.println("added the new meal for this client");
 
-    }
+    }*/
 
-    @Subscribe
+    /*@Subscribe
     public void updateMealPrice(updatePrice updatePrice) {
         //System.out.println("changing price now!");
         String mealId = String.valueOf(updatePrice.getIdMeal());
@@ -349,12 +552,12 @@ public class menu_controller {
         } else {
             System.out.println("Meal with ID " + mealId + " not found.");
         }
-    }
+    }*/
 
 
     @FXML
     void showSearchOptionsDialog(ActionEvent event) {
-        startLoading();
+        //startLoading();
         // Create a new Dialog
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle("Search Options");
@@ -435,10 +638,10 @@ public class menu_controller {
 
         // Show the Dialog
         dialog.showAndWait();
-        stopLoading();
+        //stopLoading();
     }
 
-    private void startLoading() {
+    /*private void startLoading() {
         Platform.runLater(() -> {
             loadingGif.setVisible(true);
             stackPane.setDisable(true); // Disable all UI components
@@ -451,5 +654,5 @@ public class menu_controller {
             loadingGif.setVisible(false);
             stackPane.setDisable(false); // Enable all UI components
         });
-    }
+    }*/
 }

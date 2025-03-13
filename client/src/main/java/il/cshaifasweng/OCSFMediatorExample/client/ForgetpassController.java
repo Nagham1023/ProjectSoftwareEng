@@ -42,10 +42,10 @@ public class ForgetpassController {
             errorMessageLabel.setText("Please fill in all fields.");
             return;
         }
-        //if (!isValidEmail(email)) {
-        //    errorMessageLabel.setText("Please enter a valid email address.");
-        //    return;
-        //}
+        if (!isValidEmail(email)) {
+            errorMessageLabel.setText("Please enter a valid email address.");
+            return;
+        }
         //check if user is already available
         UserCheck userCheck = new UserCheck();
         userCheck.setEmail(email);
