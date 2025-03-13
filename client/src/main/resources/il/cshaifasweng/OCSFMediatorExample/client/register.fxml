@@ -19,7 +19,7 @@
         </AnchorPane>
 
         <!-- Right Panel -->
-        <AnchorPane layoutX="500.0" prefHeight="600.0" prefWidth="500.0" style="-fx-background-color: #FFFFFF;">
+        <AnchorPane fx:id="anchorpane" layoutX="500.0" prefHeight="600.0" prefWidth="500.0" style="-fx-background-color: #FFFFFF;">
             <children>
                 <!-- Welcome Label -->
                 <Label layoutX="180.0" layoutY="20.0" text="Register">
@@ -68,6 +68,7 @@
                     </font>
                 </Label>
                 <ComboBox fx:id="genderComboBox" layoutX="100.0" layoutY="400.0" prefHeight="30.0" prefWidth="300.0" promptText="Select Gender" />
+            <ImageView fx:id="loadinggif" fitHeight="150.0" fitWidth="200.0" layoutX="-107.0" layoutY="205.0" pickOnBounds="true" preserveRatio="true" visible="false" />
             </children>
         </AnchorPane>
     </children>

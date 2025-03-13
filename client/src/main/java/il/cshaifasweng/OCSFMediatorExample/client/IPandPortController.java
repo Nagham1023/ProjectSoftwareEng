@@ -39,6 +39,7 @@ public class IPandPortController {
             Platform.runLater(() -> {
                 try {
                     App.setRoot("mainScreen");
+                    //App.setRoot("Cart_page");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

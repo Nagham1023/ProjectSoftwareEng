@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import static il.cshaifasweng.OCSFMediatorExample.client.CartPageController.listOfMeals;
+import static il.cshaifasweng.OCSFMediatorExample.client.CartPageController.numberOfMeals;
 import static il.cshaifasweng.OCSFMediatorExample.client.menu_controller.branchName;
 
 public class RestaurantListController {
@@ -48,6 +50,9 @@ public class RestaurantListController {
             } catch (Exception e) {
                 e.printStackTrace(); // In a real application, log this error or show an error message to the user
             }
+
+            listOfMeals.clear();
+            numberOfMeals = 0;
         }
 
         @Subscribe

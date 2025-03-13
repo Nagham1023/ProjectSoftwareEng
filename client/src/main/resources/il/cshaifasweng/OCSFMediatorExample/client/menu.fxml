@@ -4,7 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.effect.ColorAdjust?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
@@ -16,20 +16,28 @@
 <?import javafx.scene.text.Font?>
 
 <StackPane fx:id="stackPane" prefHeight="600" prefWidth="800" style="-fx-background-color: #f8f5f1;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.menu_controller">
+
     <!-- Main Scrollable Content -->
     <ScrollPane fx:id="scrollPane" prefHeight="600" prefWidth="800">
         <content>
             <VBox fx:id="menuContainer" spacing="20" style="-fx-padding: 20;">
-                <!-- Header with Back Arrow -->
+
+                <!-- Header with Back Arrow and Cart -->
                 <HBox spacing="10" style="-fx-alignment: center-left; -fx-padding: 10;">
-                    <Button fx:id="backButton" onAction="#backToHome" style="-fx-font-size: 18px; -fx-text-fill: #4CAF50; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
-                    <Label fx:id="textmenu" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" text="Flavor Res - Menu" />
+
+                    <!-- Back Button -->
+                    <Button fx:id="backButton" onAction="#backToHome" style="-fx-font-size: 18px; -fx-text-fill: #b70236; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
+
+                    <!-- Menu Title -->
+                    <Label fx:id="textmenu" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #b70236;" text="Flavor Res - Menu" />
+
+                    <!-- Search Button -->
                     <Button fx:id="Search_combo_box" mnemonicParsing="false" onAction="#showSearchOptionsDialog" text="Search By">
                         <font>
                             <Font name="Arial Bold Italic" size="14.0" />
                         </font>
                         <textFill>
-                            <LinearGradient endX="0.6161137440758294" endY="0.09478672985782" startY="0.5355450236966824">
+                            <LinearGradient endX="0.6" endY="0.1" startY="0.5">
                                 <stops>
                                     <Stop>
                                         <color>
@@ -38,22 +46,21 @@
                                     </Stop>
                                     <Stop offset="1.0">
                                         <color>
-                                            <Color red="0.08627451211214066" green="0.9490196108818054" blue="0.007843137718737125" />
+                                            <Color red="0.7176470756530762" green="0.007843137718737125" blue="0.21176470816135406" />
                                         </color>
                                     </Stop>
                                 </stops>
                             </LinearGradient>
                         </textFill>
                     </Button>
+
+                    <!-- Reset Button -->
                     <Button fx:id="Reset_Button" mnemonicParsing="false" onAction="#Reset_Menu" text="Reset">
                         <font>
                             <Font name="Arial Bold Italic" size="14.0" />
                         </font>
-                        <effect>
-                            <ColorAdjust />
-                        </effect>
                         <textFill>
-                            <LinearGradient endX="0.6161137440758294" endY="0.09478672985782" startY="0.5355450236966824">
+                            <LinearGradient endX="0.6" endY="0.1" startY="0.5">
                                 <stops>
                                     <Stop>
                                         <color>
@@ -62,26 +69,49 @@
                                     </Stop>
                                     <Stop offset="1.0">
                                         <color>
-                                            <Color red="0.08627451211214066" green="0.9490196108818054" blue="0.007843137718737125" />
+                                            <Color red="0.7176470756530762" green="0.007843137718737125" blue="0.21176470816135406" />
                                         </color>
                                     </Stop>
                                 </stops>
                             </LinearGradient>
                         </textFill>
                     </Button>
-                    <ImageView fx:id="loadingGif" fitHeight="106.0" fitWidth="131.0" pickOnBounds="true" preserveRatio="true" />
+
+                    <!-- Cart Icon with Badge -->
+                    <StackPane style="-fx-cursor: hand;">
+                        <ImageView fx:id="cartIcon" fitHeight="50" fitWidth="50" pickOnBounds="true" preserveRatio="true">
+                            <image>
+                                <Image url="@../../../../images/carticon.png" />
+                            </image>
+                        </ImageView>
+                        <Label fx:id="cartItemCount" prefHeight="0.0" prefWidth="13.0" style="-fx-background-color: #fe3b30; -fx-text-fill: white; -fx-font-size: 9px; -fx-padding: 3px 6px; -fx-background-radius: 20;" text="0">
+                            <StackPane.margin>
+                                <Insets right="-40.0" top="-30.0" />
+                            </StackPane.margin>
+                            <font>
+                                <Font size="7.0" />
+                            </font>
+                        </Label>
+                        <ImageView fx:id="cartIcon1" fitHeight="28.0" fitWidth="37.0" pickOnBounds="true" preserveRatio="true">
+                            <StackPane.margin>
+                                <Insets bottom="39.0" left="41.0" />
+                            </StackPane.margin>
+                        </ImageView>
+                    </StackPane>
+
                 </HBox>
 
-                <!-- Content -->
-                <Pane />
+                <!-- Menu Items Will Be Added Here -->
+                <Pane fx:id="menuItemsPane" VBox.vgrow="ALWAYS" />
             </VBox>
         </content>
     </ScrollPane>
 
-    <!-- Floating Arrow -->
-    <ImageView fx:id="scrollArrow" fitHeight="40.0" fitWidth="40.0" layoutX="500.0" layoutY="300.0" preserveRatio="true" style="-fx-alignment: center;" x="500.0">
+    <!-- Floating Scroll Arrow -->
+    <ImageView fx:id="scrollArrow" fitHeight="40" fitWidth="40" layoutX="500" layoutY="300" preserveRatio="true" style="-fx-alignment: center;">
         <StackPane.margin>
             <Insets top="400.0" />
         </StackPane.margin>
     </ImageView>
+
 </StackPane>

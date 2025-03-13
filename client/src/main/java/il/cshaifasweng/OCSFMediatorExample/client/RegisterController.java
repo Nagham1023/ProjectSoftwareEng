@@ -3,6 +3,9 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import com.mysql.cj.xdevapi.Client;
 import il.cshaifasweng.OCSFMediatorExample.entities.EmailSender;
 import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,7 +19,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -31,8 +38,12 @@ public class RegisterController {
     @FXML
     private TextField ageField;
 
+    private Timeline timeline; // Animation refresh loop
+
     @FXML
     private PasswordField confirmPasswordField;
+    @FXML
+    private ImageView loadinggif;
 
     @FXML
     private TextField emailField;
@@ -45,48 +56,61 @@ public class RegisterController {
     @FXML
     private PasswordField passwordField;
 
+
+    @FXML
+    private AnchorPane anchorpane;
+
     @FXML
     private TextField usernameField;
 
+    private Stage loadingStage;
 
     @FXML
     private ComboBox<String> genderComboBox;
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
 
     @FXML
-    void RegisterButton(ActionEvent event) throws IOException {
-        if(usernameField.getText().isEmpty() || emailField.getText().isEmpty() || passwordField.getText().isEmpty() || confirmPasswordField.getText().isEmpty() || ageField.getText().isEmpty()) {
+    void RegisterButton(ActionEvent event) {
+        if(usernameField.getText().isEmpty() || emailField.getText().isEmpty() ||
+                passwordField.getText().isEmpty() || confirmPasswordField.getText().isEmpty() ||
+                ageField.getText().isEmpty()) {
             errorMessageLabel.setText("Please fill all the fields");
             return;
         }
-        else if(genderComboBox.getValue() == null) {
+
+        if (genderComboBox.getValue() == null) {
             errorMessageLabel.setText("Please fill the gender field");
             return;
         }
-        else if(!passwordField.getText().equals(confirmPasswordField.getText())) {
+
+        if (!passwordField.getText().equals(confirmPasswordField.getText())) {
             errorMessageLabel.setText("Passwords do not match!");
             return;
         }
-        if(passwordField.getText().equals(confirmPasswordField.getText()))
-        {
-            if(passwordField.getText().length() > 15)
-            {
-                errorMessageLabel.setText("The password is too long! Use less than 15 characters");
-                return;
-            }
+
+        if (passwordField.getText().length() > 15) {
+            errorMessageLabel.setText("The password is too long! Use less than 15 characters");
+            return;
         }
+
         if (!isValidEmail(emailField.getText())) {
             errorMessageLabel.setText("Please enter a valid email address.");
             return;
         }
-        if(!isValidAge(ageField.getText())) {
+
+        if (!isValidAge(ageField.getText())) {
             errorMessageLabel.setText("Type a correct age!");
             return;
         }
 
-        UserCheck userCheck = new UserCheck(usernameField.getText(), 3);//check if the name can be used .
+
+        UserCheck userCheck = new UserCheck(usernameField.getText(), 3);
         SimpleClient client = SimpleClient.getClient();
-        client.sendToServer(userCheck);
+        try {
+            client.sendToServer(userCheck);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     private boolean isValidEmail(String email) {
         return email != null && Pattern.matches(EMAIL_REGEX, email);
@@ -107,6 +131,8 @@ public class RegisterController {
         EventBus.getDefault().register(this);
         imglogo.setImage(new Image(getClass().getResourceAsStream("/images/Mom_Sticker.gif")));
         genderComboBox.getItems().addAll("Male", "Female", "Other");
+        loadinggif.setImage(new Image(getClass().getResourceAsStream("/images/Loading.gif")));
+
     }
     @FXML
     void toLogin() {
@@ -135,6 +161,7 @@ public class RegisterController {
                 });
         }
         else if (response.isState() == 3) {
+
             if (response.getRespond().equals("Valid"))
             {
                 Platform.runLater(() -> {
@@ -184,6 +211,7 @@ public class RegisterController {
             }
         }
     }
+
 
 
 
