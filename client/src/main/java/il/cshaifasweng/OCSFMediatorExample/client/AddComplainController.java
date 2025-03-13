@@ -72,14 +72,21 @@ public class AddComplainController {
     private TextField textFieldEmail;
 
     @FXML
+    private TextField textFieldOrderNum;
+
+    @FXML
     private TextField textFieldName;
 
     private String nameValue = "";
-    private RestaurantList restaurantList;
+    private RestaurantList restaurantList = new RestaurantList();
+    private String response = "";
+    private String orderNumValue = "";
+    private double refundVal = 0;
 
 
     @FXML
     public void initialize() {
+        textFieldOrderNum.setVisible(false);
         EventBus.getDefault().register(this);
         SimpleClient client = SimpleClient.getClient();
         try {
@@ -96,6 +103,7 @@ public class AddComplainController {
         ComplainButton.setStyle("-fx-background-color: #C76A58;");
         FeedbackButton.setStyle("-fx-background-color: #832018;");
         SuggestionButton.setStyle("-fx-background-color:  #832018;");
+        textFieldOrderNum.setVisible(true);
 
     }
     @FXML
@@ -104,6 +112,8 @@ public class AddComplainController {
         ComplainButton.setStyle("-fx-background-color: #832018;");
         FeedbackButton.setStyle("-fx-background-color: #C76A58;");
         SuggestionButton.setStyle("-fx-background-color:  #832018;");
+        textFieldOrderNum.setVisible(false);
+
     }
     @FXML
     private void SuggestionButton(ActionEvent event) throws IOException {
@@ -111,17 +121,20 @@ public class AddComplainController {
         ComplainButton.setStyle("-fx-background-color: #832018;");
         FeedbackButton.setStyle("-fx-background-color: #832018;");
         SuggestionButton.setStyle("-fx-background-color:  #C76A58;");
+        textFieldOrderNum.setVisible(false);
+
     }
 
     @FXML
     private void sendButton(ActionEvent event) throws IOException {
-        if(ComplainKind==null||textFieldName.getText()==null||textFieldEmail.getText()==null||textAreaTellUs.getText()==null||date==null||nameValue==null){
+
+        if(ComplainKind==null||textFieldName.getText()==null||textFieldEmail.getText()==null||textAreaTellUs.getText()==null||date==null||nameValue==null||(orderNumValue==null && ComplainKind=="Complaint")){
             checkLabel.setText("There is at least one field empty!");
         }
         else {
-            checkLabel.setText("Sent Successfully");
             try {
                 sendAndSaveComplain();
+                checkLabel.setText("Sent Successfully");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -133,10 +146,11 @@ public class AddComplainController {
         LocalTime now = LocalTime.now(); // Get the current time
         time = Time.valueOf(now);        // Convert LocalTime to java.sql.Time
         getRestaurantByName(restaurantList);
-        complainEvent complainEvent = new complainEvent(ComplainKind,textFieldName.getText(),textFieldEmail.getText(),textAreaTellUs.getText(),date,time,status,"", restaurant_chosen);
+        complainEvent complainEvent = new complainEvent(ComplainKind,textFieldName.getText(),textFieldEmail.getText(),textAreaTellUs.getText(),date,time,restaurant_chosen,"Do",response,textFieldOrderNum.getText(),refundVal);
         SimpleClient client;
         client = SimpleClient.getClient();
         client.sendToServer(complainEvent);
+        checkLabel.setText("Sent Successfully");
     }
     @FXML
     private void backButton(ActionEvent event)throws IOException {

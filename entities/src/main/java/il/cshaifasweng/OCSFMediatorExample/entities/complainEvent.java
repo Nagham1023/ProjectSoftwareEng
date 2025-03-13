@@ -16,12 +16,14 @@ public class complainEvent implements Serializable {
     private String tell_complain;
     private Date date_complain;
     private Time time_complain;
+    private Restaurant restaurant;
     private String status_complaint;
     private String response_complaint;
-    private Restaurant restaurant;
+    private String orderNum_complaint="";
+    private double refund_complaint=0;
 
 
-    public complainEvent(String kind, String name, String email, String tell,int id,Date date,Time time, String status, String response, Restaurant restaurant) {
+    public complainEvent(String kind, String name, String email, String tell,int id,Date date,Time time, Restaurant restaurant,String status, String response, String orderNum, double refund) {
         this.kind_complain = kind;
         this.name_complain = name;
         this.email_complain = email;
@@ -32,9 +34,11 @@ public class complainEvent implements Serializable {
         this.status_complaint = status;
         this.response_complaint = response;
         this.restaurant = restaurant;
+        this.orderNum_complaint = orderNum;
+        this.refund_complaint = refund;
     }
 
-    public complainEvent(String kind, String name, String email, String tell,Date date,Time time, String status, String response, Restaurant restaurant) {
+    public complainEvent(String kind, String name, String email, String tell ,Date date,Time time, Restaurant restaurant,String status, String response, String orderNum, double refund){
         this.kind_complain = kind;
         this.name_complain = name;
         this.email_complain = email;
@@ -44,10 +48,11 @@ public class complainEvent implements Serializable {
         this.status_complaint = status;
         this.response_complaint = response;
         this.restaurant = restaurant;
+        this.orderNum_complaint = orderNum;
+        this.refund_complaint = refund;
     }
 
     public complainEvent() {
-
     }
 
 
@@ -103,6 +108,12 @@ public class complainEvent implements Serializable {
     public String getResponse() {return response_complaint;}
     public void setResponse(String response) {this.response_complaint = response;}
 
+    public String getOrderNum() {return orderNum_complaint;}
+    public void setOrderNum(String orderNum) {this.orderNum_complaint = orderNum;}
+
+    public double getRefund() {return refund_complaint;}
+    public void setRefund(double refund) {this.refund_complaint = refund;}
+
     @Override
     public String toString() {
         return "complainEvent{" +
@@ -115,6 +126,8 @@ public class complainEvent implements Serializable {
                 ", status_complaint=" + status_complaint + '\'' +
                 ", response_complaint=" + response_complaint + '\'' +
                 ", restaurant=" + restaurant + '\'' +
+                ", orderNum_complaint=" + orderNum_complaint + '\'' +
+                ", refund_complaint=" + refund_complaint + '\'' +
                 ", Id='" + id + '\'' +
                 '}';
     }

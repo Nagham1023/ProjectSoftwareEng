@@ -282,6 +282,7 @@ public class App {
             generateRestaurants();
             initializeSampleTables();
             //generateBasicUser();
+            // should generete complains
         } catch (Exception exception) {
             System.err.println("An error occurred, changes have been rolled back.");
             exception.printStackTrace();
