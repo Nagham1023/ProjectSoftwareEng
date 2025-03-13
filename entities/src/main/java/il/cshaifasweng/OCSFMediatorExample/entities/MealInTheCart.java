@@ -1,21 +1,21 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
 public class MealInTheCart {
-    private Meal meal;
+    private personal_Meal meal;
     private int quantity;
 
     // Constructor
-    public MealInTheCart(Meal meal, int quantity) {
+    public MealInTheCart(personal_Meal meal, int quantity) {
         this.meal = meal;
         this.quantity = quantity;
     }
 
     // Getters and Setters
-    public Meal getMeal() {
+    public personal_Meal getMeal() {
         return meal;
     }
 
-    public void setMeal(Meal meal) {
+    public void setMeal(personal_Meal meal) {
         this.meal = meal;
     }
 

@@ -241,23 +241,76 @@ public class menu_controller {
             for (int j = i + 1; j < listOfMeals.size(); j++) {
                 MealInTheCart nextMeal = listOfMeals.get(j);
 
-                // If both meals have the same ID, merge them
-                if (currentMeal.getMeal().getId() == nextMeal.getMeal().getId()) {
+                // If both meals have the same ID and identical customizations, merge them
+                if (currentMeal.getMeal().getMeal().getId() == nextMeal.getMeal().getMeal().getId() &&
+                        areCustomizationsEqual(currentMeal.getMeal().getCustomizationsList(), nextMeal.getMeal().getCustomizationsList())) {
+
                     // Merge quantities
                     currentMeal.setQuantity(currentMeal.getQuantity() + nextMeal.getQuantity());
 
                     // Remove the duplicate meal
                     listOfMeals.remove(j);
-
-
-                    j--;
+                    j--; // Adjust the index to account for the removed item
                 }
             }
         }
-        if(numberOfMeals != listOfMeals.size()) {
+
+        // Update the cart badge if the number of meals has changed
+        if (numberOfMeals != listOfMeals.size()) {
             numberOfMeals = listOfMeals.size();
             updateCartBadge();
         }
+    }
+    private void initalizeCart() {
+        // Iterate through the list of meals to check for duplicates
+        for (int i = 0; i < listOfMeals.size(); i++) {
+            MealInTheCart currentMeal = listOfMeals.get(i);
+
+            // Check if this meal has already been merged with another
+            for (int j = i + 1; j < listOfMeals.size(); j++) {
+                MealInTheCart nextMeal = listOfMeals.get(j);
+
+                // If both meals have the same ID and identical customizations, merge them
+                if (currentMeal.getMeal().getMeal().getId() == nextMeal.getMeal().getMeal().getId() &&
+                        areCustomizationsEqual(currentMeal.getMeal().getCustomizationsList(), nextMeal.getMeal().getCustomizationsList())) {
+
+                    // Merge quantities
+                    currentMeal.setQuantity(currentMeal.getQuantity() + nextMeal.getQuantity());
+
+                    // Remove the duplicate meal
+                    listOfMeals.remove(j);
+                    j--; // Adjust the index to account for the removed item
+                }
+            }
+        }
+
+        // Update the cart badge if the number of meals has changed
+        if (numberOfMeals != listOfMeals.size()) {
+            numberOfMeals = listOfMeals.size();
+            initalizeCartBadge();
+        }
+    }
+
+    private boolean areCustomizationsEqual(List<CustomizationWithBoolean> list1, List<CustomizationWithBoolean> list2) {
+        if (list1.size() != list2.size()) {
+            return false; // Different lengths, cannot be equal
+        }
+
+        // Compare each customization and its selection status
+        for (CustomizationWithBoolean custom1 : list1) {
+            boolean foundMatch = false;
+            for (CustomizationWithBoolean custom2 : list2) {
+                if (custom1.getCustomization().getId() == custom2.getCustomization().getId() &&
+                        custom1.getValue().equals(custom2.getValue())) {
+                    foundMatch = true;
+                    break;
+                }
+            }
+            if (!foundMatch) {
+                return false; // If any customization doesn't match, return false
+            }
+        }
+        return true;
     }
 
 
@@ -446,6 +499,7 @@ public class menu_controller {
         });
         //startLoading();
         initalizeCartBadge();
+        //initalizeCart();
         client.sendToServer("menu"+branchName);
 
         /***/

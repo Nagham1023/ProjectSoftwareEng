@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Customization;
+import il.cshaifasweng.OCSFMediatorExample.entities.CustomizationWithBoolean;
 import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
 import il.cshaifasweng.OCSFMediatorExample.entities.MealInTheCart;
 import javafx.application.Platform;
@@ -25,10 +26,7 @@ import javafx.util.Duration;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CartPageController {
@@ -67,6 +65,72 @@ public class CartPageController {
     private VBox cartItemsContainer;
 
     private static Map<Integer, HBox> mealRowMap = new HashMap<>();
+    //            mealsNum.setText("("+Integer.toString(numberOfMeals)+")");
+    private void updateCart() {
+        // Iterate through the list of meals to check for duplicates
+        for (int i = 0; i < listOfMeals.size(); i++) {
+            MealInTheCart currentMeal = listOfMeals.get(i);
+
+            // Check if this meal has already been merged with another
+            for (int j = i + 1; j < listOfMeals.size(); j++) {
+                MealInTheCart nextMeal = listOfMeals.get(j);
+
+                // If both meals have the same ID and identical customizations, merge them
+                if (currentMeal.getMeal().getMeal().getId() == nextMeal.getMeal().getMeal().getId() &&
+                        areCustomizationsEqual(currentMeal.getMeal().getCustomizationsList(), nextMeal.getMeal().getCustomizationsList())) {
+
+                    // Merge quantities
+                    currentMeal.setQuantity(currentMeal.getQuantity() + nextMeal.getQuantity());
+
+                    // Remove the duplicate meal
+                    listOfMeals.remove(j);
+                    j--; // Adjust the index to account for the removed item
+                }
+            }
+        }
+
+        // Update the cart badge if the number of meals has changed
+        if (numberOfMeals != listOfMeals.size()) {
+            numberOfMeals = listOfMeals.size();
+            mealsNum.setText("("+Integer.toString(numberOfMeals)+")");
+            //updateCartBadge();
+        }
+        clearCartRows();
+        initialize();
+
+    }
+
+    private void clearCartRows() {
+        cartItemsContainer.getChildren().clear(); // This will remove all child nodes in the container
+    }
+
+
+
+
+
+
+
+    private boolean areCustomizationsEqual(List<CustomizationWithBoolean> list1, List<CustomizationWithBoolean> list2) {
+        if (list1.size() != list2.size()) {
+            return false; // Different lengths, cannot be equal
+        }
+
+        // Compare each customization and its selection status
+        for (CustomizationWithBoolean custom1 : list1) {
+            boolean foundMatch = false;
+            for (CustomizationWithBoolean custom2 : list2) {
+                if (custom1.getCustomization().getId() == custom2.getCustomization().getId() &&
+                        custom1.getValue().equals(custom2.getValue())) {
+                    foundMatch = true;
+                    break;
+                }
+            }
+            if (!foundMatch) {
+                return false; // If any customization doesn't match, return false
+            }
+        }
+        return true;
+    }
 
     public void addMealToCart(MealInTheCart meal) {
         Platform.runLater(() -> {
@@ -76,30 +140,45 @@ public class CartPageController {
             mealRow.setPadding(new Insets(10)); // Add padding inside the HBox (top, right, bottom, left)
 
             // Meal Image
-            //ImageView mealImage = new ImageView(new Image(getClass().getResourceAsStream(imagePath)));
             ImageView mealImage = new ImageView();
 
-            if (meal.getMeal().getImage() != null) {
-                Image image = new Image(new ByteArrayInputStream(meal.getMeal().getImage()));
+            if (meal.getMeal().getMeal().getImage() != null) {
+                Image image = new Image(new ByteArrayInputStream(meal.getMeal().getMeal().getImage()));
                 mealImage = new ImageView(image);
-                // Add imageView to your UI
             } else {
                 System.err.println("Image data is null for the meal.");
-                // Handle the case where there is no image
             }
             mealImage.setFitHeight(80);
             mealImage.setFitWidth(80);
 
             // Meal Details
             VBox detailsBox = new VBox(5);
-            Label nameLabel = new Label(meal.getMeal().getName());
+
+            // Meal Name
+            Label nameLabel = new Label(meal.getMeal().getMeal().getName());
             nameLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-            Label descriptionLabel = new Label(meal.getMeal().getDescription());
+
+            // Meal Description
+            Label descriptionLabel = new Label(meal.getMeal().getMeal().getDescription());
             descriptionLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #757575;");
-            detailsBox.getChildren().addAll(nameLabel, descriptionLabel);
+
+            // Get unselected customizations and display them with "Without"
+            String withoutCustomizations = meal.getMeal().getCustomizationsList().stream()
+                    .filter(customizationWithBoolean -> !customizationWithBoolean.getValue()) // Get unselected ones
+                    .map(customizationWithBoolean -> "Without " + customizationWithBoolean.getCustomization().getName())
+                    .collect(Collectors.joining(", "));
+
+            // Label for "Without" customizations (only if there are unselected items)
+            if (!withoutCustomizations.isEmpty()) {
+                Label withoutLabel = new Label(withoutCustomizations);
+                withoutLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #000000;"); // Black text color
+                detailsBox.getChildren().addAll(nameLabel, descriptionLabel, withoutLabel);
+            } else {
+                detailsBox.getChildren().addAll(nameLabel, descriptionLabel);
+            }
 
             // Meal Price
-            Label priceLabel = new Label(meal.getMeal().getPrice() + "₪");
+            Label priceLabel = new Label(meal.getMeal().getMeal().getPrice() + "₪");
             priceLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #000000;");
 
             // Quantity Control
@@ -132,7 +211,7 @@ public class CartPageController {
                 int currentQty = Integer.parseInt(quantityField.getText());
                 if (currentQty > 1) {
                     quantityField.setText(String.valueOf(currentQty - 1));
-                    updateTotalPrice(); // Update total price when quantity changes
+                    updateTotalPrice();
                     meal.setQuantity(currentQty - 1);
                 }
             });
@@ -141,7 +220,7 @@ public class CartPageController {
             plusButton.setOnAction(event -> {
                 int currentQty = Integer.parseInt(quantityField.getText());
                 quantityField.setText(String.valueOf(currentQty + 1));
-                updateTotalPrice(); // Update total price when quantity changes
+                updateTotalPrice();
                 meal.setQuantity(currentQty + 1);
             });
 
@@ -155,9 +234,9 @@ public class CartPageController {
                 cartItemsContainer.getChildren().remove(mealRow);
                 listOfMeals.remove(meal);
                 numberOfMeals--;
-                mealsNum.setText("("+numberOfMeals+")");
-                updateTotalPrice(); // Update total price when a meal is deleted
-                if(numberOfMeals == 0) {
+                mealsNum.setText("(" + numberOfMeals + ")");
+                updateTotalPrice();
+                if (numberOfMeals == 0) {
                     emptyCart();
                 }
             });
@@ -172,8 +251,7 @@ public class CartPageController {
             // Add mealRow and spacer to cartContainer
             cartItemsContainer.getChildren().addAll(mealRow, spacer);
 
-            mealRowMap.put(meal.getMeal().getId(), mealRow);
-
+            mealRowMap.put(meal.getMeal().getMeal().getId(), mealRow);
 
             // Update total price initially
             updateTotalPrice();
@@ -182,6 +260,7 @@ public class CartPageController {
             emptyCartPane.setVisible(false);
         });
     }
+
 
     // Play the cart sound effect using MediaPlayer
     private void playDeleteSound() {
@@ -283,17 +362,14 @@ public class CartPageController {
 
     }
     private void openOrderSummary() {
-        // Initialize order details string
         StringBuilder orderDetails = new StringBuilder();
-        double totalAmount = 0.0;  // Variable to store the total amount
+        double totalAmount = 0.0;
 
-        // Loop through listOfMeals to gather details
         for (MealInTheCart meal : listOfMeals) {
-            totalAmount += meal.getMeal().getPrice() * meal.getQuantity();
+            totalAmount += meal.getMeal().getMeal().getPrice() * meal.getQuantity();
             orderDetails.append("\n");
         }
 
-        // Format the total price for display
         String totalAmountText = "Total: " + totalAmount + "₪";
 
         try {
@@ -302,100 +378,107 @@ public class CartPageController {
             Scene scene = new Scene(loader.load());
             OrderSummaryController controller = loader.getController();
 
-            // Pass the meal details and total amount to the summary controller
             controller.setSummary(summaryStage, orderDetails.toString(), totalAmountText);
 
-            // Get the VBox where meal details should be added
             VBox mealDetailsContainer = controller.getMealDetailsContainer();
 
             for (MealInTheCart meal : listOfMeals) {
-                // Create a new HBox to hold the meal image and details
-                HBox mealRow = new HBox();
+                HBox mealRow = new HBox(10);
                 mealRow.setSpacing(10);
 
-                // Convert byte[] to Image for the meal image
-                byte[] imageBytes = meal.getMeal().getImage();
+                byte[] imageBytes = meal.getMeal().getMeal().getImage();
                 if (imageBytes != null && imageBytes.length > 0) {
                     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageBytes);
                     Image mealImage = new Image(byteArrayInputStream);
 
-                    // Create ImageView
                     ImageView imageView = new ImageView(mealImage);
                     imageView.setFitHeight(100);
                     imageView.setFitWidth(100);
                     imageView.setPreserveRatio(true);
 
-                    // Add rounded corners
                     Rectangle clip = new Rectangle(100, 100);
                     clip.setArcWidth(20);
                     clip.setArcHeight(20);
                     imageView.setClip(clip);
 
-                    // Add image to mealRow
                     mealRow.getChildren().add(imageView);
                 }
 
-                // 📝 Create a TextFlow to allow different text styles
                 TextFlow mealInfoTextFlow = new TextFlow();
 
-                // 🔹 First Line: Name and Bold "X" + Quantity
-                Text mealName = new Text(meal.getMeal().getName() + " - ");
-                Text boldX = new Text("X");  // Bold "X"
+                Text mealName = new Text(meal.getMeal().getMeal().getName() + " - ");
+                Text boldX = new Text("X");
                 boldX.setStyle("-fx-font-weight: bold;");
-                Text quantity = new Text(String.valueOf(meal.getQuantity())); // Quantity in bold
+                Text quantity = new Text(String.valueOf(meal.getQuantity()));
                 quantity.setStyle("-fx-font-weight: bold;");
 
                 mealInfoTextFlow.getChildren().addAll(mealName, boldX, quantity, new Text("\n"));
 
-                // 🔹 Second Line: Description
-                if (meal.getMeal().getDescription() != null && !meal.getMeal().getDescription().isEmpty()) {
-                    Text description = new Text(meal.getMeal().getDescription() + "\n");
+                if (meal.getMeal().getMeal().getDescription() != null && !meal.getMeal().getMeal().getDescription().isEmpty()) {
+                    Text description = new Text(meal.getMeal().getMeal().getDescription() + "\n");
                     mealInfoTextFlow.getChildren().add(description);
                 }
 
-                // 🔹 Third Line: Customizations
-                if (meal.getMeal().getCustomizations() != null && !meal.getMeal().getCustomizations().isEmpty()) {
+                // Customizations with check/uncheck images
+                if (meal.getMeal().getCustomizationsList() != null && !meal.getMeal().getCustomizationsList().isEmpty()) {
                     Text customizationsTitle = new Text("Customizations:\n");
                     customizationsTitle.setStyle("-fx-font-weight: bold;");
+                    mealInfoTextFlow.getChildren().add(customizationsTitle);
 
-                    String customizationsList = meal.getMeal().getCustomizations().stream()
-                            .map(Customization::getName)
-                            .collect(Collectors.joining("\n")); // Each customization on a new line
+                    Image checkedImage = new Image(getClass().getResourceAsStream("/images/checked.png"));
+                    Image uncheckedImage = new Image(getClass().getResourceAsStream("/images/unchecked.png"));
 
-                    Text customizations = new Text(customizationsList + "\n");
+                    for (CustomizationWithBoolean customWithBool : meal.getMeal().getCustomizationsList()) {
+                        HBox customRow = new HBox(5);
+                        Label customLabel = new Label(customWithBool.getCustomization().getName());
+                        customLabel.setStyle("-fx-text-fill: black;");
 
-                    mealInfoTextFlow.getChildren().addAll(customizationsTitle, customizations);
+                        ImageView checkImageView = new ImageView(customWithBool.getValue() ? checkedImage : uncheckedImage);
+                        checkImageView.setFitWidth(20);
+                        checkImageView.setFitHeight(20);
+                        checkImageView.setPreserveRatio(true);
+
+                        // Toggle customization selection
+                        checkImageView.setOnMouseClicked(event -> {
+                            boolean newValue = !customWithBool.getValue();
+                            customWithBool.setValue(newValue);
+                            checkImageView.setImage(newValue ? checkedImage : uncheckedImage);
+                        });
+
+                        customRow.getChildren().addAll(checkImageView, customLabel);
+                        mealInfoTextFlow.getChildren().add(customRow);
+                    }
                 }
 
-                // Add mealInfoTextFlow to mealRow
                 mealRow.getChildren().add(mealInfoTextFlow);
-
-                // Add mealRow to mealDetailsContainer
                 mealDetailsContainer.getChildren().add(mealRow);
             }
 
-            // Apply blur effect on the main window
-            Stage mainStage = (Stage) stackPane.getScene().getWindow(); // Assuming you have a stackPane reference
+            Stage mainStage = (Stage) stackPane.getScene().getWindow();
             ColorAdjust blur = new ColorAdjust();
-            blur.setBrightness(-0.7); // Darken the main window
+            blur.setBrightness(-0.7);
             mainStage.getScene().getRoot().setEffect(blur);
 
-            // Make the summary window modal (disables interaction with main window)
             summaryStage.initModality(Modality.APPLICATION_MODAL);
             summaryStage.initOwner(mainStage);
 
-            // Remove blur effect when the summary window is closed
-            summaryStage.setOnHiding(event -> mainStage.getScene().getRoot().setEffect(null));
+            summaryStage.setOnHiding(event ->
+                    {
+                        mainStage.getScene().getRoot().setEffect(null);
+                        updateCart();
+                    }
+            );
 
-            // Show summary window
             summaryStage.setScene(scene);
             summaryStage.setTitle("Order Summary");
-            summaryStage.showAndWait(); // Wait until the summary window is closed
+            summaryStage.showAndWait();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
     @FXML
     private void clearCart() {
         cartItemsContainer.getChildren().clear();
