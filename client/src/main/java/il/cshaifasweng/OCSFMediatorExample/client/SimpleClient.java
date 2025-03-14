@@ -32,6 +32,15 @@ public class SimpleClient extends AbstractClient {
 		if (msg instanceof UserCheck) {
 			EventBus.getDefault().post(msg);
 		}
+		/******************************adan*****************************************/
+//		if (msg instanceof CreditCardCheck) {
+//			EventBus.getDefault().post(msg);  // Handle credit card-related messages
+//		}
+//		if (msg instanceof PersonalDetailsCheck) {
+//			EventBus.getDefault().post(msg);  // Handle credit card-related messages
+//		}
+		/******************************adan*****************************************/
+
 		if (msg instanceof ComplainList) {
 			System.out.println("the message is an adding complaint");
 			ComplainList complainList = (ComplainList) msg;
