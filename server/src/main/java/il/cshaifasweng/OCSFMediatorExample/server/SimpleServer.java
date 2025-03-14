@@ -4,6 +4,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.ReportRequest;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
+import il.cshaifasweng.OCSFMediatorExample.entities.CreditCardCheck;
 
 import java.io.IOException;
 
@@ -29,6 +30,7 @@ import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.ReportDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.*;
 
 import il.cshaifasweng.OCSFMediatorExample.server.RevenueReport;
 
@@ -89,7 +91,7 @@ public class SimpleServer extends AbstractServer {
                     System.out.println("*********************************************");
                     List<TableNode> tablesForSlot = getAvailableTables(reservation.getRestaurantName(), startTime, reservation.getSeats(), reservation.isInside());
 
-                    if (!tablesForSlot.isEmpty()&&startTime.isAfter(LocalDateTime.now())) {
+                    if (!tablesForSlot.isEmpty() && startTime.isAfter(LocalDateTime.now())) {
                         // If tables are available, add the time slot to the list
                         availableTimeSlots.add(startTime);
                     } else {
@@ -356,8 +358,107 @@ public class SimpleServer extends AbstractServer {
                 }
             }
 
-
         }
+
+        /*************************adan*****************************/
+//        if (msg instanceof CreditCardCheck) {
+//            CreditCardCheck creditCardCheck = (CreditCardCheck) msg;
+//            System.out.println("Processing request for card number: " + creditCardCheck.getCardNumber());
+//
+//            try {
+//                System.out.println(" is new card" + isCreditCardNew(creditCardCheck));
+//                // Check if a new card needs to be added or an existing one validated
+//                if (isCreditCardNew(creditCardCheck)) {
+//                    // New card details submission
+//                    PersonalDetails personalDetails = PersonalDetailsDB.getPersonalDetailsByEmail(creditCardCheck.getPersonalEmail());
+//                    if (personalDetails != null) {
+//                        CreditCard newCardDetails = new CreditCard();
+//                        newCardDetails.setCardNumber(creditCardCheck.getCardNumber());
+//                        newCardDetails.setCardholderName(creditCardCheck.getCardholderName());
+//                        newCardDetails.setCvv(creditCardCheck.getCvv());
+//                        newCardDetails.setExpiryDate(creditCardCheck.getExpiryDate()); // Ensure date format is correctly parsed
+//                        newCardDetails.setCardholdersID(creditCardCheck.getCardholdersID());
+//
+//                        newCardDetails.setPersonalDetails(personalDetails);
+//                        CreditCardDetailsDB.addCreditCardDetails(newCardDetails, personalDetails.getEmail()); // Assuming email is used for lookup in the add method
+//                        creditCardCheck.setValid(true);
+//                        creditCardCheck.setRespond("Credit card details added successfully.");
+//                    } else {
+//                        creditCardCheck.setValid(false);
+//                        creditCardCheck.setRespond("Personal details not found.");
+//                    }
+//                    // Send the result back to the client after adding a new card
+//                    client.sendToClient(creditCardCheck);
+//                } else {
+//                    // Existing card validation
+//                    List<CreditCard> creditCards = CreditCardDetailsDB.getCreditCardDetailsByPersonalEmail(creditCardCheck.getPersonalEmail());
+//                    boolean isValid = creditCards.stream().anyMatch(card ->
+//                            card.getCardNumber().equals(creditCardCheck.getCardNumber()) &&
+//                                    card.getCvv().equals(creditCardCheck.getCvv()) &&
+//                                    card.getCardholderName().equals(creditCardCheck.getCardholderName()) &&
+//                                    card.getExpiryDate().equals(creditCardCheck.getExpiryDate())
+//                    );
+//
+//                    creditCardCheck.setValid(isValid);
+//                    creditCardCheck.setRespond(isValid ? "Credit Card validation successful" : "Credit Card validation failed");
+//
+//                    // Send the validation result back to the client
+//                    client.sendToClient(creditCardCheck);
+//                }
+//            } catch (Exception e) {
+//                // Handle other exceptions that might be thrown during processing
+//                creditCardCheck.setValid(false);
+//                creditCardCheck.setRespond("Error processing request: " + e.getMessage());
+//                throw new RuntimeException("Failed to process credit card request", e);
+//            }
+//        }
+//
+//
+//        if (msg instanceof PersonalDetailsCheck) {
+//            PersonalDetailsCheck detailsCheck = (PersonalDetailsCheck) msg;
+//
+//            try {
+//                PersonalDetails existingDetails = PersonalDetailsDB.getPersonalDetailsByEmail(detailsCheck.getEmail());
+//
+//                if (existingDetails != null) {
+//                    // Validate existing personal details
+//                    if (existingDetails.getName().equals(detailsCheck.getName()) && existingDetails.getPhoneNumber().equals(detailsCheck.getPhoneNumber())) {
+//                        // Existing details match the provided details
+//                        detailsCheck.setDetailsComplete(true);
+//                        detailsCheck.setEmailVerified(true);
+//                        detailsCheck.setRespond("Existing details validated successfully.");
+//                    } else {
+//                        // Conflict in details
+//                        detailsCheck.setDetailsComplete(false);
+//                        detailsCheck.setEmailVerified(false);
+//                        detailsCheck.setRespond("Error: Mismatch with existing details for this email.");
+//                    }
+//                } else {
+//                    // No existing details, add new details
+//                    PersonalDetails newPersonalDetails = new PersonalDetails();
+//                    newPersonalDetails.setEmail(detailsCheck.getEmail());
+//                    newPersonalDetails.setName(detailsCheck.getName());
+//                    newPersonalDetails.setPhoneNumber(detailsCheck.getPhoneNumber());
+//
+//                    // Assuming you have a method to save new details
+//                    PersonalDetailsDB.addPersonalDetails(newPersonalDetails);
+//                    detailsCheck.setDetailsComplete(true);
+//                    detailsCheck.setEmailVerified(true);
+//                    detailsCheck.setRespond("New personal details added successfully.");
+//                }
+//
+//                // Send the response back to the client
+//                client.sendToClient(detailsCheck);
+//            } catch (Exception e) {
+//                throw new RuntimeException(e);
+//                // Handle exceptions and send error message back to client
+////                detailsCheck.setDetailsComplete(false);
+////                detailsCheck.setRespond("Server error: " + e.getMessage());
+////                client.sendToClient(detailsCheck);
+//            }
+//        }
+
+/***************************adan********************************/
         if (msgString.startsWith("#warning")) {
             Warning warning = new Warning("Warning from server!");
             try {
@@ -421,8 +522,7 @@ public class SimpleServer extends AbstractServer {
                 throw new RuntimeException(e);
             }
 
-        }
-        else if (msg.toString().startsWith("add client")) {
+        } else if (msg.toString().startsWith("add client")) {
             System.out.println("Adding client");
             Subscribers.add(client);
             SubscribedClient connection = new SubscribedClient(client);
@@ -438,8 +538,7 @@ public class SimpleServer extends AbstractServer {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }
-        else if (msg.toString().startsWith("remove client")) {
+        } else if (msg.toString().startsWith("remove client")) {
             System.out.println("Deleting client");
             if (!Subscribers.isEmpty()) {
                 Iterator<ConnectionToClient> iterator = Subscribers.iterator();
@@ -459,9 +558,8 @@ public class SimpleServer extends AbstractServer {
                     }
                 }
             }
-        }
-        else if (msg instanceof SearchOptions) {
-            try{
+        } else if (msg instanceof SearchOptions) {
+            try {
                 System.out.println("*************************************");
                 // Extract categories from the message
                 SearchOptions options = (SearchOptions) msg;
@@ -523,8 +621,8 @@ public class SimpleServer extends AbstractServer {
                 while (iterator.hasNext()) {
                     Meal meal = iterator.next();
                     boolean flag = false;
-                    for(Meal ml : currentMeals){
-                        if(ml.getName().equals(meal.getName())){
+                    for (Meal ml : currentMeals) {
+                        if (ml.getName().equals(meal.getName())) {
                             flag = true;
                         }
                     }
@@ -559,8 +657,7 @@ public class SimpleServer extends AbstractServer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-        else if (msg.toString().equals("Fetching SearchBy Options")) {
+        } else if (msg.toString().equals("Fetching SearchBy Options")) {
             try {
                 // Fetch all restaurants
                 List<Restaurant> restaurants = getAllRestaurants();
@@ -962,6 +1059,7 @@ public class SimpleServer extends AbstractServer {
         // Return the meals
         return restaurant.getMeals();
     }
+
     // Method to get meals by ingredient
     private List<Meal> getMealsByIngredient(String ingredient) throws Exception {
         try (Session session = App.getSessionFactory().openSession()) {
@@ -978,8 +1076,8 @@ public class SimpleServer extends AbstractServer {
                 session.update(meal); // Reattach the meal to the session
                 Hibernate.initialize(meal.getCustomizations()); // Initialize the collection
                 List<Customization> customizations = meal.getCustomizations();
-                for(Customization customization : customizations) {
-                    if(customization.getName().equals(ingredient)){
+                for (Customization customization : customizations) {
+                    if (customization.getName().equals(ingredient)) {
                         mealsWithIngredient.add(meal);
                     }
                 }
@@ -1080,6 +1178,7 @@ public class SimpleServer extends AbstractServer {
             return new ArrayList<>();
         }
     }
+
     public List<Complain> getAllComplains() {
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
@@ -1175,4 +1274,16 @@ public class SimpleServer extends AbstractServer {
         }
     }
 
+    /********************adan*************************/
+// Method to validate a CreditCardCheck object
+    private boolean validateCreditCard(CreditCardCheck creditCardCheck) {
+        // Assuming validation logic is based on basic checks for demonstration
+        boolean isValidNumber = creditCardCheck.getCardNumber().matches("\\d{16}");
+        boolean isValidCvv = creditCardCheck.getCvv().matches("\\d{3}");
+        boolean isValidId = creditCardCheck.getCardholdersID().matches("\\d{9}");
+        boolean isValidName = creditCardCheck.getCardholderName() != null && !creditCardCheck.getCardholderName().trim().isEmpty();
+
+        return isValidNumber && isValidCvv && isValidId && isValidName;
+    }
+/********************************adan************************/
 }

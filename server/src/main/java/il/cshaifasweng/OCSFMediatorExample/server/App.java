@@ -23,8 +23,10 @@ import java.util.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.addCreditCardDetails;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.addPersonalDetails;
 import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.getAllRestaurants;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.printAllUsers;
 
@@ -279,6 +281,24 @@ public class App {
             printAllData();
             printAllUsers();
             //generateOrders();
+
+            /*************************adan***************************/
+//            PersonalDetails ps  = new PersonalDetails();
+//            ps.setName("yo");
+//            ps.setEmail("yousefknani9@gmail.com");
+//            ps.setPhoneNumber("0502981753");
+//            addPersonalDetails(ps);
+//            CreditCard creditCard = new CreditCard();
+//            creditCard.setCardNumber("0000000000000000");
+//            creditCard.setExpiryDate("05/20255");
+//            creditCard.setCvv("123");
+//            creditCard.setCardholdersID("000000000");
+//            creditCard.setCardholderName("yousef");
+//            creditCard.setPersonalDetails(ps);
+//
+//            addCreditCardDetails(creditCard,"yousefknani9@gmail.com");
+            /*************************adan***************************/
+
             generateRestaurants();
             initializeSampleTables();
             //generateBasicUser();
