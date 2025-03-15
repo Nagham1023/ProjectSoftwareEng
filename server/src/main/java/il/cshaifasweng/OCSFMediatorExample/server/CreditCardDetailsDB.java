@@ -4,10 +4,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.CreditCard;
 import il.cshaifasweng.OCSFMediatorExample.entities.CreditCardCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.PersonalDetails;
 import il.cshaifasweng.OCSFMediatorExample.entities.Users;
-import org.hibernate.Hibernate;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
+import org.hibernate.*;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -21,31 +18,34 @@ public class CreditCardDetailsDB {
     private static Session session;
 
     public static void addCreditCardDetails(CreditCard newCardDetails, String personalEmail) {
-        Transaction transaction = null;
-        Session session = null;
+
         try {
-            System.out.println("1");
-            session = getSessionFactory().openSession();
-            System.out.println("2");
-            transaction = session.beginTransaction();
+            if (session == null || !session.isOpen()) {
+                SessionFactory sessionFactory = getSessionFactory();
+                session = sessionFactory.openSession();
+            }
+
+            if (session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
+            }
+            session.beginTransaction();
 
             PersonalDetails personalDetails = (PersonalDetails) session.createQuery("FROM PersonalDetails WHERE email = :email")
                     .setParameter("email", personalEmail)
                     .uniqueResult();
-            System.out.println("3");
 
             if (personalDetails != null) {
                 newCardDetails.setPersonalDetails(personalDetails);
                 session.save(newCardDetails);
                 System.out.println("Credit card details added for: " + personalEmail);
-                transaction.commit();
+                session.getTransaction().commit();
             } else {
                 System.out.println("No personal details found with email: " + personalEmail);
-                transaction.rollback();  // Explicit rollback if no personal details are found
+                session.getTransaction().rollback();  // Explicit rollback if no personal details are found
             }
         } catch (Exception e) {
-            if (transaction != null && transaction.isActive()) {
-                transaction.rollback();
+            if (session.getTransaction() != null && session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
             }
             throw new RuntimeException("Failed to add credit card details", e);
         } finally {
@@ -56,34 +56,43 @@ public class CreditCardDetailsDB {
     }
 
 
-    public static boolean isCreditCardNew(CreditCardCheck credit) throws Exception {
-        if (session == null || !session.isOpen()) {
-            SessionFactory sessionFactory = getSessionFactory();
-            session = sessionFactory.openSession();
-        }
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Long> query = builder.createQuery(Long.class);
-        Root<CreditCard> root = query.from(CreditCard.class);
-        query.select(builder.count(root))
-                .where(
-                        builder.and(
-                                builder.equal(root.get("cvv"), credit.getCvv()),
-                                builder.equal(root.get("cardNumber"), credit.getCardNumber()),
-                                builder.equal(root.get("cardholderName"), credit.getCardholderName()),
-                                builder.equal(root.get("cardholdersID"), credit.getCardholdersID()),
-                                builder.equal(root.get("expiryDate"), credit.getExpiryDate()),
-                                builder.equal(root.get("personalEmail"), credit.getPersonalEmail())
-                                //builder.equal(root.get("password"), password) // Uncomment and modify if password needs to be checked
-                        )
-                );
+    public static boolean isCreditCardNew(CreditCardCheck credit) throws HibernateException {
+        boolean isNew = false;
+        try {
+            if (session == null || !session.isOpen()) {
+                SessionFactory sessionFactory = getSessionFactory();
+                session = sessionFactory.openSession();
+            }
 
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Long> query = builder.createQuery(Long.class);
+            Root<CreditCard> root = query.from(CreditCard.class);
+            query.select(builder.count(root))
+                    .where(
+                            builder.and(
+                                    builder.equal(root.get("cvv"), credit.getCvv())
+                                    //builder.equal(root.get("cardNumber"), credit.getCardNumber()),
+                                    //builder.equal(root.get("cardholderName"), credit.getCardholderName()),
+                                    //builder.equal(root.get("cardholdersID"), credit.getCardholdersID()),
+                                    //builder.equal(root.get("expiryDate"), credit.getExpiryDate()),
+                                    //builder.equal(root.get("personalEmail"), credit.getPersonalEmail())
+                            )
+                    );
 
-        Long count = session.createQuery(query).getSingleResult();
-        if (session != null && session.isOpen()) {
-            session.close(); // Close the session after operation
+            Long count = session.createQuery(query).getSingleResult();
+            isNew = (count == 0);
+            System.out.println("there is a new credit card details: " + isNew );
+        } catch (Exception e) {
+            // You might want to log the exception here or handle specific exceptions
+            throw new HibernateException("Failed to check if credit card is new", e);
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close(); // Ensure session is closed in the finally block
+            }
         }
-        return count == 0;
+        return isNew;
     }
+
 
 
     public static List<CreditCard> getCreditCardDetailsByPersonalEmail(String personalEmail) {
@@ -120,10 +129,5 @@ public class CreditCardDetailsDB {
             if (session != null) session.close();
         }
         return null;
-    }
-
-    private static SessionFactory getSessionFactory() {
-        // This method should return your Hibernate SessionFactory instance
-        return App.getSessionFactory();
     }
 }

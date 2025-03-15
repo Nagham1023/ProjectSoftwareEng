@@ -7,6 +7,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -104,6 +105,13 @@ public class CreditDetailsController {
                 .and(emailInteractedC);
 
         checkoutButton.disableProperty().bind(isAllValid.not());
+    }
+
+    @FXML
+    void checkoutFunction(ActionEvent event) {
+        //yousef
+        //SimpleClient simpleClient = ne
+
     }
 
 
@@ -455,6 +463,7 @@ public void onCreditCardCheckResponse(CreditCardCheck creditCardCheck) {
         // Attempt to validate and then directly use the expiry date string
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
         try {
+            System.out.println("Inserting credit card details to server...");
             // This is just for validation to ensure the format is correct
             YearMonth.parse(expiryDateStr, formatter);
 

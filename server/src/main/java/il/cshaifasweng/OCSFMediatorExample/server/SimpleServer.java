@@ -361,102 +361,103 @@ public class SimpleServer extends AbstractServer {
         }
 
         /*************************adan*****************************/
-//        if (msg instanceof CreditCardCheck) {
-//            CreditCardCheck creditCardCheck = (CreditCardCheck) msg;
-//            System.out.println("Processing request for card number: " + creditCardCheck.getCardNumber());
-//
-//            try {
-//                System.out.println(" is new card" + isCreditCardNew(creditCardCheck));
-//                // Check if a new card needs to be added or an existing one validated
-//                if (isCreditCardNew(creditCardCheck)) {
-//                    // New card details submission
-//                    PersonalDetails personalDetails = PersonalDetailsDB.getPersonalDetailsByEmail(creditCardCheck.getPersonalEmail());
-//                    if (personalDetails != null) {
-//                        CreditCard newCardDetails = new CreditCard();
-//                        newCardDetails.setCardNumber(creditCardCheck.getCardNumber());
-//                        newCardDetails.setCardholderName(creditCardCheck.getCardholderName());
-//                        newCardDetails.setCvv(creditCardCheck.getCvv());
-//                        newCardDetails.setExpiryDate(creditCardCheck.getExpiryDate()); // Ensure date format is correctly parsed
-//                        newCardDetails.setCardholdersID(creditCardCheck.getCardholdersID());
-//
-//                        newCardDetails.setPersonalDetails(personalDetails);
-//                        CreditCardDetailsDB.addCreditCardDetails(newCardDetails, personalDetails.getEmail()); // Assuming email is used for lookup in the add method
-//                        creditCardCheck.setValid(true);
-//                        creditCardCheck.setRespond("Credit card details added successfully.");
-//                    } else {
-//                        creditCardCheck.setValid(false);
-//                        creditCardCheck.setRespond("Personal details not found.");
-//                    }
-//                    // Send the result back to the client after adding a new card
-//                    client.sendToClient(creditCardCheck);
-//                } else {
-//                    // Existing card validation
-//                    List<CreditCard> creditCards = CreditCardDetailsDB.getCreditCardDetailsByPersonalEmail(creditCardCheck.getPersonalEmail());
-//                    boolean isValid = creditCards.stream().anyMatch(card ->
-//                            card.getCardNumber().equals(creditCardCheck.getCardNumber()) &&
-//                                    card.getCvv().equals(creditCardCheck.getCvv()) &&
-//                                    card.getCardholderName().equals(creditCardCheck.getCardholderName()) &&
-//                                    card.getExpiryDate().equals(creditCardCheck.getExpiryDate())
-//                    );
-//
-//                    creditCardCheck.setValid(isValid);
-//                    creditCardCheck.setRespond(isValid ? "Credit Card validation successful" : "Credit Card validation failed");
-//
-//                    // Send the validation result back to the client
-//                    client.sendToClient(creditCardCheck);
-//                }
-//            } catch (Exception e) {
-//                // Handle other exceptions that might be thrown during processing
-//                creditCardCheck.setValid(false);
-//                creditCardCheck.setRespond("Error processing request: " + e.getMessage());
-//                throw new RuntimeException("Failed to process credit card request", e);
-//            }
-//        }
-//
-//
-//        if (msg instanceof PersonalDetailsCheck) {
-//            PersonalDetailsCheck detailsCheck = (PersonalDetailsCheck) msg;
-//
-//            try {
-//                PersonalDetails existingDetails = PersonalDetailsDB.getPersonalDetailsByEmail(detailsCheck.getEmail());
-//
-//                if (existingDetails != null) {
-//                    // Validate existing personal details
-//                    if (existingDetails.getName().equals(detailsCheck.getName()) && existingDetails.getPhoneNumber().equals(detailsCheck.getPhoneNumber())) {
-//                        // Existing details match the provided details
-//                        detailsCheck.setDetailsComplete(true);
-//                        detailsCheck.setEmailVerified(true);
-//                        detailsCheck.setRespond("Existing details validated successfully.");
-//                    } else {
-//                        // Conflict in details
-//                        detailsCheck.setDetailsComplete(false);
-//                        detailsCheck.setEmailVerified(false);
-//                        detailsCheck.setRespond("Error: Mismatch with existing details for this email.");
-//                    }
-//                } else {
-//                    // No existing details, add new details
-//                    PersonalDetails newPersonalDetails = new PersonalDetails();
-//                    newPersonalDetails.setEmail(detailsCheck.getEmail());
-//                    newPersonalDetails.setName(detailsCheck.getName());
-//                    newPersonalDetails.setPhoneNumber(detailsCheck.getPhoneNumber());
-//
-//                    // Assuming you have a method to save new details
-//                    PersonalDetailsDB.addPersonalDetails(newPersonalDetails);
-//                    detailsCheck.setDetailsComplete(true);
-//                    detailsCheck.setEmailVerified(true);
-//                    detailsCheck.setRespond("New personal details added successfully.");
-//                }
-//
-//                // Send the response back to the client
+        if (msg instanceof CreditCardCheck) {
+            CreditCardCheck creditCardCheck = (CreditCardCheck) msg;
+            System.out.println("Processing request for card number: " + creditCardCheck.getCardNumber());
+
+            try {
+                System.out.println(" is new card " + isCreditCardNew(creditCardCheck));
+                // Check if a new card needs to be added or an existing one validated
+                if (isCreditCardNew(creditCardCheck)) {
+                    // New card details submission
+                    PersonalDetails personalDetails = PersonalDetailsDB.getPersonalDetailsByEmail(creditCardCheck.getPersonalEmail());
+                    if (personalDetails != null) {
+                        System.out.println("personal details found");
+                        CreditCard newCardDetails = new CreditCard();
+                        newCardDetails.setCardNumber(creditCardCheck.getCardNumber());
+                        newCardDetails.setCardholderName(creditCardCheck.getCardholderName());
+                        newCardDetails.setCvv(creditCardCheck.getCvv());
+                        newCardDetails.setExpiryDate(creditCardCheck.getExpiryDate()); // Ensure date format is correctly parsed
+                        newCardDetails.setCardholdersID(creditCardCheck.getCardholdersID());
+
+                        newCardDetails.setPersonalDetails(personalDetails);
+                        CreditCardDetailsDB.addCreditCardDetails(newCardDetails, personalDetails.getEmail()); // Assuming email is used for lookup in the add method
+                        creditCardCheck.setValid(true);
+                        creditCardCheck.setRespond("Credit card details added successfully.");
+                    } else {
+                        //here adan have to add that's if there's no personal details then to generate a personal details with the credit card .
+                        System.out.println("personal details not found");
+                        creditCardCheck.setValid(false);
+                        creditCardCheck.setRespond("Personal details not found.");
+                    }
+                    client.sendToClient(creditCardCheck);
+                } else {
+                    // Existing card validation
+                    List<CreditCard> creditCards = CreditCardDetailsDB.getCreditCardDetailsByPersonalEmail(creditCardCheck.getPersonalEmail());
+                    boolean isValid = creditCards.stream().anyMatch(card ->
+                            card.getCardNumber().equals(creditCardCheck.getCardNumber()) &&
+                                    card.getCvv().equals(creditCardCheck.getCvv()) &&
+                                    card.getCardholderName().equals(creditCardCheck.getCardholderName()) &&
+                                    card.getExpiryDate().equals(creditCardCheck.getExpiryDate())
+                    );
+
+                    creditCardCheck.setValid(isValid);
+                    creditCardCheck.setRespond(isValid ? "Credit Card validation successful" : "Credit Card validation failed");
+
+                    // Send the validation result back to the client
+                    client.sendToClient(creditCardCheck);
+                }
+            } catch (Exception e) {
+                // Handle other exceptions that might be thrown during processing
+                creditCardCheck.setValid(false);
+                creditCardCheck.setRespond("Error processing request: " + e.getMessage());
+                throw new RuntimeException("Failed to process credit card request", e);
+            }
+        }
+
+        if (msg instanceof PersonalDetailsCheck) {
+            PersonalDetailsCheck detailsCheck = (PersonalDetailsCheck) msg;
+
+            try {
+                PersonalDetails existingDetails = PersonalDetailsDB.getPersonalDetailsByEmail(detailsCheck.getEmail());
+
+                if (existingDetails != null) {
+                    // Validate existing personal details
+                    if (existingDetails.getName().equals(detailsCheck.getName()) && existingDetails.getPhoneNumber().equals(detailsCheck.getPhoneNumber())) {
+                        // Existing details match the provided details
+                        detailsCheck.setDetailsComplete(true);
+                        detailsCheck.setEmailVerified(true);
+                        detailsCheck.setRespond("Existing details validated successfully.");
+                    } else {
+                        // Conflict in details
+                        detailsCheck.setDetailsComplete(false);
+                        detailsCheck.setEmailVerified(false);
+                        detailsCheck.setRespond("Error: Mismatch with existing details for this email.");
+                    }
+                } else {
+                    // No existing details, add new details
+                    PersonalDetails newPersonalDetails = new PersonalDetails();
+                    newPersonalDetails.setEmail(detailsCheck.getEmail());
+                    newPersonalDetails.setName(detailsCheck.getName());
+                    newPersonalDetails.setPhoneNumber(detailsCheck.getPhoneNumber());
+
+                    // Assuming you have a method to save new details
+                    PersonalDetailsDB.addPersonalDetails(newPersonalDetails);
+                    detailsCheck.setDetailsComplete(true);
+                    detailsCheck.setEmailVerified(true);
+                    detailsCheck.setRespond("New personal details added successfully.");
+                }
+
+                // Send the response back to the client
+                client.sendToClient(detailsCheck);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+                // Handle exceptions and send error message back to client
+//                detailsCheck.setDetailsComplete(false);
+//                detailsCheck.setRespond("Server error: " + e.getMessage());
 //                client.sendToClient(detailsCheck);
-//            } catch (Exception e) {
-//                throw new RuntimeException(e);
-//                // Handle exceptions and send error message back to client
-////                detailsCheck.setDetailsComplete(false);
-////                detailsCheck.setRespond("Server error: " + e.getMessage());
-////                client.sendToClient(detailsCheck);
-//            }
-//        }
+            }
+        }
 
 /***************************adan********************************/
         if (msgString.startsWith("#warning")) {

@@ -63,6 +63,8 @@ public class App {
         configuration.addAnnotatedClass(Restaurant.class);
         configuration.addAnnotatedClass(TableNode.class);
         configuration.addAnnotatedClass(ReservationSave.class);
+        configuration.addAnnotatedClass(PersonalDetails.class);
+        configuration.addAnnotatedClass(CreditCard.class);
 
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySettings(configuration.getProperties())
@@ -151,7 +153,7 @@ public class App {
         } finally {
             // Ensure the session is closed after the operation to avoid memory leaks
             if (session != null && session.isOpen()) {
-                // session.close();
+                 session.close();
             }
         }
 
@@ -283,20 +285,20 @@ public class App {
             //generateOrders();
 
             /*************************adan***************************/
-//            PersonalDetails ps  = new PersonalDetails();
-//            ps.setName("yo");
-//            ps.setEmail("yousefknani9@gmail.com");
-//            ps.setPhoneNumber("0502981753");
-//            addPersonalDetails(ps);
-//            CreditCard creditCard = new CreditCard();
-//            creditCard.setCardNumber("0000000000000000");
-//            creditCard.setExpiryDate("05/20255");
-//            creditCard.setCvv("123");
-//            creditCard.setCardholdersID("000000000");
-//            creditCard.setCardholderName("yousef");
-//            creditCard.setPersonalDetails(ps);
-//
-//            addCreditCardDetails(creditCard,"yousefknani9@gmail.com");
+            PersonalDetails ps  = new PersonalDetails();
+            ps.setName("yo");
+            ps.setEmail("yousefknani9@gmail.com");
+            ps.setPhoneNumber("0502981753");
+            //addPersonalDetails(ps);
+            CreditCard creditCard = new CreditCard();
+            creditCard.setCardNumber("0000000000000000");
+            creditCard.setExpiryDate("05/2025");
+            creditCard.setCvv("123");
+            creditCard.setCardholdersID("000000000");
+            creditCard.setCardholderName("yousef");
+            creditCard.setPersonalDetails(ps);
+
+            //addCreditCardDetails(creditCard,"yousefknani9@gmail.com");
             /*************************adan***************************/
 
             generateRestaurants();

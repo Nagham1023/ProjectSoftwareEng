@@ -321,7 +321,7 @@ public class UsersDB {
 
     public static void generateBasicUser() throws Exception {
                 // Helper function to read image as byte[]
-                if (session == null || !session.isOpen()) { // hala added to Ensure session is opened before calling generateOrders().
+        if (session == null || !session.isOpen()) { // hala added to Ensure session is opened before calling generateOrders().
             SessionFactory sessionFactory = getSessionFactory();
             session = sessionFactory.openSession();
         }

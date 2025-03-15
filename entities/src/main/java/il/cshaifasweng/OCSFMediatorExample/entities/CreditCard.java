@@ -30,7 +30,8 @@ public class CreditCard implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "personal_email", referencedColumnName = "email")
-    private PersonalDetails personalDetails; // Linking back to PersonalDetails via email
+    private PersonalDetails personalDetails;
+
 
     // Getters and setters
 
