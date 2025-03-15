@@ -1,7 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.PersonalDetails;
-import il.cshaifasweng.OCSFMediatorExample.entities.CreditCard;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -9,8 +9,12 @@ import org.hibernate.Transaction;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.List;
+
+import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
 
 public class PersonalDetailsDB {
     private static Session session;
@@ -70,22 +74,32 @@ public class PersonalDetailsDB {
 //    }
 
     // Add personal details to the database
-    public static void addPersonalDetails(PersonalDetails personalDetails) {
-        try (Session session = getSessionFactory().openSession()) {
-            Transaction tx = session.beginTransaction();
+    public static void addPersonalDetails(PersonalDetails personalDetails) throws Exception {
+        if (session == null || !session.isOpen()) {
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+        }
+
+        session.beginTransaction();
+        try {
             session.save(personalDetails);
-            tx.commit();
+            session.flush();
+            session.getTransaction().commit();
+
         } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
             e.printStackTrace();
+            throw new Exception("An error occurred while generating orders.", e);
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
     }
 
-    private static SessionFactory getSessionFactory() {
-        // This method should return your Hibernate SessionFactory instance, similar to your App.getSessionFactory().
-        return App.getSessionFactory();
-    }
-
-    public static boolean hasCreditCardDetails(String email) {
+    /*public static boolean hasCreditCardDetails(String email) {
         Transaction transaction = null;
         try (Session localSession = getSessionFactory().openSession()) {
             transaction = localSession.beginTransaction();
@@ -106,5 +120,5 @@ public class PersonalDetailsDB {
             e.printStackTrace();
         }
         return false;  // No credit card details found or an error occurred
-    }
+    }*/
 }

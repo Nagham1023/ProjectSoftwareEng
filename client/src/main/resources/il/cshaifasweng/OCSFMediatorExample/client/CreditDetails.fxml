@@ -48,7 +48,7 @@
             <Font name="System Bold" size="16.0" />
          </font>
       </Label>
-      <Button fx:id="checkoutButton" layoutX="127.0" layoutY="620.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="262.0" style="-fx-background-color: #832018; -fx-border-radius: 20;" text="CHECKOUT" textFill="#fbebf4">
+      <Button fx:id="checkoutButton" layoutX="127.0" layoutY="620.0" mnemonicParsing="false" onAction="#checkoutFunction" prefHeight="50.0" prefWidth="262.0" style="-fx-background-color: #832018; -fx-border-radius: 20;" text="CHECKOUT" textFill="#fbebf4">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
