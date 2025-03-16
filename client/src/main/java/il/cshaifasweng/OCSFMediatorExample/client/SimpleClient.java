@@ -33,10 +33,7 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post(msg);
 		}
 		/******************************adan*****************************************/
-		if (msg instanceof CreditCardCheck) {
-			EventBus.getDefault().post(msg);  // Handle credit card-related messages
-		}
-		if (msg instanceof PersonalDetailsCheck) {
+		if (msg instanceof PaymentCheck) {
 			EventBus.getDefault().post(msg);  // Handle credit card-related messages
 		}
 		/******************************adan*****************************************/

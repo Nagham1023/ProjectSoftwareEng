@@ -1,7 +1,10 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 //import il.cshaifasweng.OCSFMediatorExample.entities.CreditCardCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.CreditCard;
 import il.cshaifasweng.OCSFMediatorExample.entities.CreditCardCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.PaymentCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.PersonalDetails;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -62,6 +65,10 @@ public class CreditDetailsController {
     @FXML
     private Label emailErrorLabelC;
     private BooleanProperty emailInteractedC = new SimpleBooleanProperty(false);  // Track interaction
+
+
+    static public PersonalDetails personalDetails;
+
 
     @FXML
     private void initialize() {
@@ -362,17 +369,17 @@ public class CreditDetailsController {
         boolean valid = false;
         if (email.isEmpty()) {
             emailErrorLabelC.setText("This field is required.");
-            System.out.println("Email validation: field is required");
+            //System.out.println("Email validation: field is required");
         } else if (!email.matches("^[\\w.+\\-]+@gmail\\.com$")) {
             emailErrorLabelC.setText("Email should be correct and end with @gmail.com");
-            System.out.println("Email validation: incorrect format");
+            //System.out.println("Email validation: incorrect format");
         } else {
             emailErrorLabelC.setText(""); // Clear the error message if valid
             valid = true;  // Only set valid to true if email is correctly formatted
-            System.out.println("Email validation: correct format");
+            //System.out.println("Email validation: correct format");
         }
         emailInteractedC.set(valid);
-        System.out.println("isEmailValid set to: " + valid);
+        //System.out.println("isEmailValid set to: " + valid);
     }
 
 
@@ -393,22 +400,12 @@ public class CreditDetailsController {
     }
 /************************************new***********************************************/
 @Subscribe
-public void onCreditCardCheckResponse(CreditCardCheck creditCardCheck) {
+public void onPaymentResponse(PaymentCheck creditCardCheck) {
     // This method gets called when a CreditCardCheck object is posted to the EventBus
     Platform.runLater(() -> {
-        if (creditCardCheck.isValid()) {
-            // If the credit card is valid, update UI to reflect success or proceed to next steps
+
             System.out.println("Credit card is valid.");
-            // For example, clear any error messages and proceed to a confirmation page or enable further actions
-            errorLabel.setText("");
-            // Maybe navigate to a success page or enable a purchase button
-            // navigateToSuccessPage(); // This is a hypothetical method call
-        } else {
-            // If the credit card is not valid, update UI to show the error message
-            System.out.println("Credit card validation failed.");
-            errorLabel.setText(creditCardCheck.getRespond());
-            // Display more details or log them, ensure the error message is set to display why validation failed
-        }
+            errorLabel.setText(creditCardCheck.getResponse());
     });
 }
 
@@ -468,17 +465,17 @@ public void onCreditCardCheckResponse(CreditCardCheck creditCardCheck) {
             YearMonth.parse(expiryDateStr, formatter);
 
             // Since the format is correct, assign it directly
-            CreditCardCheck creditCardCheck = new CreditCardCheck();
-            creditCardCheck.setCardNumber(cardNumber);
-            creditCardCheck.setCardholderName(cardholderName);
-            creditCardCheck.setCardholdersID(cardholdersID);
-            creditCardCheck.setCvv(cvv);
-            creditCardCheck.setExpiryDate(expiryDateStr); // Store as String
+            CreditCard creditcard = new CreditCard();
+            creditcard.setCardNumber(cardNumber);
+            creditcard.setCardholderName(cardholderName);
+            creditcard.setCardholdersID(cardholdersID);
+            creditcard.setCvv(cvv);
+            creditcard.setExpiryDate(expiryDateStr); // Store as String
 
-            // Send this information to the server using SimpleClient
+            PaymentCheck paymentCheck = new PaymentCheck(creditcard,personalDetails);
             try {
                 SimpleClient client = SimpleClient.getClient();
-                client.sendToServer(creditCardCheck);
+                client.sendToServer(paymentCheck);
             } catch (IOException e) {
                 System.err.println("Error sending credit card details to server: " + e.getMessage());
                 errorLabel.setText("Failed to send data to server.");  // Update UI to show error message

@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.List;
+import org.hibernate.query.Query;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
 
@@ -43,18 +44,65 @@ public class PersonalDetailsDB {
             return false;
         }
     }
+    public static boolean isPersonalDetailsNew(PersonalDetails pd) throws HibernateException {
+        boolean isNew = false;
+        try {
+            if (session == null || !session.isOpen()) {
+                SessionFactory sessionFactory = getSessionFactory();
+                session = sessionFactory.openSession();
+                System.out.println("Session opened: " + session.isOpen());
+            }
 
-    public static PersonalDetails getPersonalDetailsByEmail(String email) {
-        try (Session localSession = getSessionFactory().openSession()) {
-            CriteriaBuilder builder = localSession.getCriteriaBuilder();
-            CriteriaQuery<PersonalDetails> query = builder.createQuery(PersonalDetails.class);
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Long> query = builder.createQuery(Long.class);
             Root<PersonalDetails> root = query.from(PersonalDetails.class);
-            query.select(root).where(builder.equal(root.get("email"), email));
-            return localSession.createQuery(query).uniqueResult();
+            query.select(builder.count(root))
+                    .where(
+                            builder.equal(root.get("email"), pd.getEmail())
+                    );
+
+            System.out.println("Running query...");
+
+            Long count = session.createQuery(query).getSingleResult();
+            isNew = (count == 0);
+            System.out.println("there is a new Personal details: " + isNew);
+
         } catch (Exception e) {
-            e.printStackTrace();
+            // Log the exception to see if there's an issue
+            System.out.println("Error occurred: " + e.getMessage());
+            e.printStackTrace();  // Print stack trace to help debug the issue
+            throw new HibernateException("Failed to check if PersonalDetails is new", e);
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close(); // Ensure session is closed in the finally block
+                System.out.println("Session closed.");
+            }
         }
-        return null;
+        return isNew;
+    }
+
+
+
+    public static PersonalDetails getPersonalDetailsByEmail(String email) throws Exception {
+        if (session == null || !session.isOpen()) {
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+        }
+        CriteriaBuilder builder = session.getCriteriaBuilder();
+        CriteriaQuery<PersonalDetails> query = builder.createQuery(PersonalDetails.class);
+        Root<PersonalDetails> root = query.from(PersonalDetails.class);
+
+        query.select(root)
+                .where(
+                        builder.and(
+                                builder.equal(root.get("email"), email)
+                        )
+                );
+        PersonalDetails pd = session.createQuery(query).uniqueResult();
+        if (session != null && session.isOpen()) {
+            session.close(); // Close the session after operation
+        }
+        return pd;
     }
 
 

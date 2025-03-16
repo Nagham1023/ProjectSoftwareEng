@@ -1,5 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.CreditCard;
+import il.cshaifasweng.OCSFMediatorExample.entities.PersonalDetails;
 import il.cshaifasweng.OCSFMediatorExample.entities.PersonalDetailsCheck;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -7,11 +9,15 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.control.TextFormatter;
+import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -45,10 +51,14 @@ public class PersonalDetailsPageController {
     private Label emailErrorLabel;
     private BooleanProperty emailInteracted = new SimpleBooleanProperty(false);  // Track interaction
 
-    @FXML private Label nameLabel;
-    @FXML private Label emailLabel;
-    @FXML private Label phoneNumberLabel;
-    @FXML private Label statusLabel;
+    @FXML
+    private Label nameLabel;
+    @FXML
+    private Label emailLabel;
+    @FXML
+    private Label phoneNumberLabel;
+    @FXML
+    private Label statusLabel;
 
     @FXML
     private void initialize() {
@@ -59,6 +69,7 @@ public class PersonalDetailsPageController {
         setupContinueButton();
         setupContinueeButton();
     }
+
     private void setupNameField() {
         // Listener for when the focus is lost from the Name field
         NamePersonalDetails.focusedProperty().addListener((observable, oldValue, isFocused) -> {
@@ -112,6 +123,7 @@ public class PersonalDetailsPageController {
     }
 
     private boolean phoneNumberFieldInteracted = false; // Initialize as false
+
     private void setupPhoneNumberField() {
         TextFormatter<String> formatter = new TextFormatter<>(change -> {
             String newText = change.getControlNewText();
@@ -190,7 +202,23 @@ public class PersonalDetailsPageController {
     }
 
     private void navigateToPersonalDetails() throws IOException {
-        App.setRoot("deliverypage");
+
+        try {
+            PersonalDetails personalDetails = new PersonalDetails();
+            personalDetails.setName(NamePersonalDetails.getText());
+            personalDetails.setEmail(EmailPersonalDetails.getText());
+            personalDetails.setPhoneNumber(PhoneNumberPersonalDetails.getText());
+
+
+
+            DeliveryPageController.personalDetails = personalDetails;
+            CreditDetailsController.personalDetails = personalDetails;
+            App.setRoot("deliverypage");
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 /******************************************************/
