@@ -18,21 +18,19 @@ import org.hibernate.query.Query;
 
 import java.time.LocalTime;
 import java.util.*;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.*;
-import static il.cshaifasweng.OCSFMediatorExample.server.ReportDB.*;
-import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.*;
+
+
 import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.*;
 
-import il.cshaifasweng.OCSFMediatorExample.server.RevenueReport;
+
 
 public class SimpleServer extends AbstractServer {
 
@@ -361,15 +359,62 @@ public class SimpleServer extends AbstractServer {
         }
 
         /*************************adan*****************************/
-        if (msg instanceof CreditCardCheck) {
+        if (msg instanceof PaymentCheck) {
+            PaymentCheck paymentCheck = (PaymentCheck) msg;
+            //System.out.println("Processing request for card number: " + paymentCheck.getCreditCard().getCardNumber());
+
+            try {
+                //System.out.println(" is new card " + isCreditCardNew(paymentCheck.getCreditCard()));
+                //System.out.println("person");
+                PersonalDetails personalDetailsDB = getPersonalDetailsByEmail(paymentCheck.getPersonalDetails().getEmail());
+                //System.out.println("personal "+personalDetailsDB);
+                CreditCard cc = getCreditCardDetailsByCardNumber(paymentCheck.getCreditCard().getCardNumber());
+                //System.out.println("the cc number "+paymentCheck.getCreditCard().getCardNumber());
+                //System.out.println("personal details " + cc);
+
+                if (cc == null) {
+                    //System.out.println("new credit card");
+
+                    if (personalDetailsDB == null) {
+                        //System.out.println("new personal details");
+                        paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
+                        addCreditCardDetails(paymentCheck.getCreditCard(), paymentCheck.getPersonalDetails());
+                    } else {
+                      //  System.out.println("not new personal details");
+                        paymentCheck.setResponse("Added the Credit Card to the database.");
+                        addCreditCardToExistingPersonalDetails(paymentCheck.getCreditCard(), personalDetailsDB);
+                    }
+                    client.sendToClient(paymentCheck);
+                } else {
+                    //System.out.println("not new credit card");
+                    if(personalDetailsDB == null) {
+                        //System.out.println("new personal details");
+                        paymentCheck.setResponse("Added the personal details to the database");
+                        addPersonalDetailsAndAssociateWithCreditCard(paymentCheck.getPersonalDetails(), cc);
+                    }
+
+                    else {
+                        //System.out.println("not new personal details");
+                        paymentCheck.setResponse("Updated the personal details to the database.");
+                        addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc);
+                        //System.out.println("Associated.");
+                    }
+                    client.sendToClient(paymentCheck);
+                }
+            } catch (Exception e) {
+                paymentCheck.setResponse("Error processing request: " + e.getMessage());
+                throw new RuntimeException("Failed to process credit card request", e);
+            }
+        }
+
+
+        /*if (msg instanceof CreditCardCheck) {
             CreditCardCheck creditCardCheck = (CreditCardCheck) msg;
             System.out.println("Processing request for card number: " + creditCardCheck.getCardNumber());
 
             try {
                 System.out.println(" is new card " + isCreditCardNew(creditCardCheck));
-                // Check if a new card needs to be added or an existing one validated
                 if (isCreditCardNew(creditCardCheck)) {
-                    // New card details submission
                     PersonalDetails personalDetails = PersonalDetailsDB.getPersonalDetailsByEmail(creditCardCheck.getPersonalEmail());
                     if (personalDetails != null) {
                         System.out.println("personal details found");
@@ -385,8 +430,7 @@ public class SimpleServer extends AbstractServer {
                         creditCardCheck.setValid(true);
                         creditCardCheck.setRespond("Credit card details added successfully.");
                     } else {
-                        //here adan have to add that's if there's no personal details then to generate a personal details with the credit card .
-                        System.out.println("personal details not found");
+
                         creditCardCheck.setValid(false);
                         creditCardCheck.setRespond("Personal details not found.");
                     }
@@ -457,7 +501,7 @@ public class SimpleServer extends AbstractServer {
 //                detailsCheck.setRespond("Server error: " + e.getMessage());
 //                client.sendToClient(detailsCheck);
             }
-        }
+        }*/
 
 /***************************adan********************************/
         if (msgString.startsWith("#warning")) {

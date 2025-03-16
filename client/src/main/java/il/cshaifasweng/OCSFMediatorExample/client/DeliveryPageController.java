@@ -1,12 +1,17 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.PersonalDetails;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.LocalTime;
@@ -53,6 +58,12 @@ public class DeliveryPageController {
 
     @FXML
     private Button visa;
+
+
+
+    static public PersonalDetails personalDetails;
+
+
     @FXML
     public void initialize() {
         setupOrderTimeComboBox();
@@ -104,8 +115,7 @@ public class DeliveryPageController {
     }
 
     private void navigateToPersonalDetails() throws IOException {
-        App.setRoot("PersonalDetailsPage");
-
+            App.setRoot("PersonalDetailsPage");
     }
 
     private void setupVisaButton() {

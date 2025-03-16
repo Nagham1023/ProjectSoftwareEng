@@ -10,7 +10,10 @@ import java.util.List;
 public class PersonalDetails implements Serializable {
 
     @Id
-    @Column(nullable = false, unique = true, length = 100)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 100)
     private String email;
 
     @Column(nullable = false, length = 100)
@@ -19,10 +22,10 @@ public class PersonalDetails implements Serializable {
     @Column(nullable = false, length = 20)
     private String phoneNumber;
 
-    @OneToMany(mappedBy = "personalDetails", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    // Correct @ManyToMany mapping with the "mappedBy" attribute indicating the owning side
+    @ManyToMany(mappedBy = "personalDetails", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<CreditCard> creditCardDetails = new ArrayList<>();
 
-    // Getters and setters
 
     public String getEmail() {
         return email;
@@ -58,7 +61,13 @@ public class PersonalDetails implements Serializable {
 
     public void addCreditCard(CreditCard creditCard) {
         creditCardDetails.add(creditCard);
-        creditCard.setPersonalDetails(this);  // Ensure bidirectional synchronization
+        //creditCard.getPersonalDetails().add(this);  // Ensure bidirectional synchronization
+    }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
     }
 
     @Override

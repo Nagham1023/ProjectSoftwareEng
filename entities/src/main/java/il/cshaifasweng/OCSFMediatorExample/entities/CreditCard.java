@@ -4,13 +4,19 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "CreditCard")
 public class CreditCard implements Serializable {
 
     @Id
-    @Column(nullable = false, length = 9, unique = true)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Automatically generated ID
+    private Long id;
+
+
+    @Column(nullable = false, length = 9)
     private String cardholdersID;
 
     @Column(nullable = false, length = 19)
@@ -22,21 +28,30 @@ public class CreditCard implements Serializable {
     @Column(nullable = false, length = 3)
     private String cvv;
 
-//    @Column(nullable = false)               //should change
-//    private LocalDate expiryDate;
-
     @Column(nullable = false, length = 7)  // "MM/yyyy"
     private String expiryDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "personal_email", referencedColumnName = "email")
-    private PersonalDetails personalDetails;
-
+    // Correct @ManyToMany mapping with the @JoinTable annotation
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "personal_creditcard", // Join table name
+            joinColumns = @JoinColumn(name = "creditcard_id", referencedColumnName = "id"), // Reference CreditCard's id
+            inverseJoinColumns = @JoinColumn(name = "personaldetails_id", referencedColumnName = "id") // Reference PersonalDetails's idd
+    )
+    private List<PersonalDetails> personalDetails = new ArrayList<>();
 
     // Getters and setters
 
     public String getCardholdersID() {
         return cardholdersID;
+    }
+
+    public Long getId() {
+
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public void setCardholdersID(String cardholdersID) {
@@ -75,16 +90,12 @@ public class CreditCard implements Serializable {
         this.expiryDate = expiryDate;
     }
 
-    public PersonalDetails getPersonalDetails() {
+    public List<PersonalDetails> getPersonalDetails() {
         return personalDetails;
     }
 
     public void setPersonalDetails(PersonalDetails personalDetails) {
-        this.personalDetails = personalDetails;
-        /*if (personalDetails != null) {
-            // Ensuring that the personalDetails instance knows about this credit card
-            personalDetails.addCreditCard(this);
-        }*/
+        this.personalDetails.add(personalDetails);
     }
 
     @Override
@@ -95,7 +106,7 @@ public class CreditCard implements Serializable {
                 ", cardholderName='" + cardholderName + '\'' +
                 ", cvv='" + cvv + '\'' +
                 ", expiryDate=" + expiryDate +
-                ", personalEmail='" + (personalDetails != null ? personalDetails.getEmail() : null) +
+                ", personalDetails=" + personalDetails +
                 '}';
     }
 }
