@@ -114,6 +114,11 @@ public class SimpleClient extends AbstractClient {
             System.out.println("Received restaurant list: " + restaurantList.toString());
             EventBus.getDefault().post(restaurantList);
         }
+		if (msg instanceof ListComplainList) {
+			ListComplainList listComplainList = (ListComplainList) msg;
+			System.out.println("Received complaint list: " + listComplainList.toString());
+			EventBus.getDefault().post(listComplainList);
+		}
 
 	}
 

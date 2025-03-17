@@ -5,25 +5,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SearchOptions implements Serializable {
-    private List<String> restaurantNames;
-    private List<String> customizationNames;
-    private String branchName; // Single branch name instead of a list
+        private List<String> restaurantNames;
+        private List<String> customizationNames;
+        private String branchName; // Single branch name instead of a list
 
-    // Constructor
+        // Constructor
     public SearchOptions(List<String> restaurantNames, List<String> customizationNames, String branchName) {
-        this.restaurantNames = restaurantNames;
-        this.customizationNames = customizationNames;
-        this.branchName = branchName;
-    }
+            this.restaurantNames = restaurantNames;
+            this.customizationNames = customizationNames;
+            this.branchName = branchName;
+        }
     public SearchOptions(List<String> restaurantNames, List<String> customizationNames) {
-        this.restaurantNames = restaurantNames;
-        this.customizationNames = customizationNames;
-    }
+            this.restaurantNames = restaurantNames;
+            this.customizationNames = customizationNames;
+        }
     public SearchOptions( List<String> restaurantNames,String branchName) {
-        this.restaurantNames = restaurantNames;
-        this.customizationNames = new ArrayList<String>();
-        this.branchName = branchName;
-    }
+            this.restaurantNames = restaurantNames;
+            this.customizationNames = new ArrayList<String>();
+            this.branchName = branchName;
+        }
 
 
 

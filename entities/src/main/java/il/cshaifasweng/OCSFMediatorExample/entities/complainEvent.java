@@ -5,6 +5,9 @@ import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class complainEvent implements Serializable {
 
@@ -14,8 +17,8 @@ public class complainEvent implements Serializable {
     private String name_complain;
     private String email_complain;
     private String tell_complain;
-    private Date date_complain;
-    private Time time_complain;
+    private LocalDate date_complain;
+    private LocalDateTime time_complain;
     private Restaurant restaurant;
     private String status_complaint;
     private String response_complaint;
@@ -23,7 +26,7 @@ public class complainEvent implements Serializable {
     private double refund_complaint=0;
 
 
-    public complainEvent(String kind, String name, String email, String tell,int id,Date date,Time time, Restaurant restaurant,String status, String response, String orderNum, double refund) {
+    public complainEvent(String kind, String name, String email, String tell,int id,LocalDate date,LocalDateTime time, Restaurant restaurant,String status, String response, String orderNum, double refund) {
         this.kind_complain = kind;
         this.name_complain = name;
         this.email_complain = email;
@@ -38,7 +41,7 @@ public class complainEvent implements Serializable {
         this.refund_complaint = refund;
     }
 
-    public complainEvent(String kind, String name, String email, String tell ,Date date,Time time, Restaurant restaurant,String status, String response, String orderNum, double refund){
+    public complainEvent(String kind, String name, String email, String tell ,LocalDate date,LocalDateTime time, Restaurant restaurant,String status, String response, String orderNum, double refund){
         this.kind_complain = kind;
         this.name_complain = name;
         this.email_complain = email;
@@ -70,9 +73,7 @@ public class complainEvent implements Serializable {
         this.name_complain = name;
     }
 
-    public String getKind() {
-        return kind_complain;
-    }
+    public String getKind() {return kind_complain;}
     public void setKind(String kind) {
         this.kind_complain = kind;
     }
@@ -91,13 +92,13 @@ public class complainEvent implements Serializable {
         this.tell_complain = tell;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date_complain;
     }
-    public void setDate(Date date) {this.date_complain = date;}
+    public void setDate(LocalDate date) {this.date_complain = date;}
 
-    public Time getTime() {return time_complain;}
-    public void setTime(Time time) {this.time_complain = time;}
+    public LocalDateTime getTime() {return time_complain;}
+    public void setTime(LocalDateTime time) {this.time_complain = time;}
 
     public Restaurant getRestaurant() {return restaurant;}
     public void setRestaurant(Restaurant restaurant) {this.restaurant = restaurant;}
