@@ -23,6 +23,10 @@ import java.util.List;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.ReportDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.TableDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.*;
@@ -251,6 +255,64 @@ public class SimpleServer extends AbstractServer {
                 e.printStackTrace();
             }
         }
+        if (msg instanceof String && msg.equals("getAllComplaints6")) {
+            try {
+                List<Complain> complainList = getAllComplainss();
+                for (Complain Complain : complainList) {
+                    Complain.toString();
+                }
+
+                // for complain and do
+                List<Complain> List1 = new ArrayList<>();
+                for (Complain complain : complainList) {
+                    if (complain.getKind().equals("Complaint") && complain.getStatus().equals("Do"))
+                        List1.add(complain);
+                    System.out.println("fill list 1");
+                }
+
+                // for complain amd done
+                List<Complain> List2 = new ArrayList<>();
+                for (Complain complain : complainList) {
+                    if (complain.getKind().equals("Complaint") && complain.getStatus().equals("Done"))
+                        List2.add(complain);
+                    System.out.println("fill list 2");
+                }
+                // for Feedback and do
+                List<Complain> List3 = new ArrayList<>();
+                for (Complain complain : complainList) {
+                    if (complain.getKind().equals("Feedback") && complain.getStatus().equals("Do"))
+                        List3.add(complain);
+                    System.out.println("fill list 3");
+                }
+
+                // for Feedback amd done
+                List<Complain> List4 = new ArrayList<>();
+                for (Complain complain : complainList) {
+                    if (complain.getKind().equals("Feedback") && complain.getStatus().equals("Done"))
+                        List4.add(complain);
+                    System.out.println("fill list 4");
+                }
+                // for Suggestion and do
+                List<Complain> List5 = new ArrayList<>();
+                for (Complain complain : complainList) {
+                    if (complain.getKind().equals("Suggestion") && complain.getStatus().equals("Do"))
+                        List5.add(complain);
+                    System.out.println("fill list 5");
+                }
+
+                // for Suggestion amd done
+                List<Complain> List6 = new ArrayList<>();
+                for (Complain complain : complainList) {
+                    if (complain.getKind().equals("Suggestion") && complain.getStatus().equals("Done"))
+                        List6.add(complain);
+                    System.out.println("fill list 6");
+                }
+                ListComplainList result = new ListComplainList(List1, List2, List3, List4, List5, List6);
+                client.sendToClient(result); // send to client
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         if (msg instanceof String && msg.equals("getAllComplaints")) {
             try {
                 ComplainList complist = new ComplainList();
@@ -261,6 +323,56 @@ public class SimpleServer extends AbstractServer {
                 e.printStackTrace();
             }
         }
+
+
+        if (msg instanceof specificComplains) {
+            try {
+                specificComplains specificComplains =(specificComplains)msg;
+                String kind = specificComplains.getSpecificKind();
+                String status = specificComplains.getSpecificStatus();
+                ComplainList SpecificList = new ComplainList();
+                ComplainList Allcomplist = new ComplainList();
+                Allcomplist.setComplainList(getAllComplains()); // Set list to send
+
+                for (Complain complain : Allcomplist.getComplainList()) {
+                    if (kind.equals(complain.getKind()) && status.equals(complain.getStatus())) {
+                        SpecificList.getComplainList().add(complain);
+                    }
+                }
+                client.sendToClient(SpecificList);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+        if (msg instanceof updateResponse) {
+            updateResponse response = (updateResponse) msg;
+            System.out.println("Received updateResponse from client: " + response.getnewResponse());
+            // שליחת התגובה לכל הלקוחות (אם זה נדרש)
+            sendToAllClients(msg);
+            System.out.println("Sent updateResponse to all clients");
+
+            String subject = "Thanks For Contacting MAMA's Kitchen";
+            String email = response.getEmailComplain();
+            String body = response.getnewResponse();
+            EmailSender emailSender = new EmailSender();
+            emailSender.sendEmail(subject, body, email);
+            System.out.println("Email sent to: " + email);
+
+            try {
+                updateComplainResponseInDatabase(response);
+                System.out.println("Updating Complain Response In Database");
+
+                client.sendToClient(msg);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to send response to client", e);
+            }
+        }
+
+
+
+
         if (msg instanceof mealEvent) {
             //here we're adding new meal !!
             //System.out.println("Received adding new mealEvent ");
@@ -549,18 +661,6 @@ public class SimpleServer extends AbstractServer {
             //sendToAllClients(msg);
             try {
                 updateMealPriceInDatabase((updatePrice) msg);
-                client.sendToClient(msg);
-                sendToAll(msg);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-        if (msg instanceof updateResponse) {
-            System.out.println("Received a response message from client ");
-            //sendToAllClients(msg);
-            try {
-                updateComplainResponseInDatabase((updateResponse) msg);
                 client.sendToClient(msg);
                 sendToAll(msg);
             } catch (IOException e) {
@@ -1224,7 +1324,7 @@ public class SimpleServer extends AbstractServer {
         }
     }
 
-    public List<Complain> getAllComplains() {
+    public List<Complain> getAllComplainss() {
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
 

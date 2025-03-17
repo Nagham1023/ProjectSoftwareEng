@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -93,42 +94,48 @@ public class AddComplainController {
             client.sendToServer("getAllRestaurants");
             System.out.println("here first");
         } catch (Exception e) {
-            e.printStackTrace(); // In a real application, log this error or show an error message to the user
+            e.printStackTrace();
         }
+    }
+    @Subscribe
+    public void handle( RestaurantList restaurantList) {
+        this.restaurantList = restaurantList;
+        fillComboBox(restaurantList);
     }
 
     @FXML
     private void ComplainButton(ActionEvent event) throws IOException {
         ComplainKind = "Complaint";
-        ComplainButton.setStyle("-fx-background-color: #C76A58;");
-        FeedbackButton.setStyle("-fx-background-color: #832018;");
-        SuggestionButton.setStyle("-fx-background-color:  #832018;");
+        ComplainButton.setStyle("-fx-background-color: linear-gradient(to bottom, #C76A58, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);");
+        FeedbackButton.setStyle("-fx-background-color: linear-gradient(to bottom, #832018, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);");
+        SuggestionButton.setStyle("-fx-background-color: linear-gradient(to bottom, #832018, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);");
         textFieldOrderNum.setVisible(true);
-
     }
+
     @FXML
     private void FeedbackButton(ActionEvent event) throws IOException {
         ComplainKind = "Feedback";
-        ComplainButton.setStyle("-fx-background-color: #832018;");
-        FeedbackButton.setStyle("-fx-background-color: #C76A58;");
-        SuggestionButton.setStyle("-fx-background-color:  #832018;");
+        ComplainButton.setStyle("-fx-background-color: linear-gradient(to bottom, #832018, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);");
+        FeedbackButton.setStyle("-fx-background-color: linear-gradient(to bottom, #C76A58, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);");
+        SuggestionButton.setStyle("-fx-background-color: linear-gradient(to bottom, #832018, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);");
         textFieldOrderNum.setVisible(false);
 
     }
     @FXML
     private void SuggestionButton(ActionEvent event) throws IOException {
         ComplainKind = "Suggestion";
-        ComplainButton.setStyle("-fx-background-color: #832018;");
-        FeedbackButton.setStyle("-fx-background-color: #832018;");
-        SuggestionButton.setStyle("-fx-background-color:  #C76A58;");
+        ComplainButton.setStyle("-fx-background-color: linear-gradient(to bottom, #832018, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);");
+        FeedbackButton.setStyle("-fx-background-color: linear-gradient(to bottom, #832018, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);");
+        SuggestionButton.setStyle("-fx-background-color: linear-gradient(to bottom, #C76A58, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);");
         textFieldOrderNum.setVisible(false);
 
     }
 
     @FXML
     private void sendButton(ActionEvent event) throws IOException {
+        getRestaurantByName(restaurantList);
 
-        if(ComplainKind==null||textFieldName.getText()==null||textFieldEmail.getText()==null||textAreaTellUs.getText()==null||date==null||nameValue==null||(orderNumValue==null && ComplainKind=="Complaint")){
+        if(ComplainKind==null||textFieldName.getText()==null||textFieldEmail.getText()==null||textAreaTellUs.getText()==null||datePicker.getValue()==null||branchesList.getValue()==null||(orderNumValue==null && ComplainKind=="Complaint")){
             checkLabel.setText("There is at least one field empty!");
         }
         else {
@@ -140,13 +147,11 @@ public class AddComplainController {
             }
         }
     }
-    @Subscribe
+
+
     private void sendAndSaveComplain() throws IOException {
-        getRestaurantByName(restaurantList);
-        LocalTime now = LocalTime.now(); // Get the current time
-        time = Time.valueOf(now);        // Convert LocalTime to java.sql.Time
-        getRestaurantByName(restaurantList);
-        complainEvent complainEvent = new complainEvent(ComplainKind,textFieldName.getText(),textFieldEmail.getText(),textAreaTellUs.getText(),date,time,restaurant_chosen,"Do",response,textFieldOrderNum.getText(),refundVal);
+        LocalDateTime timeNow = LocalDateTime.now(); // Get the current time
+        complainEvent complainEvent = new complainEvent(ComplainKind,textFieldName.getText(),textFieldEmail.getText(),textAreaTellUs.getText(),datePicker.getValue(),timeNow,restaurant_chosen,"Do",response,textFieldOrderNum.getText(),refundVal);
         SimpleClient client;
         client = SimpleClient.getClient();
         client.sendToServer(complainEvent);
@@ -157,7 +162,7 @@ public class AddComplainController {
         App.setRoot("mainScreen");
     }
 
-    @Subscribe
+
     public void fillComboBox(RestaurantList restaurantList) {
         branchesList.getItems().clear();
         System.out.println("here");
@@ -168,7 +173,6 @@ public class AddComplainController {
         }
     }
 
-    @Subscribe
     public void getRestaurantByName(RestaurantList restaurantList) {
 
         nameValue=branchesList.getValue();
@@ -180,7 +184,15 @@ public class AddComplainController {
         }
 
     }
+    @Subscribe
+    public void onComplainEvent(complainEvent event) {
+        System.out.println("Received complaint event: " + event.toString());
+        checkLabel.setText("Complaint received successfully!");
+    }
 
+    public void onClose() {
+        EventBus.getDefault().unregister(this);
+    }
 
 
 }

@@ -4,16 +4,16 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CustomerServiceViewController">
    <children>
       <SplitPane dividerPositions="0.3657718120805369" layoutX="45.0" layoutY="46.0" orientation="VERTICAL" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #FFF5F9;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <items>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="117.0" prefWidth="597.0">
+         <items>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="117.0" prefWidth="597.0">
                <children>
-                  <Button fx:id="generateButton" alignment="CENTER" contentDisplay="TOP" layoutX="249.0" layoutY="54.0" maxWidth="7.0" minWidth="109.0" mnemonicParsing="false" onAction="#GenerateButton" prefHeight="33.0" prefWidth="109.0" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 5 10; -fx-min-width: 100;" text="generate" textAlignment="JUSTIFY" textFill="#333333" textOverrun="WORD_ELLIPSIS" wrapText="true">
+                  <Button fx:id="generateButton" alignment="CENTER" contentDisplay="TOP" layoutX="249.0" layoutY="66.0" maxWidth="7.0" minWidth="109.0" mnemonicParsing="false" onAction="#GenerateButton" prefHeight="33.0" prefWidth="109.0" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 5 10; -fx-min-width: 100;" text="generate" textAlignment="JUSTIFY" textFill="#333333" textOverrun="WORD_ELLIPSIS" wrapText="true">
                      <font>
                         <Font name="System Italic" size="14.0" />
                      </font>
@@ -56,8 +56,11 @@
                   </Button>
                </children>
             </AnchorPane>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" />
-        </items>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+               <children>
+                  <VBox fx:id="ListCompContainer" layoutY="-6.0" prefHeight="256.0" prefWidth="597.0" />
+               </children></AnchorPane>
+         </items>
       </SplitPane>
    </children>
 </AnchorPane>

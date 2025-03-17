@@ -1,4 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
+import il.cshaifasweng.OCSFMediatorExample.entities.EmailSender;
+
 
 import java.io.Serializable;
 
@@ -10,12 +12,14 @@ public class updateResponse implements Serializable {
     private double refundAmount;
     //private static final long serialVersionUID = -8224097662914849957L;
 
-    public updateResponse(String newResponse, String idComplain, String email, String orderNum, double refund) {
+    public updateResponse(String newResponse, int idComplain, String email, String orderNum, double refund) {
         this.newResponse = newResponse;
-        this.idComplain = Integer.parseInt(idComplain);
+        this.idComplain = idComplain;
         this.emailComplain = email;
         this.orderNumber = orderNum;
         this.refundAmount = refund;
+
+
     }
     public String getnewResponse() {
         return newResponse;

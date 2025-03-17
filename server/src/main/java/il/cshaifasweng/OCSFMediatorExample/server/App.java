@@ -18,16 +18,19 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.addCreditCardDetails;
+import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.getAllComplains;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.addPersonalDetails;
 import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.getAllRestaurants;
+import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.generateBasicUser1;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.printAllUsers;
 
 public class App {
@@ -272,6 +275,92 @@ public class App {
         }
     }
 
+    private static void generateTheComplains() throws Exception {
+        List<Complain> complains = getAllComplains();
+
+        if(complains != null && !complains.isEmpty()) {
+            System.out.println("there are some Complains in the database");
+            return;
+        }
+        else
+            System.out.println("no complains in the database");
+        try (Session session = getSessionFactory().openSession()) {
+            session.beginTransaction();
+
+
+            LocalDate date1 = LocalDate.of(2025, 2,23); // 10:00 AM
+            LocalDate date2 = LocalDate.of(2024, 1,1); // 10:00 PM
+            LocalDate date3 = LocalDate.of(2025,5, 15);
+            LocalDate date4 = LocalDate.of(2025,11, 11);
+
+            LocalDateTime time1 = LocalDateTime.of(2025,3,3,9,45);
+            LocalDateTime time2 = LocalDateTime.of(2025,2,25,23,23);
+            LocalDateTime time3 = LocalDateTime.of(2025,3,23,22,23);
+            LocalDateTime time4 = LocalDateTime.of(2025,3,16,11,11);
+
+            Complain complain1 = new Complain();
+            complain1.setKind("Complaint");
+            complain1.setName("Hala1");
+            complain1.setEmail("7ala.saloty@gmail.com");
+            complain1.setTell("the order come 3 minutes late");
+            complain1.setDate(date1);
+            complain1.setTime(time1);
+            complain1.setStatus("Do");
+            complain1.setResponse("");
+            complain1.setOrderNum("1");
+            complain1.setRefund(0);
+
+            Complain complain2 = new Complain();
+            complain2.setKind("Complaint");
+            complain2.setName("Hala2");
+            complain2.setEmail("7ala.saloty@gmail.com");
+            complain2.setTell("the order was cold when we gut it");
+            complain2.setDate(date2);
+            complain2.setTime(time2);
+            complain2.setStatus("Done");
+            complain2.setResponse("sorry for tasting our food cold in this cold days you will gut a refund of 10");
+            complain2.setOrderNum("97");
+            complain2.setRefund(10);
+
+            Complain complain3 = new Complain();
+            complain3.setKind("Feedback");
+            complain3.setName("Hala3");
+            complain3.setEmail("7ala.saloty@gmail.com");
+            complain3.setTell("i enjoyed being in your restaurant");
+            complain3.setDate(date3);
+            complain3.setTime(time3);
+            complain3.setStatus("Do");
+            complain3.setResponse("");
+            complain3.setOrderNum("");
+            complain3.setRefund(0);
+
+            Complain complain4 = new Complain();
+            complain4.setKind("Suggestion");
+            complain4.setName("Hala4");
+            complain4.setEmail("7ala.saloty@gmail.com");
+            complain4.setTell("the meals costs to much");
+            complain4.setDate(date4);
+            complain4.setTime(time4);
+            complain4.setStatus("Done");
+            complain4.setResponse("the cost is big because we give you the biggest quality ever!, thanks for sharing your suggest");
+            complain4.setOrderNum("");
+            complain4.setRefund(0);
+
+            session.save(complain1);
+            session.save(complain2);
+            session.save(complain3);
+            session.save(complain4);
+
+            session.flush();
+            session.getTransaction().commit();
+            System.out.println("Successfully generated new complains.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("An error occurred while generating complains.", e);
+        }
+
+    }
+
 
     private static SimpleServer server;
 
@@ -302,9 +391,9 @@ public class App {
             /*************************adan***************************/
 
             generateRestaurants();
+            generateTheComplains();
             initializeSampleTables();
-            //generateBasicUser();
-            // should generete complains
+            generateBasicUser1();
         } catch (Exception exception) {
             System.err.println("An error occurred, changes have been rolled back.");
             exception.printStackTrace();

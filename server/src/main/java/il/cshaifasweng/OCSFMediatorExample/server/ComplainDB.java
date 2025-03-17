@@ -4,11 +4,16 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
@@ -36,7 +41,7 @@ public class ComplainDB {
             session.beginTransaction();
 
             // Create a query to find all meals without any constraint
-            String queryString = "FROM Complain";  // No WHERE clause, fetch all meals
+            String queryString = "FROM Complain ORDER BY time_complain DESC";
             org.hibernate.query.Query<Complain> query = session.createQuery(queryString, Complain.class);
 
             // Execute the query and get the result list
@@ -69,7 +74,7 @@ public class ComplainDB {
         complainslist.add(newComp);}
 
     public static void updateComplainResponseInDatabase(updateResponse updateResponse) {
-        //System.out.println("Changing the price in database.");
+        System.out.println("updating Complain Response In Database");
         int Idcomp = updateResponse.getIdComplain();
         String newRes = updateResponse.getnewResponse();
         String emailComp = updateResponse.getEmailComplain();
@@ -78,7 +83,7 @@ public class ComplainDB {
 
         try {
             if (session == null || !session.isOpen()) {
-                //System.out.println("Session is not initialized. Creating a new session.");
+                System.out.println("Session is not initialized. Creating a new session.");
                 SessionFactory sessionFactory = getSessionFactory();
                 session = sessionFactory.openSession();
             }
@@ -92,12 +97,14 @@ public class ComplainDB {
             //System.out.println("Started transaction to update meal price.");
 
             // Fetch the meal by ID from the current session
-            complainEvent complain = session.get(complainEvent.class, Idcomp);
+            Complain complain = session.get(Complain.class, Idcomp);
             if (complain != null) {
                 //System.out.println("Found Meal: " + meal.getName() + " with current price: " + meal.getPrice());
                 complain.setResponse(newRes); // Update the response
                 complain.setStatus("Done");
+                complain.setRefund(refund);
                 session.update(complain); // Persist the changes
+                System.out.println("updated Complain Response In Database after setting response");
                 session.getTransaction().commit(); // Commit the transaction
                 updateCompResponseById(Idcomp, newRes);
                 sendResToEmail(emailComp, newRes);
@@ -163,68 +170,43 @@ public class ComplainDB {
     }
 
     public static String addComplainIntoDatabase(complainEvent newComplain) {
-        // Extract data from the mealEvent object
-        String kind_complain = newComplain.getKind();
-        String name_complain = newComplain.getName();
-        String email_complain = newComplain.getEmail();
-        String tell_complain = newComplain.getTell();
-        Date date_complain = newComplain.getDate();
-        Time time_complain = newComplain.getTime();
-        String status_complain = newComplain.getStatus();
-        String response_complaint = newComplain.getResponse();
-        Restaurant restaurant_complain = newComplain.getRestaurant();
-        String orderNum = newComplain.getOrderNum();
-        double refund = newComplain.getRefund();
+        Session session = null;
+        Transaction transaction = null;
 
         try {
-            // Ensure the session is open
-            if (session == null || !session.isOpen()) {
-                SessionFactory sessionFactory = getSessionFactory();
-                session = sessionFactory.openSession();
-            }
-            if (session.getTransaction().isActive()) {
-                session.getTransaction().rollback();
-            }
-            session.beginTransaction();
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
 
-            // Create a new complain entity and set its attributes
             Complain newComp = new Complain();
-            newComp.setKind(kind_complain);
-            newComp.setName(name_complain);
-            newComp.setEmail(email_complain);
-            newComp.setTell(tell_complain);
-            newComp.setDate(date_complain);
-            newComp.setTime(time_complain);
-            newComp.setRestaurant(restaurant_complain);
-            newComp.setStatus(status_complain);
-            newComp.setResponse(response_complaint);
-            newComp.setOurderNum(orderNum);
-            newComp.setRefund(refund);
+            // Set all fields EXCEPT ID
+            newComp.setKind(newComplain.getKind());
+            newComp.setName(newComplain.getName());
+            newComp.setEmail(newComplain.getEmail());
+            newComp.setTell(newComplain.getTell());
+            newComp.setDate(newComplain.getDate());
+            newComp.setTime(newComplain.getTime());
+            newComp.setStatus(newComplain.getStatus());
+            newComp.setResponse(newComplain.getResponse());
+            newComp.setOrderNum(newComplain.getOrderNum());
+            newComp.setRefund(newComplain.getRefund());
+            newComp.setRestaurant(newComplain.getRestaurant());
 
-
-            // Save the complain to the database
             session.save(newComp);
-            // Add the complain to the local list
-            addCompToList(newComp);
+            transaction.commit();
 
-            System.out.println("New Comp added");
-            newComp.setId(newComplain.getId());
-
-            // Commit the transaction
-            session.getTransaction().commit();
+            System.out.println("New Comp added successfully with ID: " + newComp.getId());
+            return "added";
 
         } catch (Exception e) {
-            if (session.getTransaction() != null) {
-                session.getTransaction().rollback(); // Rollback on error
-            }
+            if (transaction != null) transaction.rollback();
             e.printStackTrace();
+            return "error";
         } finally {
-            // Leave the session open for further operations
             if (session != null && session.isOpen()) {
-                session.close(); // Close the session after operation
+                session.close();
             }
         }
-        return "added";
     }
 
 
