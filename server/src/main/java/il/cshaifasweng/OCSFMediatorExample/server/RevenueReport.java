@@ -14,9 +14,9 @@ import java.util.List;
 public class RevenueReport implements ReportStrategy {
 
     @Override
-    public String generate(LocalDate month, String restaurantName, TimeFrame timeFrame) {
+    public String generate(LocalDate month, String restaurantName, TimeFrame timeFrame, String note) {
         ReportDB reportDB = new ReportDB();
-        return reportDB.generate_revenue(month, restaurantName, timeFrame);
+        return reportDB.generate_revenue(month, restaurantName, timeFrame, note);
 
     }
 }

@@ -70,6 +70,11 @@ public class mainScreenController {
     }
 
     @FXML
+    void clickedOnCancellation(ActionEvent event)throws IOException {
+        App.setRoot("OrderCancellation");
+    }
+
+    @FXML
     // Method to handle the button click for transitioning to the restaurant list
     public void handleChooseBranchClick(ActionEvent event) throws IOException {
         /*
