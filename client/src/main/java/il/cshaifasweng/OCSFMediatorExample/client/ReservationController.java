@@ -426,11 +426,59 @@ public class ReservationController {
                 EmailSender.sendEmail("Verification Code", messageBody, email);
 
                 // Open verification code dialog
-                boolean isVerified = verifyCode(verificationCode);
+                Dialog<String> verificationDialog = new Dialog<>();
+                verificationDialog.setTitle("Verification Code");
+                verificationDialog.setHeaderText("Enter the verification code sent to your email.");
+
+                ButtonType verifyButtonType = new ButtonType("Verify", ButtonBar.ButtonData.OK_DONE);
+                verificationDialog.getDialogPane().getButtonTypes().addAll(verifyButtonType, ButtonType.CANCEL);
+
+                GridPane verificationGrid = new GridPane();
+                verificationGrid.setHgap(10);
+                verificationGrid.setVgap(10);
+
+                TextField codeField = new TextField();
+                codeField.setPromptText("Verification Code");
+
+                Label verificationErrorLabel = new Label();
+                verificationErrorLabel.setStyle("-fx-text-fill: red;");
+
+                verificationGrid.add(new Label("Verification Code:"), 0, 0);
+                verificationGrid.add(codeField, 1, 0);
+                verificationGrid.add(verificationErrorLabel, 0, 1, 2, 1);
+
+                verificationDialog.getDialogPane().setContent(verificationGrid);
+
+                // Convert the result to the entered code
+                verificationDialog.setResultConverter(dialogButton -> {
+                    if (dialogButton == verifyButtonType) {
+                        return codeField.getText();
+                    }
+                    return null; // Return null if the user clicks "Cancel"
+                });
+
+                boolean isVerified = false;
+                while (!isVerified) {
+                    Optional<String> verificationResult = verificationDialog.showAndWait();
+
+                    if (verificationResult.isPresent()) {
+                        // User clicked "Verify"
+                        String enteredCode = verificationResult.get();
+
+                        if (enteredCode.equals(verificationCode)) {
+                            isVerified = true;
+                        } else {
+                            // Incorrect code, show error message
+                            verificationErrorLabel.setText("Incorrect verification code. Please try again.");
+                        }
+                    } else {
+                        // User clicked "Cancel"
+                        break; // Exit the verification loop
+                    }
+                }
 
                 if (!isVerified) {
-                    showAlert("Verification Failed", "Incorrect verification code. Please try again.");
-                    continue;
+                    continue; // Retry the reservation process
                 }
 
                 // Successfully verified
@@ -467,7 +515,6 @@ public class ReservationController {
             }
         }
     }
-
 
 
 
