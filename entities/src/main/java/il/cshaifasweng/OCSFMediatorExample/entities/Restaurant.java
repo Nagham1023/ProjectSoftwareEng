@@ -13,7 +13,9 @@ public class Restaurant implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "restaurant_name", nullable = false)  // Ensure this field is not nullable
     private String restaurantName;
+
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TableNode> tables;

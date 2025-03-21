@@ -168,7 +168,7 @@ public abstract class AbstractClient implements Runnable
    */
   public void sendToServer(Object msg) throws IOException
   {
-    if (clientSocket == null || output == null) {
+    if (!(clientSocket != null) || output == null) {
       throw new SocketException("socket does not exist");
     }
     output.reset();

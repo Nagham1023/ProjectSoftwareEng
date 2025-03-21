@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.ContextMenu?>
@@ -8,55 +9,74 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.effect.Glow?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane accessibleRole="CHECK_MENU_ITEM" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #fbebf4;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AddComplainController">
+<AnchorPane accessibleRole="CHECK_MENU_ITEM" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(to bottom right, #fbebf4, #fff5f9); -fx-border-color: #ffd9d1; -fx-border-width: 2; -fx-border-radius: 8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AddComplainController">
+   <effect>
+      <DropShadow color="#0000001a" height="10.0" radius="4.5" width="10.0" />
+   </effect>
    <children>
-      <Line endX="100.0" layoutX="300.0" layoutY="110.0" startX="-100.0" stroke="#832018" />
-      <Text layoutX="232.0" layoutY="131.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Mama is all ears.." wrappingWidth="147.4342041015625">
+      <Button fx:id="backButton" layoutX="-2.0" mnemonicParsing="false" onAction="#backButton" prefHeight="53.0" prefWidth="117.0" style="-fx-background-color: transparent; -fx-cursor: hand;" text="←" textFill="#832018">
          <font>
-            <Font name="System Italic" size="19.0" />
+            <Font size="40.0" />
          </font>
+         <effect>
+            <Glow level="0.2" />
+         </effect>
+      </Button>
+
+      <ImageView fitHeight="96.0" fitWidth="105.0" layoutX="247.0" layoutY="4.0">
+         <Image url="@/images/mamas_kitchen_final.png" />
+         <effect>
+            <DropShadow color="#00000040" height="10.0" radius="4.5" width="10.0" />
+         </effect>
+      </ImageView>
+
+      <Line endX="150.0" layoutX="300.0" layoutY="110.0" startX="-150.0" stroke="#832018" strokeWidth="2.0">
+         <effect>
+            <DropShadow color="#00000026" height="3.0" radius="1.0" width="3.0" />
+         </effect>
+      </Line>
+
+      <Text layoutX="200.0" layoutY="131.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Mama is all ears.." textAlignment="CENTER" wrappingWidth="200.0">
+         <font>
+            <Font name="Segoe UI Italic" size="22.0" />
+         </font>
+         <effect>
+            <DropShadow color="#00000026" height="3.0" radius="1.0" width="3.0" />
+         </effect>
       </Text>
-      <Line endX="100.0" layoutX="300.0" layoutY="135.0" startX="-100.0" stroke="#832018" />
-      <Label layoutX="330.0" layoutY="193.0" prefHeight="27.0" prefWidth="69.0" text="Branch:">
+
+      <Line endX="150.0" layoutX="300.0" layoutY="135.0" startX="-150.0" stroke="#832018" strokeWidth="2.0">
+         <effect>
+            <DropShadow color="#00000026" height="3.0" radius="1.0" width="3.0" />
+         </effect>
+      </Line>
+
+      <HBox alignment="CENTER" layoutX="80.0" layoutY="147.0" spacing="25.0" />
+
+      <Label layoutX="30.0" layoutY="186.0" prefHeight="27.0" prefWidth="100.0" text="Tell Us.." textFill="#832018">
          <font>
-            <Font name="System Italic" size="18.0" />
+            <Font name="System Bold Italic" size="20.0" />
          </font>
+         <effect>
+            <DropShadow color="#00000026" height="2.0" radius="0.5" width="2.0" />
+         </effect>
       </Label>
-      <Label layoutX="330.0" layoutY="269.0" prefHeight="27.0" prefWidth="58.0" text="Email:">
+
+      <TextArea fx:id="textAreaTellUs" layoutX="24.0" layoutY="222.0" prefHeight="145.0" prefWidth="249.0" style="-fx-border-color: #832018; -fx-border-radius: 5; -fx-background-radius: 5; -fx-border-width: 1.5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 4, 0, 1, 1);">
          <font>
-            <Font name="System Italic" size="18.0" />
+            <Font size="14.0" />
          </font>
-      </Label>
-      <Label layoutX="330.0" layoutY="307.0" prefHeight="27.0" prefWidth="47.0" text="Date:">
-         <font>
-            <Font name="System Italic" size="18.0" />
-         </font>
-      </Label>
-      <Button fx:id="ComplainButton" layoutX="164.0" layoutY="148.0" mnemonicParsing="false" onAction="#ComplainButton" style="-fx-background-color: #832018;" text="Complaint" textFill="#fbebf4">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </Button>
-      <Button fx:id="SuggestionButton" layoutX="268.0" layoutY="147.0" mnemonicParsing="false" onAction="#SuggestionButton" prefHeight="27.0" prefWidth="81.0" style="-fx-background-color: #832018;" text="Suggestion" textFill="#fbebf4">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </Button>
-      <Button fx:id="FeedbackButton" layoutX="377.0" layoutY="148.0" mnemonicParsing="false" onAction="#FeedbackButton" style="-fx-background-color: #832018;" text="Feedback" textFill="#fbebf4">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </Button>
-      <TextField fx:id="textFieldEmail" layoutX="408.0" layoutY="269.0" prefHeight="25.0" prefWidth="175.0" style="-fx-border-color: #832018;" />
-      <DatePicker fx:id="datePicker" layoutX="408.0" layoutY="307.0" prefHeight="25.0" prefWidth="175.0" style="-fx-border-color: #832018;" />
-      <TextArea fx:id="textAreaTellUs" layoutX="57.0" layoutY="201.0" prefHeight="161.0" prefWidth="249.0" style="-fx-border-color: #832018;">
          <contextMenu>
             <ContextMenu>
                <items>
@@ -65,32 +85,99 @@
             </ContextMenu>
          </contextMenu>
       </TextArea>
-      <Label layoutX="57.0" layoutY="174.0" prefHeight="27.0" prefWidth="95.0" text="Tell Us..">
+
+      <VBox layoutX="330.0" layoutY="190.0" spacing="12.0">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label prefHeight="30.0" prefWidth="70.0" text="Branch:" textFill="#832018">
+                     <font>
+                        <Font name="System Bold Italic" size="18.0" />
+                     </font>
+                  </Label>
+                  <ComboBox fx:id="branchesList" prefHeight="30.0" prefWidth="175.0" promptText="Choose restaurant name" style="-fx-border-color: #832018; -fx-border-radius: 5; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0, 1, 1);" />
+               </children>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label prefHeight="30.0" prefWidth="70.0" text="Name:" textFill="#832018">
+                     <font>
+                        <Font name="System Bold Italic" size="18.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="textFieldName" prefHeight="30.0" prefWidth="175.0" style="-fx-border-color: #832018; -fx-border-radius: 5; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0, 1, 1);" />
+               </children>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="10.0">
+               <children>
+                  <Label prefHeight="30.0" prefWidth="70.0" text="Email:" textFill="#832018">
+                     <font>
+                        <Font name="System Bold Italic" size="18.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="textFieldEmail" prefHeight="30.0" prefWidth="175.0" style="-fx-border-color: #832018; -fx-border-radius: 5; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0, 1, 1);" />
+               </children>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" prefHeight="20.0" prefWidth="255.0" spacing="10.0">
+               <children>
+                  <Label prefHeight="30.0" prefWidth="70.0" text="Date:" textFill="#832018">
+                     <font>
+                        <Font name="System Bold Italic" size="18.0" />
+                     </font>
+                  </Label>
+                  <DatePicker fx:id="datePicker" prefHeight="30.0" prefWidth="175.0" style="-fx-border-color: #832018; -fx-border-radius: 5; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0, 1, 1);" />
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+
+      <HBox alignment="CENTER_RIGHT" layoutX="330.0" layoutY="348.0" spacing="10.0">
+         <children>
+            <TextField fx:id="textFieldOrderNum" prefHeight="30.0" prefWidth="189.0" promptText="Enter order number to complain" style="-fx-border-color: #832018; -fx-border-radius: 5; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 3, 0, 1, 1);" />
+
+            <Button fx:id="sendButton" mnemonicParsing="false" onAction="#sendButton" prefHeight="35.0" prefWidth="77.0" style="-fx-background-color: linear-gradient(to bottom, #fbebf4, #ffd9d1); -fx-border-color: #832018; -fx-border-width: 1.5; -fx-background-radius: 15; -fx-border-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);" text="SEND" textFill="#832018">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+               <padding>
+                  <Insets bottom="7.0" left="15.0" right="15.0" top="7.0" />
+               </padding>
+            </Button>
+         </children>
+      </HBox>
+
+      <Button fx:id="FeedbackButton" layoutX="375.0" layoutY="147.0" mnemonicParsing="false" onAction="#FeedbackButton" style="-fx-background-color: linear-gradient(to bottom, #832018, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);" text="Feedback" textFill="#fbebf4">
          <font>
-            <Font name="System Italic" size="18.0" />
+            <Font name="System Bold" size="14.0" />
+         </font>
+         <padding>
+            <Insets bottom="8.0" left="15.0" right="15.0" top="8.0" />
+         </padding>
+      </Button>
+
+      <Button fx:id="SuggestionButton" layoutX="254.0" layoutY="147.0" mnemonicParsing="false" onAction="#SuggestionButton" style="-fx-background-color: linear-gradient(to bottom, #832018, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);" text="Suggestion" textFill="#fbebf4">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+         <padding>
+            <Insets bottom="8.0" left="15.0" right="15.0" top="8.0" />
+         </padding>
+      </Button>
+      <Button fx:id="ComplainButton" layoutX="135.0" layoutY="147.0" mnemonicParsing="false" onAction="#ComplainButton" style="-fx-background-color: linear-gradient(to bottom, #832018, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);" text="Complaint" textFill="#fbebf4">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+         <padding>
+            <Insets bottom="8.0" left="15.0" right="15.0" top="8.0" />
+         </padding>
+      </Button>
+      <Label fx:id="checkLabel" layoutX="33.0" layoutY="366.0" prefHeight="30.0" prefWidth="229.0">
+         <font>
+            <Font size="15.0" />
          </font>
       </Label>
-      <ImageView fitHeight="110.0" fitWidth="134.0" layoutX="233.0">
-         <Image url="@/images/mamas_kitchen_final.png" />  <!-- Single Image element -->
-      </ImageView>
-      <Label layoutX="330.0" layoutY="232.0" prefHeight="27.0" prefWidth="58.0" text="Name:">
-         <font>
-            <Font name="System Italic" size="18.0" />
-         </font>
-      </Label>
-      <TextField fx:id="textFieldName" layoutX="408.0" layoutY="233.0" prefHeight="25.0" prefWidth="175.0" style="-fx-border-color: #832018;" />
-      <Button fx:id="sendButton" layoutX="528.0" layoutY="348.0" mnemonicParsing="false" onAction="#sendButton" style="-fx-border-color: #832018;" text="send" textFill="#832018">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </Button>
-      <Button fx:id="backButton" layoutX="-2.0" mnemonicParsing="false" onAction="#backButton" prefHeight="53.0" prefWidth="117.0" style="-fx-background-color: fbebf4;" text="←" textFill="#832018">
-         <font>
-            <Font size="40.0" />
-         </font>
-      </Button>
-      <Label fx:id="checkLabel" alignment="CENTER" layoutX="166.0" layoutY="363.0" prefHeight="25.0" prefWidth="279.0" />
-      <ComboBox fx:id="branchesList" layoutX="408.0" layoutY="194.0" prefHeight="25.0" prefWidth="175.0" promptText="Choose restaurant name" />
-      <TextField fx:id="textFieldOrderNum" layoutX="330.0" layoutY="348.0" prefHeight="28.0" prefWidth="189.0" promptText="Enter order number to complain" style="-fx-border-color: #832018;" />
    </children>
 </AnchorPane>

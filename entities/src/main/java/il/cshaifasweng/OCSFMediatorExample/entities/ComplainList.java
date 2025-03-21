@@ -11,7 +11,6 @@ public class ComplainList implements Serializable {
     public ComplainList() {
         ComplainList = new ArrayList<Complain>();
     }
-
     public List<Complain> getComplainList() {
         return ComplainList;
     }

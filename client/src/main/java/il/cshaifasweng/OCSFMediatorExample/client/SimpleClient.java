@@ -32,6 +32,12 @@ public class SimpleClient extends AbstractClient {
 		if (msg instanceof UserCheck) {
 			EventBus.getDefault().post(msg);
 		}
+		/******************************adan*****************************************/
+		if (msg instanceof PaymentCheck) {
+			EventBus.getDefault().post(msg);  // Handle credit card-related messages
+		}
+		/******************************adan*****************************************/
+
 		if (msg instanceof ComplainList) {
 			System.out.println("the message is an adding complaint");
 			ComplainList complainList = (ComplainList) msg;
@@ -121,6 +127,11 @@ public class SimpleClient extends AbstractClient {
 		}
 		if(msg instanceof ReConfirmEvent){
 			EventBus.getDefault().post(msg);
+		}
+		if (msg instanceof ListComplainList) {
+			ListComplainList listComplainList = (ListComplainList) msg;
+			System.out.println("Received complaint list: " + listComplainList.toString());
+			EventBus.getDefault().post(listComplainList);
 		}
 
 	}

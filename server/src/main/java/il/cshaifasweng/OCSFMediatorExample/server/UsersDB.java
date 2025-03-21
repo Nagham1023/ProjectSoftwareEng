@@ -4,6 +4,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.Users;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -71,7 +72,7 @@ public class UsersDB {
                 // Check if the user is signed in
                 if (!user.getSigned()) {
                     // If not signed in, update the status to true
-                    user.setSigned(true); // Assuming there's a setSigned(boolean) method in the Users class
+                    user.setSigned(false); // Assuming there's a setSigned(boolean) method in the Users class
 
                     // Save the updated user to the database
                     session.update(user);
@@ -319,9 +320,9 @@ public class UsersDB {
         }
     }
 
-    public static void generateBasicUser() throws Exception {
+    public static void generateBasicUser1() throws Exception {
                 // Helper function to read image as byte[]
-                if (session == null || !session.isOpen()) { // hala added to Ensure session is opened before calling generateOrders().
+        if (session == null || !session.isOpen()) { // hala added to Ensure session is opened before calling generateOrders().
             SessionFactory sessionFactory = getSessionFactory();
             session = sessionFactory.openSession();
         }
@@ -329,7 +330,9 @@ public class UsersDB {
             session.beginTransaction(); // Start a transaction
             try {
             // Create orders
-            Users nagham = new Users();
+            if (!isUserExists("naghamTheManager") ) {
+
+                Users nagham = new Users();
             nagham.setRole("CompanyManager");
             nagham.setEmail("naghammnsor@gmail.com");
             nagham.setPassword("NaghamYes");
@@ -337,23 +340,34 @@ public class UsersDB {
             nagham.setGender("other");
             nagham.setAge(22);
 
+                session.save(nagham);
+                session.flush();
+                session.getTransaction().commit(); // Commit the transaction
+            } }catch (Exception e) {
+                    // Rollback transaction in case of an error
+                    if (session.getTransaction() != null) {
+                        session.getTransaction().rollback();
+                    }
+                    e.printStackTrace();
+                    throw new Exception("An error occurred while generating the user.", e);
+                }
+        try {
+            // Create orders
+            if (!isUserExists("salhaTheCustomerService") ) {
 
+                Users salha = new Users();
+                salha.setRole("CustomerService");
+                salha.setEmail("salhasalha121314@gmail.com");
+                salha.setPassword("salha121314");
+                salha.setUsername("salhaTheCustomerService");
+                salha.setGender("female");
+                salha.setAge(55);
 
-            // List of Orders to add
-            List<Users> newOrders = Arrays.asList(nagham);
-
-            // Fetch existing meals from the database
-            CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaQuery<Users> query = builder.createQuery(Users.class);
-            query.from(Users.class);
-            List<Users> existingMeals = session.createQuery(query).getResultList();
-
-            // Save customizations
-            session.save(nagham);
-            session.flush();
-            session.getTransaction().commit(); // Commit the transaction
-
-        } catch (Exception e) {
+                session.save(salha);
+                session.flush();
+                session.getTransaction().commit(); // Commit the transaction
+                System.out.println("User has been created: " + salha.getUsername());
+            } }catch (Exception e) {
             // Rollback transaction in case of an error
             if (session.getTransaction() != null) {
                 session.getTransaction().rollback();
@@ -361,7 +375,26 @@ public class UsersDB {
             e.printStackTrace();
             throw new Exception("An error occurred while generating the user.", e);
         }
-        // Do not close the session here; keep it open for further operations
 
+
+
+            // List of Orders to add
+            //List<Users> newOrders = Arrays.asList(nagham,salha);
+
+//            // Fetch existing meals from the database
+//            CriteriaBuilder builder = session.getCriteriaBuilder();
+//            CriteriaQuery<Users> query = builder.createQuery(Users.class);
+//            query.from(Users.class);
+//            List<Users> existingMeals = session.createQuery(query).getResultList();
+
+            // Save customizations
+    }
+    private static boolean isUserExists(String username) {
+        System.out.println("Checking if user exists: " + username);
+        Query query = session.createQuery("FROM Users WHERE username = :username");
+        query.setParameter("username", username);
+        List<?> result = query.list();
+        System.out.println("result check");
+        return !result.isEmpty();
     }
 }

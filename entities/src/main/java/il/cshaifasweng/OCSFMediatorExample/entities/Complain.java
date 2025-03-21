@@ -4,6 +4,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -28,8 +31,8 @@ public class Complain implements Serializable {
     private String name_complain;
     private String email_complain;
     private String tell_complain;
-    private Date date_complain;
-    private Time time_complain;
+    private LocalDate date_complain;
+    private LocalDateTime time_complain;
     private String status_complaint;
     private String response_complaint;
     private String ourderNum_complain = "";
@@ -77,13 +80,13 @@ public class Complain implements Serializable {
         this.tell_complain = tell;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date_complain;
     }
-    public void setDate(Date date) {this.date_complain = date;}
+    public void setDate(LocalDate date) {this.date_complain = date;}
 
-    public Time getTime() {return time_complain;}
-    public void setTime(Time time) {this.time_complain = time;}
+    public LocalDateTime getTime() {return time_complain;}
+    public void setTime(LocalDateTime time) {this.time_complain = time;}
 
     public Restaurant getRestaurant() {return restaurant;}
     public void setRestaurant(Restaurant restaurant) {this.restaurant = restaurant;}
@@ -94,8 +97,8 @@ public class Complain implements Serializable {
     public String getResponse() {return response_complaint;}
     public void setResponse(String response) {this.response_complaint=response;}
 
-    public String getOurderNum() {return ourderNum_complain;}
-    public void setOurderNum(String ourderNum) {this.ourderNum_complain = ourderNum;}
+    public String getOrderNum() {return ourderNum_complain;}
+    public void setOrderNum(String ourderNum) {this.ourderNum_complain = ourderNum;}
 
     public double getRefund() {return refund_complain;}
     public void setRefund(double refund) {this.refund_complain = refund;}

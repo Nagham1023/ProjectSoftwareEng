@@ -158,10 +158,19 @@ public class WorkerController {
         Button clickedButton = (Button) event.getSource();
         String screenName = clickedButton.getId(); // Get the fx:id of the button
         switch (screenName){
+            case "complaint_center":
+                switchScreen("customerServiceView");
             case "reports_center":
                 switchScreen("ReportsView");
+
+
+
         }
 
+    }
+    @FXML
+    public void goToComplainsView(ActionEvent event) {
+        switchScreen("customerServiceView");
     }
 
     @Subscribe

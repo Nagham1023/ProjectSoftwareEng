@@ -5,14 +5,14 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="323.0" prefWidth="357.0" spacing="20" style="-fx-padding: 20;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AddResponseController">
+<VBox prefHeight="463.0" prefWidth="357.0" spacing="15" style="-fx-padding: 20; -fx-background-color: #fbebf4; -fx-border-color: #832018; -fx-border-width: 2; -fx-border-radius: 10; -fx-background-radius: 10;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AddResponseController">
 
-    <Label fx:id="ClientNameLabel" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Client Name" />
+    <Label fx:id="ClientNameLabel" prefHeight="64.0" prefWidth="303.0" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #832018;" text="Client Name" />
+   <TextField fx:id="tellLabel" prefHeight="99.0" prefWidth="313.0" style="-fx-border-color: #832018; -fx-background-radius: 5; -fx-border-radius: 5; -fx-padding: 5;" />
 
+    <TextField fx:id="responseField" prefHeight="114.0" prefWidth="313.0" promptText="Enter a good response" style="-fx-font-size: 16px; -fx-border-color: #832018; -fx-border-width: 1; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 5; -fx-background-color: white;" />
+    <TextField fx:id="refundField" prefHeight="33.0" prefWidth="313.0" promptText="Enter the refund amount" style="-fx-font-size: 16px; -fx-border-color: #832018; -fx-border-width: 1; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 5; -fx-background-color: white;" />
 
-    <TextField fx:id="responseField" prefHeight="141.0" prefWidth="291.0" promptText="Enter a good response" />
-   <TextField fx:id="refundField" prefHeight="25.0" prefWidth="313.0" promptText="Enter the refund amount" />
-
-
-    <Button fx:id="sendResponse" onAction="#SendResponse" text="send response" />
+    <Button fx:id="sendResponse" onAction="#SendResponse" style="-fx-background-color: #832018; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 10; -fx-border-radius: 5; -fx-background-radius: 5;" text="Send Response" />
+   <Label fx:id="checkLabel" prefHeight="17.0" prefWidth="309.0" />
 </VBox>
