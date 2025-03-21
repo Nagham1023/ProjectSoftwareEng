@@ -19,9 +19,12 @@ import javafx.geometry.Pos;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RestaurantMapController {
     boolean offline = false;
@@ -50,8 +53,6 @@ public class RestaurantMapController {
     public void initialize() throws IOException {
         EventBus.getDefault().register(this);
 
-        // Set the label text
-        restaurantLabel.setText("Select a Restaurant:");
 
         // Fetch all restaurants
         SimpleClient.getClient().sendToServer("getAllRestaurants");
@@ -154,35 +155,65 @@ public class RestaurantMapController {
         Platform.runLater(() -> {
             List<TableNode> tables = tablesStatus.getTables();
             List<String> statuses = tablesStatus.getStatuses();
-            int i = 0;
+
+            // Create a map of table IDs to their new statuses for quick lookup
+            Map<Integer, String> tableStatusMap = new HashMap<>();
+            for (int i = 0; i < tables.size(); i++) {
+                tableStatusMap.put(tables.get(i).getTableID(), statuses.get(i));
+            }
+
             // Iterate through the existing children of the mapContainer
             for (javafx.scene.Node node : mapContainer.getChildren()) {
-                if (node instanceof Button) {
-                    Button tableButton = (Button) node;
-                    // Extract the table ID from the button's text or any other identifier
-                    String buttonText = tableButton.getText();
-                    if (buttonText.equals("Details")) {
-                        // Assuming the table ID is stored in the button's user data
-                        TableNode table = tablesStatus.getTables().get(i);
-                        if (table != null) {
-                            // Find the corresponding status in the new data
+                if (node instanceof Label) {
+                    Label tableLabel = (Label) node;
+                    String labelText = tableLabel.getText();
 
-                            String newStatus = statuses.get(i);
-                            String currentColor = tableButton.getStyle().contains("-fx-background-color: ") ?
-                                    tableButton.getStyle().split("-fx-background-color: ")[1].split(";")[0] : "";
-                            String newColor = getButtonColorForStatus(newStatus);
+                    // Check if the label is a table label (e.g., "Table 1")
+                    if (labelText.startsWith("Table ")) {
+                        // Extract the table ID from the label's text
+                        int tableID = Integer.parseInt(labelText.replace("Table ", ""));
+                        String id = labelText.replaceAll("[^0-9]", "");
+                        // Find the button associated with this table label
+                        Button tableButton = findButtonForTableLabel(id);
+                        if (tableButton != null) {
+                            // Get the new status for this table
+                            String newStatus = tableStatusMap.get(tableID);
+                            if (newStatus != null) {
+                                // Get the current button color
+                                String currentColor = tableButton.getStyle().contains("-fx-background-color: ") ?
+                                        tableButton.getStyle().split("-fx-background-color: ")[1].split(";")[0] : "";
 
-                            // Compare the current color with the new color
-                            if (!newColor.equals(currentColor)) {
-                                // Update the button color
-                                tableButton.setStyle("-fx-background-color: " + newColor + "; -fx-text-fill: white;");
+                                // Get the new color for the status
+                                String newColor = getButtonColorForStatus(newStatus);
+
+                                // Compare the current color with the new color
+                                if (!newColor.equals(currentColor)) {
+                                    // Update the button color
+                                    tableButton.setStyle("-fx-background-color: " + newColor + "; -fx-text-fill: white;");
+                                }
                             }
                         }
                     }
                 }
-                i++;
             }
         });
+    }
+
+    /**
+     * Helper method to find the button associated with a table label.
+     * This assumes the button is positioned near the label in the Pane.
+     */
+    private Button findButtonForTableLabel(String tableLabel) {
+        // Iterate through the children to find a button near the label
+        for (javafx.scene.Node node : mapContainer.getChildren()) {
+            if (node instanceof Button) {
+                Button button = (Button) node;
+                if(button.getAccessibleText().equals(tableLabel)){
+                    return button;
+                }
+            }
+        }
+        return null;
     }
 
     @Subscribe
@@ -292,6 +323,7 @@ public class RestaurantMapController {
             Button tableButton = new Button("Details");
             tableButton.setLayoutX(x + 10);
             tableButton.setLayoutY(y + tableHeight + 10);
+            tableButton.setAccessibleText(""+table.getTableID());
 
             // Set button color based on table status
             String buttonColor = getButtonColorForStatus(status);

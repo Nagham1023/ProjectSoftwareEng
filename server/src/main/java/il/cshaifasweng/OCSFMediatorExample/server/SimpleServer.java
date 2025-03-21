@@ -20,6 +20,7 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
+
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
@@ -33,7 +34,6 @@ import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.*;
 
 
 import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.*;
-
 
 
 import javax.persistence.Table;
@@ -95,7 +95,7 @@ public class SimpleServer extends AbstractServer {
                     System.out.println("*********************************************");
                     List<TableNode> tablesForSlot = getAvailableTables(reservation.getRestaurantName(), startTime, reservation.getSeats(), reservation.isInside());
 
-                    if (!tablesForSlot.isEmpty()&&startTime.isAfter(LocalDateTime.now())) {
+                    if (!tablesForSlot.isEmpty() && startTime.isAfter(LocalDateTime.now())) {
                         // If tables are available, add the time slot to the list
                         availableTimeSlots.add(startTime);
                     } else {
@@ -228,7 +228,7 @@ public class SimpleServer extends AbstractServer {
 
                     // Assign tables to the reservation
 
-                    assignTablesToReservation(availableTables, event.getReservationDateTime(), event.isInside(),event.getRestaurantName());
+                    assignTablesToReservation(availableTables, event.getReservationDateTime(), event.isInside(), event.getRestaurantName());
                     printAllTablesInRestaurant(event.getRestaurantName());
 
                     // Create a new ReservationSave entity to save the reservation and tables
@@ -330,7 +330,7 @@ public class SimpleServer extends AbstractServer {
 
         if (msg instanceof specificComplains) {
             try {
-                specificComplains specificComplains =(specificComplains)msg;
+                specificComplains specificComplains = (specificComplains) msg;
                 String kind = specificComplains.getSpecificKind();
                 String status = specificComplains.getSpecificStatus();
                 ComplainList SpecificList = new ComplainList();
@@ -372,8 +372,6 @@ public class SimpleServer extends AbstractServer {
                 throw new RuntimeException("Failed to send response to client", e);
             }
         }
-
-
 
 
         if (msg instanceof mealEvent) {
@@ -495,20 +493,18 @@ public class SimpleServer extends AbstractServer {
                         paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
                         addCreditCardDetails(paymentCheck.getCreditCard(), paymentCheck.getPersonalDetails());
                     } else {
-                      //  System.out.println("not new personal details");
+                        //  System.out.println("not new personal details");
                         paymentCheck.setResponse("Added the Credit Card to the database.");
                         addCreditCardToExistingPersonalDetails(paymentCheck.getCreditCard(), personalDetailsDB);
                     }
                     client.sendToClient(paymentCheck);
                 } else {
                     //System.out.println("not new credit card");
-                    if(personalDetailsDB == null) {
+                    if (personalDetailsDB == null) {
                         //System.out.println("new personal details");
                         paymentCheck.setResponse("Added the personal details to the database");
                         addPersonalDetailsAndAssociateWithCreditCard(paymentCheck.getPersonalDetails(), cc);
-                    }
-
-                    else {
+                    } else {
                         //System.out.println("not new personal details");
                         paymentCheck.setResponse("Updated the personal details to the database.");
                         addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc);
@@ -670,7 +666,8 @@ public class SimpleServer extends AbstractServer {
                 throw new RuntimeException(e);
             }
 
-        } else if (msg.toString().startsWith("add client")) {
+        }
+        else if (msg.toString().startsWith("add client")) {
             System.out.println("Adding client");
             Subscribers.add(client);
             SubscribedClient connection = new SubscribedClient(client);
@@ -686,7 +683,8 @@ public class SimpleServer extends AbstractServer {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        } else if (msg.toString().startsWith("remove client")) {
+        }
+        else if (msg.toString().startsWith("remove client")) {
             System.out.println("Deleting client");
             if (!Subscribers.isEmpty()) {
                 Iterator<ConnectionToClient> iterator = Subscribers.iterator();
@@ -706,8 +704,7 @@ public class SimpleServer extends AbstractServer {
                     }
                 }
             }
-        }
-        else if (msg.toString().startsWith("getTablesForRestaurant: ")) {
+        } else if (msg.toString().startsWith("getTablesForRestaurant: ")) {
             try {
                 // Extract the restaurant name from the message
                 String restaurantName = msg.toString().substring("getTablesForRestaurant: ".length());
@@ -720,16 +717,12 @@ public class SimpleServer extends AbstractServer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else if (msg instanceof TableNode) {
-            try{
+        } else if (msg instanceof TableNode) {
+            try {
                 client.sendToClient("table details: " + getTableDetails(((TableNode) msg).getTableID()));
-            }catch(IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else if (msg instanceof SearchOptions) {
-            try{
         } else if (msg instanceof SearchOptions) {
             try {
                 System.out.println("*************************************");
@@ -744,7 +737,7 @@ public class SimpleServer extends AbstractServer {
 
                 // Retrieve current meals based on branch name
                 List<Meal> currentMeals = getRestaurantByName(options.getBranchName()).getMeals();
-                if(options.getBranchName().equals("all")){
+                if (options.getBranchName().equals("all")) {
                     currentMeals = getAllMeals();
                 }
                 System.out.println("Current meals for branch " + options.getBranchName() + ": " + currentMeals.size());
@@ -832,8 +825,7 @@ public class SimpleServer extends AbstractServer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-        else if (msg.toString().equals("Fetching SearchBy Options")) {
+        } else if (msg.toString().equals("Fetching SearchBy Options")) {
             try {
                 // Fetch all restaurants
                 List<Restaurant> restaurants = getAllRestaurants();
@@ -863,7 +855,6 @@ public class SimpleServer extends AbstractServer {
                 e.printStackTrace();
             }
         }
-
 
 
         if (msg instanceof complainEvent) {
@@ -1022,9 +1013,9 @@ public class SimpleServer extends AbstractServer {
             LocalTime closingHour = getRestaurantByName(restaurantName).getClosingTime();
             LocalDateTime endTime = reservationDateTime.plusHours(1); // Assume reservation lasts 1.5 hours
             endTime = endTime.plusMinutes(30);
-            if(reservationDateTime.toLocalTime().plusHours(1).equals(closingHour)||reservationDateTime.toLocalTime().plusHours(1).isAfter(closingHour)){
+            if (reservationDateTime.toLocalTime().plusHours(1).equals(closingHour) || reservationDateTime.toLocalTime().plusHours(1).isAfter(closingHour)) {
                 endTime = reservationDateTime.plusHours(1); // Assume reservation lasts 1 hours
-            }else{
+            } else {
 
                 endTime = reservationDateTime.plusHours(1); // Assume reservation lasts 1.5 hours
                 endTime = endTime.plusMinutes(30);
@@ -1146,8 +1137,8 @@ public class SimpleServer extends AbstractServer {
 //                }
 //            }
             for (LocalTime currentTimeSlot = startTime; currentTimeSlot.isBefore(endTime) || currentTimeSlot.equals(endTime); currentTimeSlot = currentTimeSlot.plusMinutes(15)) {
-                System.out.println("the current slot of time is: "+ currentTimeSlot);
-                System.out.println("the requested time is: "+ requestedTime);
+                System.out.println("the current slot of time is: " + currentTimeSlot);
+                System.out.println("the requested time is: " + requestedTime);
                 // Skip if the time slot is outside business hours
                 if (currentTimeSlot.isBefore(openingTime) || currentTimeSlot.isAfter(closingTime)) {
                     System.out.println("Requested time is outside of business hours!");
@@ -1450,6 +1441,7 @@ public class SimpleServer extends AbstractServer {
             return new ArrayList<>();
         }
     }
+
     private void saveReservationToDatabase(ReservationSave reservationSave) {
         try (Session session = App.getSessionFactory().openSession()) {
             // Begin a transaction
