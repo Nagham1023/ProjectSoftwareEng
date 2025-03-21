@@ -278,10 +278,10 @@ public class App {
             generateData();
             printAllData();
             printAllUsers();
-            //generateOrders();
+            // generateOrders();
             generateRestaurants();
             initializeSampleTables();
-            //generateBasicUser();
+            // generateBasicUser();
             // should generete complains
         } catch (Exception exception) {
             System.err.println("An error occurred, changes have been rolled back.");

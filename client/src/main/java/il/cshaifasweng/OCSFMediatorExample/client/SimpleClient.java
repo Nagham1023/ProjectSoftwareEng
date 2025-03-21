@@ -62,6 +62,8 @@ public class SimpleClient extends AbstractClient {
 				EventBus.getDefault().post(msg);
 			}else if(list.get(0) instanceof ReservationEvent){
 				EventBus.getDefault().post(msg);
+			} else if (list.get(0) instanceof TableNode) {
+				EventBus.getDefault().post(msg);
 			}
 		}
 		if(msg.getClass().equals(DifferentResrvation.class)){
@@ -79,10 +81,17 @@ public class SimpleClient extends AbstractClient {
 		if(msg instanceof SearchOptions){
 			EventBus.getDefault().post(msg);
 		}
-		// Check if the message starts with "ReportResponse"
+
 		if(msg instanceof String) {
 			String message = (String) msg;
-			if (message.startsWith("ReportResponse")) {
+			if(message.startsWith("table details: ")){
+				// Extract the table details from the message
+				String tableDetails = message.substring("table details: ".length());
+
+				// Send the table details to the EventBus
+				EventBus.getDefault().post(tableDetails);
+			}
+			else if (message.startsWith("ReportResponse")) {
 				// Split the message by "\n" to extract the report content
 				String[] parts = message.split("\n", 2); // Limit to 2 splits
 				if (parts.length == 2) {
@@ -95,10 +104,9 @@ public class SimpleClient extends AbstractClient {
 				} else {
 					System.err.println("Malformed report response from server.");
 				}
-			} else if (message.equals("Reservation confirmed successfully.")) {
+			}
+			else if (message.equals("Reservation confirmed successfully.")) {
 				EventBus.getDefault().post(msg);
-			} else {
-				System.out.println("Unhandled message: " + message);
 			}
 		}
         if (msg instanceof RestaurantList) {
@@ -108,6 +116,12 @@ public class SimpleClient extends AbstractClient {
             System.out.println("Received restaurant list: " + restaurantList.toString());
             EventBus.getDefault().post(restaurantList);
         }
+		if(msg instanceof tablesStatus){
+			EventBus.getDefault().post(msg);
+		}
+		if(msg instanceof ReConfirmEvent){
+			EventBus.getDefault().post(msg);
+		}
 
 	}
 

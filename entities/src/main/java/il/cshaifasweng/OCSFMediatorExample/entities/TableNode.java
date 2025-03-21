@@ -1,4 +1,3 @@
-
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import org.hibernate.annotations.BatchSize;
@@ -7,9 +6,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "tables")
@@ -19,7 +16,6 @@ public class TableNode implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int tableID;
 
-
     @ManyToOne
     @JoinColumn(name = "restaurant_id", nullable = false)
     private Restaurant restaurant;
@@ -28,10 +24,10 @@ public class TableNode implements Serializable {
     private int capacity;
     private String status; // "reserved", "available", "occupied"
 
-    @ElementCollection(fetch = FetchType.LAZY) // Changed to LAZY
+    @ElementCollection(fetch = FetchType.LAZY)
     private List<LocalDateTime> reservationStartTimes = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.LAZY) // Changed to LAZY
+    @ElementCollection(fetch = FetchType.LAZY)
     private List<LocalDateTime> reservationEndTimes = new ArrayList<>();
 
     @Transient
@@ -81,9 +77,32 @@ public class TableNode implements Serializable {
     }
 
     public String getStatus() {
-        return status;
-    }
+        LocalDateTime now = LocalDateTime.now();
+        boolean hasFutureReservation = false;
 
+        for (int i = 0; i < reservationStartTimes.size(); i++) {
+            LocalDateTime startTime = reservationStartTimes.get(i);
+            LocalDateTime endTime = reservationEndTimes.get(i);
+
+            // Check if the table is currently occupied
+            if (now.isAfter(startTime) && now.isBefore(endTime)) {
+                return "occupied"; // Table is currently occupied
+            }
+
+            // Check if there is a future reservation
+            if (now.isBefore(startTime)) {
+                hasFutureReservation = true;
+            }
+        }
+
+        // If there are future reservations, the table is reserved
+        if (hasFutureReservation) {
+            return "reserved";
+        }
+
+        // If not occupied or reserved, the table is available
+        return "available";
+    }
     public void setStatus(String status) {
         this.status = status;
     }
