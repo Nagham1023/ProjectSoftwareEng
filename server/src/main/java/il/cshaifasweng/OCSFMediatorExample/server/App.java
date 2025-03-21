@@ -32,7 +32,6 @@ import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.addPe
 import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.getAllRestaurants;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.generateBasicUser1;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.printAllUsers;
-
 public class App {
 
     private static Session session;
@@ -390,6 +389,7 @@ public class App {
             //addCreditCardDetails(creditCard,"yousefknani9@gmail.com");
             /*************************adan***************************/
 
+            // generateOrders();
             generateRestaurants();
             generateTheComplains();
             initializeSampleTables();

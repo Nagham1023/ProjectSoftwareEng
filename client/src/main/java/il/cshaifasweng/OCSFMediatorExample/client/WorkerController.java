@@ -41,6 +41,9 @@ public class WorkerController {
     @FXML
     private Button update_meals;
 
+    @FXML
+    private Button Reservation;
+
     private String currentWorker = "";
 
     @FXML
@@ -60,7 +63,7 @@ public class WorkerController {
             priceChange_requist.setVisible(false);
             reports_center.setVisible(false);
             tables_map.setVisible(true);
-            tables_reservation.setVisible(false);
+            tables_reservation.setVisible(true);
             update_meals.setVisible(false);
 
             switch (currentWorker) {
@@ -142,6 +145,7 @@ public class WorkerController {
             System.err.println("Failed to load " + fxmlFile + ": " + e.getMessage());
         }
     }
+
     @FXML
     public void switchScreen(String screenName) {
         Platform.runLater(() -> {
@@ -162,6 +166,7 @@ public class WorkerController {
 
 
         }
+
     }
     @FXML
     public void goToComplainsView(ActionEvent event) {
@@ -175,4 +180,28 @@ public class WorkerController {
             // Add any UI updates here
         });
     }
+
+    @FXML
+    void goToMap(ActionEvent event) {
+        Platform.runLater(() -> {
+            try {
+                App.setRoot("RestaurantMap");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+    }
+    @FXML
+    void goToReservation(ActionEvent event) {
+        Platform.runLater(() -> {
+            try {
+                App.setRoot("Wroker-Reservation");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+
 }
