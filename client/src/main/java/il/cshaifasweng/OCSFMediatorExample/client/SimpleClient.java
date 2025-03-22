@@ -32,6 +32,31 @@ public class SimpleClient extends AbstractClient {
 		if (msg instanceof UserCheck) {
 			EventBus.getDefault().post(msg);
 		}
+		if (msg instanceof PersonalDetails) {
+			System.out.println("the message is a personal details");
+			EventBus.getDefault().post(msg);  // Handle personal details-related messages
+		}
+//                if (msg instanceof List<?>) {
+//                        System.out.println("The message is a list");
+//                        List<?> list = (List<?>) msg;
+//                        if (!list.isEmpty() && list.get(0) instanceof CreditCard) {
+//                                List<CreditCard> creditCards = new ArrayList<>(list.size());
+//                                for (Object item : list) {
+//                                        if (item instanceof CreditCard) {
+//                                                creditCards.add((CreditCard) item);
+//                                        }
+//                                }
+//                                EventBus.getDefault().post(creditCards);
+//                        }
+//                }
+//                if (msg instanceof List<?>) { // Check if msg is a list
+//                        System.out.println("the message is a list");
+//                        List<?> list = (List<?>) msg;
+//                        if (!list.isEmpty() && list.get(0) instanceof CreditCard) { // Ensure it's a List<Meal>
+//                                System.out.println("list of creditcards");
+//                                EventBus.getDefault().post(msg);
+//                        }
+//                }
 		/******************************adan*****************************************/
 		if (msg instanceof PaymentCheck) {
 			EventBus.getDefault().post(msg);  // Handle credit card-related messages
@@ -39,7 +64,7 @@ public class SimpleClient extends AbstractClient {
 		/******************************adan*****************************************/
 
 		if (msg instanceof ComplainList) {
-			System.out.println("the message is an adding complaint");
+			System.out.println("the message is an adding complaintList");
 			ComplainList complainList = (ComplainList) msg;
 			//print restaurants names
 			System.out.println("Received restaurant list: " + complainList.toString());
@@ -71,14 +96,52 @@ public class SimpleClient extends AbstractClient {
 			} else if (list.get(0) instanceof TableNode) {
 				EventBus.getDefault().post(msg);
 			}
+			// Check if the list is not empty and if the first item is a CreditCard
+			else if (!list.isEmpty() && list.get(0) instanceof CreditCard) {
+				System.out.println("The message is a list of CreditCards");
+				// Iterate through the list and post each CreditCard individually
+				for (Object item : list) {
+					if (item instanceof CreditCard) {
+						CreditCard creditCard = (CreditCard) item;
+						// Post the individual CreditCard to the EventBus
+						System.out.println("Posting a single credit card to EventBus: " + creditCard);
+						EventBus.getDefault().post(creditCard); // Posting individual CreditCard to EventBus
+					}
+				}
+			}
+
 		}
+		//                        else if (!list.isEmpty() && list.get(0) instanceof CreditCard) {
+//                                        System.out.println("The message is a list");
+//                                        List<CreditCard> creditCards = new ArrayList<>(list.size());
+//                                        for (Object item : list) {
+//                                                if (item instanceof CreditCard) {
+//                                                        creditCards.add((CreditCard) item);
+//                                                }
+//                                        }
+//                                System.out.println("Posting credit card details to EventBus.");
+//                                        System.out.println(creditCards + " credddddit ");
+//                                System.out.println(" credit card get class " + creditCards.getClass().getName());
+//
+//                                EventBus.getDefault().post(creditCards);
+//                                }
+
+
 		if(msg.getClass().equals(DifferentResrvation.class)){
 			EventBus.getDefault().post(msg);
 		}
 		if (msg.getClass().equals(mealEvent.class)) {
 			EventBus.getDefault().post(msg);
 		}
+		if (msg.getClass().equals(Order.class)) {
+			System.out.println("received order");
+			EventBus.getDefault().post(msg);
+		}
 		if (msg.getClass().equals(RestaurantList.class)) {
+			EventBus.getDefault().post(msg);
+		}
+		if (msg.getClass().equals(ListOfCC.class)) {
+			System.out.println("received list of CC");
 			EventBus.getDefault().post(msg);
 		}
 		if (msg.getClass().equals(Warning.class)) {
@@ -110,9 +173,21 @@ public class SimpleClient extends AbstractClient {
 				} else {
 					System.err.println("Malformed report response from server.");
 				}
+			} else if (message.equals("Reservation confirmed successfully.")) {
+				EventBus.getDefault().post(msg);
+			} else if (message.equals("Order not found."))
+			{
+				EventBus.getDefault().post(msg);
+			} else if (message.equals("No order!"))
+			{
+				EventBus.getDefault().post(msg);
+			}else if (message.equals("Not same restaurant!"))
+			{
 			}
 			else if (message.equals("Reservation confirmed successfully.")) {
 				EventBus.getDefault().post(msg);
+			}else {
+				System.out.println("Unhandled message: " + message);
 			}
 		}
         if (msg instanceof RestaurantList) {

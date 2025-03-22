@@ -119,4 +119,17 @@ public class Meal implements Serializable {
         this.restaurants = restaurants;
     }
 
+    @Override
+    public String toString() {
+        return "Meal{" +
+                "id=" + id +
+                ", mealName='" + mealName + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", isCompany=" + isCompany +
+                ", isDelivery=" + isDelivery +
+                ", imageSize=" + (image != null ? image.length : 0) + " bytes" +
+                '}';
+    }
+
 }

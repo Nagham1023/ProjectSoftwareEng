@@ -58,6 +58,27 @@ public class MealsDB {
             Customization blackBread = new Customization();
             blackBread.setName("Black Bread");
 
+            // List of customizations to check and add if not existing
+            List<Customization> customizations = Arrays.asList(moreLettuce, extraCheese, moreOnion, highSpicyLevel, blackBread);
+
+            // Check if customizations already exist in the database and save only new ones
+            for (Customization customization : customizations) {
+                CriteriaBuilder builder = session.getCriteriaBuilder();
+                CriteriaQuery<Customization> query = builder.createQuery(Customization.class);
+                query.from(Customization.class);
+
+                List<Customization> existingCustomizations = session.createQuery(query).getResultList();
+                boolean isDuplicate = existingCustomizations.stream()
+                        .anyMatch(existingCustomization -> existingCustomization.getName().equalsIgnoreCase(customization.getName()));
+
+                if (!isDuplicate) {
+                    session.save(customization);
+                    System.out.println("Added new customization: " + customization.getName());
+                } else {
+                    System.out.println("Duplicate customization skipped: " + customization.getName());
+                }
+            }
+
             // Create Meals
             Meal burger = new Meal();
             burger.setName("Burger");
@@ -103,12 +124,6 @@ public class MealsDB {
             query.from(Meal.class);
             List<Meal> existingMeals = session.createQuery(query).getResultList();
 
-            // Save customizations
-            session.save(moreLettuce);
-            session.save(extraCheese);
-            session.save(moreOnion);
-            session.save(highSpicyLevel);
-            session.save(blackBread);
 
             // Add only unique meals
             for (Meal newMeal : newMeals) {

@@ -38,8 +38,8 @@ public class IPandPortController {
             client.openConnection();
             Platform.runLater(() -> {
                 try {
-                    //App.setRoot("mainScreen");
-                    App.setRoot("PersonalDetailsPage");
+                    App.setRoot("mainScreen");
+                    //App.setRoot("PersonalDetailsPage");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

@@ -2,12 +2,12 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.CreditCard;
 import il.cshaifasweng.OCSFMediatorExample.entities.PersonalDetails;
-import il.cshaifasweng.OCSFMediatorExample.entities.PersonalDetailsCheck;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,6 +23,10 @@ import org.greenrobot.eventbus.Subscribe;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static il.cshaifasweng.OCSFMediatorExample.client.CreditDetailsController.done_Order;
 
 public class PersonalDetailsPageController {
 
@@ -40,6 +44,7 @@ public class PersonalDetailsPageController {
 
     @FXML
     private TextField PhoneNumberPersonalDetails;
+
 
     @FXML
     private Button arrowPersonalDetails;
@@ -59,15 +64,18 @@ public class PersonalDetailsPageController {
     private Label phoneNumberLabel;
     @FXML
     private Label statusLabel;
+    // Declare `personalDetails` as a class member if not already
+    public PersonalDetails personalDetails;
 
     @FXML
     private void initialize() {
-        EventBus.getDefault().register(this);
+        //EventBus.getDefault().register(this);
         setupEmailField();
         setupPhoneNumberField();
         setupNameField();
         setupContinueButton();
-        setupContinueeButton();
+        //setupContinueeButton();
+        ContinuePersonalDetails.setOnAction(event -> handleContinueAction(event));
     }
 
     private void setupNameField() {
@@ -191,7 +199,7 @@ public class PersonalDetailsPageController {
                         .or(isEmailValid.not()));
     }
 
-    private void setupContinueeButton() {
+    /*private void setupContinueeButton() {
         ContinuePersonalDetails.setOnAction(event -> {
             try {
                 navigateToPersonalDetails();
@@ -199,43 +207,45 @@ public class PersonalDetailsPageController {
                 e.printStackTrace(); // Proper error handling
             }
         });
+    }*/
+
+    /******************************************************/
+    @FXML
+    void backToCart(ActionEvent event) {
+        try {
+            App.setRoot("Cart_page");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void navigateToPersonalDetails() throws IOException {
 
+    @FXML
+    public void handleContinueAction(ActionEvent event) {
+        // Initialize and set up personalDetails here
+        //System.out.println("here3");
+        personalDetails = new PersonalDetails();
+        personalDetails.setName(NamePersonalDetails.getText().trim());
+        personalDetails.setEmail(EmailPersonalDetails.getText().trim());
+        personalDetails.setPhoneNumber(PhoneNumberPersonalDetails.getText().trim());
+
+
+
+        // Send data to the server
         try {
-            PersonalDetails personalDetails = new PersonalDetails();
-            personalDetails.setName(NamePersonalDetails.getText());
-            personalDetails.setEmail(EmailPersonalDetails.getText());
-            personalDetails.setPhoneNumber(PhoneNumberPersonalDetails.getText());
 
+            // Navigate to the next screen after handling the server interaction
 
+            //System.out.println("here2");
 
             DeliveryPageController.personalDetails = personalDetails;
             CreditDetailsController.personalDetails = personalDetails;
+            done_Order.setCustomerEmail(EmailPersonalDetails.getText());
             App.setRoot("deliverypage");
-
-
         } catch (IOException e) {
+            System.err.println("Error in handleContinueAction: " + e.getMessage());
             e.printStackTrace();
         }
-    }
 
-/******************************************************/
-@Subscribe
-public void onPersonalDetailsCheckResponse(PersonalDetailsCheck detailsCheck) {
-    // This method gets called when a PersonalDetailsCheck object is posted to the EventBus
-    Platform.runLater(() -> {
-        if (detailsCheck.isEmailVerified() && detailsCheck.isDetailsComplete()) {
-            // If the personal details are verified and complete, update UI to reflect success
-            nameLabel.setText(detailsCheck.getName());
-            emailLabel.setText(detailsCheck.getEmail());
-            phoneNumberLabel.setText(detailsCheck.getPhoneNumber());
-            statusLabel.setText("Details are verified and complete.");
-        } else {
-            // If the personal details are not complete or email not verified, update UI to show error
-            statusLabel.setText("Verification failed or details incomplete.");
-        }
-    });
-}
+    }
 }

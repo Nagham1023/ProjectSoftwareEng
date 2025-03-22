@@ -4,7 +4,6 @@ import il.cshaifasweng.OCSFMediatorExample.entities.ReportRequest;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
-import il.cshaifasweng.OCSFMediatorExample.entities.CreditCardCheck;
 
 import java.io.IOException;
 
@@ -23,8 +22,10 @@ import java.util.List;
 
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 
+import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.OrdersDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.ReportDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.TableDB.*;
@@ -51,6 +52,7 @@ public class SimpleServer extends AbstractServer {
     protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
         System.out.println("Received message from client ");
         String msgString = msg.toString();
+        System.out.println(msgString);
 
 
         if (msg instanceof ReservationEvent) {
@@ -270,7 +272,7 @@ public class SimpleServer extends AbstractServer {
                 for (Complain complain : complainList) {
                     if (complain.getKind().equals("Complaint") && complain.getStatus().equals("Do"))
                         List1.add(complain);
-                    System.out.println("fill list 1");
+                    //System.out.println("fill list 1");
                 }
 
                 // for complain amd done
@@ -278,14 +280,14 @@ public class SimpleServer extends AbstractServer {
                 for (Complain complain : complainList) {
                     if (complain.getKind().equals("Complaint") && complain.getStatus().equals("Done"))
                         List2.add(complain);
-                    System.out.println("fill list 2");
+                    //System.out.println("fill list 2");
                 }
                 // for Feedback and do
                 List<Complain> List3 = new ArrayList<>();
                 for (Complain complain : complainList) {
                     if (complain.getKind().equals("Feedback") && complain.getStatus().equals("Do"))
                         List3.add(complain);
-                    System.out.println("fill list 3");
+                    //System.out.println("fill list 3");
                 }
 
                 // for Feedback amd done
@@ -293,14 +295,14 @@ public class SimpleServer extends AbstractServer {
                 for (Complain complain : complainList) {
                     if (complain.getKind().equals("Feedback") && complain.getStatus().equals("Done"))
                         List4.add(complain);
-                    System.out.println("fill list 4");
+                    //System.out.println("fill list 4");
                 }
                 // for Suggestion and do
                 List<Complain> List5 = new ArrayList<>();
                 for (Complain complain : complainList) {
                     if (complain.getKind().equals("Suggestion") && complain.getStatus().equals("Do"))
                         List5.add(complain);
-                    System.out.println("fill list 5");
+                    //System.out.println("fill list 5");
                 }
 
                 // for Suggestion amd done
@@ -308,7 +310,7 @@ public class SimpleServer extends AbstractServer {
                 for (Complain complain : complainList) {
                     if (complain.getKind().equals("Suggestion") && complain.getStatus().equals("Done"))
                         List6.add(complain);
-                    System.out.println("fill list 6");
+                    //System.out.println("fill list 6");
                 }
                 ListComplainList result = new ListComplainList(List1, List2, List3, List4, List5, List6);
                 client.sendToClient(result); // send to client
@@ -326,6 +328,33 @@ public class SimpleServer extends AbstractServer {
                 e.printStackTrace();
             }
         }
+        if (msg instanceof String && ((String) msg).startsWith("showorder")) {
+            //System.out.println("im in show order");
+            int orderNum = Integer.parseInt(((String) msg).substring(9)); // Extract from index 9 onwards
+            try {
+                Order order = OrderById(orderNum);
+                if (order == null) {
+                  System.out.println("Order not found.");
+                  client.sendToClient("Order not found.");
+                }
+                else client.sendToClient(order);
+                //System.out.println("sending back the order to the client "+order);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        }/*
+        if (msg instanceof Order) {
+
+            Order order = (Order) msg;
+            //System.out.println("the message is new order");
+            order.setRestaurantId(getRestaurantIdByName(order.getRestaurantName()));
+            order.setOrderType("ss");
+            for(MealInTheCart meal : order.getMeals())
+                saveCustomizationsbool(meal.getMeal().getCustomizationsList());
+            saveOrder(order);
+            //System.out.println("The order has been saved");
+        }*/
 
 
         if (msg instanceof specificComplains) {
@@ -351,26 +380,22 @@ public class SimpleServer extends AbstractServer {
 
         if (msg instanceof updateResponse) {
             updateResponse response = (updateResponse) msg;
-            System.out.println("Received updateResponse from client: " + response.getnewResponse());
-            // שליחת התגובה לכל הלקוחות (אם זה נדרש)
-            sendToAllClients(msg);
-            System.out.println("Sent updateResponse to all clients");
+            //System.out.println("Received updateResponse from client: " + response.getnewResponse());
 
-            String subject = "Thanks For Contacting MAMA's Kitchen";
-            String email = response.getEmailComplain();
-            String body = response.getnewResponse();
-            EmailSender emailSender = new EmailSender();
-            emailSender.sendEmail(subject, body, email);
-            System.out.println("Email sent to: " + email);
 
-            try {
-                updateComplainResponseInDatabase(response);
-                System.out.println("Updating Complain Response In Database");
+            //System.out.println("Sent updateResponse to all clients");
 
-                client.sendToClient(msg);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to send response to client", e);
-            }
+            //String subject = "Thanks For Contacting MAMA's Kitchen";
+            //String email = response.getEmailComplain();
+            //String body = response.getnewResponse();
+            //EmailSender emailSender = new EmailSender();
+            //emailSender.sendEmail(subject, body, email);
+            //System.out.println("Email sent to: " + email);
+
+            updateComplainResponseInDatabase(response);
+            System.out.println("Updating Complain Response In Database");
+
+            //client.sendToClient(msg);
         }
 
 
@@ -460,13 +485,21 @@ public class SimpleServer extends AbstractServer {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if (((UserCheck) msg).isState() == 4) {
+            } else if (((UserCheck) msg).isState() == 4) { //if logout
                 try {
                     //System.out.println("Logging out from the database");
                     SignOut((UserCheck) msg);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
+            }
+            else if (((UserCheck) msg).isState() == 5) {//if changing the info
+                try {
+                    UpdateEmailAndPassword((UserCheck) msg);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             }
 
         }
@@ -477,38 +510,55 @@ public class SimpleServer extends AbstractServer {
             //System.out.println("Processing request for card number: " + paymentCheck.getCreditCard().getCardNumber());
 
             try {
-                //System.out.println(" is new card " + isCreditCardNew(paymentCheck.getCreditCard()));
-                //System.out.println("person");
+
                 PersonalDetails personalDetailsDB = getPersonalDetailsByEmail(paymentCheck.getPersonalDetails().getEmail());
-                //System.out.println("personal "+personalDetailsDB);
                 CreditCard cc = getCreditCardDetailsByCardNumber(paymentCheck.getCreditCard().getCardNumber());
-                //System.out.println("the cc number "+paymentCheck.getCreditCard().getCardNumber());
-                //System.out.println("personal details " + cc);
+                CreditCard newCC = paymentCheck.getCreditCard();
+                PersonalDetails newPD = paymentCheck.getPersonalDetails();
+                Order newOrder = paymentCheck.getOrder();
+                newOrder.setRestaurantId(getRestaurantIdByName(newOrder.getRestaurantName()));
+
+
+                /*saves the customizations of every meal in the order*/
+                for(MealInTheCart meal : newOrder.getMeals())
+                    saveCustomizationsbool(meal.getMeal().getCustomizationsList());
+
+
 
                 if (cc == null) {
-                    //System.out.println("new credit card");
+
 
                     if (personalDetailsDB == null) {
-                        //System.out.println("new personal details");
+                        //System.out.println("the personal details is null and cc is null");
+                        newOrder.setCreditCard_num(newCC.getCardNumber());
                         paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
-                        addCreditCardDetails(paymentCheck.getCreditCard(), paymentCheck.getPersonalDetails());
+                        addCreditCardDetails(newCC, newPD,newOrder);
                     } else {
-                        //  System.out.println("not new personal details");
+                        //System.out.println("the personal details is already added but cc is null");
                         paymentCheck.setResponse("Added the Credit Card to the database.");
-                        addCreditCardToExistingPersonalDetails(paymentCheck.getCreditCard(), personalDetailsDB);
+
+                        newOrder.setCreditCard_num(newCC.getCardNumber());
+                        addCreditCardToExistingPersonalDetails(newCC, personalDetailsDB,newOrder);
                     }
                     client.sendToClient(paymentCheck);
                 } else {
                     //System.out.println("not new credit card");
-                    if (personalDetailsDB == null) {
+                    if(personalDetailsDB == null) {
+                        //System.out.println("personal details null but cc is not null");
                         //System.out.println("new personal details");
+                        newOrder.setCreditCard_num(cc.getCardNumber());
+
                         paymentCheck.setResponse("Added the personal details to the database");
-                        addPersonalDetailsAndAssociateWithCreditCard(paymentCheck.getPersonalDetails(), cc);
-                    } else {
-                        //System.out.println("not new personal details");
+                        addPersonalDetailsAndAssociateWithCreditCard(newPD, cc,newOrder);
+                    }
+
+                    else {
+                        //System.out.println("not null both");
                         paymentCheck.setResponse("Updated the personal details to the database.");
-                        addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc);
-                        //System.out.println("Associated.");
+
+                        newOrder.setCreditCard_num(cc.getCardNumber());
+
+                        addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc, newOrder);
                     }
                     client.sendToClient(paymentCheck);
                 }
@@ -517,102 +567,37 @@ public class SimpleServer extends AbstractServer {
                 throw new RuntimeException("Failed to process credit card request", e);
             }
         }
-
-
-        /*if (msg instanceof CreditCardCheck) {
-            CreditCardCheck creditCardCheck = (CreditCardCheck) msg;
-            System.out.println("Processing request for card number: " + creditCardCheck.getCardNumber());
-
+        //        System.out.println(msg.getClass() + " get class msg");
+        System.out.println("Received message of type: " + msg.getClass().getName());
+        // Check if the message is a PersonalDetails object
+        if (msg instanceof PersonalDetails) {
             try {
-                System.out.println(" is new card " + isCreditCardNew(creditCardCheck));
-                if (isCreditCardNew(creditCardCheck)) {
-                    PersonalDetails personalDetails = PersonalDetailsDB.getPersonalDetailsByEmail(creditCardCheck.getPersonalEmail());
-                    if (personalDetails != null) {
-                        System.out.println("personal details found");
-                        CreditCard newCardDetails = new CreditCard();
-                        newCardDetails.setCardNumber(creditCardCheck.getCardNumber());
-                        newCardDetails.setCardholderName(creditCardCheck.getCardholderName());
-                        newCardDetails.setCvv(creditCardCheck.getCvv());
-                        newCardDetails.setExpiryDate(creditCardCheck.getExpiryDate()); // Ensure date format is correctly parsed
-                        newCardDetails.setCardholdersID(creditCardCheck.getCardholdersID());
-
-                        newCardDetails.setPersonalDetails(personalDetails);
-                        CreditCardDetailsDB.addCreditCardDetails(newCardDetails, personalDetails.getEmail()); // Assuming email is used for lookup in the add method
-                        creditCardCheck.setValid(true);
-                        creditCardCheck.setRespond("Credit card details added successfully.");
+                PersonalDetails personal = (PersonalDetails) msg;
+                // Log the actual name of the PersonalDetails object
+                System.out.println(personal.getName() + " simple server personal details");
+                // Fetch personal details from the database based on the email
+                PersonalDetails personalDetailsDB = getPersonalDetailsByEmail(personal.getEmail());
+                System.out.println("hosam **************");
+                if (personalDetailsDB != null) {
+                    System.out.println("adan **************");
+                    // Process credit card details if found
+                    List<CreditCard> creditCards = personalDetailsDB.getCreditCardDetails();
+                    if (creditCards != null && !creditCards.isEmpty()) {
+                        System.out.println("in personal details simple server");
+                        System.out.println(creditCards + " ^6666^^^^^^^^^");
+                        ListOfCC loc= new ListOfCC(creditCards);
+                        client.sendToClient(loc);  // Send credit card details back to the client
                     } else {
-
-                        creditCardCheck.setValid(false);
-                        creditCardCheck.setRespond("Personal details not found.");
+                        client.sendToClient("No credit card details found for " + personal.getEmail());
                     }
-                    client.sendToClient(creditCardCheck);
                 } else {
-                    // Existing card validation
-                    List<CreditCard> creditCards = CreditCardDetailsDB.getCreditCardDetailsByPersonalEmail(creditCardCheck.getPersonalEmail());
-                    boolean isValid = creditCards.stream().anyMatch(card ->
-                            card.getCardNumber().equals(creditCardCheck.getCardNumber()) &&
-                                    card.getCvv().equals(creditCardCheck.getCvv()) &&
-                                    card.getCardholderName().equals(creditCardCheck.getCardholderName()) &&
-                                    card.getExpiryDate().equals(creditCardCheck.getExpiryDate())
-                    );
-
-                    creditCardCheck.setValid(isValid);
-                    creditCardCheck.setRespond(isValid ? "Credit Card validation successful" : "Credit Card validation failed");
-
-                    // Send the validation result back to the client
-                    client.sendToClient(creditCardCheck);
+                    client.sendToClient("No details found for email: " + personal.getEmail());
                 }
             } catch (Exception e) {
-                // Handle other exceptions that might be thrown during processing
-                creditCardCheck.setValid(false);
-                creditCardCheck.setRespond("Error processing request: " + e.getMessage());
-                throw new RuntimeException("Failed to process credit card request", e);
+                System.err.println("Error processing PersonalDetails: " + e.getMessage());
             }
         }
 
-        if (msg instanceof PersonalDetailsCheck) {
-            PersonalDetailsCheck detailsCheck = (PersonalDetailsCheck) msg;
-
-            try {
-                PersonalDetails existingDetails = PersonalDetailsDB.getPersonalDetailsByEmail(detailsCheck.getEmail());
-
-                if (existingDetails != null) {
-                    // Validate existing personal details
-                    if (existingDetails.getName().equals(detailsCheck.getName()) && existingDetails.getPhoneNumber().equals(detailsCheck.getPhoneNumber())) {
-                        // Existing details match the provided details
-                        detailsCheck.setDetailsComplete(true);
-                        detailsCheck.setEmailVerified(true);
-                        detailsCheck.setRespond("Existing details validated successfully.");
-                    } else {
-                        // Conflict in details
-                        detailsCheck.setDetailsComplete(false);
-                        detailsCheck.setEmailVerified(false);
-                        detailsCheck.setRespond("Error: Mismatch with existing details for this email.");
-                    }
-                } else {
-                    // No existing details, add new details
-                    PersonalDetails newPersonalDetails = new PersonalDetails();
-                    newPersonalDetails.setEmail(detailsCheck.getEmail());
-                    newPersonalDetails.setName(detailsCheck.getName());
-                    newPersonalDetails.setPhoneNumber(detailsCheck.getPhoneNumber());
-
-                    // Assuming you have a method to save new details
-                    PersonalDetailsDB.addPersonalDetails(newPersonalDetails);
-                    detailsCheck.setDetailsComplete(true);
-                    detailsCheck.setEmailVerified(true);
-                    detailsCheck.setRespond("New personal details added successfully.");
-                }
-
-                // Send the response back to the client
-                client.sendToClient(detailsCheck);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-                // Handle exceptions and send error message back to client
-//                detailsCheck.setDetailsComplete(false);
-//                detailsCheck.setRespond("Server error: " + e.getMessage());
-//                client.sendToClient(detailsCheck);
-            }
-        }*/
 
 /***************************adan********************************/
         if (msgString.startsWith("#warning")) {
@@ -858,14 +843,39 @@ public class SimpleServer extends AbstractServer {
 
 
         if (msg instanceof complainEvent) {
-            //here we're adding new complain !!
             System.out.println("Received adding new complainEvent ");
-            try {
-                addComplainIntoDatabase((complainEvent) msg);
-                client.sendToClient(msg);
+            complainEvent ce = (complainEvent) msg;
+            if(Objects.equals(ce.getKind(), "Complaint"))
+            {
+                Order order = OrderById(Integer.parseInt(ce.getOrderNum()));
+                if(order == null)
+                {
+                    try {
+                        client.sendToClient("No order!");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                else
+                {
+                    if(Objects.equals(order.getRestaurantName(), ce.getRestaurant().getRestaurantName())) {
+                        addComplainIntoDatabase(ce);
+                        sendToAll(msg);
+                    }
+                    else
+                    {
+                        try {
+                            client.sendToClient("Not same restaurant!");
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+
+            }
+            else {
+                addComplainIntoDatabase(ce);
                 sendToAll(msg);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             }
         }
 
@@ -874,7 +884,7 @@ public class SimpleServer extends AbstractServer {
     public Restaurant getRestaurantByName(String restaurantName) {
         Restaurant restaurant = null;
 
-        try (Session session = App.getSessionFactory().openSession()) {
+        try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
             // Create a query to fetch the restaurant by name
@@ -896,7 +906,7 @@ public class SimpleServer extends AbstractServer {
     private List<TableNode> getAvailableTables(String restaurantName, LocalDateTime reservationDateTime, int seats, boolean isInside) {
         List<TableNode> availableTables = new ArrayList<>();
 
-        try (Session session = App.getSessionFactory().openSession()) {
+        try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
             // Fetch tables for the restaurant that match the inside/outside preference
@@ -1044,6 +1054,8 @@ public class SimpleServer extends AbstractServer {
         System.out.println("i am in assigdTablesToReservation ");
 
     }
+
+
 
     private List<ReservationEvent> check_Available_Reservation(ReservationEvent reservation) {
         List<ReservationEvent> availableReservations = new ArrayList<>();
@@ -1203,7 +1215,7 @@ public class SimpleServer extends AbstractServer {
     private List<TableNode> getTablesByRestaurant(String restaurantName) {
         List<Restaurant> result = new ArrayList<>();
 
-        try (Session session = App.getSessionFactory().openSession()) { // Auto-closing session
+        try (Session session = getSessionFactory().openSession()) { // Auto-closing session
             session.beginTransaction();
 
             // Correct the query by structuring the JOIN FETCH properly
@@ -1265,7 +1277,7 @@ public class SimpleServer extends AbstractServer {
 
     // Method to get meals by ingredient
     private List<Meal> getMealsByIngredient(String ingredient) throws Exception {
-        try (Session session = App.getSessionFactory().openSession()) {
+        try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
             // Get all meals (detached)
@@ -1316,7 +1328,7 @@ public class SimpleServer extends AbstractServer {
     }
 
     private void printAllTablesInRestaurant(String restaurantName) {
-        try (Session session = App.getSessionFactory().openSession()) {
+        try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
             // Fetch all tables for the specified restaurant
@@ -1364,7 +1376,7 @@ public class SimpleServer extends AbstractServer {
     }
 
     public List<Restaurant> getAllRestaurants() {
-        try (Session session = App.getSessionFactory().openSession()) {
+        try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
             // Fetch all restaurants from the database
@@ -1383,7 +1395,7 @@ public class SimpleServer extends AbstractServer {
     }
 
     public List<Complain> getAllComplainss() {
-        try (Session session = App.getSessionFactory().openSession()) {
+        try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
             // Fetch all the complains from the database
@@ -1402,7 +1414,7 @@ public class SimpleServer extends AbstractServer {
     }
 
     public List<Customization> getAllCustomizations() {
-        try (Session session = App.getSessionFactory().openSession()) {
+        try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
             // Fetch all customizations from the database
@@ -1443,7 +1455,7 @@ public class SimpleServer extends AbstractServer {
     }
 
     private void saveReservationToDatabase(ReservationSave reservationSave) {
-        try (Session session = App.getSessionFactory().openSession()) {
+        try (Session session = getSessionFactory().openSession()) {
             // Begin a transaction
             session.beginTransaction();
 
@@ -1462,7 +1474,7 @@ public class SimpleServer extends AbstractServer {
     }
 
     public void printAllReservationSaves() {
-        Session session = App.getSessionFactory().openSession();
+        Session session = getSessionFactory().openSession();
 
         try {
             session.beginTransaction();
@@ -1610,7 +1622,7 @@ public class SimpleServer extends AbstractServer {
 
     /********************adan*************************/
 // Method to validate a CreditCardCheck object
-    private boolean validateCreditCard(CreditCardCheck creditCardCheck) {
+    /*private boolean validateCreditCard(CreditCardCheck creditCardCheck) {
         // Assuming validation logic is based on basic checks for demonstration
         boolean isValidNumber = creditCardCheck.getCardNumber().matches("\\d{16}");
         boolean isValidCvv = creditCardCheck.getCvv().matches("\\d{3}");
@@ -1618,6 +1630,6 @@ public class SimpleServer extends AbstractServer {
         boolean isValidName = creditCardCheck.getCardholderName() != null && !creditCardCheck.getCardholderName().trim().isEmpty();
 
         return isValidNumber && isValidCvv && isValidId && isValidName;
-    }
+    }*/
 /********************************adan************************/
 }

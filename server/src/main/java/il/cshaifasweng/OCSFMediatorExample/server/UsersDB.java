@@ -72,7 +72,7 @@ public class UsersDB {
                 // Check if the user is signed in
                 if (!user.getSigned()) {
                     // If not signed in, update the status to true
-                    user.setSigned(false); // Assuming there's a setSigned(boolean) method in the Users class
+                    user.setSigned(true); // Assuming there's a setSigned(boolean) method in the Users class
 
                     // Save the updated user to the database
                     session.update(user);
@@ -98,7 +98,6 @@ public class UsersDB {
         }
     }
     public static void SignOut(UserCheck us) throws Exception {
-        Session session = null;
         try {
             // Open a session if it's not already open
             SessionFactory sessionFactory = getSessionFactory();
@@ -124,6 +123,46 @@ public class UsersDB {
                     // Save the updated user to the database
                     session.update(user);
                     session.getTransaction().commit();
+            } else {
+                // User not found
+                return;
+            }
+        } catch (Exception e) {
+            if (session != null && session.getTransaction() != null) {
+                session.getTransaction().rollback(); // Rollback in case of an error
+            }
+            throw e; // Re-throw the exception
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close(); // Close the session
+            }
+        }
+    }
+    public static void UpdateEmailAndPassword (UserCheck us) throws Exception {
+        try {
+            // Open a session if it's not already open
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+
+            // Begin a transaction
+            session.beginTransaction();
+
+            // Create a Criteria query to find the user by username
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Users> query = builder.createQuery(Users.class);
+            Root<Users> root = query.from(Users.class);
+            query.select(root).where(builder.equal(root.get("username"), us.getUsername()));
+
+            // Execute the query to get the user
+            Users user = session.createQuery(query).uniqueResult();
+
+            if (user != null) {
+
+                user.setEmail(us.getEmail());
+                user.setPassword(us.getPassword());
+
+                session.update(user);
+                session.getTransaction().commit();
             } else {
                 // User not found
                 return;
@@ -327,34 +366,19 @@ public class UsersDB {
             session = sessionFactory.openSession();
         }
 
+        /*if (session.getTransaction().isActive()) {
+            session.getTransaction().rollback();
+        }*/
             session.beginTransaction(); // Start a transaction
             try {
             // Create orders
-            if (!isUserExists("naghamTheManager") ) {
-
                 Users nagham = new Users();
-            nagham.setRole("CompanyManager");
-            nagham.setEmail("naghammnsor@gmail.com");
-            nagham.setPassword("NaghamYes");
-            nagham.setUsername("naghamTheManager");
-            nagham.setGender("other");
-            nagham.setAge(22);
-
-                session.save(nagham);
-                session.flush();
-                session.getTransaction().commit(); // Commit the transaction
-            } }catch (Exception e) {
-                    // Rollback transaction in case of an error
-                    if (session.getTransaction() != null) {
-                        session.getTransaction().rollback();
-                    }
-                    e.printStackTrace();
-                    throw new Exception("An error occurred while generating the user.", e);
-                }
-        try {
-            // Create orders
-            if (!isUserExists("salhaTheCustomerService") ) {
-
+                nagham.setRole("CompanyManager");
+                nagham.setEmail("naghammnsor@gmail.com");
+                nagham.setPassword("NaghamYes");
+                nagham.setUsername("naghamTheManager");
+                nagham.setGender("other");
+                nagham.setAge(22);
                 Users salha = new Users();
                 salha.setRole("CustomerService");
                 salha.setEmail("salhasalha121314@gmail.com");
@@ -362,32 +386,43 @@ public class UsersDB {
                 salha.setUsername("salhaTheCustomerService");
                 salha.setGender("female");
                 salha.setAge(55);
+                Users yousef = new Users();
+                yousef.setRole("CompanyManager");
+                yousef.setEmail("yousefknani9@gmail.com");
+                yousef.setPassword("212");
+                yousef.setUsername("ceo");
+                yousef.setGender("male");
+                yousef.setAge(24);
 
-                session.save(salha);
+
+                if (!isUserExists("naghamTheManager") ) {
+
+                    session.save(nagham);
+                    System.out.println("User has been created: " + nagham.getUsername());
+                }
+
+                // Ensure you are checking for existing user
+                if (!isUserExists("salhaTheCustomerService")) {
+                    // Save the new user to the database
+                    session.save(salha);
+                    System.out.println("User has been created: " + salha.getUsername());
+                }
+
+                // Create orders
+                if (!isUserExists("ceo") ) {
+                    session.save(yousef);
+                    System.out.println("User has been created: " + yousef.getUsername());
+                }
                 session.flush();
                 session.getTransaction().commit(); // Commit the transaction
-                System.out.println("User has been created: " + salha.getUsername());
-            } }catch (Exception e) {
-            // Rollback transaction in case of an error
-            if (session.getTransaction() != null) {
-                session.getTransaction().rollback();
             }
+            catch (Exception e) {
+            // Rollback transaction in case of an error
             e.printStackTrace();
             throw new Exception("An error occurred while generating the user.", e);
         }
 
 
-
-            // List of Orders to add
-            //List<Users> newOrders = Arrays.asList(nagham,salha);
-
-//            // Fetch existing meals from the database
-//            CriteriaBuilder builder = session.getCriteriaBuilder();
-//            CriteriaQuery<Users> query = builder.createQuery(Users.class);
-//            query.from(Users.class);
-//            List<Users> existingMeals = session.createQuery(query).getResultList();
-
-            // Save customizations
     }
     private static boolean isUserExists(String username) {
         System.out.println("Checking if user exists: " + username);

@@ -1,10 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 //import il.cshaifasweng.OCSFMediatorExample.entities.CreditCardCheck;
-import il.cshaifasweng.OCSFMediatorExample.entities.CreditCard;
-import il.cshaifasweng.OCSFMediatorExample.entities.CreditCardCheck;
-import il.cshaifasweng.OCSFMediatorExample.entities.PaymentCheck;
-import il.cshaifasweng.OCSFMediatorExample.entities.PersonalDetails;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -12,8 +9,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
+import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
@@ -22,19 +19,21 @@ import javafx.util.StringConverter;
 import java.awt.*;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
-import javafx.scene.control.Button;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 
 public class CreditDetailsController {
 
+    static public Order done_Order;
     @FXML
     private TextField cardNumberField;
     @FXML
@@ -44,9 +43,8 @@ public class CreditDetailsController {
     @FXML
     private TextField cvvnumber;
     @FXML
-    private TextField Personalemail;
-    @FXML
-    private Button checkoutButton;
+    private Button savecreditButton;
+
     @FXML
     private Label errorLabel;
     @FXML
@@ -68,10 +66,15 @@ public class CreditDetailsController {
 
 
     static public PersonalDetails personalDetails;
+    @FXML
+    private ComboBox<CreditCard> savedCardsComboBox;
+
+//    @FXML
+//    private ListView<CreditCard> creditCardListView; // Example component for displaying cards
 
 
     @FXML
-    private void initialize() {
+    void initialize() {
         EventBus.getDefault().register(this);
         setupCardNumberField();
         setupCardholderNameField();
@@ -80,8 +83,62 @@ public class CreditDetailsController {
         setupMonthYearComboBox();
         setupBindings();
         setuparrowButton();
-        setupEmailField();
-        checkoutButton.setOnAction(event -> sendCreditCardDetailsToServer());
+
+        savedCardsComboBox.setOnAction(event -> handleCardSelection());
+        /*sending to get all the cc*/
+        try {
+            System.out.println("sending to server");
+            SimpleClient.getClient().sendToServer(personalDetails);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        savecreditButton.setOnAction(event -> sendCreditCardDetailsToServer());
+
+    }
+    private void handleCardSelection() {
+        CreditCard selectedCard = savedCardsComboBox.getValue();
+
+        boolean isNoneSelected = (selectedCard == null);
+
+        // Enable/Disable fields based on selection
+        cardNumberField.setDisable(!isNoneSelected);
+        cardholderNameField.setDisable(!isNoneSelected);
+        monthYearComboBox.setDisable(!isNoneSelected);
+        cvvnumber.setDisable(!isNoneSelected);
+        CardholdersIDcardField.setDisable(!isNoneSelected);
+        if (savecreditButton.disableProperty().isBound()) {
+            savecreditButton.disableProperty().unbind();
+        }
+
+        savecreditButton.setDisable(isNoneSelected);
+
+        // Fill details if a card is selected, otherwise clear fields
+        if (selectedCard != null) {
+            errorLabel.setText("");
+            errorLabelcvv.setText("");
+            errorLabelID.setText("");
+            errorLabelName.setText("");
+            errorLabelexpirydate.setText("");
+            emailErrorLabelC.setText("");
+            cvvnumber.setText("***");
+            cardholderNameField.setText(selectedCard.getCardholderName());
+            monthYearComboBox.setValue(selectedCard.getExpiryDate());
+            cardNumberField.setText("**** **** **** " + selectedCard.getCardNumber().substring(selectedCard.getCardNumber().length() - 4));
+            CardholdersIDcardField.setText(selectedCard.getCardholdersID());
+        } else {
+            clearFields();
+            setupBindings();
+        }
+    }
+
+
+    private void clearFields() {
+        cardNumberField.clear();
+        cardholderNameField.clear();
+        //monthYearComboBox.clear();
+        cvvnumber.clear();
+        CardholdersIDcardField.clear();
     }
 
     private void setupBindings() {
@@ -108,23 +165,11 @@ public class CreditDetailsController {
                 .and(isCardholderNameValid)
                 .and(isIDValid)
                 .and(isCvvValid)
-                .and(isMonthYearValid)
-                .and(emailInteractedC);
+                .and(isMonthYearValid);
+//                .and(emailInteractedC);
 
-        checkoutButton.disableProperty().bind(isAllValid.not());
+        savecreditButton.disableProperty().bind(isAllValid.not());
     }
-
-    @FXML
-    void checkoutFunction(ActionEvent event) {
-        //yousef
-        //SimpleClient simpleClient = ne
-
-    }
-
-
-
-
-
 
 
     private void setupCardNumberField() {
@@ -170,23 +215,9 @@ public class CreditDetailsController {
         }
     }
 
-//    private String formatCardNumber(String text) {
-//        String digitsOnly = text.replaceAll("\\s+", "");
-//        StringBuilder formatted = new StringBuilder();
-//        for (int i = 0; i < digitsOnly.length(); i++) {
-//            if (i > 0 && i % 4 == 0) {
-//                formatted.append(" "); // Insert space every four characters
-//            }
-//            formatted.append(digitsOnly.charAt(i));
-//        }
-//        return formatted.toString();
-//    }
-
     private int getDigitCount(String text) {
         return text.replaceAll("\\s+", "").length();
     }
-
-
 
     private void setupCardholderNameField() {
         cardholderNameField.addEventFilter(KeyEvent.KEY_TYPED, event -> {
@@ -215,58 +246,55 @@ public class CreditDetailsController {
         });
     }
 
-
     private void setupMonthYearComboBox() {
-    List<String> monthYears = new ArrayList<>();
-    int currentYear = LocalDate.now().getYear();
-    int currentMonth = LocalDate.now().getMonthValue();
-    String currentMonthYear = String.format("%02d/%d", currentMonth, currentYear); // Current month/year string
-    boolean currentMonthYearFound = false;
+        List<String> monthYears = new ArrayList<>();
+        int currentYear = LocalDate.now().getYear();
+        int currentMonth = LocalDate.now().getMonthValue();
+        String currentMonthYear = String.format("%02d/%d", currentMonth, currentYear); // Current month/year string
+        boolean currentMonthYearFound = false;
 
-    for (int year = currentYear; year <= currentYear + 10; year++) {
-        for (int month = 1; month <= 12; month++) {
-            String monthYear = String.format("%02d/%d", month, year);
-            monthYears.add(monthYear);
-            if (monthYear.equals(currentMonthYear)) {
-                currentMonthYearFound = true;
-            }
-        }
-    }
-    monthYearComboBox.getItems().setAll(monthYears);
-
-    // Set the current month and year as the selected item if found
-    if (currentMonthYearFound) {
-        monthYearComboBox.getSelectionModel().select(currentMonthYear);
-    } else {
-        monthYearComboBox.getSelectionModel().selectFirst();  // Fallback to the first item if current month/year not found
-    }
-
-    monthYearComboBox.setOnAction(event -> {
-        if (monthYearComboBox.getValue() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
-            try {
-                YearMonth selectedYearMonth = YearMonth.parse(monthYearComboBox.getValue(), formatter);
-                YearMonth currentYearMonth = YearMonth.now();
-
-                // Check if the selected year-month is before the current year-month
-                if (selectedYearMonth.isBefore(currentYearMonth)) {
-                    System.out.println("Date is in the past.");
-                    errorLabelexpirydate.setText("Expiration date must be in the future.");
-                } else {
-                    System.out.println("Date is valid.");
-                    errorLabelexpirydate.setText("");
+        for (int year = currentYear; year <= currentYear + 10; year++) {
+            for (int month = 1; month <= 12; month++) {
+                String monthYear = String.format("%02d/%d", month, year);
+                monthYears.add(monthYear);
+                if (monthYear.equals(currentMonthYear)) {
+                    currentMonthYearFound = true;
                 }
-            } catch (DateTimeParseException e) {
-                System.out.println("Parsing failed: " + e.getMessage());
-                errorLabelexpirydate.setText("Invalid date format.");
             }
-        } else {
-            errorLabelexpirydate.setText("No date selected.");
         }
-    });
-}
+        monthYearComboBox.getItems().setAll(monthYears);
 
+        // Set the current month and year as the selected item if found
+        if (currentMonthYearFound) {
+            monthYearComboBox.getSelectionModel().select(currentMonthYear);
+        } else {
+            monthYearComboBox.getSelectionModel().selectFirst();  // Fallback to the first item if current month/year not found
+        }
 
+        monthYearComboBox.setOnAction(event -> {
+            if (monthYearComboBox.getValue() != null) {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
+                try {
+                    YearMonth selectedYearMonth = YearMonth.parse(monthYearComboBox.getValue(), formatter);
+                    YearMonth currentYearMonth = YearMonth.now();
+
+                    // Check if the selected year-month is before the current year-month
+                    if (selectedYearMonth.isBefore(currentYearMonth)) {
+                        System.out.println("Date is in the past.");
+                        errorLabelexpirydate.setText("Expiration date must be in the future.");
+                    } else {
+                        System.out.println("Date is valid.");
+                        errorLabelexpirydate.setText("");
+                    }
+                } catch (DateTimeParseException e) {
+                    System.out.println("Parsing failed: " + e.getMessage());
+                    errorLabelexpirydate.setText("Invalid date format.");
+                }
+            } else {
+                errorLabelexpirydate.setText("No date selected.");
+            }
+        });
+    }
 
     private String formatCardNumber(String text) {
         String digitsOnly = text.replaceAll("\\s+", "");
@@ -343,119 +371,42 @@ public class CreditDetailsController {
             errorLabelcvv.setText(""); // Clear error message if the input is valid
         }
     }
-
-    private void setupEmailField() {
-        // Validate email on text change and mark interaction
-        Personalemail.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!emailInteractedC.get()) {
-                emailInteractedC.set(true); // Mark as interacted on first text change
-            }
-            validateEmail();
-        });
-
-        // Add this if you need to validate on focus loss, though it might be redundant
-        Personalemail.focusedProperty().addListener((observable, oldValue, isFocused) -> {
-            if (!isFocused) {
-                validateEmail();
-            }
-        });
-    }
-
-
-
-
-    private void validateEmail() {
-        String email = Personalemail.getText();
-        boolean valid = false;
-        if (email.isEmpty()) {
-            emailErrorLabelC.setText("This field is required.");
-            //System.out.println("Email validation: field is required");
-        } else if (!email.matches("^[\\w.+\\-]+@gmail\\.com$")) {
-            emailErrorLabelC.setText("Email should be correct and end with @gmail.com");
-            //System.out.println("Email validation: incorrect format");
-        } else {
-            emailErrorLabelC.setText(""); // Clear the error message if valid
-            valid = true;  // Only set valid to true if email is correctly formatted
-            //System.out.println("Email validation: correct format");
-        }
-        emailInteractedC.set(valid);
-        //System.out.println("isEmailValid set to: " + valid);
-    }
-
-
-
-
     private void setuparrowButton() {
         arrow.setOnAction(event -> {
             try {
-                goback();
+                System.out.println("Arrow button pressed.");
+                App.setRoot("deliverypage");
             } catch (IOException e) {
                 e.printStackTrace(); // Proper error handling
             }
         });
     }
+    /************************************new***********************************************/
+    @Subscribe
+    public void onPaymentResponse(PaymentCheck creditCardCheck) {
+        // This method gets called when a CreditCardCheck object is posted to the EventBus
+        Platform.runLater(() -> {
 
-    private void goback() throws IOException {
-        App.setRoot("deliverypage");
-    }
-/************************************new***********************************************/
-@Subscribe
-public void onPaymentResponse(PaymentCheck creditCardCheck) {
-    // This method gets called when a CreditCardCheck object is posted to the EventBus
-    Platform.runLater(() -> {
-
-            System.out.println("Credit card is valid.");
+            System.out.println("Credit card is valid." + creditCardCheck.getOrder());
             errorLabel.setText(creditCardCheck.getResponse());
-    });
-}
+            done_Order = creditCardCheck.getOrder();
+            try {
+                App.setRoot("receipt");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
 
-//    public void sendCreditCardDetailsToServer() {
-//        String cardNumber = cardNumberField.getText().trim();
-//        String cardholderName = cardholderNameField.getText().trim();
-//        String cardholdersID = CardholdersIDcardField.getText().trim();
-//        String cvv = cvvnumber.getText().trim();
-//        String expiryDateStr = monthYearComboBox.getValue();  //  the expiry date is selected from a ComboBox and is in the format "MM/yyyy"
-//
-//        // Parse the expiry date string to LocalDate
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
-//        String expiryDate = null;
-//        try {
-//            YearMonth.parse(expiryDateStr, formatter); // This is just for validation
-//            expiryDate = expiryDateStr; // Since the format is correct, assign it directly
-//        } catch (DateTimeParseException e) {
-//            System.err.println("Failed to parse expiry date: " + e.getMessage());
-//            errorLabel.setText("Invalid expiry date format.");
-//            return; // Exit if parsing fails
-//        }
-//
-//        // Create a CreditCardCheck instance and set values
-//        CreditCardCheck creditCardCheck = new CreditCardCheck();
-//        creditCardCheck.setCardNumber(cardNumber);
-//        creditCardCheck.setCardholderName(cardholderName);
-//        creditCardCheck.setCardholdersID(cardholdersID);
-//        creditCardCheck.setCvv(cvv);
-//        creditCardCheck.setExpiryDate(expiryDate);
-//
-//        // Send this information to the server using SimpleClient
-//        try {
-//            SimpleClient client = SimpleClient.getClient();
-//            if (!client.isConnected()) {
-//                client.openConnection();  // Attempt to open the connection if not already connected
-//            }
-//            client.sendToServer(creditCardCheck);
-//        } catch (IOException e) {
-//            System.err.println("Error sending credit card details to server: " + e.getMessage());
-//            errorLabel.setText("Failed to connect to server. Check connection and try again.");
-//        }
-//
-//    }
 
     public void sendCreditCardDetailsToServer() {
         String cardNumber = cardNumberField.getText().trim();
         String cardholderName = cardholderNameField.getText().trim();
         String cardholdersID = CardholdersIDcardField.getText().trim();
         String cvv = cvvnumber.getText().trim();
-        String expiryDateStr = monthYearComboBox.getValue();  // Assuming the expiry date is selected from a ComboBox and is in the format "MM/yyyy"
+        String expiryDateStr = monthYearComboBox.getValue();  // the expiry date is selected from a ComboBox and is in the format "MM/yyyy"
+        done_Order.setDate(LocalDate.now());
+        done_Order.setOrderTime(LocalDateTime.now());
 
         // Attempt to validate and then directly use the expiry date string
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
@@ -471,8 +422,17 @@ public void onPaymentResponse(PaymentCheck creditCardCheck) {
             creditcard.setCardholdersID(cardholdersID);
             creditcard.setCvv(cvv);
             creditcard.setExpiryDate(expiryDateStr); // Store as String
+            PaymentCheck paymentCheck;
 
-            PaymentCheck paymentCheck = new PaymentCheck(creditcard,personalDetails);
+            if(savedCardsComboBox.getValue() != null) {
+                System.out.println("selected credit card");
+                paymentCheck = new PaymentCheck(savedCardsComboBox.getValue(),personalDetails,done_Order);
+            }
+            else {
+                paymentCheck = new PaymentCheck(creditcard, personalDetails, done_Order);
+                System.out.println("new credit card");
+            }
+
             try {
                 SimpleClient client = SimpleClient.getClient();
                 client.sendToServer(paymentCheck);
@@ -486,8 +446,26 @@ public void onPaymentResponse(PaymentCheck creditCardCheck) {
         }
     }
 
+    @Subscribe
+    public void onCreditCardDetailsReceived(ListOfCC creditCards) {
+        Platform.runLater(() -> {
+            System.out.println("getting from server");
+            savedCardsComboBox.getItems().clear();
+            savedCardsComboBox.getItems().add(null); // First option
+            for (CreditCard creditCard : creditCards.getCreditCards()) {
+                savedCardsComboBox.getItems().add(creditCard);
+            }
+            savedCardsComboBox.getSelectionModel().selectFirst();
 
+        });
+    }
 
-
+    @Subscribe
+    public void noCc(String msg)
+    {
+        System.out.println(msg);
+        savedCardsComboBox.getItems().clear();
+        savedCardsComboBox.getItems().add(null); // First option
+        savedCardsComboBox.getSelectionModel().selectFirst();
+    }
 }
-

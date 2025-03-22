@@ -22,9 +22,12 @@ import javafx.scene.control.Label;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -38,6 +41,10 @@ public class CustomerServiceViewController {
 
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
+
+
+    @FXML
+    private AnchorPane anchorPane;
 
     @FXML // URL location of the FXML file that was given to the FXMLLoader
     private URL location;
@@ -116,11 +123,11 @@ public class CustomerServiceViewController {
         suggestionButton.setStyle("-fx-background-color: #C76A58;");
     }
     @FXML
-    void GenerateButton(ActionEvent event) throws IOException {
+    void GenerateButton() throws IOException {
         if(statusVal==null||kindVal==null)
             checkLabel.setText("Need To Choose Kind And Status!");
         else{
-            checkLabel.setText("Genelating..");
+            checkLabel.setText("Generating..");
         if("Complaint".equals(kindVal) && "Do".equals(statusVal)){
            GetTheComplains(list1);
         }
@@ -145,6 +152,7 @@ public class CustomerServiceViewController {
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
         System.out.println("EventBus registered successfully.");
+        System.out.println("Starting the init");
 
         SimpleClient client;
         client = SimpleClient.getClient();
@@ -159,56 +167,28 @@ public class CustomerServiceViewController {
         assert suggestionButton != null : "fx:id=\"suggestionButton\" was not injected: check your FXML file 'customerServiceView.fxml'.";
 
     }
-    public void restartThePage()  {
-
-        EventBus.getDefault().register(this);
-        System.out.println("EventBus registered successfully.");
-
-        SimpleClient client;
-        client = SimpleClient.getClient();
-        try {
-            client.sendToServer("getAllComplaints6");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        if(statusVal==null||kindVal==null)
-            checkLabel.setText("Need To Choose Kind And Status!");
-        else{
-            checkLabel.setText("Genelating..");
-            if("Complaint".equals(kindVal) && "Do".equals(statusVal)){
-                GetTheComplains(list1);
-            }
-            if("Complaint".equals(kindVal) && "Done".equals(statusVal)){
-                GetTheComplains(list2);
-            }
-            if("Feedback".equals(kindVal) && "Do".equals(statusVal)){
-                GetTheComplains(list3);
-            }
-            if("Feedback".equals(kindVal) && "Done".equals(statusVal)){
-                GetTheComplains(list4);
-            }
-            if("Suggestion".equals(kindVal) && "Do".equals(statusVal)){
-                GetTheComplains(list5);
-            }
-            if("Suggestion".equals(kindVal) && "Done".equals(statusVal)){
-                GetTheComplains(list6);
-            }}
-    }
-
     @Subscribe
     public void handleComplainListEvent(ListComplainList event) {
-        this.listComplainList = event;
-        event.tooString();
-        list1 = listComplainList.getComplaincd();
-        list2 = listComplainList.getComplaincn();
-        list3 = listComplainList.getComplainfd();
-        list4 = listComplainList.getComplainfn();
-        list5 = listComplainList.getComplainsd();
-        list6 = listComplainList.getComplainsn();
+        Platform.runLater(()->{
+            this.listComplainList = event;
+            event.tooString();
+            list1 = listComplainList.getComplaincd();
+            list2 = listComplainList.getComplaincn();
+            list3 = listComplainList.getComplainfd();
+            list4 = listComplainList.getComplainfn();
+            list5 = listComplainList.getComplainsd();
+            list6 = listComplainList.getComplainsn();
+            try {
+                GenerateButton();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public void GetTheComplains(List<Complain> compList) {
 
+        //System.out.println("GetTheComplains");
         Platform.runLater(() -> {
             ListCompContainer.getChildren().clear();
             ListCompContainer.getChildren().removeIf(node -> {
@@ -249,41 +229,31 @@ public class CustomerServiceViewController {
 
 
 
-//            Stage mainStage = (Stage) stackPane.getScene().getWindow();
-//            ColorAdjust blur = new ColorAdjust();
-//            blur.setBrightness(-0.7);  // Simulate blur effect
-//            mainStage.getScene().getRoot().setEffect(blur);
-//
-//            // Create a new popup stage (modal window)
-//            Stage popupStage = new Stage();
-//            popupStage.setTitle("Meal Details");
-//            popupStage.setScene(new Scene(root));
-//
-//            // Make the popup window undecorated (no frame) BEFORE it is shown
-//            popupStage.initStyle(StageStyle.UTILITY); // This must be done before showing the window
-//
-//            // Make popup modal (disable interaction with main window)
-//            popupStage.initModality(Modality.APPLICATION_MODAL);
-//            popupStage.initOwner(mainStage); // Link popup to the main window
-//
-//            // Remove blur effect when popup is closed
-//            popupStage.setOnHiding(event -> mainStage.getScene().getRoot().setEffect(null));
-//
-//            // Show popup
-//            popupStage.showAndWait();  // Wait until the popup is closed
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-            restartThePage();
+
+
+        checkLabel.setText("response finished!");
 
     }
     @Subscribe
-    public void handelComplain(complainEvent event) throws IOException {
-        restartThePage();
+    public void handelComplain(complainEvent event) {
+        Platform.runLater(() -> {
+            try {
+                SimpleClient.getClient().sendToServer("getAllComplaints6");
+                //GenerateButton();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+
+        });
     }
 
-    public void onResponseClicked(Complain complain) { //when click on add response for some complain row
+    /*
+    public void onResponseClicked(Complain complain) {
+
         // Create a new meal row (HBox)
         HBox compRow = new HBox(20);
         compRow.setStyle("-fx-background-color: #ffffff; -fx-border-color: #000000; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;");
@@ -319,6 +289,7 @@ public class CustomerServiceViewController {
                         numberOfMeals++;
                         updateCartBadge();
                     }*/
+    /*
                     openAddResponseView(complain);
                 }
         );
@@ -337,9 +308,230 @@ public class CustomerServiceViewController {
         //mealPriceLabels.put(String.valueOf(meal.getId()), priceLabel);
     }
 
+    */
 
+    public void onResponseClicked(Complain complain) {
+        // Create a new complaint row (HBox)
+        HBox compRow = new HBox(20);
+        compRow.setStyle("-fx-background-color: #ffffff; -fx-border-color: #000000; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;");
 
+        // Hidden Label to store complaint ID
+        Label idLabel = new Label(String.valueOf(complain.getId()));
+        idLabel.setVisible(false); // Make it invisible
+        idLabel.setManaged(false); // Ensure it doesn't take layout space
 
+        // Complaint Details
+        VBox detailsBox = new VBox(5);
+        Label nameLabel = new Label(complain.getName());
+        nameLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        Label tellLabel = new Label(complain.getTell());
+        tellLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #757575;");
+        detailsBox.getChildren().addAll(nameLabel, tellLabel);
 
+        // Complaint Date
+        Label dateLabel = new Label(complain.getDate() + "");
+        dateLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #b70236;");
+
+        // Response Button
+        Button responseBTN = new Button("Response");
+        responseBTN.setStyle("-fx-background-color: #222222; -fx-text-fill: #f3f3f3; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
+        responseBTN.setOnAction(event -> openAddResponseView(complain));
+
+        // Show Order Button (Only for 'Complaint' kind)
+        Button showOrderBTN = new Button("Show Order");
+        showOrderBTN.setStyle("-fx-background-color: #0044cc; -fx-text-fill: #ffffff; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
+        showOrderBTN.setOnAction(event -> openOrderDetails(complain.getOrderNum()));
+
+        // Add buttons and details based on status and kind
+        if ("Do".equals(complain.getStatus())) {
+            if ("Complaint".equals(complain.getKind())) {
+                compRow.getChildren().addAll(detailsBox, dateLabel, responseBTN, showOrderBTN);
+            } else {
+                compRow.getChildren().addAll(detailsBox, dateLabel, responseBTN);
+            }
+        } else {
+            if ("Complaint".equals(complain.getKind())) {
+                compRow.getChildren().addAll(detailsBox, dateLabel, showOrderBTN);
+            } else {
+                compRow.getChildren().addAll(detailsBox, dateLabel);
+            }
+        }
+
+        // Add complaint row to the container
+        ListCompContainer.getChildren().add(compRow);
+
+        addResponseButtons.put(String.valueOf(complain.getId()), responseBTN);
+    }
+    private void openOrderDetails(String orderNum) {
+        try {
+            System.out.println("openOrderDetails: " + orderNum);
+            SimpleClient.getClient().sendToServer("showorder"+orderNum);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    /*@Subscribe
+    public void onEvent(MealsList event){
+        Platform.runLater(() -> {
+            List<Meal> meals = event.getMeals();
+            List<MealInTheCart> newmeals = new ArrayList<>();
+            List<personal_Meal> pmeals = new ArrayList<>();
+            List<CustomizationWithBoolean> customizations = new ArrayList<>();
+            for (Meal meal : meals) {
+                for(Customization Custo :meal.getCustomizations())
+                {
+                    CustomizationWithBoolean temp = new CustomizationWithBoolean(Custo,true) ;
+                    customizations.add(temp);
+                }
+                personal_Meal temp = new personal_Meal(meal,customizations);
+                pmeals.add(temp);
+            }
+            for(personal_Meal pmeal :pmeals)
+            {
+                MealInTheCart temp = new MealInTheCart(pmeal,2);
+                newmeals.add(temp);
+            }
+            ShowTheMeals(newmeals);
+        });
+    }*/
+    @Subscribe
+    public void gotTheOrder(Order order){
+        Platform.runLater(() -> {
+            if (order == null) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Order Not Found");
+                alert.setHeaderText(null);
+                alert.setContentText("The order you are looking for does not exist!");
+                alert.showAndWait();
+            } else {
+                System.out.println("gotTheOrder: " + order);
+                ShowTheMeals(order.getMeals());
+            }
+        });
+
+    }
+    @Subscribe
+    public void emptyOrder(String msg) {
+        if(msg.equals("Order not found."))
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Order Not Found");
+                alert.setHeaderText(null);
+                alert.setContentText("The order you are looking for does not exist!");
+                alert.showAndWait();
+            });
+    }
+    private void ShowTheMeals(List<MealInTheCart> listOfMeals) {
+        StringBuilder orderDetails = new StringBuilder();
+        double totalAmount = 0.0;
+
+        for (MealInTheCart meal : listOfMeals) {
+            totalAmount += meal.getMeal().getMeal().getPrice() * meal.getQuantity();
+            orderDetails.append("\n");
+        }
+
+        String totalAmountText = "Total: " + totalAmount + "₪";
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("SummaryWindow.fxml"));
+            Stage summaryStage = new Stage();
+            Scene scene = new Scene(loader.load());
+            OrderSummaryController controller = loader.getController();
+
+            controller.setSummary(summaryStage, orderDetails.toString(), totalAmountText);
+            controller.getCheckOutbtn().setVisible(false);
+
+            VBox mealDetailsContainer = controller.getMealDetailsContainer();
+
+            for (MealInTheCart meal : listOfMeals) {
+                HBox mealRow = new HBox(10);
+                mealRow.setSpacing(10);
+
+                byte[] imageBytes = meal.getMeal().getMeal().getImage();
+                if (imageBytes != null && imageBytes.length > 0) {
+                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageBytes);
+                    Image mealImage = new Image(byteArrayInputStream);
+
+                    ImageView imageView = new ImageView(mealImage);
+                    imageView.setFitHeight(100);
+                    imageView.setFitWidth(100);
+                    imageView.setPreserveRatio(true);
+
+                    Rectangle clip = new Rectangle(100, 100);
+                    clip.setArcWidth(20);
+                    clip.setArcHeight(20);
+                    imageView.setClip(clip);
+
+                    mealRow.getChildren().add(imageView);
+                }
+
+                TextFlow mealInfoTextFlow = new TextFlow();
+
+                Text mealName = new Text(meal.getMeal().getMeal().getName() + " - ");
+                Text boldX = new Text("X");
+                boldX.setStyle("-fx-font-weight: bold;");
+                Text quantity = new Text(String.valueOf(meal.getQuantity()));
+                quantity.setStyle("-fx-font-weight: bold;");
+
+                Text mealPrice = new Text(" (" + meal.getMeal().getMeal().getPrice() + "₪)\n");
+                mealPrice.setStyle("-fx-font-weight: bold;");
+
+                mealInfoTextFlow.getChildren().addAll(mealName, boldX, quantity,mealPrice, new Text("\n"));
+
+                if (meal.getMeal().getMeal().getDescription() != null && !meal.getMeal().getMeal().getDescription().isEmpty()) {
+                    Text description = new Text(meal.getMeal().getMeal().getDescription() + "\n");
+                    mealInfoTextFlow.getChildren().add(description);
+                }
+
+                // Customizations with check/uncheck images
+                if (meal.getMeal().getCustomizationsList() != null && !meal.getMeal().getCustomizationsList().isEmpty()) {
+                    Text customizationsTitle = new Text("Customizations:\n");
+                    customizationsTitle.setStyle("-fx-font-weight: bold;");
+                    mealInfoTextFlow.getChildren().add(customizationsTitle);
+
+                    Image checkedImage = new Image(getClass().getResourceAsStream("/images/checked.png"));
+                    Image uncheckedImage = new Image(getClass().getResourceAsStream("/images/unchecked.png"));
+
+                    for (CustomizationWithBoolean customWithBool : meal.getMeal().getCustomizationsList()) {
+                        HBox customRow = new HBox(5);
+                        Label customLabel = new Label(customWithBool.getCustomization().getName());
+                        customLabel.setStyle("-fx-text-fill: black;");
+
+                        ImageView checkImageView = new ImageView(customWithBool.getValue() ? checkedImage : uncheckedImage);
+                        checkImageView.setFitWidth(20);
+                        checkImageView.setFitHeight(20);
+                        checkImageView.setPreserveRatio(true);
+
+                        customRow.getChildren().addAll(checkImageView, customLabel);
+                        mealInfoTextFlow.getChildren().add(customRow);
+                    }
+                }
+
+                mealRow.getChildren().add(mealInfoTextFlow);
+                mealDetailsContainer.getChildren().add(mealRow);
+            }
+
+            Stage mainStage = (Stage) anchorPane.getScene().getWindow();
+            ColorAdjust blur = new ColorAdjust();
+            blur.setBrightness(-0.7);
+            mainStage.getScene().getRoot().setEffect(blur);
+
+            summaryStage.initModality(Modality.APPLICATION_MODAL);
+            summaryStage.initOwner(mainStage);
+
+            summaryStage.setOnHiding(event ->
+                    {
+                        mainStage.getScene().getRoot().setEffect(null);
+//                        updateCart();
+                    }
+            );
+            summaryStage.setScene(scene);
+            summaryStage.setTitle("Order Summary");
+            summaryStage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
