@@ -13,9 +13,9 @@
 
 <AnchorPane prefHeight="672.0" prefWidth="524.0" style="-fx-background-color: #ffffff; -fx-border-radius: 10;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CreditDetailsController">
    <children>
-      <ImageView fitHeight="168.0" fitWidth="350.0" layoutX="130.0" layoutY="60.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true">
+      <ImageView fitHeight="223.0" fitWidth="228.0" layoutX="105.0" layoutY="43.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@/images/Credit_Card_Image.png" />
+            <Image url="@../../../../images/Credit_Card_Image.png" />
          </image>
          <effect>
             <ColorAdjust />
@@ -24,12 +24,17 @@
             <Cursor fx:constant="NONE" />
          </cursor>
       </ImageView>
+
+      <!-- Saved Cards ComboBox -->
+      <ComboBox fx:id="savedCardsComboBox" layoutX="107.0" layoutY="202.0" prefHeight="37.0" prefWidth="300.0" promptText="Select saved card" style="-fx-background-color: #fbebf4; -fx-border-color: #832018; -fx-border-radius: 5;" />
+
       <Label layoutX="112.0" layoutY="242.0" prefHeight="26.0" prefWidth="123.0" style="-fx-border-width: 20;" text="Card Number" textFill="#832018">
          <font>
             <Font name="System Bold" size="16.0" />
          </font>
       </Label>
       <TextField fx:id="cardNumberField" layoutX="108.0" layoutY="269.0" prefHeight="37.0" prefWidth="300.0" promptText="0000 0000 0000 0000" style="-fx-background-color: #fbebf4; -fx-border-color: #832018; -fx-border-radius: 5;" />
+
       <Label fx:id="errorLabel" layoutX="105.0" layoutY="307.0" prefHeight="17.0" prefWidth="300.0" textFill="red" />
 
       <Label layoutX="105.0" layoutY="316.0" prefHeight="26.0" prefWidth="138.0" text="Cardholder Name" textFill="#832018">
@@ -38,27 +43,32 @@
          </font>
       </Label>
       <TextField fx:id="cardholderNameField" layoutX="108.0" layoutY="342.0" prefHeight="37.0" prefWidth="300.0" style="-fx-background-color: #fbebf4; -fx-border-color: #832018; -fx-border-radius: 5;" />
+
       <Label layoutX="108.0" layoutY="465.0" text="Expiry date" textFill="#832018">
          <font>
             <Font name="System Bold" size="16.0" />
          </font>
       </Label>
+
       <Label layoutX="321.0" layoutY="469.0" text="CVV " textFill="#832018">
          <font>
             <Font name="System Bold" size="16.0" />
          </font>
       </Label>
-      <Button fx:id="checkoutButton" layoutX="127.0" layoutY="620.0" mnemonicParsing="false" onAction="#checkoutFunction" prefHeight="50.0" prefWidth="262.0" style="-fx-background-color: #832018; -fx-border-radius: 20;" text="CHECKOUT" textFill="#fbebf4">
+
+      <Button fx:id="savecreditButton" layoutX="133.0" layoutY="569.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="247.0" style="-fx-background-color: #832018; -fx-border-radius: 20;" text="CheckOut" textFill="#fbebf4">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
       </Button>
+
       <TextField fx:id="cvvnumber" layoutX="321.0" layoutY="491.0" prefHeight="38.0" prefWidth="86.0" style="-fx-background-color: #fbebf4; -fx-border-color: #832018; -fx-border-radius: 5;">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
          <promptText>3 digits</promptText>
       </TextField>
+
       <Label fx:id="errorLabelcvv" layoutX="285.0" layoutY="530.0" prefHeight="17.0" prefWidth="300.0" textFill="red" />
 
       <Label layoutX="211.0" layoutY="13.0" prefHeight="22.0" prefWidth="102.0" text="Card setting" textFill="#832018">
@@ -66,41 +76,38 @@
             <Font name="System Bold" size="15.0" />
          </font>
       </Label>
-      <Label layoutX="150.0" layoutY="184.0" prefHeight="18.0" prefWidth="156.0" text="9234    0000    0000    0000" textFill="WHITE" />
-      <Label layoutX="150.0" layoutY="75.0" text="Credit" textFill="WHITE">
+
+      <Label layoutX="113.0" layoutY="159.0" prefHeight="18.0" prefWidth="205.0" text="9234    0000    0000    0000" textFill="WHITE" />
+
+      <Label layoutX="125.0" layoutY="58.0" text="Credit" textFill="WHITE">
          <font>
             <Font size="14.0" />
          </font>
       </Label>
+
       <ComboBox fx:id="monthYearComboBox" layoutX="107.0" layoutY="491.0" prefHeight="38.0" prefWidth="110.0" style="-fx-background-color: #fbebf4; -fx-border-color: #832018; -fx-border-radius: 5;" />
+
       <Label fx:id="errorLabelexpirydate" layoutX="84.0" layoutY="530.0" prefHeight="17.0" prefWidth="300.0" textFill="red" />
 
-
       <TextField fx:id="CardholdersIDcardField" layoutX="108.0" layoutY="415.0" prefHeight="37.0" prefWidth="300.0" promptText="Enter 9-digit ID" style="-fx-background-color: #fbebf4; -fx-border-color: #832018; -fx-border-radius: 5;" />
+
       <Label layoutX="105.0" layoutY="389.0" prefHeight="26.0" prefWidth="156.0" text="Cardholder's ID card" textFill="#832018">
-<!--      <Label fx:id="errorLabelID" layoutX="107.0" layoutY="434.0" prefHeight="17.0" prefWidth="300.0" textFill="red" visible="true" />-->
-
-<!--         <Button fx:id="checkoutButton" layoutX="61.0" layoutY="568.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="262.0" style="-fx-background-color: #832018; -fx-border-radius: 20;" text="CHECKOUT" textFill="#fbebf4" />-->
-
          <font>
             <Font name="System Bold" size="16.0" />
          </font>
       </Label>
+
       <Button fx:id="arrow" layoutX="23.0" layoutY="12.0" mnemonicParsing="false" prefHeight="24.0" prefWidth="24.0" style="-fx-background-radius: 30; -fx-background-color: #fbebf4;" text="&lt;" textFill="#832018">
          <font>
             <Font name="System Bold Italic" size="11.0" />
          </font>
       </Button>
-      <Label fx:id="errorLabelID" layoutX="107.0" layoutY="456.0" prefHeight="17.0" prefWidth="300.0" textFill="red" visible="true" />
-      <Label fx:id="errorLabelName" layoutX="107.0" layoutY="380.0" prefHeight="17.0" prefWidth="300.0" textFill="red" visible="false" />
-      <TextField fx:id="Personalemail" layoutX="108.0" layoutY="565.0" prefHeight="37.0" prefWidth="300.0" promptText="Please enter the same email to save your card details" style="-fx-background-color: #fbebf4; -fx-border-color: #832018; -fx-border-radius: 5;" />
-      <Label layoutX="180.0" layoutY="539.0" prefHeight="26.0" prefWidth="156.0" text="Your Personal Email" textFill="#832018">
-         <font>
-            <Font name="System Bold" size="16.0" />
-         </font>
-      </Label>
-      <Label fx:id="emailErrorLabelC" layoutX="108.0" layoutY="602.0" prefHeight="17.0" prefWidth="416.0" textFill="red" />
 
+      <Label fx:id="errorLabelID" layoutX="107.0" layoutY="456.0" prefHeight="17.0" prefWidth="300.0" textFill="red" visible="true" />
+
+      <Label fx:id="errorLabelName" layoutX="107.0" layoutY="380.0" prefHeight="17.0" prefWidth="300.0" textFill="red" visible="false" />
+
+      <Label fx:id="emailErrorLabelC" layoutX="108.0" layoutY="602.0" prefHeight="17.0" prefWidth="416.0" textFill="red" />
 
    </children>
 </AnchorPane>

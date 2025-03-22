@@ -6,11 +6,21 @@ public class PaymentCheck implements Serializable {
     private CreditCard creditCard;
     private PersonalDetails personalDetails;
     private String response;
+    private Order order;
 
-    public PaymentCheck(CreditCard creditCard, PersonalDetails personalDetails) {
+    public PaymentCheck(CreditCard creditCard, PersonalDetails personalDetails,Order order) {
         this.creditCard = creditCard;
         this.personalDetails = personalDetails;
+        this.order = order;
     }
+
+    public Order getOrder() {
+        return order;
+    }
+    public void setOrder(Order order) {
+        this.order = order;
+    }
+
     public CreditCard getCreditCard() {
         return creditCard;
     }

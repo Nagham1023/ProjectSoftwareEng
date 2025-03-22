@@ -379,6 +379,7 @@ public class CartPageController {
             OrderSummaryController controller = loader.getController();
 
             controller.setSummary(summaryStage, orderDetails.toString(), totalAmountText);
+            controller.setMeals(listOfMeals);
 
             VBox mealDetailsContainer = controller.getMealDetailsContainer();
 
@@ -411,8 +412,10 @@ public class CartPageController {
                 boldX.setStyle("-fx-font-weight: bold;");
                 Text quantity = new Text(String.valueOf(meal.getQuantity()));
                 quantity.setStyle("-fx-font-weight: bold;");
+                Text mealPrice = new Text(" (" + meal.getMeal().getMeal().getPrice() + "₪)\n");
+                mealPrice.setStyle("-fx-font-weight: bold;");
 
-                mealInfoTextFlow.getChildren().addAll(mealName, boldX, quantity, new Text("\n"));
+                mealInfoTextFlow.getChildren().addAll(mealName, boldX, quantity,mealPrice, new Text("\n"));
 
                 if (meal.getMeal().getMeal().getDescription() != null && !meal.getMeal().getMeal().getDescription().isEmpty()) {
                     Text description = new Text(meal.getMeal().getMeal().getDescription() + "\n");
@@ -477,6 +480,8 @@ public class CartPageController {
             e.printStackTrace();
         }
     }
+
+
 
 
     @FXML

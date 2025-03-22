@@ -1,6 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.client.events.ReportResponseEvent;
+import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.complainEvent;
 import javafx.application.Platform; // Add this import
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -45,6 +47,7 @@ public class WorkerController {
     private Button Reservation;
 
     private String currentWorker = "";
+    Button clickedButton;
 
     @FXML
     void initialize() {
@@ -81,6 +84,7 @@ public class WorkerController {
                     break;
                 case "CompanyManager":
                     reports_center.setVisible(true);
+                    complaint_center.setVisible(true);
                     branches_managment.setVisible(true);
                     priceChange_requist.setVisible(true);
                     break;
@@ -155,13 +159,33 @@ public class WorkerController {
 
     @FXML
     public void onButtonClick(ActionEvent event) {
-        Button clickedButton = (Button) event.getSource();
+        clickedButton = (Button) event.getSource();
+        changeScreen();
+    }
+    public void changeScreen (){
+
         String screenName = clickedButton.getId(); // Get the fx:id of the button
         switch (screenName){
-            case "complaint_center":
+            case "complaint_center": {
                 switchScreen("customerServiceView");
-            case "reports_center":
+                break;
+            }
+            case "reports_center": {
                 switchScreen("ReportsView");
+                break;
+            }
+            case "personalInf":
+            {
+
+                switchScreen("Personal_Information");
+                break;
+            }
+            default: {
+                System.out.println("Unknown screen: " + screenName);
+                //switchScreen("mainScreen");
+                break;
+            }
+
 
 
 
@@ -171,6 +195,7 @@ public class WorkerController {
     @FXML
     public void goToComplainsView(ActionEvent event) {
         switchScreen("customerServiceView");
+
     }
 
     @Subscribe
@@ -179,6 +204,21 @@ public class WorkerController {
             System.out.println("Event received: " + event.toString());
             // Add any UI updates here
         });
+    }
+
+    @FXML
+    void backToHome(ActionEvent event) {
+        try {
+            //Send to server logout.
+            UserCheck us = SimpleClient.getClient().getUser();
+            System.out.println("signing out from "+us.getUsername());
+            SimpleClient.getClient().setUser(null);
+            us.setState(4);
+            SimpleClient.getClient().sendToServer(us);
+            App.setRoot("mainScreen");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @FXML

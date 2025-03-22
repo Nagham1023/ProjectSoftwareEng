@@ -16,6 +16,8 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Objects;
 
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.isLog;
+
 public class LoginController {
 
 
@@ -47,6 +49,16 @@ public class LoginController {
 
     @FXML
     public void initialize(){
+        if(isLog())
+        {
+            Platform.runLater(()->{
+                try {
+                    App.setRoot("worker_screen");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
         EventBus.getDefault().register(this);
         imglogo.setImage(new Image(getClass().getResourceAsStream("/images/Mom_Sticker.gif")));
         accountimg.setImage(new Image(getClass().getResourceAsStream("/images/account_circle.png")));

@@ -1,11 +1,15 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
+import org.hibernate.annotations.BatchSize;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "CreditCard")
@@ -100,6 +104,13 @@ public class CreditCard implements Serializable {
 
     @Override
     public String toString() {
+        if (cardNumber == null || cardNumber.length() < 4) {
+            return "**** **** **** ****"; // Fallback if the card number is invalid
+        }
+        return "**** **** **** " + cardNumber.substring(cardNumber.length() - 4);
+    }
+
+    public String toString2() {
         return "CreditCard{" +
                 "cardholdersID='" + cardholdersID + '\'' +
                 ", cardNumber='" + cardNumber + '\'' +
