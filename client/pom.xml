@@ -63,19 +63,25 @@
 			<dependency>
 				<groupId>org.openjfx</groupId>
 				<artifactId>javafx-controls</artifactId>
-				<version>17</version> <!-- Make sure to match the version of JavaFX you are using -->
+				<version>23.0.1</version> <!-- Make sure to match the version of JavaFX you are using -->
 			</dependency>
 			<dependency>
 				<groupId>org.openjfx</groupId>
 				<artifactId>javafx-fxml</artifactId>
-				<version>17</version>
+				<version>23.0.1</version>
 			</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-media</artifactId>
 			<version>17.0.2</version>  <!-- Make sure to use the correct version -->
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>com.twilio.sdk</groupId>
+            <artifactId>twilio</artifactId>
+            <version>9.1.1</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 	<build>
 		<plugins>
 			<plugin>

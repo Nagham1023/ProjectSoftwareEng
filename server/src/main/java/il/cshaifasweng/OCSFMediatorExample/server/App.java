@@ -32,7 +32,6 @@ import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.addPe
 import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.getAllRestaurants;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.generateBasicUser1;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.printAllUsers;
-
 public class App {
 
     private static Session session;
@@ -69,6 +68,9 @@ public class App {
         configuration.addAnnotatedClass(PersonalDetails.class);
         configuration.addAnnotatedClass(CreditCard.class);
         configuration.addAnnotatedClass(UpdatePriceRequest.class);
+        configuration.addAnnotatedClass(personal_Meal.class);
+        configuration.addAnnotatedClass(MealInTheCart.class);
+        configuration.addAnnotatedClass(CustomizationWithBoolean.class);
 
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySettings(configuration.getProperties())
@@ -149,7 +151,6 @@ public class App {
             session.save(five);
 
             session.flush();
-            // Commit the transaction after all operations are done
             session.getTransaction().commit();
 
         } catch (Exception e) {
@@ -407,10 +408,22 @@ public class App {
             //addCreditCardDetails(creditCard,"yousefknani9@gmail.com");
             /*************************adan***************************/
 
+            // generateOrders();
             generateRestaurants();
             generateTheComplains();
             initializeSampleTables();
             generateBasicUser1();
+            // Register a shutdown hook
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println("Shutdown initiated. Performing cleanup...");
+                // Put your cleanup code here (close resources, save state, etc.)
+                try {
+                    Thread.sleep(1000); // Simulating cleanup (e.g., closing resources)
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("Cleanup completed.");
+            }));
         } catch (Exception exception) {
             System.err.println("An error occurred, changes have been rolled back.");
             exception.printStackTrace();

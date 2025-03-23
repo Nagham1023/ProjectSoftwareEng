@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.HBox?>
 
 <?import java.lang.String?>
-<ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" stylesheets="@reservation-style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReservationController">
+<ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" stylesheets="@reservation-style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.workerReservation">
     <content>
         <AnchorPane fx:id="anchorPane" prefHeight="600.0" prefWidth="600.0">
             <children>
@@ -26,18 +26,6 @@
                 <!-- GridPane for Form Layout -->
                 <GridPane fx:id="gridPane" layoutX="50" layoutY="50" hgap="10" vgap="10" AnchorPane.topAnchor="50" AnchorPane.leftAnchor="50" AnchorPane.rightAnchor="50">
                     <children>
-                        <!-- Date Picker -->
-                        <Label text="Date:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="form-label" />
-                        <DatePicker fx:id="datePicker" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="date-picker" />
-
-                        <!-- Time Selection -->
-                        <Label text="Time:" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="form-label" />
-                        <HBox spacing="10" GridPane.rowIndex="1" GridPane.columnIndex="1">
-                            <children>
-                                <ComboBox fx:id="hourComboBox" prefWidth="80" promptText="HH" styleClass="combo-box" />
-                                <ComboBox fx:id="minuteComboBox" prefWidth="80" promptText="MM" styleClass="combo-box" />
-                            </children>
-                        </HBox>
 
                         <!-- Restaurant Selection -->
                         <Label text="Restaurant:" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="form-label" />

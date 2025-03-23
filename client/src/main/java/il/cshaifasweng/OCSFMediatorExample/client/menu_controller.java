@@ -85,19 +85,14 @@ public class menu_controller {
     private Button add_meal;
 
     @FXML
+
     private Label textmenu;
-
-    // Search-related fields (moved from SearchByController)
-
-    @FXML
-    private Label Error_Label; // Label for error messages
 
     private List<String> restaurantNames;
     private List<String> customizationNames;
 
     @FXML
     private Label cartItemCount;
-    private final List<String> cart = new ArrayList<>();
 
     @FXML
     void Reset_Menu(ActionEvent event) throws IOException {
@@ -192,6 +187,7 @@ public class menu_controller {
         App.setRoot("RestaurantList");
     }
 
+
     private void onMealAdded() {
         System.out.println("Meal added to cart!");
         // You can update the cart counter here
@@ -274,36 +270,11 @@ public class menu_controller {
             updateCartBadge();
         }
     }
-
     private void initalizeCart() {
         // Iterate through the list of meals to check for duplicates
         for (int i = 0; i < listOfMeals.size(); i++) {
             MealInTheCart currentMeal = listOfMeals.get(i);
 
-            // Check if this meal has already been merged with another
-            for (int j = i + 1; j < listOfMeals.size(); j++) {
-                MealInTheCart nextMeal = listOfMeals.get(j);
-
-                // If both meals have the same ID and identical customizations, merge them
-                if (currentMeal.getMeal().getMeal().getId() == nextMeal.getMeal().getMeal().getId() &&
-                        areCustomizationsEqual(currentMeal.getMeal().getCustomizationsList(), nextMeal.getMeal().getCustomizationsList())) {
-
-                    // Merge quantities
-                    currentMeal.setQuantity(currentMeal.getQuantity() + nextMeal.getQuantity());
-
-                    // Remove the duplicate meal
-                    listOfMeals.remove(j);
-                    j--; // Adjust the index to account for the removed item
-                }
-            }
-        }
-
-        // Update the cart badge if the number of meals has changed
-        if (numberOfMeals != listOfMeals.size()) {
-            numberOfMeals = listOfMeals.size();
-            initalizeCartBadge();
-        }
-    }
 
     private boolean areCustomizationsEqual(List<CustomizationWithBoolean> list1, List<CustomizationWithBoolean> list2) {
         if (list1.size() != list2.size()) {
@@ -592,6 +563,7 @@ public class menu_controller {
         cartIcon.setOnMouseClicked(event -> {
             try {
                 App.setRoot("Cart_page");
+
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

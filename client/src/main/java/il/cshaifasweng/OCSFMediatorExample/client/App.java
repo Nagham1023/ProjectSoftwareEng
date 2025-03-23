@@ -49,23 +49,17 @@ public class App extends Application {
 
         stage.setScene(scene);
         stage.show();
+
+        // Register the shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutdown Hook Triggered");
+            cleanup();
+        }));
     }
 
     static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));
     }
-
-    /*public static <T> T setRoot(String fxml) throws IOException {
-        FXMLLoader loader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-        Parent root = loader.load();
-
-        // Change the scene root
-        scene.setRoot(root);
-
-        // Return the controller
-        return loader.getController();
-    }*/
-
 
     private static Parent loadFXML(String fxml) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
@@ -95,6 +89,9 @@ public class App extends Application {
     @Override
     public void stop() {
         System.out.println("Stopped");
+        cleanup();
+    }
+    private void cleanup(){
         try {
 
             if (SimpleClient.getClient() != null) {

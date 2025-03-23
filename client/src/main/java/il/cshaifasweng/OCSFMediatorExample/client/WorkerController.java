@@ -1,6 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.client.events.ReportResponseEvent;
+import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.complainEvent;
 import javafx.application.Platform; // Add this import
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -42,7 +44,11 @@ public class WorkerController {
     @FXML
     private Button update_meals;
 
+    @FXML
+    private Button Reservation;
+
     private String currentWorker = "";
+    Button clickedButton;
 
     @FXML
     void initialize() {
@@ -61,7 +67,7 @@ public class WorkerController {
             priceChange_requist.setVisible(false);
             reports_center.setVisible(false);
             tables_map.setVisible(true);
-            tables_reservation.setVisible(false);
+            tables_reservation.setVisible(true);
             update_meals.setVisible(false);
 
             switch (currentWorker) {
@@ -80,6 +86,7 @@ public class WorkerController {
                     break;
                 case "CompanyManager":
                     reports_center.setVisible(true);
+                    complaint_center.setVisible(true);
                     branches_managment.setVisible(true);
                     priceChange_requist.setVisible(true);
                     break;
@@ -159,6 +166,7 @@ public class WorkerController {
             System.err.println("Failed to load " + fxmlFile + ": " + e.getMessage());
         }
     }
+
     @FXML
     public void switchScreen(String screenName,String message) {
             Platform.runLater(() -> {
@@ -168,11 +176,16 @@ public class WorkerController {
 
     @FXML
     public void onButtonClick(ActionEvent event) {
-        Button clickedButton = (Button) event.getSource();
+        clickedButton = (Button) event.getSource();
+        changeScreen();
+    }
+    public void changeScreen (){
+
         String screenName = clickedButton.getId(); // Get the fx:id of the button
         switch (screenName){
             case "complaint_center":
                 switchScreen("customerServiceView", "customerService");
+                break;
             case "reports_center":
                 switchScreen("ReportsView","report");
                 break;
@@ -181,13 +194,27 @@ public class WorkerController {
                 break;
             case "priceChange_requist":
                 switchScreen("requestsView","request");
+            case "personalInf":
+            {
+
+                switchScreen("Personal_Information");
+                break;
+            }
+            default: {
+                System.out.println("Unknown screen: " + screenName);
+                //switchScreen("mainScreen");
+                break;
+            }
 
         }
+
     }
+
 //    @FXML
 //    public void goToComplainsView(ActionEvent event) {
 //        switchScreen("customerServiceView");
 //    }
+
 
     @Subscribe
     public void onEvent(ReportResponseEvent event) {
@@ -196,4 +223,43 @@ public class WorkerController {
             // Add any UI updates here
         });
     }
+
+    @FXML
+    void backToHome(ActionEvent event) {
+        try {
+            //Send to server logout.
+            UserCheck us = SimpleClient.getClient().getUser();
+            System.out.println("signing out from "+us.getUsername());
+            SimpleClient.getClient().setUser(null);
+            us.setState(4);
+            SimpleClient.getClient().sendToServer(us);
+            App.setRoot("mainScreen");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @FXML
+    void goToMap(ActionEvent event) {
+        Platform.runLater(() -> {
+            try {
+                App.setRoot("RestaurantMap");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+    }
+    @FXML
+    void goToReservation(ActionEvent event) {
+        Platform.runLater(() -> {
+            try {
+                App.setRoot("Wroker-Reservation");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+
 }

@@ -106,9 +106,9 @@ public class ComplainDB {
                 session.update(complain); // Persist the changes
                 System.out.println("updated Complain Response In Database after setting response");
                 session.getTransaction().commit(); // Commit the transaction
-                updateCompResponseById(Idcomp, newRes);
+                /*updateCompResponseById(Idcomp, newRes);
                 sendResToEmail(emailComp, newRes);
-                giveBackTheRefund(orderNum,refund);
+                giveBackTheRefund(orderNum,refund);*/
             }
         } catch (Exception e) {
             //System.out.println("An error occurred during the update operation.");
@@ -124,7 +124,7 @@ public class ComplainDB {
         }
     }
 
-    public static void  giveBackTheRefund(String orderNum,double refund) {
+    /*public static void  giveBackTheRefund(String orderNum,double refund) {
         // Check if the meatlist is initialized
         if (orderNum == null || refund == 0) {
             System.out.println("no need to give back the refund");
@@ -138,9 +138,9 @@ public class ComplainDB {
         }
 
 
-    }
+    }*/
 
-    public static void sendResToEmail(String emailComp, String newRes) {
+    /*public static void sendResToEmail(String emailComp, String newRes) {
         // Check if the meatlist is initialized
         if (emailComp == null || newRes == null) {
             System.out.println("Something empty or not initialized.");
@@ -150,9 +150,9 @@ public class ComplainDB {
         // neeeeeeeeeeeeed tooooooooooooooo dooooooooooooooooo
         // send new res to the email emailComp
 
-    }
+    }*/
 
-    public static void updateCompResponseById(int Idcomp, String newRes) {
+    /*public static void updateCompResponseById(int Idcomp, String newRes) {
         // Check if the meatlist is initialized
         if (complainslist == null || complainslist.isEmpty()) {
             System.out.println("Something is empty or not initialized.");
@@ -167,7 +167,7 @@ public class ComplainDB {
                 return; // Exit the loop after updating
             }
         }
-    }
+    }*/
 
     public static String addComplainIntoDatabase(complainEvent newComplain) {
         Session session = null;

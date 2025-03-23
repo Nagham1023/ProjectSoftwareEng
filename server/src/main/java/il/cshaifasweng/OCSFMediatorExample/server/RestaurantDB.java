@@ -28,12 +28,6 @@ public class RestaurantDB {
     /*************/
     /**From here all the functions have to update and talk with the database*/
 
-//    private void initializeSampleRestaurants() {
-//        restaurants.add(new Restaurant(1, "Haifa", "images/restaurant.jpg", "04-9944871"));
-//        restaurants.add(new Restaurant(2, "Nazareth", "images/restaurant.jpg", "04-9825625"));
-//        restaurants.add(new Restaurant(3, "Old Aco", "images/restaurant.jpg", "04-9458712"));
-//        restaurants.add(new Restaurant(4, "Tamra", "images/restaurant.jpg", "04-9944321"));
-//    }
 
     public static List<Restaurant> getAllRestaurants() {
         // Ensure the session is open
@@ -96,6 +90,29 @@ public class RestaurantDB {
             restaurants.set(index, updatedRestaurant);
         }
     }
+    public static int getRestaurantIdByName(String restaurantName) {
+        int restaurantId = -1;  // Default value if not found
+
+        try (Session session = App.getSessionFactory().openSession()) {
+            session.beginTransaction();
+
+            // Assuming 'Restaurant' is your entity class and 'name' is the column storing the restaurant name
+            Restaurant restaurant = (Restaurant) session.createQuery("FROM Restaurant WHERE restaurantName = :name")
+                    .setParameter("name", restaurantName)
+                    .uniqueResult();
+
+            if (restaurant != null) {
+                restaurantId = restaurant.getId();  // Get the ID of the restaurant
+            }
+
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return restaurantId;
+    }
+
 
 
 }
