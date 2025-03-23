@@ -17,6 +17,8 @@ import org.hibernate.query.Query;
 
 import java.time.LocalTime;
 import java.util.*;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,9 +34,11 @@ import static il.cshaifasweng.OCSFMediatorExample.server.TableDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.*;
-
-
+import static il.cshaifasweng.OCSFMediatorExample.server.ReportDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.*;
+import il.cshaifasweng.OCSFMediatorExample.server.RevenueReport;
+import il.cshaifasweng.OCSFMediatorExample.server.OrderTypeReport;
 
 
 import javax.persistence.Table;
@@ -402,9 +406,19 @@ public class SimpleServer extends AbstractServer {
         if (msg instanceof mealEvent) {
             //here we're adding new meal !!
             //System.out.println("Received adding new mealEvent ");
-            String addResult = AddNewMeal((mealEvent) msg);//if "added" then successed if "exist" then failed bcs there is a meal like that
+            Meal addResult = AddNewMeal((mealEvent) msg);//if "added" then successed if "exist" then failed bcs there is a meal like that
             System.out.println("Added new mealEvent to the database");
-            sendToAll(addResult);
+            ((mealEvent) msg).setMeal(addResult);
+            sendToAll(msg);
+
+
+        }
+        if (msg instanceof UpdateMealRequest) {
+            //here we're adding new meal !!
+            //System.out.println("Received adding new UpdateMealRequest ");
+            String addResult = updateMeal((UpdateMealRequest) msg);//if "added" then successed if "not exist" then failed bcs there is no meal like that
+            System.out.println("Added new UpdateMealRequest to the database");
+            sendToAll(msg);
             if (Objects.equals(addResult, "added")) {
                 sendToAll(msg);
             }
@@ -421,8 +435,13 @@ public class SimpleServer extends AbstractServer {
         if (msg instanceof String && msgString.startsWith("menu")) {
             String branch = msgString.substring(4);
             System.out.println("getting a menu to " + branch);
+            List<Meal> ml=null;
             try {
-                List<Meal> ml = getmealsb(branch);
+                if(branch.equals("ALL")) {
+                    ml = MealsDB.GetAllMeals();
+                }
+                else{
+                ml = getmealsb(branch);}
                 MealsList sending = new MealsList(ml);
                 client.sendToClient(sending);
             } catch (Exception e) {
@@ -502,8 +521,8 @@ public class SimpleServer extends AbstractServer {
 
             }
 
-        }
 
+        }
         /*************************adan*****************************/
         if (msg instanceof PaymentCheck) {
             PaymentCheck paymentCheck = (PaymentCheck) msg;
@@ -600,6 +619,42 @@ public class SimpleServer extends AbstractServer {
 
 
 /***************************adan********************************/
+        if (msg instanceof CancelOrderEvent) {
+            CancelOrderEvent cancelEvent = (CancelOrderEvent) msg;
+            String orderNumber = cancelEvent.getOrderNumber();
+            Order order = OrdersDB.getOrderById(orderNumber);
+
+            try {
+                CancelOrderEvent event = new CancelOrderEvent(order, orderNumber);
+                if (order == null) {
+                    event.setStatus("Order not found");
+                } else {
+                    event.setStatus("Order found");
+                }
+                client.sendToClient(event);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+        if (msg instanceof UpdateMealEvent) {
+            UpdateMealEvent UpdateMealEvent = (UpdateMealEvent) msg;
+            String mealId = UpdateMealEvent.getMealId();
+            Meal meal = MealsDB.getMealById(mealId);
+
+            try {
+                UpdateMealEvent event = new UpdateMealEvent(meal, mealId);
+                if (meal == null) {
+                    event.setStatus("meal not found");
+                } else {
+                    event.setStatus("meal found");
+                }
+                client.sendToClient(event);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
         if (msgString.startsWith("#warning")) {
             Warning warning = new Warning("Warning from server!");
             try {
@@ -622,7 +677,19 @@ public class SimpleServer extends AbstractServer {
                 case "revenueReport":
                     // Generate the revenue report (assuming 'month', 'restaurantName', and 'timeFrame' are part of the request)
                     RevenueReport revenueReport = new RevenueReport();
-                    response = revenueReport.generate(reportRequest.getDate(), reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame());
+                    response = revenueReport.generate(reportRequest.getDate(), reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "revenue");
+                    break;
+                case "deliveryReport":
+                    OrderTypeReport deliveryReport = new OrderTypeReport();
+                    response = deliveryReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "DELIVERY");
+                    break;
+                case "pickupReport":
+                    OrderTypeReport pickupReport = new OrderTypeReport();
+                    response = pickupReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "PICKUP");
+                    break;
+                case "allOrdersReport":
+                    OrderTypeReport allOrdersReport = new OrderTypeReport();
+                    response = allOrdersReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "ALL");
                     break;
 
                 // You can add more cases here for other report types in the future
@@ -644,9 +711,26 @@ public class SimpleServer extends AbstractServer {
             System.out.println("Received update price message from client ");
             //sendToAllClients(msg);
             try {
-                updateMealPriceInDatabase((updatePrice) msg);
-                client.sendToClient(msg);
-                sendToAll(msg);
+                if(((updatePrice) msg).getPurpose().equals("changing")){
+                    updatePrice req=(updatePrice)msg;
+                    updateMealPriceInDatabase(req);
+                    //String mealId = String.valueOf(req.getIdMeal());
+                    deletePriceChangeReq(req.getIdMeal());
+                    client.sendToClient(msg);
+                    sendToAll(msg);
+                } else if (((updatePrice) msg).getPurpose().equals("denying")) {
+                    deletePriceChangeReq( ((updatePrice) msg).getIdMeal());
+                    client.sendToClient(msg);
+                    sendToAll(msg);
+
+                } else{
+                    MealUpdateRequest req= new MealUpdateRequest();
+                    req=AddUpdatePriceRequest((updatePrice) msg);
+                    client.sendToClient(req);
+                    sendToAll(req);
+                }
+
+
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -689,7 +773,9 @@ public class SimpleServer extends AbstractServer {
                     }
                 }
             }
-        } else if (msg.toString().startsWith("getTablesForRestaurant: ")) {
+
+      
+        else if (msg.toString().startsWith("getTablesForRestaurant: ")) {
             try {
                 // Extract the restaurant name from the message
                 String restaurantName = msg.toString().substring("getTablesForRestaurant: ".length());
@@ -722,8 +808,10 @@ public class SimpleServer extends AbstractServer {
 
                 // Retrieve current meals based on branch name
                 List<Meal> currentMeals = getRestaurantByName(options.getBranchName()).getMeals();
+
                 if (options.getBranchName().equals("all")) {
                     currentMeals = getAllMeals();
+
                 }
                 System.out.println("Current meals for branch " + options.getBranchName() + ": " + currentMeals.size());
 
@@ -774,8 +862,8 @@ public class SimpleServer extends AbstractServer {
                 while (iterator.hasNext()) {
                     Meal meal = iterator.next();
                     boolean flag = false;
-                    for (Meal ml : currentMeals) {
-                        if (ml.getName().equals(meal.getName())) {
+                    for(Meal ml : currentMeals){
+                        if(ml.getName().equals(meal.getName())){
                             flag = true;
                         }
                     }
@@ -810,7 +898,8 @@ public class SimpleServer extends AbstractServer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else if (msg.toString().equals("Fetching SearchBy Options")) {
+        }
+        else if (msg.toString().equals("Fetching SearchBy Options")) {
             try {
                 // Fetch all restaurants
                 List<Restaurant> restaurants = getAllRestaurants();
@@ -840,8 +929,25 @@ public class SimpleServer extends AbstractServer {
                 e.printStackTrace();
             }
         }
+        else if (msg.toString().startsWith("DeleteMeal")){
+            System.out.println("Deleting MEAL");
+            String mealId = msgString.substring(6);
+            int mealIdn = Integer.parseInt(msgString.replaceAll("\\D+", ""));
+            System.out.println(mealIdn);
+            String S=deleteMeal(mealIdn);
+            System.out.println("ftt am7a dab3at esa");
+            // Build structured message
+            String response = "delete"+" "+mealId+" "+S;
 
+            try {
+                System.out.println("Sending " + response);
+                client.sendToClient(response); // Send to requesting client
+                sendToAll(response); // Broadcast to all clients
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
+        }
         if (msg instanceof complainEvent) {
             System.out.println("Received adding new complainEvent ");
             complainEvent ce = (complainEvent) msg;
@@ -878,7 +984,17 @@ public class SimpleServer extends AbstractServer {
                 sendToAll(msg);
             }
         }
+        if (msg instanceof String && msgString.equals("show change price requests")){
+            List<MealUpdateRequest> requests=null;
+            try {
+                requests = getAllRequestsWithMealDetails();
+                PCRequestsList sending = new PCRequestsList(requests);
+                client.sendToClient(sending);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
 
+        }
     }
 
     public Restaurant getRestaurantByName(String restaurantName) {
@@ -1073,7 +1189,10 @@ public class SimpleServer extends AbstractServer {
 
             // Validate that the requested reservation time is within business hours
             LocalTime requestedLocalTime = requestedTime.toLocalTime();
-
+            if (requestedLocalTime.isBefore(openingTime) || requestedLocalTime.isAfter(closingTime)) {
+                System.out.println("Requested time is outside of business hours!");
+                return availableReservations; // Return empty list
+            }
 
             // Fetch tables for the restaurant
             System.out.println("Fetching tables for restaurant: " + restaurantName);
@@ -1511,6 +1630,26 @@ public class SimpleServer extends AbstractServer {
         }
     }
 
+
+//    public List<Meal> getAllMeals() {
+//        try (Session session = App.getSessionFactory().openSession()) {
+//            session.beginTransaction();
+//
+//            // Fetch all meals from the database
+//            Query<Meal> query = session.createQuery("FROM Meal", Meal.class);
+//            List<Meal> meals = query.getResultList();
+//
+//            session.getTransaction().commit();
+//
+//            // Return a copy of the list to avoid external modifications
+//            return new ArrayList<>(meals);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            // Return an empty list in case of an error
+//            return new ArrayList<>();
+//        }
+//    }
+  
     private String getTableDetails(int tableID) {
         StringBuilder details = new StringBuilder();
 
@@ -1620,6 +1759,7 @@ public class SimpleServer extends AbstractServer {
         }
     }
 
+
     /********************adan*************************/
 // Method to validate a CreditCardCheck object
     /*private boolean validateCreditCard(CreditCardCheck creditCardCheck) {
@@ -1632,4 +1772,40 @@ public class SimpleServer extends AbstractServer {
         return isValidNumber && isValidCvv && isValidId && isValidName;
     }*/
 /********************************adan************************/
+    /// ////work fine
+    public List<MealUpdateRequest> getAllRequestsWithMealDetails() {
+        try (Session session = App.getSessionFactory().openSession()) {
+            session.beginTransaction();
+
+            // Use JOIN FETCH to load the Meal entity with the request
+            Query<UpdatePriceRequest> query = session.createQuery(
+                    "SELECT r FROM UpdatePriceRequest r JOIN FETCH r.meal",
+                    UpdatePriceRequest.class
+            );
+
+            List<UpdatePriceRequest> requests = query.getResultList();
+
+            session.getTransaction().commit();
+
+            // Convert to MealUpdateRequest DTOs
+            List<MealUpdateRequest> dtos = new ArrayList<>();
+            for (UpdatePriceRequest request : requests) {
+                Meal meal = request.getMeal();
+                dtos.add(new MealUpdateRequest(
+                        String.valueOf(meal.getId()) ,
+                        meal.getName(),
+                        meal.getDescription(),
+                        meal.getImage(),
+                        request.getOldPrice(),
+                        request.getNewPrice()
+                ));
+            }
+
+            return dtos;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
 }

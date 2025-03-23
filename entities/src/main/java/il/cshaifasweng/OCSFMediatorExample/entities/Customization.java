@@ -15,11 +15,20 @@ public class Customization implements Serializable {
 
     private String customizationName;
 
-    @ManyToMany(
-            mappedBy = "customizations",
-            fetch = FetchType.EAGER
-    )
-    private List<Meal> meals;
+//    @ManyToMany(
+//            mappedBy = "customizations",
+//            fetch = FetchType.EAGER
+//    )
+//
+//    private List<Meal> meals;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<Meal> meals = new ArrayList<>(); // Remove mappedBy
+
+    // Constructor
+    public Customization() {
+        this.meals = new ArrayList<>(); // Redundant if initialized above, but safe
+    }
+
     public int getId() {
         return id;
     }

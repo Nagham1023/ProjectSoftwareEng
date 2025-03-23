@@ -21,6 +21,7 @@ public class Order implements Serializable{
     private LocalDate date;
     private String orderType;
     private int total_price;
+
     private String orderStatus;
     private String customerEmail;
     private LocalDateTime orderTime;
@@ -30,7 +31,6 @@ public class Order implements Serializable{
     /***yousef***/
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<MealInTheCart> meals = new ArrayList<>();
-
 
 
 

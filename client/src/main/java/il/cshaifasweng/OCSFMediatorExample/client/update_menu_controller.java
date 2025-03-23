@@ -25,6 +25,7 @@ public class update_menu_controller {
         this.mealNameLabel.setText("Change Price for: " + mealName);
         this.currentPriceLabel.setText("Current Price: " + priceLabel.getText());
         this.priceLabel = priceLabel;
+        System.out.println("Setting meal ID: " + mealid); // Debug log
         this.mealId = mealid;
     }
 
@@ -35,13 +36,13 @@ public class update_menu_controller {
             //System.out.println("im in to change price");
             SimpleClient client;
             client = SimpleClient.getClient();
-            updatePrice uPrice = new updatePrice(Double.parseDouble(newPrice),Integer.parseInt(mealId));
+            updatePrice uPrice = new updatePrice(Double.parseDouble(newPrice),Integer.parseInt(mealId),"asking");
             try {
                 client.sendToServer(uPrice);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            //priceLabel.setText(newPrice + "₪");
+            //priceLabel.setText(newPrice + "₪"); I have a feeling
             priceField.getScene().getWindow().hide(); // Close the window
         }
         //else System.out.println("i cant enter to change price");

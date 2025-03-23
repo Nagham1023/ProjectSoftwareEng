@@ -16,7 +16,7 @@ public class ReportContext {
         this.reportStrategy = reportStrategy;
     }
 
-    public String generateReport(LocalDate month, String restaurantName, TimeFrame timeFrame) {
-        return reportStrategy.generate(month, restaurantName, timeFrame);
+    public String generateReport(LocalDate month, String restaurantName, TimeFrame timeFrame, String note) {
+        return reportStrategy.generate(month, restaurantName, timeFrame, note);
     }
 }

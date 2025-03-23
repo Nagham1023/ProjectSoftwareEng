@@ -57,7 +57,7 @@ public class ReportsViewController {
         // Add options to the ComboBox
         //restaurant_name.getItems().addAll("Option 1", "Nazareth", "ALL");
         // Add options to the ComboBox
-        reportType.getItems().addAll("revenueReport", "Option 2", "Option 3");
+        reportType.getItems().addAll("revenueReport", "deliveryReport", "pickupReport","allOrdersReport");
         // Add options to the ComboBox
         timeStamp.getItems().addAll("MONTHLY", "YEARLY");
 
