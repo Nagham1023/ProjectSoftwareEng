@@ -29,6 +29,22 @@ public class SimpleClient extends AbstractClient {
 			System.out.println("the message is an update price");
 			EventBus.getDefault().post(msg);
 		}
+
+		//handling order cancellation
+		if (msg instanceof CancelOrderEvent) {
+			CancelOrderEvent event = (CancelOrderEvent) msg;
+			//Order order = event.getOrder();
+			EventBus.getDefault().post(event);
+		}
+
+		//handling reservation cancellation
+		if (msg instanceof CancelReservationEvent) {
+			CancelReservationEvent event = (CancelReservationEvent) msg;
+			//String id = event.getReservationId();
+			//String customerEmail = event.getCustomerEmail();
+			EventBus.getDefault().post(event);
+		}
+
 		if (msg instanceof UserCheck) {
 			EventBus.getDefault().post(msg);
 		}

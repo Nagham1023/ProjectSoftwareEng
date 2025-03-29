@@ -122,6 +122,16 @@ public class mainScreenController {
         });
     }
 
+    @FXML
+    void goToCancellation(ActionEvent event) {
+        Platform.runLater(() -> {
+            try {
+                App.setRoot("Cancellation");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
 
 
 }

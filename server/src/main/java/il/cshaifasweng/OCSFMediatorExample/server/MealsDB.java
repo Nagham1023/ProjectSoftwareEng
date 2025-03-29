@@ -27,6 +27,7 @@ public class MealsDB {
             return inputStream.readAllBytes();
         }
     }
+
     public static void generateData() throws Exception {
         Transaction transaction = null;
         try {
@@ -172,6 +173,7 @@ public class MealsDB {
         }
         return meals;
     }
+
     public static void updateMealPriceById(int mealId, double newPrice) {
         // Check if the meatlist is initialized
         if (meatlist == null || meatlist.isEmpty()) {
@@ -192,6 +194,7 @@ public class MealsDB {
         // If meal with the given ID is not found
         //System.out.println("Meal with ID " + mealId + " not found.");
     }
+
     public static void addMealToList(Meal newMeal) {
         // Ensure meatlist is initialized
         if (meatlist == null) {
@@ -211,6 +214,7 @@ public class MealsDB {
             //System.out.println("Added new meal to the list: " + newMeal.getName());
         }
     }
+
     public static void updateMealPriceInDatabase(updatePrice updatePrice) {
         //System.out.println("Changing the price in database.");
         int mealId = updatePrice.getIdMeal();
@@ -257,6 +261,7 @@ public class MealsDB {
         }
         //System.out.println("Finished updating the price in the database.");
     }
+
     public static String AddNewMeal(mealEvent newMeal) {
         // Extract data from the mealEvent object
         String mealDisc = newMeal.getMealDisc();
@@ -324,6 +329,7 @@ public class MealsDB {
         }
         return "added";
     }
+
     public static List<mealEvent> getmealEvent() throws Exception {
         List<mealEvent> result = new ArrayList<>();
         for (Meal meal : meatlist) {
@@ -332,6 +338,7 @@ public class MealsDB {
         }
         return result;
     }
+
     public static List<mealEvent> getmealEventbranched(List<Meal> meals) throws Exception {
         List<mealEvent> result = new ArrayList<>();
         for (Meal meal : meals) {
@@ -340,6 +347,7 @@ public class MealsDB {
         }
         return result;
     }
+
     public static List<Meal> getmealsb(String branchName) throws Exception {
         List<Meal> meals = new ArrayList<>();
 

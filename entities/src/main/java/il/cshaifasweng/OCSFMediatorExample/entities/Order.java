@@ -3,6 +3,7 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "orders")
@@ -16,10 +17,27 @@ public class Order implements Serializable{
     private LocalDate date;
     private String orderType;
     private int total_price;
+    private String orderStatus;
+    private String customerEmail;
+    private LocalDateTime orderTime;
 
     //@ManyToOne
-   // @JoinColumn(name = "restaurant_id")
+    // @JoinColumn(name = "restaurant_id")
     //private Restaurant restaurant;
+
+    public Order() {}
+
+    public Order(Order order) {
+        this.id = order.getId();
+        this.restaurantId = order.getRestaurantId();
+        this.restaurantName = order.getRestaurantName();
+        this.date = order.getDate();
+        this.orderType = order.getOrderType();
+        this.total_price = order.getTotal_price();
+        this.orderStatus = order.getOrderStatus();
+        this.customerEmail = order.getCustomerEmail();
+        this.orderTime = order.getOrderTime();
+    }
 
     public int getId() {
         return id;
@@ -68,4 +86,16 @@ public class Order implements Serializable{
     public void setRestaurantName(String restaurantName) {
         this.restaurantName = restaurantName;
     }
+
+    public String getOrderStatus() {return orderStatus;}
+
+    public void setOrderStatus(String orderStatus) {this.orderStatus = orderStatus;}
+
+    public String getCustomerEmail() {return customerEmail;}
+
+    public void setCustomerEmail(String email) {this.customerEmail = email;}
+
+    public LocalDateTime getOrderTime() {return orderTime;}
+
+    public void setOrderTime(LocalDateTime orderTime) {this.orderTime=orderTime;}
 }

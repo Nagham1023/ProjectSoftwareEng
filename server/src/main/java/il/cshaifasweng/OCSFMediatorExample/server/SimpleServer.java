@@ -50,6 +50,60 @@ public class SimpleServer extends AbstractServer {
         System.out.println("Received message from client ");
         String msgString = msg.toString();
 
+        // Canceling an Order
+        if (msg instanceof CancelOrderEvent) {
+            CancelOrderEvent cancelOrder = (CancelOrderEvent) msg;
+            String orderNumber = cancelOrder.getOrderNumber();
+            Order order = OrdersDB.getOrderById(orderNumber);
+
+            try {
+                CancelOrderEvent event = new CancelOrderEvent(order, orderNumber);
+                if (order == null) {
+                    event.setStatus("Order not found");
+                } else {
+                    event.setStatus("Order found");
+                }
+                client.sendToClient(event);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Cancelling a Reservation
+        if (msg instanceof CancelReservationEvent) {
+            CancelReservationEvent cancelReservationevent = (CancelReservationEvent) msg;
+
+            //getting the id of the reservation to cancel from the event
+            String reservationId = cancelReservationevent.getReservationId();
+
+            //fetching the reservation in the database
+            ReservationSave reservation = ReservationsDB.getReservationById(reservationId);
+
+            if (reservation != null) {
+                //getting the customer's email
+//                String customerEmail = reservation.getEmail();
+//                int seats;
+//                seats = reservation.getSeats();
+//                LocalDateTime reservationDateTime;
+//                reservationDateTime = reservation.getReservationDateTime();
+
+
+                //deleting the reservation from the database
+                boolean reservationCanceled = ReservationsDB.cancelReservationById(reservationId);
+
+                try{
+                    if (reservationCanceled) {
+                        System.out.println("Reservation " + reservationId + " is successfully canceled.");
+                        sendToAllClients(new CancelReservationEvent(reservation));
+                    } else {
+                        System.out.println("Reservation " + reservationId + " could not be canceled.");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
 
         if (msg instanceof ReservationEvent) {
             ReservationEvent reservation = (ReservationEvent) msg;
