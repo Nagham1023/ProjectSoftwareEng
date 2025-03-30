@@ -17,6 +17,8 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 
 import java.time.LocalTime;
+import java.util.stream.Collectors;
+import java.time.Duration;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -236,11 +238,12 @@ public class SimpleServer extends AbstractServer {
 
                     // Save the reservation to the database
                     saveReservationToDatabase(reservationSave);
-                    sendToAll(new ReConfirmEvent());
-                    printAllReservationSaves();
                     // Notify the client that the reservation was successful
                     System.out.println("Reservation confirmed successfully.");
                     client.sendToClient("Reservation confirmed successfully.");
+                    wait(500);
+                    sendToAll(new ReConfirmEvent());
+                    printAllReservationSaves();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -327,6 +330,13 @@ public class SimpleServer extends AbstractServer {
             }
         }
 
+        if (msg instanceof String && ((String) msg).startsWith("Cancel Reservation:")) {
+            printAllReservationSaves();
+            handleCancellationRequest((String) msg, client);
+            printAllReservationSaves();
+            sendToAll(new ReConfirmEvent());
+
+        }
 
         if (msg instanceof specificComplains) {
             try {
@@ -348,6 +358,7 @@ public class SimpleServer extends AbstractServer {
             }
 
         }
+
 
         if (msg instanceof updateResponse) {
             updateResponse response = (updateResponse) msg;
@@ -1608,6 +1619,179 @@ public class SimpleServer extends AbstractServer {
         }
     }
 
+    private void handleCancellationRequest(String msg, ConnectionToClient client) {
+        try {
+            // Parse the message
+            String data = msg.substring("Cancel Reservation:".length()).trim();
+            String[] parts = data.split(",");
+
+
+            String name = parts[0].trim();
+            String phone = parts[1].trim();
+            String email = parts[2].trim();
+
+            // Process cancellation
+            String result = cancelReservation(name, phone, email);
+
+            client.sendToClient("Cancle Reservation " + result);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public String cancelReservation(String name, String phone, String email) {
+        Session session = App.getSessionFactory().openSession();
+        try {
+            session.beginTransaction();
+
+            // Query for matching reservations
+            Query<ReservationSave> query = session.createQuery(
+                    "FROM ReservationSave r WHERE " +
+                            "r.fullName = :name AND " +
+                            "r.phoneNumber = :phone AND " +
+                            "r.email = :email", ReservationSave.class);
+
+            List<ReservationSave> reservations = query
+                    .setParameter("name", name)
+                    .setParameter("phone", phone)
+                    .setParameter("email", email)
+                    .getResultList();
+
+            // Filter only future reservations
+            LocalDateTime now = LocalDateTime.now();
+            List<ReservationSave> futureReservations = reservations.stream()
+                    .filter(r -> !r.getReservationDateTime().isBefore(now)) // Keep only future reservations
+                    .sorted(Comparator.comparing(ReservationSave::getReservationDateTime)) // Sort by date
+                    .collect(Collectors.toList());
+
+            if (futureReservations.isEmpty()) {
+                return "Error: No future reservation found to cancel";
+            }
+
+            // Take only the first future reservation
+            ReservationSave reservationToCancel = futureReservations.get(0);
+
+            // Calculate charge
+            int charge = calculateCancellationCharge(reservationToCancel, now);
+
+            // Free tables and remove reservation
+            Hibernate.initialize(reservationToCancel.getTables());
+            for (TableNode table : reservationToCancel.getTables()) {
+                Hibernate.initialize(table.getReservationStartTimes());
+                Hibernate.initialize(table.getReservationEndTimes());
+                removeReservationTimes(table, reservationToCancel.getReservationDateTime());
+                session.update(table);
+            }
+            session.delete(reservationToCancel);
+
+            session.getTransaction().commit();
+
+            // Send cancellation email
+            String emailContent = buildCancellationEmail(reservationToCancel, charge);
+            EmailSender.sendEmail("Reservation Cancellation Confirmation", emailContent, email);
+
+            return charge > 0 ?
+                    "Success: Cancelled with charge of " + charge + " ILS" :
+                    "Success: Cancelled with no charge";
+
+        } catch (Exception e) {
+            if (session.getTransaction().isActive()) {
+                session.getTransaction().rollback();
+            }
+            return "Error: Failed to cancel reservation - " + e.getMessage();
+        } finally {
+            session.close();
+        }
+    }
+
+    private String buildCancellationEmail(ReservationSave reservation, int charge) {
+        return String.format(
+                "Dear %s,\n\n" +
+                        "We confirm your reservation cancellation at %s:\n\n" +
+                        "Reservation Details:\n" +
+                        "- Date/Time: %s\n" +
+                        "- Number of Guests: %d\n" +
+                        "- Cancellation Processed: %s\n\n" +
+                        "%s\n\n" + // Charge information
+                        "Cancellation Policy:\n" +
+                        "- Cancellations within 1 hour of reservation incur 10 ILS per seat\n\n" +
+                        "Thank you for your patronage. We hope to serve you again soon.\n\n" +
+                        "Best regards,\n" +
+                        "Customer Service Team\n" +
+                        "%s",
+                reservation.getFullName(),
+                reservation.getRestaurantName(),
+                reservation.getReservationDateTime().toString(),
+                reservation.getSeats(),
+                LocalDateTime.now().toString(),
+                charge > 0 ? String.format("Cancellation Charge: %d ILS", charge)
+                        : "No cancellation charges applied",
+                reservation.getRestaurantName()
+        );
+    }
+
+    private int calculateCancellationCharge(ReservationSave reservation, LocalDateTime cancellationTime) {
+        // Check if cancellation is within 1 hour of reservation time
+        LocalDateTime reservationTime = reservation.getReservationDateTime();
+        Duration timeDifference = Duration.between(cancellationTime, reservationTime);
+
+        // If cancellation is within 1 hour before reservation
+        if (!timeDifference.isNegative() && timeDifference.toHours() < 1) {
+            // Charge 10 ILS per seat
+            return reservation.getSeats() * 10;
+        }
+        return 0;
+    }
+
+    private List<ReservationSave> findReservations(Session session, String name,
+                                                   String phone, String email) {
+        return session.createQuery(
+                        "FROM ReservationSave r WHERE " +
+                                "r.fullName = :name AND " +
+                                "r.phoneNumber = :phone AND " +
+                                "r.email = :email", ReservationSave.class)
+                .setParameter("name", name)
+                .setParameter("phone", phone)
+                .setParameter("email", email)
+                .getResultList();
+    }
+
+    private void cancelSingleReservation(Session session, ReservationSave reservation) {
+        // Initialize lazy-loaded collections
+        Hibernate.initialize(reservation.getTables());
+
+        // Process each table in the reservation
+        for (TableNode table : reservation.getTables()) {
+            // Initialize time collections
+            Hibernate.initialize(table.getReservationStartTimes());
+            Hibernate.initialize(table.getReservationEndTimes());
+
+            // Remove the reservation times
+            removeReservationTimes(table, reservation.getReservationDateTime());
+
+            // Update table status
+            table.setStatus(table.getStatus()); // Triggers status recalculation
+            session.update(table);
+        }
+
+        // Delete the reservation
+        session.delete(reservation);
+    }
+
+    private void removeReservationTimes(TableNode table, LocalDateTime reservationTime) {
+        List<LocalDateTime> starts = table.getReservationStartTimes();
+        List<LocalDateTime> ends = table.getReservationEndTimes();
+
+        // Find matching time slot (assuming exact match on start time)
+        for (int i = 0; i < starts.size(); i++) {
+            if (starts.get(i).equals(reservationTime)) {
+                starts.remove(i);
+                ends.remove(i);
+                break;
+            }
+        }
+    }
     /********************adan*************************/
 // Method to validate a CreditCardCheck object
     private boolean validateCreditCard(CreditCardCheck creditCardCheck) {

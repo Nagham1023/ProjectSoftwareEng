@@ -114,6 +114,9 @@ public class SimpleClient extends AbstractClient {
 			else if (message.equals("Reservation confirmed successfully.")) {
 				EventBus.getDefault().post(msg);
 			}
+			else if(message.startsWith("Cancle Reservation ")){
+				EventBus.getDefault().post(message.substring("Cancle Reservation ".length()).trim());
+			}
 		}
         if (msg instanceof RestaurantList) {
             RestaurantList restaurantList = (RestaurantList) msg;

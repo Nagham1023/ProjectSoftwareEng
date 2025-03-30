@@ -305,6 +305,8 @@ public class ReservationController {
     @Subscribe
     public void reConfirmFunction(ReConfirmEvent reConfirmEvent) {
         try {
+            if(loadingGif.isVisible()&&anchorPane.isDisabled())
+                return;
             handleConfirm();
         } catch (IOException e) {
             throw new RuntimeException(e);

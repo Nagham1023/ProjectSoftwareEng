@@ -71,11 +71,16 @@
               <Image url="@/images/instaIcon.png" />  <!-- Single Image element -->
       </ImageView>
       <Button layoutX="533.0" layoutY="20.0" mnemonicParsing="false" onAction="#openLink" opacity="0.0" prefHeight="40.0" prefWidth="40.0" style="-fx-border-color: #832018;" />
-      <Button layoutX="202.0" layoutY="480.0" mnemonicParsing="false" onAction="#goToReservation" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Pick a Reservation" textFill="#fbebf4">
-         <font>
-            <Font name="System Bold Italic" size="20.0" />
-         </font>
-      </Button>
+       <Button layoutX="202.0" layoutY="480.0" mnemonicParsing="false" onAction="#goToReservation" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Pick a Reservation" textFill="#fbebf4">
+           <font>
+               <Font name="System Bold Italic" size="20.0" />
+           </font>
+       </Button>
+       <Button layoutX="500.0" layoutY="480.0" mnemonicParsing="false" onAction="#goToReservationCancel" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Cancel a Reservation" textFill="#fbebf4">
+           <font>
+               <Font name="System Bold Italic" size="20.0" />
+           </font>
+       </Button>
       <Button layoutX="543.0" layoutY="30.0" mnemonicParsing="false" onAction="#openLink" opacity="0.0" prefHeight="40.0" prefWidth="40.0" style="-fx-border-color: #832018;" />
 
       <Button layoutX="553.0" layoutY="40.0" mnemonicParsing="false" onAction="#openLink" opacity="0.0" prefHeight="40.0" prefWidth="40.0" style="-fx-border-color: #832018;" />
