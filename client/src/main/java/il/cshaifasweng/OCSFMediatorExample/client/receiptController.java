@@ -83,9 +83,10 @@ public class receiptController {
             body.append("- ").append(meal).append("\n");
         }
 
-        // Add delivery price
-        body.append("\nDelivery Fee: ").append(deliveryPrice).append("₪\n");
-        // Add total price
+
+        if(done_Order.getOrderType().equals("Delivery"))
+            body.append("\nDelivery Fee: ").append(deliveryPrice).append("₪\n");
+
         body.append("Total Price: ").append(done_Order.getTotal_price()).append("₪\n");
 
         body.append("\nWe hope you enjoy your meal!\n\n");
