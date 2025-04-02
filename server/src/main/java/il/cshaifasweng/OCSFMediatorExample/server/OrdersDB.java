@@ -1,8 +1,5 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
-
-import il.cshaifasweng.OCSFMediatorExample.entities.Order;
-import org.hibernate.Session;
 import il.cshaifasweng.OCSFMediatorExample.entities.CustomizationWithBoolean;
 import il.cshaifasweng.OCSFMediatorExample.entities.MealInTheCart;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
@@ -10,17 +7,15 @@ import org.hibernate.Session;
 
 import java.util.List;
 
-
 public class OrdersDB {
 
-    public static Order getOrderById(String orderId) {
+    public static Order getOrderById(int orderId) {
         System.out.println("now I am in the function");
         Order order = null;
-        int id=Integer.parseInt(orderId);
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
 
-            order = session.get(Order.class,id);
+            order = session.get(Order.class, orderId);
             if (order != null) {
                 order.setOrderStatus("Cancelled");
                 session.update(order);
@@ -29,20 +24,19 @@ public class OrdersDB {
             e.printStackTrace();
         }
         return order;
-}
-//    }
+    }
 
- //   public static Order OrderById(int orderId) {
-   //     Order order = null;
-     //   try (Session session = App.getSessionFactory().openSession()) {
-       //     session.beginTransaction();
+    public static Order OrderById(int orderId) {
+        Order order = null;
+        try (Session session = App.getSessionFactory().openSession()) {
+            session.beginTransaction();
 
-         //   order = session.get(Order.class, orderId);
-        //} catch (Exception e) {
-          //  e.printStackTrace();
-        //}
-        //return order;
-    // }
+            order = session.get(Order.class, orderId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return order;
+    }
 
     public static void saveOrder(Order order) {
         try (Session session = App.getSessionFactory().openSession()) {
@@ -57,11 +51,12 @@ public class OrdersDB {
             e.printStackTrace();
         }
     }
+
     public static void saveCustomizationsbool(List<CustomizationWithBoolean> customs) {
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
 
-            for(CustomizationWithBoolean custom : customs) {
+            for (CustomizationWithBoolean custom : customs) {
                 session.saveOrUpdate(custom);  // Use saveOrUpdate to handle both new and existing entities}
             }
 
@@ -72,11 +67,10 @@ public class OrdersDB {
             e.printStackTrace();
         }
     }
-
+}
     /*public static void saveOrder2(Order order) {
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
-
             // Persist CustomizationWithBoolean if necessary, using saveOrUpdate
             for (MealInTheCart mealInTheCart : order.getMeals()) {
                 for (CustomizationWithBoolean customization : mealInTheCart.getMeal().getCustomizationsList()) {
@@ -84,19 +78,10 @@ public class OrdersDB {
                     session.saveOrUpdate(customization);
                 }
             }
-
             // Now save or update the order (this will cascade to meals and customizations)
             session.saveOrUpdate(order);
-
             session.getTransaction().commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }*/
-
-
-
-
-
-
-}

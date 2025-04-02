@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Complain;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
 import il.cshaifasweng.OCSFMediatorExample.entities.TimeFrame;
 import org.hibernate.Session;
@@ -113,6 +114,7 @@ public class ReportDB {
 
         return reportBuilder.toString();
     }
+
     public String generate_order_type_report(LocalDate month, String restaurantName, TimeFrame timeFrame, String orderTypeFilter) {
         System.out.println("Generating order type report for restaurant: " + restaurantName + " (Filter: " + orderTypeFilter + ")");
         StringBuilder reportBuilder = new StringBuilder();
@@ -196,6 +198,85 @@ public class ReportDB {
             if (session != null && session.isOpen()) {
                 session.close();
             }
+        }
+
+        return reportBuilder.toString();
+    }
+
+    public String generate_complain_report(LocalDate month, String restaurantName, TimeFrame timeFrame, String note) {
+        System.out.println("Generating complaint report for " + ("ONE".equals(note) ? "restaurant: " + restaurantName : "all restaurants"));
+        StringBuilder reportBuilder = new StringBuilder();
+        Session session = null;
+
+        try {
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+            session.beginTransaction();
+
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
+            Root<Complain> root = query.from(Complain.class);
+
+            // Determine period grouping (month for yearly, day for monthly)
+            Expression<Integer> periodExpression = timeFrame == TimeFrame.YEARLY
+                    ? builder.function("MONTH", Integer.class, root.get("date_complain"))
+                    : builder.function("DAY", Integer.class, root.get("date_complain"));
+
+            // Date predicates based on timeframe
+            Predicate yearPredicate = builder.equal(
+                    builder.function("YEAR", Integer.class, root.get("date_complain")),
+                    month.getYear()
+            );
+
+            Predicate finalPredicate = yearPredicate;
+            if (timeFrame == TimeFrame.MONTHLY) {
+                Predicate monthPredicate = builder.equal(
+                        builder.function("MONTH", Integer.class, root.get("date_complain")),
+                        month.getMonthValue()
+                );
+                finalPredicate = builder.and(yearPredicate, monthPredicate);
+            }
+
+            // Always filter by "Complaint" type
+            Predicate kindPredicate = builder.equal(root.get("kind_complain"), "Complaint");
+            finalPredicate = builder.and(finalPredicate, kindPredicate);
+
+            // Add restaurant filter only if note is "ONE"
+            if ("ONE".equals(note)) {
+                // Correct "name" to "restaurantName"
+                Predicate restaurantPredicate = builder.equal(root.get("restaurant").get("restaurantName"), restaurantName);
+                finalPredicate = builder.and(finalPredicate, restaurantPredicate);
+            }
+
+            // Build query
+            query.multiselect(periodExpression, builder.count(root))
+                    .where(finalPredicate)
+                    .groupBy(periodExpression)
+                    .orderBy(builder.asc(periodExpression));
+
+            List<Object[]> results = session.createQuery(query).getResultList();
+
+            // Format report header to match client expectations
+            reportBuilder.append("Complaint Report - ");
+            reportBuilder.append(timeFrame == TimeFrame.MONTHLY ? "Daily\n\n" : "Yearly\n\n"); // Use "Yearly" instead of "Monthly"
+            reportBuilder.append("Scope: ").append("ONE".equals(note) ? restaurantName : "All Restaurants").append("\n");
+
+            if (results.isEmpty()) {
+                reportBuilder.append("No complaints found.\n");
+            } else {
+                for (Object[] row : results) {
+                    // Format lines like "Day 5: $3" to match revenue report parsing
+                    reportBuilder.append(timeFrame == TimeFrame.MONTHLY ? "Day " : "Month ")
+                            .append(row[0]).append(": $").append(row[1]).append("\n");
+                }
+            }
+
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (session != null) session.getTransaction().rollback();
+            return "Error: " + e.getMessage();
+        } finally {
+            if (session != null) session.close();
         }
 
         return reportBuilder.toString();

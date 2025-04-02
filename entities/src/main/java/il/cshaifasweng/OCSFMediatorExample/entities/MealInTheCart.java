@@ -1,5 +1,4 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
-
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -14,10 +13,8 @@ public class MealInTheCart implements Serializable {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "personal_meal_id", referencedColumnName = "id")
     private personal_Meal meal;
-
-
-   private int quantity;
-   private String RestaurantName;
+    private int quantity;
+    private String RestaurantName;
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)  // Maps to the 'Order' entity
@@ -52,15 +49,12 @@ public class MealInTheCart implements Serializable {
     public personal_Meal getMeal() {
         return meal;
     }
-
     public void setMeal(personal_Meal meal) {
         this.meal = meal;
     }
-
     public int getQuantity() {
         return quantity;
     }
-
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }

@@ -71,7 +71,7 @@ public class mainScreenController {
 
     @FXML
     void clickedOnCancellation(ActionEvent event)throws IOException {
-        App.setRoot("OrderCancellation");
+        App.setRoot("CancellationPage");
     }
 
     @FXML

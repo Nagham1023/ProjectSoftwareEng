@@ -23,7 +23,7 @@ public class SimpleClient extends AbstractClient {
 	private static boolean logged = false;
 
 	private SimpleClient(String host, int port) {
-		super(host, port)	;
+		super(host, port);
 	}
 
 	@Override
@@ -31,41 +31,114 @@ public class SimpleClient extends AbstractClient {
 		System.out.println("got a message from server " + msg);
 		if (msg instanceof updatePrice) {
 			System.out.println("the message is an update price");
-			updatePrice priceUpdate=(updatePrice) msg;
-			// Create the event wrapper once
-			UpdatePriceRequestEvent event = new UpdatePriceRequestEvent((updatePrice) msg);
-			switch(priceUpdate.getPurpose().toLowerCase()) {
-				case "denying":
-					// Specific handling for denial
-					EventBus.getDefault().post(event);
-					break;
-				case "changing":
-					EventBus.getDefault().post(msg);
-					EventBus.getDefault().post(event);
-					break;
-			}
-//			if(((updatePrice) msg).getPurpose().equals("denying")){
-//				EventBus.getDefault().post(new UpdatePriceRequestEvent((updatePrice) msg));
-//			} else {
-//			EventBus.getDefault().post(msg);
-//			EventBus.getDefault().post(new UpdatePriceRequestEvent((updatePrice) msg));
-//			}
+			handleUpdatePrice(msg);
 		}
-		if(msg instanceof UpdateMealRequest){
+		else if (msg instanceof UpdateMealRequest) {
 			EventBus.getDefault().post(msg);
 		}
-		if (msg instanceof MealUpdateRequest) {
+		else if (msg instanceof MealUpdateRequest) {
 			System.out.println("the message is an update price request");
 			EventBus.getDefault().post((MealUpdateRequest) msg);
 		}
-		if (msg instanceof UserCheck) {
+		else if (msg instanceof PCRequestsList) {
+			EventBus.getDefault().post((PCRequestsList) msg);
+		}
+		else if (msg instanceof UserCheck) {
 			EventBus.getDefault().post(msg);
 		}
-		if (msg instanceof PersonalDetails) {
+		else if (msg instanceof PersonalDetails) {
 			System.out.println("the message is a personal details");
 			EventBus.getDefault().post(msg);  // Handle personal details-related messages
 		}
-//                if (msg instanceof List<?>) {
+
+		/******************************adan*****************************************/
+		else if (msg instanceof PaymentCheck) {
+			EventBus.getDefault().post(msg);  // Handle credit card-related messages
+		}
+		/******************************adan*****************************************/
+
+		else if (msg instanceof ComplainList) {
+			System.out.println("the message is an adding complaintList");
+			ComplainList complainList = (ComplainList) msg;
+			//print restaurants names
+			System.out.println("Received restaurant list: " + complainList.toString());
+			EventBus.getDefault().post(complainList);
+		}
+		else if (msg instanceof complainEvent) {
+			System.out.println("the message is an adding complaint");
+			EventBus.getDefault().post(msg);
+		}
+		else if (msg instanceof MealsList) {
+			EventBus.getDefault().post(msg);
+		}
+		else if (msg instanceof List<?>) { // Check if msg is a list
+			System.out.println("the message is a list");
+			List<?> list = (List<?>) msg;
+			handleListMessage(list);
+		}
+		else if (msg instanceof CancelOrderEvent) {
+			CancelOrderEvent event = (CancelOrderEvent) msg;
+			Order order = event.getOrder();
+			EventBus.getDefault().post(event);
+		}
+		else if (msg instanceof UpdateMealEvent) {
+			UpdateMealEvent event = (UpdateMealEvent) msg;
+			EventBus.getDefault().post(event);
+		}
+		//***************************omar********************************************//
+		else if (msg.getClass().equals(DifferentResrvation.class)) {
+				EventBus.getDefault().post(msg);
+		}
+		else if (msg.getClass().equals(mealEvent.class)) {
+				EventBus.getDefault().post(msg);
+		}
+		else if (msg.getClass().equals(Order.class)) {
+				System.out.println("received order");
+				EventBus.getDefault().post(msg);
+		}
+		else if (msg.getClass().equals(RestaurantList.class)) {
+				EventBus.getDefault().post(msg);
+		}
+		else if (msg.getClass().equals(ListOfCC.class)) {
+				System.out.println("received list of CC");
+				EventBus.getDefault().post(msg);
+		}
+		else if (msg.getClass().equals(Warning.class)) {
+				EventBus.getDefault().post(new WarningEvent((Warning) msg));
+		}
+		else if (msg instanceof SearchOptions) {
+				EventBus.getDefault().post(msg);
+		}
+		else if (msg instanceof RestaurantList) {
+			RestaurantList restaurantList = (RestaurantList) msg;
+			//print restaurants names
+			System.out.println("Received restaurant list: " + restaurantList.toString());
+			EventBus.getDefault().post(restaurantList);
+		}
+		else if (msg instanceof String) {
+			String message = (String) msg;
+			handleStringMessage((String) msg);
+		}
+		else if (msg instanceof tablesStatus) {
+			EventBus.getDefault().post(msg);
+		}
+		else if (msg instanceof ReConfirmEvent) {
+			EventBus.getDefault().post(msg);
+		}
+		else if (msg instanceof ListComplainList) {
+			ListComplainList listComplainList = (ListComplainList) msg;
+			System.out.println("Received complaint list: " + listComplainList.toString());
+			EventBus.getDefault().post(listComplainList);
+		}
+		else if (msg instanceof updateResponse) {
+			generateResponse((updateResponse) msg);
+		}
+		else {
+				System.out.println("Unhandled message: " + (String) msg);
+			}
+		//*********************** deleted functions?*****************//
+
+		//                if (msg instanceof List<?>) {
 //                        System.out.println("The message is a list");
 //                        List<?> list = (List<?>) msg;
 //                        if (!list.isEmpty() && list.get(0) instanceof CreditCard) {
@@ -86,69 +159,7 @@ public class SimpleClient extends AbstractClient {
 //                                EventBus.getDefault().post(msg);
 //                        }
 //                }
-		/******************************adan*****************************************/
-		if (msg instanceof PaymentCheck) {
-			EventBus.getDefault().post(msg);  // Handle credit card-related messages
-		}
-		/******************************adan*****************************************/
-
-		if (msg instanceof ComplainList) {
-			System.out.println("the message is an adding complaintList");
-			ComplainList complainList = (ComplainList) msg;
-			//print restaurants names
-			System.out.println("Received restaurant list: " + complainList.toString());
-			EventBus.getDefault().post(complainList);
-		}
-		if (msg instanceof complainEvent) {
-			System.out.println("the message is an adding complaint");
-			EventBus.getDefault().post(msg);
-		}
-		if(msg instanceof MealsList) {
-			EventBus.getDefault().post(msg);
-		}
-		if (msg instanceof List<?>) { // Check if msg is a list
-			System.out.println("the message is a list");
-			List<?> list = (List<?>) msg;
-			if (!list.isEmpty() && list.get(0) instanceof mealEvent) { // Ensure it's a List<Meal>
-				System.out.println("list of meals");
-				EventBus.getDefault().post(msg);
-			}
-			else if (list.get(0) instanceof Meal) { // If the list contains Meal objects
-				System.out.println("Meals found:");
-				for (Object obj : list) {
-					Meal meal = (Meal) obj;
-					System.out.println("Meal: " + meal.getName() + " - " + meal.getDescription());
-				}
-				EventBus.getDefault().post(msg);
-			}else if(list.get(0) instanceof ReservationEvent){
-				EventBus.getDefault().post(msg);
-			} else if (list.get(0) instanceof TableNode) {
-				EventBus.getDefault().post(msg);
-			}
-			// Check if the list is not empty and if the first item is a CreditCard
-			else if (!list.isEmpty() && list.get(0) instanceof CreditCard) {
-				System.out.println("The message is a list of CreditCards");
-				// Iterate through the list and post each CreditCard individually
-				for (Object item : list) {
-					if (item instanceof CreditCard) {
-						CreditCard creditCard = (CreditCard) item;
-						// Post the individual CreditCard to the EventBus
-						System.out.println("Posting a single credit card to EventBus: " + creditCard);
-						EventBus.getDefault().post(creditCard); // Posting individual CreditCard to EventBus
-					}
-				}
-			}
-
-		}
-		if (msg instanceof CancelOrderEvent) {
-			CancelOrderEvent event = (CancelOrderEvent) msg;
-			Order order = event.getOrder();
-			EventBus.getDefault().post(event);
-		}
-		if (msg instanceof UpdateMealEvent) {
-			UpdateMealEvent event = (UpdateMealEvent) msg;
-			EventBus.getDefault().post(event);
-		}
+		//********************************************//
 		//                        else if (!list.isEmpty() && list.get(0) instanceof CreditCard) {
 //                                        System.out.println("The message is a list");
 //                                        List<CreditCard> creditCards = new ArrayList<>(list.size());
@@ -163,139 +174,206 @@ public class SimpleClient extends AbstractClient {
 //
 //                                EventBus.getDefault().post(creditCards);
 //                                }
+		//******************************************************************//
+		//			} else if (message.equals("Order not found.")) {
+//				EventBus.getDefault().post(msg);
+//			} else if (message.equals("No order!")) {
+//				EventBus.getDefault().post(msg);
+//			} else if (message.equals("Not same restaurant!")) {
+//			} else if (message.equals("Reservation confirmed successfully.")) {
+//				EventBus.getDefault().post(msg);
+			/// ////////////*****************************************************///
+//
+//			if (msg instanceof ListComplainList) {
+//				ListComplainList listComplainList = (ListComplainList) msg;
+//				System.out.println("Received complaint list: " + listComplainList.toString());
+//				EventBus.getDefault().post(listComplainList);
+//			}
+//
+//		}
+	}
 
-
-		if(msg.getClass().equals(DifferentResrvation.class)){
-			EventBus.getDefault().post(msg);
-		}
-		if (msg.getClass().equals(mealEvent.class)) {
-			EventBus.getDefault().post(msg);
-		}
-		if (msg.getClass().equals(Order.class)) {
-			System.out.println("received order");
-			EventBus.getDefault().post(msg);
-		}
-		if (msg.getClass().equals(RestaurantList.class)) {
-			EventBus.getDefault().post(msg);
-		}
-		if (msg.getClass().equals(ListOfCC.class)) {
-			System.out.println("received list of CC");
-			EventBus.getDefault().post(msg);
-		}
-		if (msg.getClass().equals(Warning.class)) {
-			EventBus.getDefault().post(new WarningEvent((Warning) msg));
-		}
-		if(msg instanceof SearchOptions){
-			EventBus.getDefault().post(msg);
-		}
-
-		if(msg instanceof String) {
-			String message = (String) msg;
-			if(message.startsWith("table details: ")){
-				// Extract the table details from the message
-				String tableDetails = message.substring("table details: ".length());
-
-				// Send the table details to the EventBus
-				EventBus.getDefault().post(tableDetails);
+		public static SimpleClient getClient () {
+			if (client == null) {
+				client = new SimpleClient(IP, Port);
 			}
-			else if (message.startsWith("ReportResponse")) {
-				// Split the message by "\n" to extract the report content
-				String[] parts = message.split("\n", 2); // Limit to 2 splits
-				if (parts.length == 2) {
-					String report = parts[1]; // The actual report content
-					System.out.println("Received report: " + report);
+			return client;
+		}
 
-
-					// Publish the event to the EventBus
-					EventBus.getDefault().post(new ReportResponseEvent(report));
-				}
-				else {
-					System.err.println("Malformed report response from server.");
-				}
-			} else if (message.equals("Reservation confirmed successfully.")) {
-				EventBus.getDefault().post(msg);
-
-			} else if (message.contains("delete")) {
-				// Extract the substring after "delete "
-				String payload = message;
-				System.out.println("Received delete payload: " + payload);
-
-				String[] parts = payload.split(" ");
-
-				// Extract values
-				String mealId = parts[4];
-				String mealName = parts[5];
-				System.out.println("Received delete meal: " + mealName + " - " + mealId);
-
-				if (mealId != null && mealName != null) {
-					// Post the event with both ID and name
-					EventBus.getDefault().post(new DeleteMealEvent(mealId, mealName));
-				}
-
-			} else {
-
-			} else if (message.equals("Order not found."))
-			{
-				EventBus.getDefault().post(msg);
-			} else if (message.equals("No order!"))
-			{
-				EventBus.getDefault().post(msg);
-			}else if (message.equals("Not same restaurant!"))
-			{
+		public static boolean isClientConnected () {
+			boolean temp = logged;
+			if (!logged) {
+				logged = true;
 			}
-			else if (message.equals("Reservation confirmed successfully.")) {
-				EventBus.getDefault().post(msg);
-			}else {
+			return temp;
+		}
 
-				System.out.println("Unhandled message: " + message);
+		public static boolean isLog () {
+			return UserClient != null;
+		}
+
+		public static UserCheck getUser () {
+			return UserClient;
+		}
+
+		public static void setUser (UserCheck user){
+			UserClient = user;
+		}
+
+
+	//-------------------------------helper functions-------------------------------------------//
+	private void handleUpdatePrice(Object msg) {
+
+		UpdatePriceRequestEvent event = new UpdatePriceRequestEvent((updatePrice) msg);
+		switch (((updatePrice) msg).getPurpose().toLowerCase()) {
+			case "denying":
+				// Specific handling for denial
+				EventBus.getDefault().post(event);
+				break;
+			case "changing":
+				EventBus.getDefault().post(msg);
+				EventBus.getDefault().post(event);
+				break;
+		}
+	}
+
+	private void handleListMessage(List<?> list) {
+
+		if (list.isEmpty()) return;
+
+		Object firstItem = list.get(0);
+		if (firstItem instanceof mealEvent) {
+			System.out.println("List of meal events");
+			EventBus.getDefault().post(list);
+		}
+		else if (firstItem instanceof Meal) {
+			System.out.println("Meals list:");
+			for (Object obj : list) {
+				Meal meal = (Meal) obj;
+				System.out.println("Meal: " + meal.getName() + " - " + meal.getDescription());
+			}
+			EventBus.getDefault().post(list);
+		}
+		else if (firstItem instanceof ReservationEvent) {
+			EventBus.getDefault().post(list);
+		}
+		else if (firstItem instanceof TableNode) {
+			EventBus.getDefault().post(list);
+		}
+		else if (firstItem instanceof CreditCard) {
+			handleCreditCards(list);
+		}
+	}
+
+	private void handleCreditCards(List<?> list) {
+		System.out.println("The message is a list of CreditCards");
+		// Iterate through the list and post each CreditCard individually
+		for (Object item : list) {
+			if (item instanceof CreditCard) {
+				CreditCard creditCard = (CreditCard) item;
+				// Post the individual CreditCard to the EventBus
+				System.out.println("Posting a single credit card to EventBus: " + creditCard);
+				EventBus.getDefault().post(creditCard); // Posting individual CreditCard to EventBus
 			}
 		}
-        if (msg instanceof RestaurantList) {
-            RestaurantList restaurantList = (RestaurantList) msg;
-
-            //print restaurants names
-            System.out.println("Received restaurant list: " + restaurantList.toString());
-            EventBus.getDefault().post(restaurantList);
-        }
-
-		if(msg instanceof PCRequestsList) {
-
-		if(msg instanceof tablesStatus){
-			EventBus.getDefault().post(msg);
-		}
-		if(msg instanceof ReConfirmEvent){
-
-			EventBus.getDefault().post(msg);
-		}
-		if (msg instanceof ListComplainList) {
-			ListComplainList listComplainList = (ListComplainList) msg;
-			System.out.println("Received complaint list: " + listComplainList.toString());
-			EventBus.getDefault().post(listComplainList);
-		}
-
 	}
 
-	public static SimpleClient getClient() {
-		if (client == null) {
-			client = new SimpleClient(IP, Port);
+	private void handleStringMessage(String message) {
+		if (message.startsWith("table details: ")) {
+			// Extract the table details from the message
+			String tableDetails = message.substring("table details: ".length());
+			// Send the table details to the EventBus
+			EventBus.getDefault().post(tableDetails);
 		}
-		return client;
-	}
-	public static boolean isClientConnected(){
-		boolean temp = logged;
-        if(!logged){
-			logged = true;
+		else if (message.equalsIgnoreCase("added")) {
+			EventBus.getDefault().post("added");
 		}
-		return temp;
-    }
-	public static boolean isLog() {
-        return UserClient != null;
+		else if (message.startsWith("ReportResponse")) {
+			handleReportResponse(message);
+		}
+		else if (message.contains("delete")) {
+			handleDeleteMessage(message);
+		}
+		else if (message.equals("Reservation confirmed successfully.")) {
+			EventBus.getDefault().post(message);
+		}
+		else if(message.startsWith("Cancle Reservation ")){
+			EventBus.getDefault().post(message.substring("Cancle Reservation ".length()).trim());}
+		else {
+			switch (message) {
+				case "Reservation confirmed successfully.":
+					EventBus.getDefault().post(message);
+					break;
+				case "Order not found.":
+					EventBus.getDefault().post(message);
+					break;
+				case "No order!":
+					EventBus.getDefault().post(message);
+					break;
+				case "Not same restaurant!":
+					EventBus.getDefault().post(message);
+					break;
+				default:
+					System.out.println("Unhandled message: " + message);
+			}
+		}
 	}
-	public static UserCheck getUser() {
-		return UserClient;
-	}
-	public static void setUser(UserCheck user) {
-		UserClient = user;
+	private void handleReportResponse(String message) {
+		// Split the message by "\n" to extract the report content
+		String[] parts = message.split("\n", 2);
+		if (parts.length == 2) {
+			String report = parts[1]; // The actual report content
+			System.out.println("Received report: " + report);
+			EventBus.getDefault().post(new ReportResponseEvent(report));
+		} else {
+			System.err.println("Malformed report response");
+		}
 	}
 
+	private void handleDeleteMessage(String message) {
+		// Extract the substring after "delete "
+		String payload = message;
+		System.out.println("Received delete payload: " + payload);
+
+		String[] parts = payload.split(" ");
+
+		// Extract values
+		String mealId = parts[4];
+		String mealName = parts[5];
+		System.out.println("Received delete meal: " + mealName + " - " + mealId);
+
+		if (mealId != null && mealName != null) {
+			// Post the event with both ID and name
+			EventBus.getDefault().post(new DeleteMealEvent(mealId, mealName));
+		}
+	}
+
+	private void generateResponse(updateResponse response) {
+		String orderNum = response.getOrderNumber();
+		String complaintType = "Refunded";
+		String ourResponse = response.getnewResponse();
+		String refundAmount = String.valueOf(response.getRefundAmount());
+
+
+		// Generate subject
+		String subject = "Response to Your Complaint - Order #" + orderNum;
+
+		// Generate message
+		StringBuilder message = new StringBuilder("Dear customer" + ",\n\n");
+		message.append("Thank you for reaching out regarding your ").append(complaintType.toLowerCase()).append(".\n\n");
+		message.append("Here is a summary of your inquiry:\n\n");
+		message.append("**Order Number:** ").append(orderNum).append("\n");
+		message.append("**Our Response:**\n");
+		message.append(ourResponse).append("\n\n");
+
+		if (!refundAmount.isEmpty()) {
+			message.append("✅ **Refund Issued:** We have processed a refund of ").append(refundAmount).append("₪ to your account.\n\n");
+		}
+
+		message.append("We value you as our customer and are here to assist with any further concerns.\n\n");
+		message.append("Warm regards,\nMama's Restaurant Customer Service Team");
+
+
+		EmailSender.sendEmail(subject, message.toString(), response.getEmailComplain());
+	}
 }

@@ -27,10 +27,8 @@ public class DeliveryPageController {
 
     @FXML
     private Button Delivery;
-
     @FXML
     private Button PlaceYourOrder;
-
     @FXML
     private Button arrow;
 
@@ -42,35 +40,26 @@ public class DeliveryPageController {
 
     @FXML
     private Button mastercard;
-
     @FXML
     private Pane orderPrice;
-
     @FXML
     private Button orderdate;
-
     @FXML
     private Button selfPickup;
-
     @FXML
     private TextField addressField;
     @FXML
     private TextField homeNumberField;
-
     @FXML
     private Label pickupMessageLabel;
-
     @FXML
     private ComboBox<String> orderTimeComboBox;
-
     @FXML
     private Button visa;
-
     @FXML
     private ListView<CreditCard> creditCardListView; // Example component for displaying cards
 
     static public PersonalDetails personalDetails;
-
 
     @FXML
     public void initialize() {
@@ -92,31 +81,25 @@ public class DeliveryPageController {
         orderTimeComboBox.getItems().setAll(availableTimes);
         orderTimeComboBox.getSelectionModel().selectFirst(); // Optionally select the first available time.
     }
-
     private List<String> calculateTimes() {
         List<String> times = new ArrayList<>();
         LocalTime startTime = LocalTime.now().plusMinutes(30); // Start 30 minutes from now.
         final LocalTime startLimit = LocalTime.of(10, 30); // Start of the time limit at 10:00 AM
         final LocalTime endLimit = LocalTime.of(22, 0); // End of the time limit at 10:00 PM
         final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-
         // Adjust start time to 10:30 AM if it's earlier than that or to the next half hour slot if it's later
         if (startTime.isBefore(startLimit)) {
             startTime = startLimit;
         } else if (startTime.isAfter(endLimit)) {
             startTime = endLimit.plusMinutes(30); // Next day's first slot if after 10 PM
         }
-
         // Loop to add times but ensure it's within the 10:00 AM to 10:00 PM bounds
         while (startTime.isBefore(endLimit.plusMinutes(30))) { // Include 10:00 PM time slot
             times.add(startTime.format(timeFormatter));
             startTime = startTime.plusMinutes(30); // Increment by 30 minutes
         }
-
         return times;
     }
-
-
     private void setupArrowButton() {
         arrow.setOnAction(event -> {
             try {
@@ -205,7 +188,6 @@ public class DeliveryPageController {
         selfPickup.setOnAction(event -> toggleDeliveryOptions(true));
         Delivery.setOnAction(event -> toggleDeliveryOptions(false));
     }
-
     private void toggleDeliveryOptions(boolean isSelfPickupSelected) {
         if (isSelfPickupSelected) {
             // Self Pickup selected
@@ -225,8 +207,6 @@ public class DeliveryPageController {
             done_Order.setOrderType("Delivery");
         }
     }
-
-
     // Don't forget to unregister when no longer needed
     public void unregister() {
         EventBus.getDefault().unregister(this);

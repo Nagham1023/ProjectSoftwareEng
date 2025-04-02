@@ -4,7 +4,6 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -12,10 +11,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UpdateMeal {
     @FXML
@@ -34,7 +30,13 @@ public class UpdateMeal {
     private VBox dynamicCustomizationContainer;
 
     @FXML
+    private VBox dynamicRestaurantContainer;
+
+    @FXML
     private Label errorLabel;
+
+    @FXML
+    private Label errorLabel1;
 
     @FXML
     private ChoiceBox<String> restaurant_name;
@@ -43,11 +45,14 @@ public class UpdateMeal {
     private List<String> customizationOriginal;
     private List<String> customizationInitialized = new ArrayList<>();
     private List<String> chosenCustomizationNames= new ArrayList<>();
+    private List<String> chosenRestaurantsNames= new ArrayList<>();
     private String originalDescription;
     private List<String> originalCustomizations = new ArrayList<>();
+    private List<String> originalRestaurantsNames= new ArrayList<>();
     private String mealId;
     private Meal meal;
     private Map<String, HBox> customrowMap = new HashMap<>();
+    private Map<String, HBox> restaurantrowMap = new HashMap<>();
     private Map<String, String> existingCustomizations = new HashMap<>();
 
     @FXML
@@ -93,21 +98,23 @@ public class UpdateMeal {
             restaurant_name.getItems().add("ALL");
         });
     }
-    public void setMealDetails(String name, String id, String description, List<String> customizations) {
+    public void setMealDetails(String name, String id, String description, List<String> customizations, List<String> restaurants) {
         this.mealNameLabel.setText("Update: " + name);
         this.mealId = id;
         this.mealDescriptionField.setText(description);
 
         // Load customizations from parameters instead of server
         customizations.forEach(this::fillRow);
+        restaurants.forEach(this::fillRowRestaurants);
         customizationOriginal = customizations;
+        originalRestaurantsNames =restaurants;
         this.originalDescription = description;
         //customizationOriginal.forEach(this::fillChoosen);
         System.out.println("Customizations: " + customizations);
     }
 
-    private void fillChoosen(String s) {
-        chosenCustomizationNames.add(s);
+    private void fillChosen(List<String> chosen,String s) {
+        chosen.add(s);
     }
 
     @Subscribe
@@ -134,7 +141,23 @@ public class UpdateMeal {
 
         // Repopulate from original data
         customizationOriginal.forEach(this::fillRow);
+        // Repopulate from original data
+
     }
+
+    private void refreshRestaurantsDisplay() {
+        restaurantrowMap.clear();
+        chosenRestaurantsNames.clear();
+
+        // Clear only dynamic rows
+        dynamicRestaurantContainer.getChildren().clear();
+
+        // Repopulate from original data
+        originalRestaurantsNames.forEach(this::fillRowRestaurants);
+        // Repopulate from original data
+
+    }
+
     public void fillRow(String customizationName) {
         Platform.runLater(() -> {
             String key = customizationName;
@@ -169,6 +192,40 @@ public class UpdateMeal {
         });
     }
 
+    public void fillRowRestaurants(String restaurantName) {
+        Platform.runLater(() -> {
+            String key = restaurantName;
+            HBox mealRow = new HBox(20);
+            mealRow.setStyle("-fx-background-color: #ffdbe4; -fx-border-color: #881d3a; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;");
+
+            //labels for data show
+            Label restaurant = new Label(restaurantName);
+
+            restaurant.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #881d3a;");
+
+            // Buttons container
+            HBox buttonBox = new HBox(10);
+
+            Button deleteB = new Button("DELETE");
+            deleteB.setStyle("-fx-background-color: #C75C5C; -fx-text-fill: #FFD9D1;");
+            deleteB.setOnAction(e -> handleDeleteRestaurant(restaurantName));
+
+            buttonBox.getChildren().addAll(deleteB);
+
+
+            mealRow.getChildren().addAll(
+                    restaurant,
+                    buttonBox
+            );
+
+
+            dynamicRestaurantContainer.getChildren().add(mealRow);
+            System.out.println("showing customization for meal");
+            chosenRestaurantsNames.add(restaurantName);
+            restaurantrowMap.put(key, mealRow);
+        });
+    }
+
     public void addToListCustom(ActionEvent actionEvent) {
         String selectedValue = costumazation_name.getValue();
         String customizationName;
@@ -183,13 +240,13 @@ public class UpdateMeal {
 
         // Validation
         if (customizationName.isEmpty()) {
-            showError("Please enter/select a customization!");
+            showError(errorLabel,"Please enter/select a customization!");
             return;
         }
 
         // Check duplicates
         if (customrowMap.containsKey(customizationName)) {
-            showError("Customization already exists!");
+            showError(errorLabel,"Customization already exists!");
             printMap(customrowMap);
             return;
         }
@@ -200,6 +257,50 @@ public class UpdateMeal {
         fillRow(customizationName);
         clearInput();
     }
+
+    public void addToListRestaurant(ActionEvent actionEvent) {
+        String selectedValue = restaurant_name.getValue();
+        String restaurantName;
+
+        // Handle "All" selection
+        if ("ALL".equals(selectedValue)) {
+            Iterator<String> iterator = chosenRestaurantsNames.iterator();
+            while (iterator.hasNext()) {
+                String restaurant = iterator.next();
+                HBox row = restaurantrowMap.get(restaurant);
+                if (row != null) {
+                    // Remove from UI immediately
+                    dynamicRestaurantContainer.getChildren().remove(row);
+
+                    // Update state synchronously
+                    restaurantrowMap.remove(restaurant);
+                    iterator.remove(); // Safe removal
+                }
+            }
+
+        }
+        restaurantName = selectedValue.trim();
+
+        // Validation
+        if (restaurantName.isEmpty()) {
+            showError(errorLabel1,"Please enter/select a restaurant!");
+            return;
+        }
+
+        // Check duplicates
+        if (restaurantrowMap.containsKey(restaurantName)) {
+            showError(errorLabel1, "restaurant already exists!");
+            printMap(restaurantrowMap);
+            return;
+        }
+
+
+        // Add to UI and storage
+        chosenRestaurantsNames.add(restaurantName);
+        fillRow(restaurantName);
+        clearInput();
+    }
+
     public static <K, V> void printMap(Map<K, V> map) {
         if (map == null || map.isEmpty()) {
             System.out.println("Map is empty.");
@@ -217,11 +318,23 @@ public class UpdateMeal {
         HBox row = customrowMap.get(customizationName);
         if (row != null) {
             // Remove from UI immediately
-            customizationContainer.getChildren().remove(row);
+            dynamicCustomizationContainer.getChildren().remove(row);
 
             // Update state synchronously
             customrowMap.remove(customizationName);
             chosenCustomizationNames.remove(customizationName);
+        }
+    }
+
+    private void handleDeleteRestaurant(String restaurantName) {
+        HBox row = restaurantrowMap.get(restaurantName);
+        if (row != null) {
+            // Remove from UI immediately
+            dynamicRestaurantContainer.getChildren().remove(row);
+
+            // Update state synchronously
+            restaurantrowMap.remove(restaurantName);
+            chosenRestaurantsNames.remove(restaurantName);
         }
     }
 
@@ -231,7 +344,7 @@ public class UpdateMeal {
         errorLabel.setText("");
     }
 
-    private void showError(String message) {
+    private void showError(Label errorLabel, String message) {
         Platform.runLater(() -> {
             errorLabel.setText(message);
             errorLabel.setStyle("-fx-text-fill: #760b0b; -fx-font-weight: bold;");
@@ -245,24 +358,38 @@ public class UpdateMeal {
 
         // Reset customizations
         refreshCustomizationDisplay();
+        refreshRestaurantsDisplay();
 
-        showError(""); // Clear any errors
+        showError(errorLabel,""); // Clear any errors
+        showError(errorLabel1,"");
     }
 
     @FXML
     void openAddMealPage(ActionEvent event) {
+        boolean isCompany= true;
         String newDescription = mealDescriptionField.getText().trim();
         List<String> newCustomizations = new ArrayList<>(chosenCustomizationNames);
 
         // Validation
         if (newDescription.isEmpty()) {
-            showError("Description cannot be empty!");
+            showError(errorLabel,"Description cannot be empty!");
             return;
         }
 
         if (chosenCustomizationNames.isEmpty()) {
-            showError("At least one customization required!");
+            showError(errorLabel,"At least one customization required!");
             return;
+        }
+
+        Iterator<String> iterator = chosenRestaurantsNames.iterator();
+
+        if(!chosenRestaurantsNames.get(0).equals("ALL")) {
+            while (iterator.hasNext()) {
+                String restaurant = iterator.next();
+                if (!restaurantNames.contains(restaurant)) {
+                    isCompany = false;
+                }
+            }
         }
 
         // Create update object
@@ -270,18 +397,18 @@ public class UpdateMeal {
                 mealId,
                 newDescription,
                 chosenCustomizationNames,
-                restaurant_name.getValue()
+                chosenRestaurantsNames
         );
 
         try {
             SimpleClient.getClient().sendToServer(updateRequest);
-            showError("Changes saved successfully!");
+            showError(errorLabel,"Changes saved successfully!");
             mealDescriptionField.getScene().getWindow().hide();
             // Update original values after successful save
             this.originalDescription = newDescription;
             this.originalCustomizations = new ArrayList<>(newCustomizations);
         } catch (IOException e) {
-            showError("Failed to save changes. Please try again.");
+            showError(errorLabel,"Failed to save changes. Please try again.");
             e.printStackTrace();
         }
     }

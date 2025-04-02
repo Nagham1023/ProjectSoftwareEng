@@ -18,6 +18,9 @@ import javafx.util.Pair;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import static il.cshaifasweng.OCSFMediatorExample.client.CreditDetailsController.done_Order;
+import static il.cshaifasweng.OCSFMediatorExample.client.CreditDetailsController.done_Reservation;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,6 +30,9 @@ import java.util.Optional;
 import java.util.Random;
 
 public class ReservationController {
+
+    PersonalDetails personalDetails = new PersonalDetails();
+
     @FXML
     private ScrollPane scrollPane; // Inject the ScrollPane from the FXML file
 
@@ -288,16 +294,20 @@ public class ReservationController {
         Platform.runLater(() -> {
             if (msg.equals("Reservation confirmed successfully.")) {
 
-                showAlert("Reservation Confirmed", "Your reservation has been confirmed successfully!");
+                //showAlert("Reservation Confirmed", "Your reservation has been confirmed successfully!");
 
                 // Clear all fields and reset the page
                 clearAllFields();
                 // Stop loading animation
                 stopLoading();
                 try {
-                    backToHome();
+
+                    //showAlert("Reservation Confirmed", resultMessage);
+                    CreditDetailsController.personalDetails = personalDetails;
+                    App.setRoot("CreditDetails");
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    System.err.println("Error in handleContinueAction: " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
         });
@@ -305,6 +315,8 @@ public class ReservationController {
     @Subscribe
     public void reConfirmFunction(ReConfirmEvent reConfirmEvent) {
         try {
+            if(loadingGif.isVisible()&&anchorPane.isDisabled())
+                return;
             handleConfirm();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -482,6 +494,22 @@ public class ReservationController {
                 }
 
                 // Successfully verified
+                personalDetails.setName(fullName);
+                personalDetails.setEmail(email);
+                personalDetails.setPhoneNumber(phoneNumber);
+                FinalReservationEvent finalReservationEvent = new FinalReservationEvent(
+                        restaurantName, selectedDateTime, seats, isInside, fullName, phoneNumber, email
+                );
+                done_Reservation = finalReservationEvent;
+                CreditDetailsController.mode= "Reservation";
+
+                try {
+                    SimpleClient.getClient().sendToServer(finalReservationEvent);
+                    reservationSuccessful = true;
+                } catch (IOException e) {
+                    showAlert("Error", "Failed to send reservation to the server. Please try again.");
+                    e.printStackTrace();
+                }
                 String resultMessage = String.format(
                         """
                                 Reservation Details:
@@ -495,19 +523,6 @@ public class ReservationController {
                         email
                 );
 
-                showAlert("Reservation Confirmed", resultMessage);
-
-                FinalReservationEvent finalReservationEvent = new FinalReservationEvent(
-                        restaurantName, selectedDateTime, seats, isInside, fullName, phoneNumber, email
-                );
-
-                try {
-                    SimpleClient.getClient().sendToServer(finalReservationEvent);
-                    reservationSuccessful = true;
-                } catch (IOException e) {
-                    showAlert("Error", "Failed to send reservation to the server. Please try again.");
-                    e.printStackTrace();
-                }
             } else {
                 // User clicked "Cancel"
                 stopLoading();
