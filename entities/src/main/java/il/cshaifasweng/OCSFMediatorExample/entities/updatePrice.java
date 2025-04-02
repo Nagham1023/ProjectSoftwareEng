@@ -5,11 +5,13 @@ import java.io.Serializable;
 public class updatePrice implements Serializable {
     private double newPrice;
     private int idMeal;
+    private String purpose;
     private static final long serialVersionUID = -8224097662914849957L;
 
-    public updatePrice(double newPrice, int idMeal) {
+    public updatePrice(double newPrice, int idMeal,String purpose) {
         this.newPrice = newPrice;
         this.idMeal = idMeal;
+        this.purpose = purpose;
     }
     public double getNewPrice() {
         return newPrice;
@@ -22,5 +24,17 @@ public class updatePrice implements Serializable {
     }
     public void setIdMeal(int idMeal) {
         this.idMeal = idMeal;
+    }
+    public String getPurpose() {
+        return purpose;
+    }
+
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
+    }
+
+    @Override
+    public String toString() {
+        return ("the purpose was" + purpose +" the new price is" + newPrice+" the meal ID is"+ idMeal);
     }
 }

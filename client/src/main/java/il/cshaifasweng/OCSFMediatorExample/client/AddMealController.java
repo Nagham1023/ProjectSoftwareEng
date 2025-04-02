@@ -5,13 +5,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Restaurant;
+import il.cshaifasweng.OCSFMediatorExample.entities.RestaurantList;
+import il.cshaifasweng.OCSFMediatorExample.entities.SearchOptions;
 import il.cshaifasweng.OCSFMediatorExample.entities.mealEvent;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -21,6 +22,8 @@ import org.greenrobot.eventbus.Subscribe;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -37,8 +40,18 @@ public class AddMealController {
     private TextField mealPriceField;
 
     @FXML
+    private ComboBox<String> costumazation_name;
+
+    @FXML
+    private ComboBox<String> restaurant_name;
+
+    @FXML
     private ImageView mealImageView;
     private File selectedImageFile;
+
+    private List<String> restaurantNames;
+    private List<String> customizationNames;
+    private List<String> chosenCustomizationNames= new ArrayList<>();
 
 
     public static byte[] imageToByteArray(Image image) {
@@ -78,8 +91,10 @@ public class AddMealController {
     @FXML
     public void onAddMealClicked() throws IOException {
         byte[] imageBytes = imageToByteArray(mealImageView.getImage());
-        mealEvent ME = new mealEvent(mealNameField.getText(),mealDescriptionField.getText(),mealPriceField.getText(),imageBytes);
-        SimpleClient client;
+        //mealEvent ME = new mealEvent(mealNameField.getText(),mealDescriptionField.getText(),mealPriceField.getText(),imageBytes);
+        mealEvent ME= new mealEvent(mealNameField.getText(), mealDescriptionField.getText(), mealPriceField.getText(), imageBytes, restaurant_name.getValue().equals("ALL"), chosenCustomizationNames, restaurant_name.getValue());
+
+            SimpleClient client;
         client = SimpleClient.getClient();
         // Convert byte[] to InputStream
         client.sendToServer(ME);
@@ -127,6 +142,60 @@ public class AddMealController {
     @FXML
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
+        SimpleClient client = SimpleClient.getClient();
+        try {
+            SimpleClient.getClient().sendToServer("Fetching SearchBy Options");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @Subscribe
+    public void putSearchOptions(SearchOptions options) {
+        // Handle the event sent from the server
+        restaurantNames = options.getRestaurantNames();
+        customizationNames = options.getCustomizationNames();
+        Platform.runLater(() -> {
+            // UI-related code here
+            fillComboBox();
+        });
+    }
+
+    public void fillComboBox() {
+        Platform.runLater(() -> { // Wrap ALL UI operations here
+            // Clear ComboBoxes
+            restaurant_name.getItems().clear();
+            costumazation_name.getItems().clear();
+
+            // Add items to ComboBoxes
+            for (String restaurant : restaurantNames) {
+                restaurant_name.getItems().add(restaurant);
+            }
+            for (String customization : customizationNames) {
+                costumazation_name.getItems().add(customization);
+            }
+
+            // Add "ALL" and "Write Other" options
+            restaurant_name.getItems().add("ALL");
+            costumazation_name.getItems().add("Write Other");
+
+            // Make ComboBox editable
+            costumazation_name.setEditable(true);
+        });
+    }
+
+    @FXML
+    public void addingCustomization() {
+        String selectedValue = costumazation_name.getValue();
+
+        if (selectedValue == null || selectedValue.isEmpty()) {
+            // Handle empty selection if needed
+            return;
+        }
+
+        // Check if the value is not already in the list
+        if (!chosenCustomizationNames.contains(selectedValue)) {
+            chosenCustomizationNames.add(selectedValue);
+        }
     }
 
 

@@ -6,6 +6,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,18 +22,14 @@ public class Order implements Serializable{
     private LocalDate date;
     private String orderType;
     private int total_price;
-    private String orderStatus;
     private String customerEmail;
     private LocalDateTime orderTime;
+    private String orderStatus;
     private String creditCard_num;
-
 
     /***yousef***/
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<MealInTheCart> meals = new ArrayList<>();
-
-
-
 
 
     public Order() {}

@@ -14,6 +14,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
+import static il.cshaifasweng.OCSFMediatorExample.client.menu_controller.branchName;
 
 public class WorkerController {
     @FXML
@@ -78,6 +79,7 @@ public class WorkerController {
                     break;
                 case "Dietation":
                     update_meals.setVisible(true);
+                    priceChange_requist.setVisible(true);
                     break;
                 case "ChainManager":
                     reports_center.setVisible(true);
@@ -131,12 +133,27 @@ public class WorkerController {
 //            System.err.println("Failed to load ReportsView.fxml: " + e.getMessage());
 //        }
 //    }
-    public void loadView(String fxmlFile) {
+    public void loadView(String fxmlFile,String message)  {
         try {
+            branchName="ALL";
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
             Node view = loader.load();
+            if (message.equals("diet")) {
+                menu_controller controller = loader.getController();
+                controller.setWorkerMode(true); // Worker mode
+                //show all the meals for all the branches
+            }
+            if (message.equals("request")) {
+                RequestViewController controller = loader.getController();
+                if(currentWorker.equals("CompanyManager")) {
+                    controller.setModifyMode(true);
+                }
+                else{
+                    controller.setModifyMode(false);
+                }
+            }
 
-            Platform.runLater(() -> {
+                Platform.runLater(() -> {
                 if (chartArea != null) {
                     chartArea.getChildren().clear();
                     chartArea.getChildren().add(view);
@@ -151,10 +168,10 @@ public class WorkerController {
     }
 
     @FXML
-    public void switchScreen(String screenName) {
-        Platform.runLater(() -> {
-            loadView(screenName + ".fxml");
-        });
+    public void switchScreen(String screenName,String message) {
+            Platform.runLater(() -> {
+                loadView(screenName + ".fxml", message);
+            });
     }
 
     @FXML
@@ -166,37 +183,24 @@ public class WorkerController {
 
         String screenName = clickedButton.getId(); // Get the fx:id of the button
         switch (screenName){
-            case "complaint_center": {
-                switchScreen("customerServiceView");
+            case "complaint_center":
+                switchScreen("customerServiceView", "customerService");
+            case "reports_center":
+                switchScreen("ReportsView","report");
                 break;
-            }
-            case "reports_center": {
-                switchScreen("ReportsView");
+            case "update_meals":
+                switchScreen("menu","diet");
                 break;
-            }
-            case "personalInf":
-            {
-
-                switchScreen("Personal_Information");
-                break;
-            }
-            default: {
-                System.out.println("Unknown screen: " + screenName);
-                //switchScreen("mainScreen");
-                break;
-            }
-
-
-
+            case "priceChange_requist":
+                switchScreen("requestsView","request");
 
         }
 
     }
-    @FXML
-    public void goToComplainsView(ActionEvent event) {
-        switchScreen("customerServiceView");
-
-    }
+//    @FXML
+//    public void goToComplainsView(ActionEvent event) {
+//        switchScreen("customerServiceView");
+//    }
 
     @Subscribe
     public void onEvent(ReportResponseEvent event) {

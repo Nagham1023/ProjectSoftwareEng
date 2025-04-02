@@ -5,6 +5,7 @@ import org.hibernate.*;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.IOException;
 import java.io.InputStream;
@@ -156,6 +157,41 @@ public class MealsDB {
             }
         }
     }
+    /*********************************new get all meal*************************************/
+//    public static List<Meal> GetAllMeals(){
+//        List<Meal> result = new ArrayList<>();
+//        Session session = null;
+//        Transaction transaction = null;
+//
+//        try {
+//            SessionFactory sessionFactory = getSessionFactory();
+//            session = sessionFactory.openSession(); // New session for every call
+//            transaction = session.beginTransaction();
+//
+//            CriteriaBuilder builder = session.getCriteriaBuilder();
+//            CriteriaQuery<Meal> query = builder.createQuery(Meal.class);
+//            Root<Meal> root = query.from(Meal.class);
+//            query.select(root);
+//
+//            // Execute query with cache disabled
+//            result = session.createQuery(query)
+//                    .setCacheable(false) // Bypass Hibernate cache
+//                    .getResultList();
+//
+//            transaction.commit();
+//        } catch (Exception e) {
+//            if (transaction != null && transaction.isActive()) {
+//                transaction.rollback();
+//            }
+//            e.printStackTrace();
+//        } finally {
+//            if (session != null && session.isOpen()) {
+//                session.close(); // Ensure session is closed
+//            }
+//        }
+//        return result;
+//    }
+/*************Catched DATA getALLMeal*********************************/
 
     public static List<Meal> getAllMeals() throws Exception {
         Session localSession = null;
@@ -187,6 +223,7 @@ public class MealsDB {
         }
         return meals;
     }
+    /********************************/
     public static void updateMealPriceById(int mealId, double newPrice) {
         // Check if the meatlist is initialized
         if (meatlist == null || meatlist.isEmpty()) {
@@ -272,72 +309,160 @@ public class MealsDB {
         }
         //System.out.println("Finished updating the price in the database.");
     }
-    public static String AddNewMeal(mealEvent newMeal) {
-        // Extract data from the mealEvent object
-        String mealDisc = newMeal.getMealDisc();
-        byte[] mealImage = newMeal.getImage();
-        String mealName = newMeal.getMealName();
-        String mealPrice = newMeal.getPrice();
-
+//    public static String AddNewMeal(mealEvent newMeal) {
+//        List<Customization> customizations = new ArrayList<>();
+//        // Extract data from the mealEvent object
+//        String mealDisc = newMeal.getMealDisc();
+//        byte[] mealImage = newMeal.getImage();
+//        String mealName = newMeal.getMealName();
+//        String mealPrice = newMeal.getPrice();
+//        for(String custom: newMeal.getCustomizationList()){
+//            Customization customization = new Customization();
+//            customization.setName(custom);
+//            customizations.add(customization);
+//        }
+//
+//        try {
+//            // Ensure the session is open
+//            if (session == null || !session.isOpen()) {
+//                SessionFactory sessionFactory = getSessionFactory();
+//                session = sessionFactory.openSession();
+//            }
+//
+//            if (session.getTransaction().isActive()) {
+//                session.getTransaction().rollback();
+//            }
+//
+//            session.beginTransaction();
+//
+//            // Check for duplicates in the database
+//            CriteriaBuilder builder = session.getCriteriaBuilder();
+//            CriteriaQuery<Meal> query = builder.createQuery(Meal.class);
+//            query.from(Meal.class);
+//            List<Meal> existingMeals = session.createQuery(query).getResultList();
+//
+//            boolean isDuplicate = existingMeals.stream()
+//                    .anyMatch(existingMeal -> existingMeal.getName().equalsIgnoreCase(mealName) &&
+//                            existingMeal.getDescription().equalsIgnoreCase(mealDisc));
+//
+//            if (isDuplicate) {
+//                System.out.println("Meal already exists in the database: " + mealName);
+//                return "exist";
+//            } else {
+//                // Create a new Meal entity and set its attributes
+//                Meal newM = new Meal();
+//                newM.setName(mealName);
+//                newM.setDescription(mealDisc);
+//                newM.setPrice(Double.parseDouble(mealPrice));
+//                newM.setImage(mealImage);
+//
+//                // Save the meal to the database
+//                session.save(newM);
+//
+//                // Add the meal to the local list
+//                addMealToList(newM);
+//
+//                System.out.println("New meal added: " + mealName + " Id: " + newM.getId());
+//                newMeal.setId(String.valueOf(newM.getId()));
+//            }
+//
+//            // Commit the transaction
+//            session.getTransaction().commit();
+//
+//        } catch (Exception e) {
+//            if (session.getTransaction() != null) {
+//                session.getTransaction().rollback(); // Rollback on error
+//            }
+//            e.printStackTrace();
+//        } finally {
+//            // Leave the session open for further operations
+//            if (session != null && session.isOpen()) {
+//                session.close(); // Close the session after operation
+//            }
+//        }
+//        return "added";
+//    }
+    public static Meal AddNewMeal(mealEvent newMeal) {
+        Session session = null;
+        Transaction transaction = null;
         try {
-            // Ensure the session is open
-            if (session == null || !session.isOpen()) {
-                SessionFactory sessionFactory = getSessionFactory();
-                session = sessionFactory.openSession();
-            }
+            // 1. Initialize Hibernate session
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
 
-            if (session.getTransaction().isActive()) {
-                session.getTransaction().rollback();
-            }
-
-            session.beginTransaction();
-
-            // Check for duplicates in the database
+            // 2. Check for duplicate meals
             CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaQuery<Meal> query = builder.createQuery(Meal.class);
-            query.from(Meal.class);
-            List<Meal> existingMeals = session.createQuery(query).getResultList();
+            CriteriaQuery<Meal> mealQuery = builder.createQuery(Meal.class);
+            Root<Meal> root = mealQuery.from(Meal.class);
+            mealQuery.where(
+                    builder.equal(
+                            builder.lower(root.get("mealName")),
+                            newMeal.getMealName().toLowerCase()
+                    )
+            );
 
-            boolean isDuplicate = existingMeals.stream()
-                    .anyMatch(existingMeal -> existingMeal.getName().equalsIgnoreCase(mealName) &&
-                            existingMeal.getDescription().equalsIgnoreCase(mealDisc));
-
-            if (isDuplicate) {
-                System.out.println("Meal already exists in the database: " + mealName);
-                return "exist";
-            } else {
-                // Create a new Meal entity and set its attributes
-                Meal newM = new Meal();
-                newM.setName(mealName);
-                newM.setDescription(mealDisc);
-                newM.setPrice(Double.parseDouble(mealPrice));
-                newM.setImage(mealImage);
-
-                // Save the meal to the database
-                session.save(newM);
-
-                // Add the meal to the local list
-                addMealToList(newM);
-
-                System.out.println("New meal added: " + mealName + " Id: " + newM.getId());
-                newMeal.setId(String.valueOf(newM.getId()));
+            List<Meal> existingMeals = session.createQuery(mealQuery).getResultList();
+            if (!existingMeals.isEmpty()) {
+                return existingMeals.get(0);
             }
 
-            // Commit the transaction
-            session.getTransaction().commit();
+            // 3. Create and configure the new meal
+            Meal newMealEntity = new Meal();
+            newMealEntity.setName(newMeal.getMealName());
+            newMealEntity.setDescription(newMeal.getMealDisc());
+            newMealEntity.setPrice(Double.parseDouble(newMeal.getPrice()));
+            newMealEntity.setImage(newMeal.getImage());
+            newMealEntity.setCompany(newMeal.isCompany());
+            newMealEntity.setDelivery(true);
+
+            // 4. Process customizations
+            List<Customization> customizations = new ArrayList<>();
+            for (String customizationName : newMeal.getCustomizationList()) {
+                // Check if customization already exists
+                CriteriaQuery<Customization> customQuery = builder.createQuery(Customization.class);
+                Root<Customization> customRoot = customQuery.from(Customization.class);
+                customQuery.where(
+                        builder.equal(
+                                builder.lower(customRoot.get("customizationName")),
+                                customizationName.toLowerCase()
+                        )
+                );
+
+                List<Customization> existingCustoms = session.createQuery(customQuery).getResultList();
+
+                Customization customization;
+                if (!existingCustoms.isEmpty()) {
+                    customization = existingCustoms.get(0); // Use existing
+                } else {
+                    customization = new Customization(); // Create new
+                    customization.setName(customizationName);
+                    session.persist(customization); // Save new customization
+                }
+
+                // Bidirectional sync
+                if (!customization.getMeals().contains(newMealEntity)) {
+                    customization.getMeals().add(newMealEntity);
+                }
+                if (!newMealEntity.getCustomizations().contains(customization)) {
+                    newMealEntity.getCustomizations().add(customization);
+                }
+            }
+
+            // 5. Save to database
+            session.persist(newMealEntity);
+            transaction.commit();
+
+            newMeal.setId(String.valueOf(newMealEntity.getId()));
+            return newMealEntity;
 
         } catch (Exception e) {
-            if (session.getTransaction() != null) {
-                session.getTransaction().rollback(); // Rollback on error
-            }
+            if (transaction != null) transaction.rollback();
             e.printStackTrace();
+            return null;
         } finally {
-            // Leave the session open for further operations
-            if (session != null && session.isOpen()) {
-                session.close(); // Close the session after operation
-            }
+            if (session != null) session.close();
         }
-        return "added";
     }
     public static List<mealEvent> getmealEvent() throws Exception {
         List<mealEvent> result = new ArrayList<>();
@@ -430,11 +555,242 @@ public class MealsDB {
             e.printStackTrace();
         } finally {
             // Ensure session is closed after use
+            for (Meal meal : result) {
+                Hibernate.initialize(meal.getCustomizations()); // Force initialization
+            }
+
             if (session != null && session.isOpen()) {
                 session.close();
             }
         }
 
         return result;
+    }
+
+    public static MealUpdateRequest AddUpdatePriceRequest(updatePrice priceRequest) {
+        // Extract data from the priceRequest object
+        int mealId = priceRequest.getIdMeal();
+        double newPrice = priceRequest.getNewPrice();
+        MealUpdateRequest result = new MealUpdateRequest();
+
+        Session session = null;
+        Transaction transaction = null;
+        try {
+            session = App.getSessionFactory().openSession();
+            transaction = session.beginTransaction();
+
+            // Fetch the Meal entity using its ID
+            Meal meal = session.get(Meal.class, mealId);
+            if (meal == null) {
+                System.out.println("Meal not found with ID: " + mealId);
+                return result;
+            }
+
+            // Check for duplicates: Existing requests for the same meal
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<UpdatePriceRequest> query = builder.createQuery(UpdatePriceRequest.class);
+            Root<UpdatePriceRequest> root = query.from(UpdatePriceRequest.class);
+
+            // Compare the Meal object in existing requests
+            Predicate mealPredicate = builder.equal(root.get("meal"), meal);
+            query.where(mealPredicate);
+
+            List<UpdatePriceRequest> existingRequests = session.createQuery(query).getResultList();
+
+            if (!existingRequests.isEmpty()) {
+                System.out.println("A price change request already exists for meal ID: " + mealId);
+                UpdatePriceRequest existing = existingRequests.get(0);
+                result = new MealUpdateRequest(
+                        String.valueOf(meal.getId()),
+                        meal.getName(),
+                        meal.getDescription(),
+                        meal.getImage(),
+                        existing.getOldPrice(),
+                        existing.getNewPrice()
+                );
+                return result;
+
+            }
+
+            // Create a new request and link it to the Meal
+            UpdatePriceRequest updateRequest = new UpdatePriceRequest();
+            updateRequest.setMeal(meal); // Link the Meal object
+            updateRequest.setOldPrice(meal.getPrice());
+            updateRequest.setNewPrice(newPrice);
+
+            meal.getPriceRequests().add(updateRequest); // Update the Meal's list
+            session.save(updateRequest);
+            session.flush();
+            transaction.commit(); // Explicit commit
+
+            // Return the complete DTO
+            result = new MealUpdateRequest(
+                    String.valueOf(meal.getId()),
+                    meal.getName(),
+                    meal.getDescription(),
+                    meal.getImage(),
+                    meal.getPrice(),  // old price
+                    newPrice
+            );
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            result.setStatus("error");
+            result.setMealId(String.valueOf(mealId));
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close(); // Close manually
+            }
+        }
+        return result;
+    }
+    public static void deletePriceChangeReq(int mealId) {
+        try (Session session = App.getSessionFactory().openSession()) {
+            session.beginTransaction();
+
+            // Fetch the Meal entity
+            Meal meal = session.get(Meal.class, mealId);
+            if (meal == null) {
+                System.out.println("Meal not found.");
+                return;
+            }
+
+            // Find all requests linked to this meal
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<UpdatePriceRequest> query = builder.createQuery(UpdatePriceRequest.class);
+            Root<UpdatePriceRequest> root = query.from(UpdatePriceRequest.class);
+            query.where(builder.equal(root.get("meal"), meal));
+
+            List<UpdatePriceRequest> requests = session.createQuery(query).getResultList();
+
+            // Delete all found requests
+            for (UpdatePriceRequest req : requests) {
+                session.delete(req);
+            }
+
+            session.getTransaction().commit();
+            System.out.println("Deleted " + requests.size() + " request(s) for meal ID: " + mealId);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public static String deleteMeal(int mealId) {
+        System.out.println("now I am in the function");
+        String mealName = null;
+        try (Session session = App.getSessionFactory().openSession()) {
+            session.beginTransaction();
+
+            Meal meal = session.get(Meal.class, mealId);
+            if (meal != null) {
+                // First, remove associations from restaurants
+                for (Restaurant restaurant : meal.getRestaurants()) {
+                    restaurant.getMeals().remove(meal);
+                    session.update(restaurant); // Save the updated restaurant
+                }
+            }
+            if (meal != null) {
+                session.delete(meal); // Will cascade to delete requests
+            }
+
+            session.getTransaction().commit();
+            System.out.println("Meal and associated requests deleted");
+            mealName = meal.getName();
+
+        } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+                return "sorry didn't successfully delete meal";
+            }
+            e.printStackTrace();
+        }
+        return mealName;
+    }
+    public static Meal getMealById(String mealId) {
+        System.out.println("now I am in the function getMealById");
+        Meal meal = null;
+        int id=Integer.parseInt(mealId);
+        try (Session session = App.getSessionFactory().openSession()) {
+            session.beginTransaction();
+
+            meal = session.get(Meal.class,id);
+            if (meal != null) {
+                session.update(meal);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return meal;
+    }
+
+    public static String updateMeal(UpdateMealRequest msg) {
+        Session session = null;
+        Transaction transaction = null;
+        try {
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+
+            // 1. Get existing meal (FIXED HERE)
+            Meal meal = session.get(Meal.class, Integer.parseInt(msg.getMealId())); // <-- Integer ID
+            if (meal == null) return "not exist";
+
+            // 2. Clear existing customizations (both sides of relationship)
+            List<Customization> oldCustomizations = new ArrayList<>(meal.getCustomizations());
+            for (Customization oldCustom : oldCustomizations) {
+                // Remove from meal
+                meal.getCustomizations().remove(oldCustom);
+                // Remove meal from customization
+                oldCustom.getMeals().remove(meal);
+            }
+
+            // 3. Process new customizations
+            List<Customization> newCustomizations = new ArrayList<>();
+            for (String customizationName : msg.getNewCustomizations()) {
+                CriteriaBuilder builder = session.getCriteriaBuilder();
+                CriteriaQuery<Customization> query = builder.createQuery(Customization.class);
+                Root<Customization> root = query.from(Customization.class);
+                query.where(builder.equal(builder.lower(root.get("customizationName")), customizationName.toLowerCase()));
+
+                Customization customization = session.createQuery(query).uniqueResult();
+
+                if (customization == null) {
+                    customization = new Customization();
+                    customization.setName(customizationName);
+                    session.persist(customization);
+                }
+
+                // Establish bidirectional relationship
+                customization.getMeals().add(meal);
+                meal.getCustomizations().add(customization);
+                newCustomizations.add(customization);
+            }
+
+            // 4. Update other fields
+            meal.setDescription(msg.getNewDescription());
+
+            // 5. Update restaurant associations
+            if (msg.getBranchName().equals("ALL")) {
+                meal.setCompany(true);
+            } else {
+                meal.setCompany(false);
+                CriteriaBuilder builder = session.getCriteriaBuilder();
+                CriteriaQuery<Restaurant> query = builder.createQuery(Restaurant.class);
+                Root<Restaurant> root = query.from(Restaurant.class);
+                query.where(builder.equal(root.get("name"), msg.getBranchName()));
+                List<Restaurant> results = session.createQuery(query).getResultList();
+                meal.setRestaurants(results);
+            }
+
+            session.merge(meal);
+            transaction.commit();
+            return "updated";
+
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            e.printStackTrace();
+            return "error";
+        } finally {
+            if (session != null) session.close();
+        }
     }
 }

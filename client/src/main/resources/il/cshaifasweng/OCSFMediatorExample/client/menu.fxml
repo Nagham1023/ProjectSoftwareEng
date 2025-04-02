@@ -76,6 +76,7 @@
                             </LinearGradient>
                         </textFill>
                     </Button>
+                    <Button fx:id="add_meal" mnemonicParsing="false" onAction="#openAddMealPage" text="Add Meal" />
 
                     <!-- Cart Icon with Badge -->
                     <StackPane style="-fx-cursor: hand;">
