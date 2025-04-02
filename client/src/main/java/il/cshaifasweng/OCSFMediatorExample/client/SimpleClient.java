@@ -21,6 +21,7 @@ public class SimpleClient extends AbstractClient {
 	public static int Port = 3000;
 	private static UserCheck UserClient = null;
 	private static boolean logged = false;
+	public static int deliveryPrice = 25;
 
 	private SimpleClient(String host, int port) {
 		super(host, port)	;
@@ -206,6 +207,7 @@ public class SimpleClient extends AbstractClient {
 				EventBus.getDefault().post(msg);
 			}else if (message.equals("Not same restaurant!"))
 			{
+				EventBus.getDefault().post(msg);
 			}
 			else if (message.equals("Reservation confirmed successfully.")) {
 				EventBus.getDefault().post(msg);
@@ -226,7 +228,10 @@ public class SimpleClient extends AbstractClient {
                     EventBus.getDefault().post(new DeleteMealEvent(mealId, mealName));
                 }
 
-            } else {
+            }
+			else if (((String) msg).contains("Cancle Reservation"))
+				EventBus.getDefault().post(msg);
+				else {
                 System.out.println("Unhandled message: " + message);
             }
 		}

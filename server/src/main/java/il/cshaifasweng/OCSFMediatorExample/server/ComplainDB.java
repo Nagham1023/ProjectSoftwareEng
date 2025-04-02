@@ -1,10 +1,13 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -16,12 +19,15 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
-
 public class ComplainDB {
-
     private static Session session;
     public static List<Complain> complainslist;
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
 
     public static List<Complain> getAllComplains() {
         // Ensure the session is open
@@ -34,20 +40,16 @@ public class ComplainDB {
                 return null;
             }
         }
-
         List<Complain> result = new ArrayList<>();
         try {
             // Begin the transaction for querying
             session.beginTransaction();
-
             // Create a query to find all meals without any constraint
             String queryString = "FROM Complain ORDER BY time_complain DESC";
             org.hibernate.query.Query<Complain> query = session.createQuery(queryString, Complain.class);
-
             // Execute the query and get the result list
             result = query.getResultList();
             complainslist = result;
-
             // Commit the transaction
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -63,15 +65,16 @@ public class ComplainDB {
                 session.close();
             }
         }
-
         return result;
     }
+
     public static void addCompToList(Complain newComp) {
         // Ensure complainslist is initialized
         if (complainslist == null) {
             complainslist = new ArrayList<>();
         }
-        complainslist.add(newComp);}
+        complainslist.add(newComp);
+    }
 
     public static void updateComplainResponseInDatabase(updateResponse updateResponse) {
         System.out.println("updating Complain Response In Database");
@@ -80,22 +83,18 @@ public class ComplainDB {
         String emailComp = updateResponse.getEmailComplain();
         String orderNum = updateResponse.getOrderNumber();
         double refund = updateResponse.getRefundAmount();
-
         try {
             if (session == null || !session.isOpen()) {
                 System.out.println("Session is not initialized. Creating a new session.");
                 SessionFactory sessionFactory = getSessionFactory();
                 session = sessionFactory.openSession();
             }
-
             if (session.getTransaction().isActive()) {
                 //System.out.println("Transaction already active. Rolling it back.");
                 session.getTransaction().rollback();
             }
-
             session.beginTransaction();
             //System.out.println("Started transaction to update meal price.");
-
             // Fetch the meal by ID from the current session
             Complain complain = session.get(Complain.class, Idcomp);
             if (complain != null) {
@@ -124,52 +123,7 @@ public class ComplainDB {
         }
     }
 
-    /*public static void  giveBackTheRefund(String orderNum,double refund) {
-        // Check if the meatlist is initialized
-        if (orderNum == null || refund == 0) {
-            System.out.println("no need to give back the refund");
-            return;
-        }
-        else {
-
-            // neeeeeeeeeeeeed tooooooooooooooo dooooooooooooooooo
-            // send back the refund to the card that paied on the order with this order num
-
-        }
-
-
-    }*/
-
-    /*public static void sendResToEmail(String emailComp, String newRes) {
-        // Check if the meatlist is initialized
-        if (emailComp == null || newRes == null) {
-            System.out.println("Something empty or not initialized.");
-            return;
-        }
-
-        // neeeeeeeeeeeeed tooooooooooooooo dooooooooooooooooo
-        // send new res to the email emailComp
-
-    }*/
-
-    /*public static void updateCompResponseById(int Idcomp, String newRes) {
-        // Check if the meatlist is initialized
-        if (complainslist == null || complainslist.isEmpty()) {
-            System.out.println("Something is empty or not initialized.");
-            return;
-        }
-        // Search for the comp with the given ID
-        for (Complain complain : complainslist) {
-            if (complain.getId() == Idcomp) {
-                complain.setResponse(newRes);
-                complain.setStatus("Done");
-                System.out.println("Complain ID " + Idcomp + " the response: " + complain.getResponse());
-                return; // Exit the loop after updating
-            }
-        }
-    }*/
-
-    public static String addComplainIntoDatabase(complainEvent newComplain) {
+    public static String addComplainIntoDatabase(complainEvent newComplain, ConnectionToClient client) {
         Session session = null;
         Transaction transaction = null;
 
@@ -194,7 +148,7 @@ public class ComplainDB {
 
             session.save(newComp);
             transaction.commit();
-
+            complaintAutoResponse(newComp,client);
             System.out.println("New Comp added successfully with ID: " + newComp.getId());
             return "added";
 
@@ -208,7 +162,51 @@ public class ComplainDB {
             }
         }
     }
+    public static void complaintAutoResponse(Complain complaint,ConnectionToClient client) {
+        // Calculate 24 hours in milliseconds
+        long dayToFinish = TimeUnit.HOURS.toMillis(24);
+        // Schedule the autoRespondToComplaint method to run after the delay
+        scheduler.schedule(() -> autoRespondToComplaint(complaint, client), dayToFinish, TimeUnit.MILLISECONDS);
+    }
 
+    private static void autoRespondToComplaint(Complain complaint, ConnectionToClient client) {
+        System.out.println("SchedulerService DEBUG: Auto-responding to complaint: " + complaint.getId());
+        autoRespond(complaint, client);
+    }
 
+    private static void autoRespond(Complain complaint, ConnectionToClient client) {
+        Session session = null;
+        Transaction transaction = null;
+        int complaintId = complaint.getId();
+        String response = "We regret that we couldn't resolve your complaint within 24 hours. \" +\n" +
+                "                \"A full refund of 75 NIS has been issued. We apologize for the inconvenience.";
+        try {
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+            String hql = "FROM Complain c WHERE c.id = :id " +
+                    "AND c.kind_complain = 'Complaint' " +
+                    "AND c.status_complaint = 'Do'";
+            Query<Complain> query = session.createQuery(hql, Complain.class);
+            query.setParameter("id", complaintId);
+            Complain complain = query.uniqueResult();
 
+            session.getTransaction().commit();
+
+            if (complain != null && complain.getStatus().equals("Do")) {
+                updateResponse ur=new updateResponse(response, complaintId,complaint.getEmail(),complaint.getOrderNum(),75);
+                updateComplainResponseInDatabase(ur);
+                client.sendToClient(ur);
+
+            } else if(complaint==null) {
+                System.out.println("AutoRespond: Complaint not found for ID: " + complaintId);
+            } else {
+                System.out.println("complaintAutoRespond: Complaint for ID: " + complaintId+ "is Done");
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            System.err.println("complaintAutoRespond: Error responding to complaint: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }

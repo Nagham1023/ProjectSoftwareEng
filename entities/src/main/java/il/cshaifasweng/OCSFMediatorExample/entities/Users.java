@@ -36,7 +36,9 @@ public class Users implements Serializable {
     @Column(nullable = false)
     private String role;
 
+
     private boolean isSigned = false; //true if signed else false .
+
 
 
     // Getters and Setters
@@ -100,6 +102,7 @@ public class Users implements Serializable {
     public void setRole(String role) {
         this.role = role;
     }
+
 
     @Override
     public String toString() {

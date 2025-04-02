@@ -37,6 +37,7 @@ public class ReportsViewController {
     private ComboBox<String> timeStamp;
 
     private String currentWorker = "";
+    private String currentRestaurant = "";
     private String nameValue = "";
     private String typeValue = "";
     private String timeValue = "";
@@ -57,7 +58,7 @@ public class ReportsViewController {
         // Add options to the ComboBox
         //restaurant_name.getItems().addAll("Option 1", "Nazareth", "ALL");
         // Add options to the ComboBox
-        reportType.getItems().addAll("revenueReport", "deliveryReport", "pickupReport","allOrdersReport");
+        reportType.getItems().addAll("revenueReport", "deliveryReport", "pickupReport","allOrdersReport", "ComplainReport");
         // Add options to the ComboBox
         timeStamp.getItems().addAll("MONTHLY", "YEARLY");
 
@@ -171,13 +172,22 @@ public class ReportsViewController {
 
     @FXML
     private void handleCellClick(javafx.event.ActionEvent event) {
+        ReportRequest req;
         // Create the ReportRequest object
-        ReportRequest req = new ReportRequest(
-                LocalDate.now(),          // Use the current date for now (adjust as needed)
-                TimeFrame.valueOf(timeValue), // Convert timeValue ("MONTHLY" or "YEARLY") to TimeFrame enum
-                typeValue,               // Report type
-                nameValue                // Target restaurant name
-        );
+        if(currentWorker.equals("ChainManager")) {
+            req=new ReportRequest(
+                    LocalDate.now(),          // Use the current date for now
+                    TimeFrame.valueOf(timeValue), // Convert timeValue ("MONTHLY" or "YEARLY") to TimeFrame enum
+                    typeValue,               // Report type
+                    currentRestaurant                // Target restaurant name
+            );
+        } else{
+            req = new ReportRequest(
+                    LocalDate.now(),          // Use the current date for now (adjust as needed)
+                    TimeFrame.valueOf(timeValue), // Convert timeValue ("MONTHLY" or "YEARLY") to TimeFrame enum
+                    typeValue,               // Report type
+                    nameValue                // Target restaurant name
+            );}
         // Now we have to tell the server
         try {
             SimpleClient.getClient().sendToServer(req);
@@ -194,10 +204,13 @@ public class ReportsViewController {
         for (Restaurant restaurant : restaurants) {
             restaurant_name.getItems().add(restaurant.getRestaurantName()); // Add each restaurant name
         }
-
+        restaurant_name.getItems().add("ALL");
     }
 
     public void setRole(String role) {
         this.currentWorker = role;
+    }
+    public void setBranch(String role) {
+        this.currentRestaurant = role;
     }
 }

@@ -7,6 +7,7 @@ public class UpdateMealRequest implements Serializable {
     String mealId;
     String newDescription;
     List<String> newCustomizations;
+    List<String> newBranches;
     String branchName;
 
     public UpdateMealRequest(String mealId, String newDescription, List<String> newCustomizations, String branchName) {
@@ -14,6 +15,13 @@ public class UpdateMealRequest implements Serializable {
         this.newDescription = newDescription;
         this.newCustomizations = newCustomizations;
         this.branchName = branchName;
+    }
+
+    public UpdateMealRequest(String mealId, String newDescription, List<String> newCustomizations, List<String> newBranches) {
+        this.mealId = mealId;
+        this.newDescription = newDescription;
+        this.newCustomizations = newCustomizations;
+        this.newBranches = newBranches;
     }
 
     public String getMealId() {
@@ -46,5 +54,13 @@ public class UpdateMealRequest implements Serializable {
 
     public void setBranchName(String branchName) {
         this.branchName = branchName;
+    }
+
+    public List<String> getNewBranches() {
+        return newBranches;
+    }
+
+    public void setNewBranches(List<String> newBranches) {
+        this.newBranches = newBranches;
     }
 }

@@ -117,12 +117,11 @@ public class UsersDB {
 
             if (user != null) {
                 // Check if the user is signed in
-                    // If not signed in, update the status to true
-                    user.setSigned(false); // Assuming there's a setSigned(boolean) method in the Users class
-
-                    // Save the updated user to the database
-                    session.update(user);
-                    session.getTransaction().commit();
+                // If not signed in, update the status to true
+                user.setSigned(false); // Assuming there's a setSigned(boolean) method in the Users class
+                // Save the updated user to the database
+                session.update(user);
+                session.getTransaction().commit();
             } else {
                 // User not found
                 return;
@@ -360,7 +359,7 @@ public class UsersDB {
     }
 
     public static void generateBasicUser1() throws Exception {
-                // Helper function to read image as byte[]
+        // Helper function to read image as byte[]
         if (session == null || !session.isOpen()) { // hala added to Ensure session is opened before calling generateOrders().
             SessionFactory sessionFactory = getSessionFactory();
             session = sessionFactory.openSession();
@@ -369,54 +368,52 @@ public class UsersDB {
         /*if (session.getTransaction().isActive()) {
             session.getTransaction().rollback();
         }*/
-            session.beginTransaction(); // Start a transaction
-            try {
+        session.beginTransaction(); // Start a transaction
+        try {
             // Create orders
-                Users nagham = new Users();
-                nagham.setRole("CompanyManager");
-                nagham.setEmail("naghammnsor@gmail.com");
-                nagham.setPassword("NaghamYes");
-                nagham.setUsername("naghamTheManager");
-                nagham.setGender("other");
-                nagham.setAge(22);
-                Users salha = new Users();
-                salha.setRole("CustomerService");
-                salha.setEmail("salhasalha121314@gmail.com");
-                salha.setPassword("salha121314");
-                salha.setUsername("salhaTheCustomerService");
-                salha.setGender("female");
-                salha.setAge(55);
-                Users yousef = new Users();
-                yousef.setRole("CompanyManager");
-                yousef.setEmail("yousefknani9@gmail.com");
-                yousef.setPassword("212");
-                yousef.setUsername("ceo");
-                yousef.setGender("male");
-                yousef.setAge(24);
+            Users nagham = new Users();
+            nagham.setRole("CompanyManager");
+            nagham.setEmail("naghammnsor@gmail.com");
+            nagham.setPassword("NaghamYes");
+            nagham.setUsername("naghamTheManager");
+            nagham.setGender("other");
+            nagham.setAge(22);
+            Users salha = new Users();
+            salha.setRole("CustomerService");
+            salha.setEmail("salhasalha121314@gmail.com");
+            salha.setPassword("salha121314");
+            salha.setUsername("salhaTheCustomerService");
+            salha.setGender("female");
+            salha.setAge(55);
+            Users yousef = new Users();
+            yousef.setRole("CompanyManager");
+            yousef.setEmail("yousefknani9@gmail.com");
+            yousef.setPassword("212");
+            yousef.setUsername("ceo");
+            yousef.setGender("male");
+            yousef.setAge(24);
+            if (!isUserExists("naghamTheManager") ) {
 
-
-                if (!isUserExists("naghamTheManager") ) {
-
-                    session.save(nagham);
-                    System.out.println("User has been created: " + nagham.getUsername());
-                }
-
-                // Ensure you are checking for existing user
-                if (!isUserExists("salhaTheCustomerService")) {
-                    // Save the new user to the database
-                    session.save(salha);
-                    System.out.println("User has been created: " + salha.getUsername());
-                }
-
-                // Create orders
-                if (!isUserExists("ceo") ) {
-                    session.save(yousef);
-                    System.out.println("User has been created: " + yousef.getUsername());
-                }
-                session.flush();
-                session.getTransaction().commit(); // Commit the transaction
+                session.save(nagham);
+                System.out.println("User has been created: " + nagham.getUsername());
             }
-            catch (Exception e) {
+
+            // Ensure you are checking for existing user
+            if (!isUserExists("salhaTheCustomerService")) {
+                // Save the new user to the database
+                session.save(salha);
+                System.out.println("User has been created: " + salha.getUsername());
+            }
+
+            // Create orders
+            if (!isUserExists("ceo") ) {
+                session.save(yousef);
+                System.out.println("User has been created: " + yousef.getUsername());
+            }
+            session.flush();
+            session.getTransaction().commit(); // Commit the transaction
+        }
+        catch (Exception e) {
             // Rollback transaction in case of an error
             e.printStackTrace();
             throw new Exception("An error occurred while generating the user.", e);

@@ -69,9 +69,9 @@ public class Meal implements Serializable {
     )
     private List<Customization> customizations = new ArrayList<>(); // Initialized
 
-        // Relationship with Restaurant (separate)
-        @ManyToMany(mappedBy = "meals", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-        private List<Restaurant> restaurantAssociations = new ArrayList<>();
+//    // Relationship with Restaurant (separate)
+//    @ManyToMany(mappedBy = "meals", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+//    private List<Restaurant> restaurantAssociations = new ArrayList<>();
 
     public int getId() {
         return id;
@@ -144,13 +144,6 @@ public class Meal implements Serializable {
         this.restaurants = restaurants;
     }
 
-    public List<Restaurant> getRestaurantAssociations() {
-        return restaurantAssociations;
-    }
-
-    public void setRestaurantAssociations(List<Restaurant> restaurantAssociations) {
-        this.restaurantAssociations = restaurantAssociations;
-    }
 
     public List<UpdatePriceRequest> getPriceRequests() {
         return priceRequests;

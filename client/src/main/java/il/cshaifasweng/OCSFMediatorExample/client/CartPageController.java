@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static il.cshaifasweng.OCSFMediatorExample.client.CreditDetailsController.mode;
+
 public class CartPageController {
 
     public static List<MealInTheCart> listOfMeals = new ArrayList<>();
@@ -471,7 +473,7 @@ public class CartPageController {
                         updateCart();
                     }
             );
-
+            mode = "Order";
             summaryStage.setScene(scene);
             summaryStage.setTitle("Order Summary");
             summaryStage.showAndWait();

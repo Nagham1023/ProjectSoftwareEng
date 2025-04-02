@@ -67,6 +67,7 @@ public class App {
         configuration.addAnnotatedClass(ReservationSave.class);
         configuration.addAnnotatedClass(PersonalDetails.class);
         configuration.addAnnotatedClass(CreditCard.class);
+        configuration.addAnnotatedClass(UpdatePriceRequest.class);
         configuration.addAnnotatedClass(personal_Meal.class);
         configuration.addAnnotatedClass(MealInTheCart.class);
         configuration.addAnnotatedClass(CustomizationWithBoolean.class);
@@ -152,7 +153,6 @@ public class App {
             session.save(five);
 
             session.flush();
-            // Commit the transaction after all operations are done
             session.getTransaction().commit();
 
         } catch (Exception e) {
@@ -389,7 +389,7 @@ public class App {
             deleteAllTablesAndRelatedData();
             generateData();
             printAllData();
-            generateBasicUser();
+            //generateBasicUser();
             printAllUsers();
             //generateOrders();
 
@@ -410,6 +410,7 @@ public class App {
             //addCreditCardDetails(creditCard,"yousefknani9@gmail.com");
             /*************************adan***************************/
 
+            // generateOrders();
             generateRestaurants();
             generateTheComplains();
             initializeSampleTables();

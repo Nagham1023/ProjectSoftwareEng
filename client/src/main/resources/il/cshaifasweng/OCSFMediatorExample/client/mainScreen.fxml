@@ -57,7 +57,7 @@
             <Font name="System Bold Italic" size="24.0" />
          </font>
       </Button>
-    <Button layoutX="322.0" layoutY="403.0" mnemonicParsing="false" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Order Cancellation" textFill="#fbebf4">
+    <Button layoutX="322.0" layoutY="403.0" mnemonicParsing="false" onAction="#clickedOnCancellation" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Cancellation" textFill="#fbebf4">
          <font>
             <Font name="System Bold Italic" size="20.0" />
          </font>

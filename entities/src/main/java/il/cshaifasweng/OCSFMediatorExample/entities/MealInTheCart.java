@@ -14,10 +14,8 @@ public class MealInTheCart implements Serializable {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "personal_meal_id", referencedColumnName = "id")
     private personal_Meal meal;
-
-
-   private int quantity;
-   private String RestaurantName;
+    private int quantity;
+    private String RestaurantName;
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)  // Maps to the 'Order' entity

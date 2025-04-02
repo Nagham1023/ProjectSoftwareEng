@@ -6,22 +6,41 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane prefHeight="214.0" prefWidth="389.0" style="-fx-background-color: #fbebf4;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.OrderCancellationController">
+<AnchorPane prefHeight="260.0" prefWidth="400.0" style="-fx-background-color: #fbebf4;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.OrderCancellationController">
     <children>
+        <!-- Page Title -->
+        <Label layoutX="90.0" layoutY="20.0" prefHeight="30.0" prefWidth="250.0" text="Cancel Your Order" textAlignment="CENTER" textFill="#832018">
+            <font>
+                <Font name="Bell MT" size="20.0" />
+            </font>
+        </Label>
+
+        <!-- Label for Order Number -->
+        <Label layoutX="50.0" layoutY="60.0" text="Order Number:" textFill="#832018">
+            <font>
+                <Font name="Bell MT" size="14.0" />
+            </font>
+        </Label>
+        <!-- TextField for Order Number Input -->
+        <TextField fx:id="ID" layoutX="180.0" layoutY="58.0" prefHeight="22.0" prefWidth="170.0" />
+
+        <!-- Label for Email -->
+        <Label layoutX="50.0" layoutY="100.0" text="Personal Email:" textFill="#832018">
+            <font>
+                <Font name="Bell MT" size="14.0" />
+            </font>
+        </Label>
+        <!-- TextField for Email Input -->
+        <TextField fx:id="emailField" layoutX="180.0" layoutY="98.0" prefHeight="22.0" prefWidth="170.0" />
+
         <!-- Cancel Order Button -->
-        <Button fx:id="CancelButton" contentDisplay="CENTER" layoutX="154.0" layoutY="138.0" mnemonicParsing="false" onAction="#CancelOrder" style="-fx-background-color: #832018;" text="Cancel Order" textAlignment="CENTER" textFill="#fbebf4">
+        <Button fx:id="CancelButton" layoutX="120.0" layoutY="150.0" mnemonicParsing="false" onAction="#CancelOrder" style="-fx-background-color: #832018; -fx-border-radius: 10px;" text="Cancel Order" textFill="#fbebf4">
             <font>
                 <Font name="Bell MT" size="12.0" />
             </font>
         </Button>
-        <!-- Label for Order Number -->
-        <Label alignment="CENTER" layoutX="114.0" layoutY="66.0" prefHeight="18.0" prefWidth="161.0" text="Insert the order number:" textAlignment="CENTER" textFill="#832018">
-            <font>
-                <Font name="Bell MT" size="15.0" />
-            </font>
-        </Label>
-        <!-- TextField for Order Number Input -->
-        <TextField fx:id="OrderNumber" layoutX="130.0" layoutY="94.0" prefHeight="22.0" prefWidth="130.0" />
+
+        <!-- Error Message Label -->
+        <Label fx:id="idErrorLabel" layoutX="50.0" layoutY="190.0" prefWidth="300.0" textFill="red" />
     </children>
 </AnchorPane>

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static il.cshaifasweng.OCSFMediatorExample.client.CreditDetailsController.done_Order;
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.deliveryPrice;
 
 public class DeliveryPageController {
 
@@ -153,11 +154,20 @@ public class DeliveryPageController {
             showAlert("Please select either Delivery or Self Pickup before proceeding.");
             return; // Stop further execution
         }
+        if(isDeliverySelected() && addressField.getText().trim().isEmpty() && homeNumberField.getText().trim().isEmpty()){
+            showAlert("Please enter a valid address.");
+            return;
+        }
+
         App.setRoot("CreditDetails");
     }
     private boolean isDeliveryOrPickupSelected() {
         return Delivery.getStyle().contains("-fx-background-color: #832018") ||
                 selfPickup.getStyle().contains("-fx-background-color: #832018");
+    }
+    private boolean isDeliverySelected() {
+        return Delivery.getStyle().contains("-fx-background-color: #832018");
+
     }
 
     private void setupmastercardButton() {
@@ -173,6 +183,10 @@ public class DeliveryPageController {
         if (!isDeliveryOrPickupSelected()) {
             showAlert("Please select either Delivery or Self Pickup before proceeding.");
             return; // Stop further execution
+        }
+        if(isDeliverySelected() && addressField.getText().trim().isEmpty() && homeNumberField.getText().trim().isEmpty()){
+            showAlert("Please enter a valid address.");
+            return;
         }
         App.setRoot("CreditDetails");
     }
@@ -190,6 +204,10 @@ public class DeliveryPageController {
         if (!isDeliveryOrPickupSelected()) {
             showAlert("Please select either Delivery or Self Pickup before proceeding.");
             return; // Stop further execution
+        }
+        if(isDeliverySelected() && addressField.getText().trim().isEmpty() && homeNumberField.getText().trim().isEmpty()){
+            showAlert("Please enter a valid address.");
+            return;
         }
         App.setRoot("CreditDetails");
     }
@@ -215,6 +233,7 @@ public class DeliveryPageController {
             addressField.setVisible(false);
             homeNumberField.setVisible(false);
             done_Order.setOrderType("Self PickUp");
+            price.setText(done_Order.getTotal_price()+"₪");
         } else {
             // Delivery selected
             Delivery.setStyle("-fx-background-color: #832018; -fx-text-fill: white; -fx-background-radius: 20; -fx-border-color: #832018; -fx-border-width: 2; -fx-border-radius: 20;");
@@ -223,6 +242,8 @@ public class DeliveryPageController {
             addressField.setVisible(true);
             homeNumberField.setVisible(true);
             done_Order.setOrderType("Delivery");
+            int newPrice = done_Order.getTotal_price() + deliveryPrice;
+            price.setText(newPrice + "₪");
         }
     }
 

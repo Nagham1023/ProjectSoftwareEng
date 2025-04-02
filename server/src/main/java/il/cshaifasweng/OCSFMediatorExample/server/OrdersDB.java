@@ -9,14 +9,13 @@ import java.util.List;
 
 public class OrdersDB {
 
-    public static Order getOrderById(String orderId) {
+    public static Order getOrderById(int orderId) {
         System.out.println("now I am in the function");
         Order order = null;
-        int id=Integer.parseInt(orderId);
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
 
-            order = session.get(Order.class,id);
+            order = session.get(Order.class, orderId);
             if (order != null) {
                 order.setOrderStatus("Cancelled");
                 session.update(order);
@@ -52,11 +51,12 @@ public class OrdersDB {
             e.printStackTrace();
         }
     }
+
     public static void saveCustomizationsbool(List<CustomizationWithBoolean> customs) {
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
 
-            for(CustomizationWithBoolean custom : customs) {
+            for (CustomizationWithBoolean custom : customs) {
                 session.saveOrUpdate(custom);  // Use saveOrUpdate to handle both new and existing entities}
             }
 
@@ -67,7 +67,7 @@ public class OrdersDB {
             e.printStackTrace();
         }
     }
-
+}
     /*public static void saveOrder2(Order order) {
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
@@ -88,11 +88,3 @@ public class OrdersDB {
             e.printStackTrace();
         }
     }*/
-
-
-
-
-
-
-
-}

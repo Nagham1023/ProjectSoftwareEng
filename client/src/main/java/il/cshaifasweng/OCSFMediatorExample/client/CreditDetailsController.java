@@ -30,10 +30,14 @@ import java.util.stream.IntStream;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.deliveryPrice;
+
 
 public class CreditDetailsController {
 
     static public Order done_Order;
+    static public FinalReservationEvent done_Reservation;
+    static public String mode;
     @FXML
     private TextField cardNumberField;
     @FXML
@@ -126,6 +130,7 @@ public class CreditDetailsController {
             monthYearComboBox.setValue(selectedCard.getExpiryDate());
             cardNumberField.setText("**** **** **** " + selectedCard.getCardNumber().substring(selectedCard.getCardNumber().length() - 4));
             CardholdersIDcardField.setText(selectedCard.getCardholdersID());
+            setupBindings();
         } else {
             clearFields();
             setupBindings();
@@ -161,13 +166,20 @@ public class CreditDetailsController {
             return false;
         }, monthYearComboBox.valueProperty());
 
-        BooleanBinding isAllValid = isCardNumberValid
+        BooleanBinding isAllValid;
+
+        if(savedCardsComboBox.getValue() != null) {
+            isAllValid = isCardNumberValid
+                    .and(isCardholderNameValid)
+                    .and(isIDValid)
+                    .and(isMonthYearValid);
+        }
+        else isAllValid = isCardNumberValid
                 .and(isCardholderNameValid)
                 .and(isIDValid)
                 .and(isCvvValid)
                 .and(isMonthYearValid);
 //                .and(emailInteractedC);
-
         savecreditButton.disableProperty().bind(isAllValid.not());
     }
 
@@ -245,9 +257,7 @@ public class CreditDetailsController {
             }
         });
     }
-
-    private void setupMonthYearComboBox() {
-        List<String> monthYears = new ArrayList<>();
+    private void setupMonthYearComboBox() {List<String> monthYears = new ArrayList<>();
         int currentYear = LocalDate.now().getYear();
         int currentMonth = LocalDate.now().getMonthValue();
         String currentMonthYear = String.format("%02d/%d", currentMonth, currentYear); // Current month/year string
@@ -267,8 +277,7 @@ public class CreditDetailsController {
         // Set the current month and year as the selected item if found
         if (currentMonthYearFound) {
             monthYearComboBox.getSelectionModel().select(currentMonthYear);
-        } else {
-            monthYearComboBox.getSelectionModel().selectFirst();  // Fallback to the first item if current month/year not found
+        } else {monthYearComboBox.getSelectionModel().selectFirst();  // Fallback to the first item if current month/year not found
         }
 
         monthYearComboBox.setOnAction(event -> {
@@ -385,6 +394,7 @@ public class CreditDetailsController {
     @Subscribe
     public void onPaymentResponse(PaymentCheck creditCardCheck) {
         // This method gets called when a CreditCardCheck object is posted to the EventBus
+        if(creditCardCheck.getMode().equals("Order")){
         Platform.runLater(() -> {
 
             System.out.println("Credit card is valid." + creditCardCheck.getOrder());
@@ -396,6 +406,16 @@ public class CreditDetailsController {
                 throw new RuntimeException(e);
             }
         });
+        } else {
+            errorLabel.setText(creditCardCheck.getResponse());
+            Platform.runLater(() -> {
+                try {
+                    App.setRoot("mainScreen");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
     }
 
 
@@ -405,8 +425,14 @@ public class CreditDetailsController {
         String cardholdersID = CardholdersIDcardField.getText().trim();
         String cvv = cvvnumber.getText().trim();
         String expiryDateStr = monthYearComboBox.getValue();  // the expiry date is selected from a ComboBox and is in the format "MM/yyyy"
-        done_Order.setDate(LocalDate.now());
-        done_Order.setOrderTime(LocalDateTime.now());
+        if(mode.equals("Order")){
+            done_Order.setDate(LocalDate.now());
+            done_Order.setOrderTime(LocalDateTime.now());
+            if(done_Order.getOrderType().equals("Delivery"))
+            {
+             done_Order.setTotal_price(done_Order.getTotal_price()+deliveryPrice);
+            }
+        }
 
         // Attempt to validate and then directly use the expiry date string
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
@@ -426,10 +452,20 @@ public class CreditDetailsController {
 
             if(savedCardsComboBox.getValue() != null) {
                 System.out.println("selected credit card");
-                paymentCheck = new PaymentCheck(savedCardsComboBox.getValue(),personalDetails,done_Order);
+                if(mode.equals("Order")) {
+                    paymentCheck = new PaymentCheck(savedCardsComboBox.getValue(), personalDetails, done_Order, "Order");
+                } else {
+                    paymentCheck = new PaymentCheck(savedCardsComboBox.getValue(), personalDetails,"Reservation");
+                }
             }
             else {
-                paymentCheck = new PaymentCheck(creditcard, personalDetails, done_Order);
+                if(mode.equals("Order")) {
+                    paymentCheck = new PaymentCheck(creditcard, personalDetails, done_Order, "Order");
+                }
+                else {
+                    paymentCheck = new PaymentCheck(creditcard, personalDetails, "Reservation");
+                }
+
                 System.out.println("new credit card");
             }
 
@@ -469,3 +505,4 @@ public class CreditDetailsController {
         savedCardsComboBox.getSelectionModel().selectFirst();
     }
 }
+

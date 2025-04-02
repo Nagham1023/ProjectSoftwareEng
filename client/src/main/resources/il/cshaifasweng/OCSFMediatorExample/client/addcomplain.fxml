@@ -173,11 +173,10 @@
          <padding>
             <Insets bottom="8.0" left="15.0" right="15.0" top="8.0" />
          </padding>
-      </Button>
-      <Label fx:id="checkLabel" layoutX="14.0" layoutY="366.0" prefHeight="30.0" prefWidth="309.0">
-         <font>
-            <Font size="15.0" />
-         </font>
-      </Label>
+      </Button><Label fx:id="checkLabel" layoutX="14.0" layoutY="366.0" prefHeight="30.0" prefWidth="309.0">
+      <font>
+         <Font size="15.0" />
+      </font>
+   </Label>
    </children>
 </AnchorPane>

@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import static il.cshaifasweng.OCSFMediatorExample.client.CreditDetailsController.done_Order;
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.deliveryPrice;
 
 public class receiptController {
     @FXML
@@ -37,12 +38,13 @@ public class receiptController {
 
 
     public void initialize() {
+        int paid = done_Order.getTotal_price();
         OrderNumField.setText("Order Number: "+done_Order.getId());
         branchField.setText(done_Order.getRestaurantName());
         dateField.setText(String.valueOf(done_Order.getDate()));
         String ccNumber = done_Order.getCreditCard_num();
         String lastFour = ccNumber.length() > 4 ? ccNumber.substring(ccNumber.length() - 4) : ccNumber;
-        PaidField.setText("Paid "+done_Order.getTotal_price()+"₪ with Credit Card ends with "+lastFour);
+        PaidField.setText("Paid "+paid+"₪ with Credit Card ends with "+lastFour);
         fillMealDetailsContainer();
         String[] mealsOrdered = new String[done_Order.getMeals().size()];
         int index = 0;
@@ -52,6 +54,10 @@ public class receiptController {
             index++;
         }
         sendOrderConfirmationEmail(CreditDetailsController.personalDetails,done_Order.getId(), done_Order.getRestaurantName(),mealsOrdered );
+        if(done_Order.getOrderType().equals("Delivery"))
+        {
+            addDelivery();
+        }
     }
 
 
@@ -76,6 +82,11 @@ public class receiptController {
         for (String meal : mealsOrdered) {
             body.append("- ").append(meal).append("\n");
         }
+
+        // Add delivery price
+        body.append("\nDelivery Fee: ").append(deliveryPrice).append("₪\n");
+        // Add total price
+        body.append("Total Price: ").append(done_Order.getTotal_price()).append("₪\n");
 
         body.append("\nWe hope you enjoy your meal!\n\n");
         body.append("Best regards,\n");
@@ -185,6 +196,41 @@ public class receiptController {
             // Add the row to the meal details container
             mealDetailsContainer.getChildren().add(mealRow);
         }
+    }
+    public void addDelivery() {
+        StringBuilder orderDetails = new StringBuilder();
+
+        HBox deliveryRow = new HBox(10);
+        deliveryRow.setSpacing(10);
+
+
+        Image delivery = new Image(getClass().getResourceAsStream("/images/delivery_icon.png"));
+
+        ImageView imageView = new ImageView(delivery);
+        imageView.setFitHeight(100);
+        imageView.setFitWidth(100);
+        imageView.setPreserveRatio(true);
+
+        Rectangle clip = new Rectangle(100, 100);
+        clip.setArcWidth(20);
+        clip.setArcHeight(20);
+        imageView.setClip(clip);
+
+        deliveryRow.getChildren().add(imageView);
+
+        // Add meal info text (name and quantity)
+        TextFlow DeliveryInfo = new TextFlow();
+
+        Text text = new Text("Delivery - ");
+
+        Text deliveryPrice = new Text(" (25₪)\n");
+        deliveryPrice.setStyle("-fx-font-weight: bold;");
+
+        DeliveryInfo.getChildren().addAll(text,deliveryPrice, new Text("\n"));
+
+        deliveryRow.getChildren().add(DeliveryInfo);
+
+        mealDetailsContainer.getChildren().add(deliveryRow);
     }
 
 }
