@@ -26,14 +26,16 @@ public class ValidationPageController {
     private String password;
     private String gender;
     private int age;
+    private String role;
 
-    public void setUserInfo(int validationCode,String name,String email,String password,String gender,int age) {
+    public void setUserInfo(int validationCode,String name,String email,String password,String gender,int age, String role) {
         this.validationCode = validationCode;
         this.name = name;
         this.email = email;
         this.password = password;
         this.gender = gender;
         this.age = age;
+        this.role = role;
     }
 
 
@@ -45,6 +47,7 @@ public class ValidationPageController {
             statusLabel.setText("Validation successful!");
             statusLabel.setTextFill(javafx.scene.paint.Color.GREEN);
             UserCheck userCheck = new UserCheck(name,password,email,age,gender,0);
+            userCheck.setRole(role);
             SimpleClient client = SimpleClient.getClient();
             client.sendToServer(userCheck);
             Stage stage = (Stage) validateButton.getScene().getWindow();

@@ -230,7 +230,10 @@ public class SimpleServer extends AbstractServer {
                     saveReservationToDatabase(reservationSave);
                     // Notify the client that the reservation was successful
                     System.out.println("Reservation confirmed successfully.");
-                    client.sendToClient("Reservation confirmed successfully.");
+                    //client.sendToClient("Reservation confirmed successfully.");
+                    /// in zoom
+                    System.out.println("go To payment check");
+                    client.sendToClient(reservationSave);
                     wait(500);
                     sendToAll(new ReConfirmEvent());
                     printAllReservationSaves();
@@ -274,19 +277,20 @@ public class SimpleServer extends AbstractServer {
             MealEventUpgraded UpdateMealEvent = (MealEventUpgraded) msg;
             Meal addResult=AddNewMealUpgraded((MealEventUpgraded) msg);
             mealEvent messagee= new mealEvent(UpdateMealEvent.getMealName(), UpdateMealEvent.getPrice(), String.valueOf(addResult.getId()),addResult);
-            sendToAll(msg);
-            if (addResult != null)
-                sendToAll("added");
+            sendToAll(messagee);
+            //if (addResult != null)
+                //sendToAll("added");
         }
         else if (msg instanceof UpdateMealRequest) {
             //here we're adding new meal !!
             //System.out.println("Received adding new UpdateMealRequest ");
             String addResult = updateMeal((UpdateMealRequest) msg);//if "added" then successed if "not exist" then failed bcs there is no meal like that
             System.out.println("Added new UpdateMealRequest to the database");
-            sendToAll(msg);
-            if (Objects.equals(addResult, "added")) {
+            //sendToAll(msg);
+            //if (Objects.equals(addResult, "added")) {
                 sendToAll(msg);
-            }
+            //}
+            //else
 
         }
         else if (msg instanceof String && msgString.equals("toMenuPage")) {
@@ -395,7 +399,7 @@ public class SimpleServer extends AbstractServer {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if (((UserCheck) msg).isState() == 3) {//if just a name check
+            } else if (((UserCheck) msg).isState() == 3 || (((UserCheck) msg).isState() == 8)) {//if just a name check
                 try {
                     if (checkUserName(((UserCheck) msg).getUsername())) {
                         ((UserCheck) msg).setRespond("notValid");
@@ -421,10 +425,42 @@ public class SimpleServer extends AbstractServer {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-
             }
-
-
+            else if (((UserCheck) msg).isState() == 9) {//Update in db
+                try {
+                    UsersDB.UpdateUser((UserCheck) msg);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        else if (msg instanceof String && ((String)msg).equals("Get all users")) {
+            System.out.println("Getting all users");
+            List<Users> users= UsersDB.getUsers();
+            try {
+                client.sendToClient(users);
+                sendToAll(users);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else if(msg instanceof UserManagement){
+            if(((UserManagement) msg).getMethod().equals("update")){
+               // String response = UsersDB.UpdateUser((UserManagement) msg);
+            }
+            else {
+                System.out.println("Invalid method BUT I WILL DELETE THE USER");
+                try {
+                    UsersDB.delete(((UserManagement) msg).getUsername());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            try {
+                client.sendToClient((UserManagement) msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         //Payment Processing -Adan
@@ -458,7 +494,8 @@ public class SimpleServer extends AbstractServer {
                         newOrder.setCreditCard_num(newCC.getCardNumber());
                         paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
                         addCreditCardDetails(newCC, newPD,newOrder);
-                    } else {
+                    }
+                    else {
                         //System.out.println("the personal details is already added but cc is null");
                         paymentCheck.setResponse("Added the Credit Card to the database.");
 
@@ -486,20 +523,23 @@ public class SimpleServer extends AbstractServer {
                         addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc, newOrder);
                     }
                     client.sendToClient(paymentCheck);
-                } }
+                }
+            }
                 else {
+                    ReservationSave newReservation= ((PaymentCheck) msg).getReservationEvent();
                     if (cc == null) {
 
 
                         if (personalDetailsDB == null) {
-                            //System.out.println("the personal details is null and cc is null in the reservation part");
-
+                            newReservation.setCreditCard_num(newCC.getCardNumber());
                             paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
-                            addCreditCardDetailsForRes(newCC, newPD);
-                        } else {
+                            addCreditCardDetailsForRes(newCC, newPD,newReservation);
+                        }
+                        else {
                             //System.out.println("the personal details is already added but cc is null");
                             paymentCheck.setResponse("Added the Credit Card to the database.");
-                            addCreditCardToExistingPersonalDetailsForRes(newCC, personalDetailsDB);
+                            newReservation.setCreditCard_num(newCC.getCardNumber());
+                            addCreditCardToExistingPersonalDetailsForRes(newCC, personalDetailsDB,newReservation);
                         }
                         client.sendToClient(paymentCheck);
                     } else {
@@ -507,19 +547,19 @@ public class SimpleServer extends AbstractServer {
                         if(personalDetailsDB == null) {
                             //System.out.println("personal details null but cc is not null");
                             //System.out.println("new personal details");
-                            //newOrder.setCreditCard_num(cc.getCardNumber());
+                            newReservation.setCreditCard_num(cc.getCardNumber());
 
                             paymentCheck.setResponse("Added the personal details to the database");
-                            addPersonalDetailsAndAssociateWithCreditCardForRes(newPD, cc);
+                            addPersonalDetailsAndAssociateWithCreditCardForRes(newPD, cc,newReservation);
                         }
 
                         else {
                             //System.out.println("not null both");
                             paymentCheck.setResponse("Updated the personal details to the database.");
 
-                            //newOrder.setCreditCard_num(cc.getCardNumber());
+                            newReservation.setCreditCard_num(cc.getCardNumber());
 
-                            addCreditCardToPersonalDetailsIfBothExistsForRes(personalDetailsDB, cc);
+                            addCreditCardToPersonalDetailsIfBothExistsForRes(personalDetailsDB, cc,newReservation);
                         }
                         client.sendToClient(paymentCheck);
                     }

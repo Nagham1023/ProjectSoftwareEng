@@ -1,9 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.CreditCard;
-import il.cshaifasweng.OCSFMediatorExample.entities.Order;
-import il.cshaifasweng.OCSFMediatorExample.entities.PersonalDetails;
-import il.cshaifasweng.OCSFMediatorExample.entities.Users;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.hibernate.*;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -318,7 +315,7 @@ public class CreditCardDetailsDB {
     }
 
     //**************************** for reservation purposes***************************************************************//
-    public static void addCreditCardDetailsForRes(CreditCard newCardDetails, PersonalDetails personalDetails) {
+    public static void addCreditCardDetailsForRes(CreditCard newCardDetails, PersonalDetails personalDetails, ReservationSave finalReservationEvent) {
         try {
             if (session == null || !session.isOpen()) {
                 SessionFactory sessionFactory = getSessionFactory();
@@ -339,6 +336,7 @@ public class CreditCardDetailsDB {
                 session.save(newCardDetails);
 
 
+                session.saveOrUpdate(finalReservationEvent);
                 session.getTransaction().commit();
             } else {
                 session.getTransaction().rollback(); // Explicit rollback if personalDetails is null
@@ -355,7 +353,7 @@ public class CreditCardDetailsDB {
             }
         }
     }
-    public static void addCreditCardToExistingPersonalDetailsForRes(CreditCard newCreditCard,PersonalDetails PersonalDetails) {
+    public static void addCreditCardToExistingPersonalDetailsForRes(CreditCard newCreditCard,PersonalDetails PersonalDetails ,ReservationSave finalReservationEvent) {
         Transaction transaction = null;
         try {
             // Ensure session is open
@@ -388,6 +386,7 @@ public class CreditCardDetailsDB {
 
             // Update other entities
             session.saveOrUpdate(managedPersonalDetails);
+            session.saveOrUpdate(finalReservationEvent);
 
 
             transaction.commit();
@@ -407,7 +406,7 @@ public class CreditCardDetailsDB {
             }
         }
     }
-    public static void addPersonalDetailsAndAssociateWithCreditCardForRes(PersonalDetails newPersonalDetails, CreditCard existingCreditCard) {
+    public static void addPersonalDetailsAndAssociateWithCreditCardForRes(PersonalDetails newPersonalDetails, CreditCard existingCreditCard,ReservationSave finalReservationEvent) {
         try {
             // Open session if not already open
             if (session == null || !session.isOpen()) {
@@ -439,6 +438,7 @@ public class CreditCardDetailsDB {
             // Save the updated CreditCard object (this will persist the association)
             session.saveOrUpdate(existingCreditCard);
 
+            session.saveOrUpdate(finalReservationEvent);
             // Commit the transaction
             session.getTransaction().commit();
 
@@ -454,7 +454,7 @@ public class CreditCardDetailsDB {
             }
         }
     }
-    public static void addCreditCardToPersonalDetailsIfBothExistsForRes(PersonalDetails existingPersonalDetails, CreditCard existingCreditCard) {
+    public static void addCreditCardToPersonalDetailsIfBothExistsForRes(PersonalDetails existingPersonalDetails, CreditCard existingCreditCard,ReservationSave finalReservationEvent) {
         try {
             // Open session if not already open
             if (session == null || !session.isOpen()) {
@@ -483,6 +483,7 @@ public class CreditCardDetailsDB {
             // Save or update the CreditCard and PersonalDetails objects
             session.saveOrUpdate(dbPersonalDetails);
             session.saveOrUpdate(dbCreditCard);
+            session.saveOrUpdate(finalReservationEvent);
 
             // Commit the transaction
             session.getTransaction().commit();

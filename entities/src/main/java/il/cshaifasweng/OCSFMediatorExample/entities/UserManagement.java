@@ -2,98 +2,97 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import java.io.Serializable;
 
-public class UserCheck implements Serializable {
-
-    private static final long serialVersionUID = 1L;
+public class UserManagement implements Serializable {
     private String username;
     private String password;
     private String email;
     private int age;
     private String gender;
-    private Long id;
     private String role;
-    private String firstName;
+    private String method;
+    private String oldName;
 
-    private String respond;
-    private int state; //1 if login, 0 if register , 2 if forget pass, 3 if username check,4 if logout,5 if changing info, 8 if update all the user
-    public UserCheck() {}
-    public UserCheck(String username, String password,int state) {
+    //for delete the user
+    public UserManagement(String username, String method) {
         this.username = username;
-        this.password = password;
-        this.state = state;
+        this.method = method;
     }
-    public UserCheck(String username,int state) {
-        this.username = username;
-        this.state = state;
-    }
-    public UserCheck(String username, String password, String email, int age, String gender, int state) {
+
+    //for the update details
+    public UserManagement(String oldName,String username, String password, String email, int age, String gender, String role, String method) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.age = age;
         this.gender = gender;
-        this.state = state;
+        this.role = role;
+        this.method = method;
+        this.oldName = oldName;
     }
-    public String getRespond(){
-        return respond;
-    }
-    public void setRespond(String respond){
-        this.respond = respond;
-    }
+
+    public UserManagement() {}
+
     public String getUsername() {
         return username;
     }
+
     public void setUsername(String username) {
         this.username = username;
     }
+
     public String getPassword() {
         return password;
     }
+
     public void setPassword(String password) {
         this.password = password;
     }
-    public int isState() {
-        return state;
-    }
-    public void setState(int state) {
-        this.state = state;
-    }
+
     public String getEmail() {
         return email;
     }
+
     public void setEmail(String email) {
         this.email = email;
     }
+
     public int getAge() {
         return age;
     }
+
     public void setAge(int age) {
         this.age = age;
     }
+
     public String getGender() {
         return gender;
     }
+
     public void setGender(String gender) {
         this.gender = gender;
     }
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
+
     public String getRole() {
         return role;
     }
+
     public void setRole(String role) {
         this.role = role;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getMethod() {
+        return method;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public String getOldName() {
+        return oldName;
+    }
+
+    public void setOldName(String oldName) {
+        this.oldName = oldName;
     }
 }

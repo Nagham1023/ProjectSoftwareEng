@@ -290,9 +290,10 @@ public class ReservationController {
     }
 
     @Subscribe
-    public void reservationConfirmed(String msg) {
+    public void reservationConfirmed(ReservationSave msg) {
         Platform.runLater(() -> {
-            if (msg.equals("Reservation confirmed successfully.")) {
+            //if (msg.equals("Reservation confirmed successfully.")) {
+            //if (msg.equals("go To payment check")) {
 
                 //showAlert("Reservation Confirmed", "Your reservation has been confirmed successfully!");
 
@@ -303,13 +304,14 @@ public class ReservationController {
                 try {
 
                     //showAlert("Reservation Confirmed", resultMessage);
+                    done_Reservation=msg;
                     CreditDetailsController.personalDetails = personalDetails;
                     App.setRoot("CreditDetails");
                 } catch (IOException e) {
                     System.err.println("Error in handleContinueAction: " + e.getMessage());
                     e.printStackTrace();
                 }
-            }
+            //}
         });
     }
     @Subscribe
@@ -500,7 +502,7 @@ public class ReservationController {
                 FinalReservationEvent finalReservationEvent = new FinalReservationEvent(
                         restaurantName, selectedDateTime, seats, isInside, fullName, phoneNumber, email
                 );
-                done_Reservation = finalReservationEvent;
+                //done_Reservation = finalReservationEvent;
                 CreditDetailsController.mode= "Reservation";
 
                 try {
@@ -633,5 +635,11 @@ public class ReservationController {
         double y = event.getY() - 20;
         effect.setOffsetX(x);
         effect.setOffsetY(y);
+    }
+    @Subscribe
+    public void creditCardPge(String message) {
+        if(message.equals("go To payment check")){
+
+        }
     }
 }

@@ -4,72 +4,91 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.StackPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegisterController">
-    <children>
-        <!-- Left Panel -->
-        <AnchorPane layoutX="0.0" prefHeight="600.0" prefWidth="500.0" style="-fx-background-color: #FFC0CB;">
+<SplitPane dividerPositions="0.2" orientation="VERTICAL" prefHeight="611.0" prefWidth="779.0" style="-fx-background-color: #FFF5F9;"
+           xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegisterController">
+
+    <items>
+
+        <!-- Top Section (Reduced Form Area) -->
+        <StackPane prefHeight="150.0" prefWidth="778.0" style="-fx-background-color: #FFF5F9;">
             <children>
-                <ImageView fx:id="imglogo" fitHeight="429.0" fitWidth="293.0" layoutX="108.0" layoutY="137.0" pickOnBounds="true" preserveRatio="true" />
-            </children>
-        </AnchorPane>
 
-        <!-- Right Panel -->
-        <AnchorPane fx:id="anchorpane" layoutX="500.0" prefHeight="600.0" prefWidth="500.0" style="-fx-background-color: #FFFFFF;">
+                <AnchorPane fx:id="anchorpane" prefHeight="150.0" prefWidth="778.0" style="-fx-background-color: #FFFFFF;">
+                    <children>
+
+                        <!-- Page Title -->
+                        <Text fill="#832018" layoutX="250.0" layoutY="30.0" text="Branches Management">
+                            <font>
+                                <Font name="System Bold Italic" size="22.0" />
+                            </font>
+                        </Text>
+
+                        <!-- Subtitle -->
+                        <Text fill="#c72066" layoutX="300.0" layoutY="55.0" text="Add a New Worker">
+                            <font>
+                                <Font name="System Italic" size="14.0" />
+                            </font>
+                        </Text>
+
+                        <!-- Input fields (arranged compactly) -->
+                        <TextField fx:id="usernameField" layoutX="40.0" layoutY="70.0" prefHeight="25.0" prefWidth="160.0" promptText="Username" />
+                        <TextField fx:id="emailField" layoutX="210.0" layoutY="70.0" prefHeight="25.0" prefWidth="160.0" promptText="Email" />
+                        <PasswordField fx:id="passwordField" layoutX="380.0" layoutY="70.0" prefHeight="25.0" prefWidth="160.0" promptText="Password" />
+                        <TextField fx:id="ageField" layoutX="550.0" layoutY="70.0" prefHeight="25.0" prefWidth="160.0" promptText="Age (in years)" />
+
+                        <ComboBox fx:id="genderComboBox" layoutX="40.0" layoutY="105.0" prefHeight="25.0" prefWidth="160.0" promptText="Select Gender" />
+                        <ComboBox fx:id="restaurantsComboBox" layoutX="210.0" layoutY="105.0" prefHeight="25.0" prefWidth="160.0" promptText="Select Branch" />
+                        <ComboBox fx:id="roleComboBox" layoutX="380.0" layoutY="105.0" prefHeight="25.0" prefWidth="160.0" promptText="Select Role" />
+
+                        <!-- Add Worker Button -->
+                        <Button fx:id="registerButton" layoutX="550.0" layoutY="105.0" mnemonicParsing="false" onAction="#RegisterButton" prefHeight="30.0" prefWidth="160.0"
+                                style="-fx-background-color: #832018; -fx-border-radius: 5px;" text="Add Worker" textFill="WHITE">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Button>
+
+                        <!-- Error Message Label -->
+                        <Label fx:id="errorMessageLabel" layoutX="270.0" layoutY="140.0" prefHeight="20.0" prefWidth="250.0" textFill="RED">
+                            <font>
+                                <Font name="System Bold" size="12.0" />
+                            </font>
+                        </Label>
+
+                    </children>
+                </AnchorPane>
+
+            </children>
+        </StackPane>
+
+        <!-- Bottom Section (User List inside ScrollPane) -->
+        <StackPane prefHeight="461.0" prefWidth="778.0" style="-fx-background-color: #FFF5F9;">
             <children>
-                <!-- Welcome Label -->
-                <Label layoutX="180.0" layoutY="20.0" text="Register">
-                    <font>
-                        <Font name="System Bold" size="40.0" />
-                    </font>
-                </Label>
 
-                <!-- Subtext -->
-                <Label layoutX="100.0" layoutY="80.0" text="Create a new account to get started.">
-                    <font>
-                        <Font size="18.0" />
-                    </font>
-                </Label>
+                <!-- ScrollPane to make sure list is scrollable -->
+                <ScrollPane prefHeight="460.0" prefWidth="778.0" fitToWidth="true" style="-fx-background-color: transparent;">
+                    <content>
 
-                <!-- Username Field -->
-                <TextField fx:id="usernameField" layoutX="100.0" layoutY="150.0" prefHeight="30.0" prefWidth="300.0" promptText="Username" />
+                        <!-- VBox to hold the user list (fills the entire width) -->
+                        <VBox fx:id="dynamicUserNames" spacing="10" style="-fx-background-color: #FFF5F9; -fx-padding: 10px; -fx-alignment: CENTER; -fx-pref-width: 100%;">
+                        </VBox>
 
-                <!-- Email Field -->
-                <TextField fx:id="emailField" layoutX="100.0" layoutY="200.0" prefHeight="30.0" prefWidth="300.0" promptText="Email" />
+                    </content>
+                </ScrollPane>
 
-                <!-- Password Field -->
-                <PasswordField fx:id="passwordField" layoutX="100.0" layoutY="250.0" prefHeight="30.0" prefWidth="300.0" promptText="Password" />
-
-                <!-- Confirm Password Field -->
-                <PasswordField fx:id="confirmPasswordField" layoutX="100.0" layoutY="300.0" prefHeight="30.0" prefWidth="300.0" promptText="Confirm Password" />
-
-                <TextField fx:id="ageField" layoutX="100.0" layoutY="350.0" prefHeight="30.0" prefWidth="300.0" promptText="Age (in years)" />
-                <!-- Register Button -->
-                <Button fx:id="registerButton" layoutX="150.0" layoutY="460.0" mnemonicParsing="false" onAction="#RegisterButton" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #262626; -fx-background-radius: 20;" text="Register" textFill="WHITE">
-                    <font>
-                        <Font size="18.0" />
-                    </font>
-                </Button>
-
-                <!-- Error Message Label -->
-                <Label fx:id="errorMessageLabel" layoutX="100.0" layoutY="520.0" prefHeight="30.0" prefWidth="300.0" textFill="RED">
-               <font>
-                  <Font name="System Bold" size="13.0" />
-               </font></Label>
-
-                <!-- Already have an account -->
-                <Label layoutX="140.0" layoutY="560.0" onMouseClicked="#toLogin" text="Already have an account? Login">
-                    <font>
-                        <Font size="14.0" />
-                    </font>
-                </Label>
-                <ComboBox fx:id="genderComboBox" layoutX="100.0" layoutY="400.0" prefHeight="30.0" prefWidth="300.0" promptText="Select Gender" />
-            <ImageView fx:id="loadinggif" fitHeight="150.0" fitWidth="200.0" layoutX="-107.0" layoutY="205.0" pickOnBounds="true" preserveRatio="true" visible="false" />
             </children>
-        </AnchorPane>
-    </children>
-</AnchorPane>
+        </StackPane>
+
+    </items>
+</SplitPane>

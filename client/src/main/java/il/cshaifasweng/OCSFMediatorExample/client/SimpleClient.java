@@ -1,10 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.client.events.DeleteMealEvent;
-import il.cshaifasweng.OCSFMediatorExample.client.events.ReportResponseEvent;
-import il.cshaifasweng.OCSFMediatorExample.client.events.UpdatePriceRequestEvent;
-import il.cshaifasweng.OCSFMediatorExample.client.events.WarningEvent;
+import il.cshaifasweng.OCSFMediatorExample.client.events.*;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import il.cshaifasweng.OCSFMediatorExample.entities.UserManagement;
 import org.greenrobot.eventbus.EventBus;
 
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
@@ -13,6 +11,7 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SimpleClient extends AbstractClient {
 
@@ -132,6 +131,12 @@ public class SimpleClient extends AbstractClient {
 		}
 		else if (msg instanceof updateResponse) {
 			generateResponse((updateResponse) msg);
+		}
+		else if (msg instanceof UserManagement){
+			handleUserManagement((UserManagement)msg);
+		}
+		else if (msg instanceof ReservationSave) {
+			EventBus.getDefault().post((ReservationSave)msg);
 		}
 		else {
 				System.out.println("Unhandled message: " + (String) msg);
@@ -263,6 +268,17 @@ public class SimpleClient extends AbstractClient {
 		else if (firstItem instanceof CreditCard) {
 			handleCreditCards(list);
 		}
+		else if(firstItem instanceof Users){
+			System.out.println("Received users");
+			List<Users> usersList = list.stream()
+					.filter(obj -> obj instanceof Users) // Ensure only Users objects are included
+					.map(obj -> (Users) obj)             // Cast each object to Users
+					.collect(Collectors.toList());
+
+			EventBus.getDefault().post(new UsersListEvent(usersList));
+
+			//EventBus.getDefault().post(new UsersListEvent((List<Users>) list));
+		}
 	}
 
 	private void handleCreditCards(List<?> list) {
@@ -299,6 +315,13 @@ public class SimpleClient extends AbstractClient {
 		}
 		else if(message.startsWith("Cancle Reservation ")){
 			EventBus.getDefault().post(message.substring("Cancle Reservation ".length()).trim());}
+		else if (message.equals("Registration completed successfully")) {
+			EventBus.getDefault().post(message);
+
+		}
+		else if(message.equals("go To payment check")){
+			EventBus.getDefault().post(message);
+		}
 		else {
 			switch (message) {
 				case "Reservation confirmed successfully.":
@@ -346,6 +369,9 @@ public class SimpleClient extends AbstractClient {
 			// Post the event with both ID and name
 			EventBus.getDefault().post(new DeleteMealEvent(mealId, mealName));
 		}
+	}
+	private void handleUserManagement(UserManagement msg){
+		EventBus.getDefault().post(msg);
 	}
 
 	private void generateResponse(updateResponse response) {

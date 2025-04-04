@@ -1,8 +1,11 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
+import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
 import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.UserManagement;
 import il.cshaifasweng.OCSFMediatorExample.entities.Users;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -14,6 +17,7 @@ import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
 public class UsersDB {
     private static Session session;
     public static List<Users> users;
+
     public static List<Users> getUsers() {
         Session localSession = null; // Local session for this method
         try {
@@ -39,6 +43,7 @@ public class UsersDB {
         }
         return users;
     }
+
     public static boolean checkAndUpdateUserSignInStatus(String username) throws Exception {
         Session session = null;
         try {
@@ -83,6 +88,7 @@ public class UsersDB {
             }
         }
     }
+
     public static void SignOut(UserCheck us) throws Exception {
         try {
             // Open a session if it's not already open
@@ -119,6 +125,7 @@ public class UsersDB {
             }
         }
     }
+
     public static void UpdateEmailAndPassword (UserCheck us) throws Exception {
         try {
             // Open a session if it's not already open
@@ -144,6 +151,7 @@ public class UsersDB {
 
                 session.update(user);
                 session.getTransaction().commit();
+                updateUserDetailsById(user);
             } else {
                 // User not found
                 return;
@@ -159,6 +167,69 @@ public class UsersDB {
             }
         }
     }
+
+    public static void UpdateGenderAgeRoleUsername (UserCheck us) throws Exception {
+        Session session = null;
+        Transaction transaction = null;
+        try {
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+
+            // Create a Criteria query to find the user by username
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Users> query = builder.createQuery(Users.class);
+            Root<Users> root = query.from(Users.class);
+            query.select(root).where(builder.equal(root.get("username"), us.getFirstName()));
+
+            // Execute the query to get the user
+            Users user = session.createQuery(query).uniqueResult();
+
+            if (user != null) {
+
+                user.setGender(us.getGender());
+                user.setAge(us.getAge());
+                user.setRole(us.getRole());
+                user.setPassword(us.getPassword());
+                user.setEmail(us.getEmail());
+                user.setUsername(us.getUsername());
+                user.setPassword(us.getPassword());
+                session.update(user);
+                transaction.commit();
+                updateUserDetailsById(user);
+            } else {
+                System.out.println("User not found");
+                return;
+            }
+        } catch (Exception e) {
+            if (session != null && session.getTransaction() != null) {
+                session.getTransaction().rollback(); // Rollback in case of an error
+            }
+            throw e; // Re-throw the exception
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close(); // Close the session
+            }
+        }
+    }
+    public static void updateUserDetailsById(Users UserU) {
+        // Check if the users list is initialized
+        if (users == null || users.isEmpty()) {
+            System.out.println("The users list is empty or not initialized.");
+            return;
+        }
+
+        // Search for the user with the given ID
+        for (Users user : users) {
+            if (user.getId() == UserU.getId()) {
+                user=UserU;
+                return; // Exit the loop after updating
+            }
+        }
+    }
+
+
+
     public static boolean checkUser(String username, String password) throws Exception {
         if (session == null || !session.isOpen()) {
             SessionFactory sessionFactory = getSessionFactory();
@@ -180,6 +251,7 @@ public class UsersDB {
         }
         return count > 0;
     }
+
     public static boolean checkEmail(UserCheck us) throws Exception {
         if (session == null || !session.isOpen()) {
             SessionFactory sessionFactory = getSessionFactory();
@@ -207,6 +279,7 @@ public class UsersDB {
             return false;
         }
     }
+
     public static boolean checkUserName(String username) throws Exception {
         if (session == null || !session.isOpen()) {
             SessionFactory sessionFactory = getSessionFactory();
@@ -227,6 +300,7 @@ public class UsersDB {
         }
         return count > 0;
     }
+
     public static void getUserInfo(UserCheck us) throws Exception {
         if (session == null || !session.isOpen()) {
             SessionFactory sessionFactory = getSessionFactory();
@@ -255,6 +329,7 @@ public class UsersDB {
             us.setRole(user.getRole());
         }
     }
+
     public static String AddNewUser(UserCheck newUser) {
         // Extract data from the mealEvent object
         String UserName = newUser.getUsername();
@@ -262,6 +337,7 @@ public class UsersDB {
         String UserEmail = newUser.getEmail();
         String UserGender = newUser.getGender();
         int UserAge = newUser.getAge();
+        String role= newUser.getRole();
         try {
             // Ensure the session is open
             if (session == null || !session.isOpen()) {
@@ -289,7 +365,7 @@ public class UsersDB {
                 newU.setEmail(UserEmail);
                 newU.setGender(UserGender);
                 newU.setAge(UserAge);
-                newU.setRole("Customer");
+                newU.setRole(role);
                 session.save(newU);
                 users.add(newU);
                 System.out.println("New User added: " + UserName);
@@ -309,6 +385,55 @@ public class UsersDB {
         }
         return "Registration completed successfully";
     }
+
+    public static void UpdateUser (UserCheck us) throws Exception {
+        try {
+            // Open a session if it's not already open
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+
+            // Begin a transaction
+            session.beginTransaction();
+
+            // Create a Criteria query to find the user by username
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Users> query = builder.createQuery(Users.class);
+            Root<Users> root = query.from(Users.class);
+            query.select(root).where(builder.equal(root.get("username"), us.getFirstName()));
+            System.out.println(us.getFirstName()+" to make sure it is the right old userName");
+            // Execute the query to get the user
+            Users user = session.createQuery(query).uniqueResult();
+
+            if (user != null) {
+
+                user.setEmail(us.getEmail());
+                user.setPassword(us.getPassword());
+                user.setAge(us.getAge());
+                user.setGender(us.getGender());
+                user.setRole(us.getRole());
+                user.setUsername(us.getUsername());
+                System.out.println(user);
+
+                session.update(user);
+                session.getTransaction().commit();
+                //updateUserDetailsById(user);
+            } else {
+                // User not found
+                return;
+            }
+        } catch (Exception e) {
+            if (session != null && session.getTransaction() != null) {
+                System.out.println("hhhhhhhhhhh no saved user");
+                session.getTransaction().rollback(); // Rollback in case of an error
+            }
+            throw e; // Re-throw the exception
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close(); // Close the session
+            }
+        }
+    }
+
     public static void printAllUsers() {
         try {
             System.out.println("\n=== Users List ===");
@@ -320,6 +445,7 @@ public class UsersDB {
             e.printStackTrace();
         }
     }
+
     public static void generateBasicUser1() throws Exception {
         // Helper function to read image as byte[]
         if (session == null || !session.isOpen()) { // hala added to Ensure session is opened before calling generateOrders().
@@ -381,6 +507,7 @@ public class UsersDB {
             throw new Exception("An error occurred while generating the user.", e);
         }
     }
+
     private static boolean isUserExists(String username) {
         System.out.println("Checking if user exists: " + username);
         Query query = session.createQuery("FROM Users WHERE username = :username");
@@ -388,5 +515,39 @@ public class UsersDB {
         List<?> result = query.list();
         System.out.println("result check");
         return !result.isEmpty();
+    }
+
+    public static void delete(String userName) throws Exception {
+        System.out.println("now I am in the function to delete the user: " + userName);
+        try (Session session = App.getSessionFactory().openSession()) {
+            session.beginTransaction();
+           // Users user = session.get(Users.class, userName);
+            // Create a Criteria query to find the user by username
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Users> query = builder.createQuery(Users.class);
+            Root<Users> root = query.from(Users.class);
+            query.select(root).where(builder.equal(root.get("username"), userName));
+            // Execute the query to get the user
+            Users user = session.createQuery(query).uniqueResult();
+            if (user != null) {
+                // Check if the user is signed in
+                users.remove(user);
+                session.delete(user);
+                session.getTransaction().commit();
+                System.out.println("Deleted user: " + userName);
+            } else {
+                // User not found
+                return;
+            }
+        } catch (Exception e) {
+            if (session != null && session.getTransaction() != null) {
+                session.getTransaction().rollback(); // Rollback in case of an error
+            }
+            throw e; // Re-throw the exception
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close(); // Close the session
+            }
+        }
     }
 }

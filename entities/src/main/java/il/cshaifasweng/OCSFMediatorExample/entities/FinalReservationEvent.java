@@ -14,6 +14,7 @@ public class FinalReservationEvent implements Serializable {
     private String phoneNumber; // New field for user's phone number
 
     private String email; // New field for user's email
+    private String creditCard_num;
 
 
     // Constructor with all fields
@@ -87,6 +88,14 @@ public class FinalReservationEvent implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getCreditCard_num() {
+        return creditCard_num;
+    }
+
+    public void setCreditCard_num(String creditCard_num) {
+        this.creditCard_num = creditCard_num;
     }
 
     @Override

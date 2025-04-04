@@ -212,5 +212,6 @@ public class ReportsViewController {
     }
     public void setBranch(String role) {
         this.currentRestaurant = role;
+        restaurant_name.setVisible(false);
     }
 }

@@ -225,6 +225,12 @@ public class WorkerController {
                 switchScreen("Wroker-Reservation","Wroker-Reservation");
                 break;
             }
+            case "branches_managment":
+            {
+
+                switchScreen("register","register");
+                break;
+            }
             default: {
                 System.out.println("Unknown screen: " + screenName);
                 //switchScreen("mainScreen");

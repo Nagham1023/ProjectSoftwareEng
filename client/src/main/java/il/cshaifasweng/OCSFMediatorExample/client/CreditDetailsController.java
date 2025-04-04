@@ -15,12 +15,14 @@ import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
 import java.awt.*;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.greenrobot.eventbus.EventBus;
@@ -29,7 +31,7 @@ import org.greenrobot.eventbus.Subscribe;
 public class CreditDetailsController {
 
     static public Order done_Order;
-    static public FinalReservationEvent done_Reservation;
+    static public ReservationSave done_Reservation;
     static public String mode;
     @FXML
     private TextField cardNumberField;
@@ -359,9 +361,12 @@ public class CreditDetailsController {
             }
         });
         } else {
-            errorLabel.setText(creditCardCheck.getResponse());
+
             Platform.runLater(() -> {
                 try {
+                    //errorLabel.setText(creditCardCheck.getResponse());
+                    errorLabel.setText(creditCardCheck.getResponse());
+                    sendReservationConfirmationEmail(CreditDetailsController.personalDetails,done_Reservation.getReservationSaveID(), done_Reservation.getRestaurantName(),done_Reservation.getSeats() );
                     App.setRoot("mainScreen");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -378,7 +383,6 @@ public class CreditDetailsController {
         if(mode.equals("Order")){
         done_Order.setDate(LocalDate.now());
         done_Order.setOrderTime(LocalDateTime.now());}
-
         // Attempt to validate and then directly use the expiry date string
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
         try {
@@ -399,7 +403,7 @@ public class CreditDetailsController {
                 if(mode.equals("Order")) {
                     paymentCheck = new PaymentCheck(savedCardsComboBox.getValue(), personalDetails, done_Order, "Order");
                 } else {
-                    paymentCheck = new PaymentCheck(savedCardsComboBox.getValue(), personalDetails,"Reservation");
+                    paymentCheck = new PaymentCheck(savedCardsComboBox.getValue(), personalDetails,done_Reservation,"Reservation");
                 }
             }
             else {
@@ -407,7 +411,7 @@ public class CreditDetailsController {
                     paymentCheck = new PaymentCheck(creditcard, personalDetails, done_Order, "Order");
                 }
                 else {
-                    paymentCheck = new PaymentCheck(creditcard, personalDetails, "Reservation");
+                    paymentCheck = new PaymentCheck(creditcard, personalDetails,done_Reservation, "Reservation");
                 }
 
                 System.out.println("new credit card");
@@ -445,6 +449,32 @@ public class CreditDetailsController {
         savedCardsComboBox.getItems().clear();
         savedCardsComboBox.getItems().add(null); // First option
         savedCardsComboBox.getSelectionModel().selectFirst();
+    }
+    public static void sendReservationConfirmationEmail(PersonalDetails customer, int orderNumber,
+                                                  String restaurantName, int seats) {
+        // Create the subject
+        String subject = "Reservation Confirmation - Order #" + orderNumber;
+
+        // Format the date
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String currentDate = dateFormat.format(new Date());
+
+        // Construct the body of the email
+        StringBuilder body = new StringBuilder();
+        body.append("Dear ").append(customer.getName()).append(",\n\n");
+        body.append("Thank you for your order at ").append(restaurantName).append("!\n\n");
+        body.append("Here are the details of your reservation").append("\n");
+        body.append("Order Date: ").append(currentDate).append("\n\n");
+        body.append("number of seats:\n");
+
+        body.append("- ").append(seats).append("\n");
+
+        body.append("\nWe hope you enjoy your visit!\n\n");
+        body.append("Best regards,\n");
+        body.append("Mama's Restaurant Team");
+
+        // Now you can call the email sender with the subject, body, and the customer's email
+        EmailSender.sendEmail(subject, body.toString(), customer.getEmail());
     }
 }
 
