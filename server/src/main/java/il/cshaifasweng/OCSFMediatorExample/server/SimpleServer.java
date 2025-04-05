@@ -332,7 +332,11 @@ public class SimpleServer extends AbstractServer {
 
         if (msg instanceof String && ((String) msg).startsWith("Cancel Reservation:")) {
             printAllReservationSaves();
-            handleCancellationRequest((String) msg, client);
+            try{
+                handleCancellationRequest((String) msg, client);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
             printAllReservationSaves();
             sendToAll(new ReConfirmEvent());
 
@@ -1619,58 +1623,59 @@ public class SimpleServer extends AbstractServer {
         }
     }
 
-    private void handleCancellationRequest(String msg, ConnectionToClient client) {
+    private void handleCancellationRequest(String msg, ConnectionToClient client)throws Exception{
         try {
             // Parse the message
             String data = msg.substring("Cancel Reservation:".length()).trim();
             String[] parts = data.split(",");
 
+            if (parts.length != 2) {
+                client.sendToClient("Error: Invalid cancellation request format");
+                return;
+            }
 
             String name = parts[0].trim();
-            String phone = parts[1].trim();
-            String email = parts[2].trim();
+            int reservationId;
+
+            try {
+                reservationId = Integer.parseInt(parts[1].trim());
+            } catch (NumberFormatException e) {
+                client.sendToClient("Error: Reservation ID must be a number");
+                return;
+            }
 
             // Process cancellation
-            String result = cancelReservation(name, phone, email);
-
-            client.sendToClient("Cancle Reservation " + result);
+            String result = cancelReservation(name, reservationId);
+            client.sendToClient("Cancel Reservation " + result);
 
         } catch (Exception e) {
             e.printStackTrace();
+            client.sendToClient("Error: " + e.getMessage());
         }
     }
 
-    public String cancelReservation(String name, String phone, String email) {
+    public String cancelReservation(String name, int reservationId) {
         Session session = App.getSessionFactory().openSession();
         try {
             session.beginTransaction();
 
-            // Query for matching reservations
-            Query<ReservationSave> query = session.createQuery(
-                    "FROM ReservationSave r WHERE " +
-                            "r.fullName = :name AND " +
-                            "r.phoneNumber = :phone AND " +
-                            "r.email = :email", ReservationSave.class);
+            // Get reservation by ID
+            ReservationSave reservationToCancel = session.get(ReservationSave.class, reservationId);
 
-            List<ReservationSave> reservations = query
-                    .setParameter("name", name)
-                    .setParameter("phone", phone)
-                    .setParameter("email", email)
-                    .getResultList();
-
-            // Filter only future reservations
-            LocalDateTime now = LocalDateTime.now();
-            List<ReservationSave> futureReservations = reservations.stream()
-                    .filter(r -> !r.getReservationDateTime().isBefore(now)) // Keep only future reservations
-                    .sorted(Comparator.comparing(ReservationSave::getReservationDateTime)) // Sort by date
-                    .collect(Collectors.toList());
-
-            if (futureReservations.isEmpty()) {
-                return "Error: No future reservation found to cancel";
+            // Validate reservation exists and name matches
+            if (reservationToCancel == null) {
+                return "Error: No reservation found with ID " + reservationId;
             }
 
-            // Take only the first future reservation
-            ReservationSave reservationToCancel = futureReservations.get(0);
+            if (!reservationToCancel.getFullName().equalsIgnoreCase(name)) {
+                return "Error: Name doesn't match the reservation";
+            }
+
+            // Check if reservation is in the future
+            LocalDateTime now = LocalDateTime.now();
+            if (reservationToCancel.getReservationDateTime().isBefore(now)) {
+                return "Error: Cannot cancel past reservation";
+            }
 
             // Calculate charge
             int charge = calculateCancellationCharge(reservationToCancel, now);
@@ -1689,7 +1694,9 @@ public class SimpleServer extends AbstractServer {
 
             // Send cancellation email
             String emailContent = buildCancellationEmail(reservationToCancel, charge);
-            EmailSender.sendEmail("Reservation Cancellation Confirmation", emailContent, email);
+            EmailSender.sendEmail("Reservation Cancellation Confirmation",
+                    emailContent,
+                    reservationToCancel.getEmail());
 
             return charge > 0 ?
                     "Success: Cancelled with charge of " + charge + " ILS" :
