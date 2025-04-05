@@ -40,6 +40,7 @@ import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.ReportDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.*;
+
 import il.cshaifasweng.OCSFMediatorExample.server.RevenueReport;
 import il.cshaifasweng.OCSFMediatorExample.server.OrderTypeReport;
 
@@ -64,7 +65,8 @@ public class SimpleServer extends AbstractServer {
 
         //Reservation Management - omar
         if (msg instanceof ReservationEvent) {
-            while(ReservationOperation) {}
+            while (ReservationOperation) {
+            }
             ReservationOperation = true;
             ReservationEvent reservation = (ReservationEvent) msg;
             printAllTablesInRestaurant(reservation.getRestaurantName());
@@ -147,10 +149,10 @@ public class SimpleServer extends AbstractServer {
             }
             ReservationOperation = false;
         }
-
         else if (msg instanceof FinalReservationEvent) {
 
-            while(ReservationOperation) {}
+            while (ReservationOperation) {
+            }
             ReservationOperation = true;
             try {
                 FinalReservationEvent event = (FinalReservationEvent) msg;
@@ -227,8 +229,7 @@ public class SimpleServer extends AbstractServer {
                             throw new RuntimeException(e);
                         }
                     }
-                }
-                else {
+                } else {
                     System.out.println("*********************************************");
                     System.out.println("The available tables are: " + availableTables);
                     System.out.println("*********************************************");
@@ -263,11 +264,12 @@ public class SimpleServer extends AbstractServer {
             ReservationOperation = false;
         }
         else if (msg instanceof String && ((String) msg).startsWith("Cancel Reservation:")) {
-            while(ReservationOperation) {}
+            while (ReservationOperation) {
+            }
             ReservationOperation = true;
-            try{
+            try {
                 handleCancellationRequest((String) msg, client);
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             printAllReservationSaves();
@@ -275,31 +277,29 @@ public class SimpleServer extends AbstractServer {
             ReservationOperation = false;
 
         }
-        else if(msg instanceof FaildPayRes){
-            try{
-            client.sendToClient(msg);}
-            catch(Exception e){
+        else if (msg instanceof FaildPayRes) {
+            try {
+                client.sendToClient(msg);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
 
-        if (msg instanceof String && ((String) msg).startsWith("Cancel Reservation:")) {
-            while(ReservationOperation) {}
-            ReservationOperation = true;
-            printAllReservationSaves();
-            try{
-                handleCancellationRequest((String) msg, client);
-            }catch(Exception e){
+
+
+        else if (msg instanceof specificComplains) {
+
+            try {
+                RestaurantList restaurantList = new RestaurantList();
+                restaurantList.setRestaurantList(getAllRestaurants()); // Set list to send
+                System.out.println(restaurantList.getRestaurantList());
+                client.sendToClient(restaurantList); // send to client
+            } catch (IOException e) {
                 e.printStackTrace();
             }
-            printAllReservationSaves();
-            sendToAll(new ReConfirmEvent());
-            ReservationOperation = false;
         }
-
-        if (msg instanceof specificComplains) {
-
+        else if (msg instanceof String && msg.equals("getAllRestaurants")) {
             try {
                 RestaurantList restaurantList = new RestaurantList();
                 restaurantList.setRestaurantList(getAllRestaurants()); // Set list to send
@@ -316,9 +316,10 @@ public class SimpleServer extends AbstractServer {
             System.out.println("Added new mealEvent to the database");
             ((mealEvent) msg).setMeal(addResult);
             sendToAll(msg);
+        }
 
 
-        if (msg instanceof updateResponse) {
+        else if (msg instanceof updateResponse) {
             updateResponse response = (updateResponse) msg;
             System.out.println("Received updateResponse from client: " + response.getnewResponse());
             // שליחת התגובה לכל הלקוחות (אם זה נדרש)
@@ -336,14 +337,17 @@ public class SimpleServer extends AbstractServer {
                 updateComplainResponseInDatabase(response);
                 System.out.println("Updating Complain Response In Database");
 
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         else if (msg instanceof MealEventUpgraded) {
             MealEventUpgraded UpdateMealEvent = (MealEventUpgraded) msg;
-            Meal addResult=AddNewMealUpgraded((MealEventUpgraded) msg);
-            mealEvent messagee= new mealEvent(UpdateMealEvent.getMealName(), UpdateMealEvent.getPrice(), String.valueOf(addResult.getId()),addResult);
+            Meal addResult = AddNewMealUpgraded((MealEventUpgraded) msg);
+            mealEvent messagee = new mealEvent(UpdateMealEvent.getMealName(), UpdateMealEvent.getPrice(), String.valueOf(addResult.getId()), addResult);
             sendToAll(messagee);
             //if (addResult != null)
-                //sendToAll("added");
+            //sendToAll("added");
         }
         else if (msg instanceof UpdateMealRequest) {
             //here we're adding new meal !!
@@ -352,7 +356,7 @@ public class SimpleServer extends AbstractServer {
             System.out.println("Added new UpdateMealRequest to the database");
             //sendToAll(msg);
             //if (Objects.equals(addResult, "added")) {
-                sendToAll(msg);
+            sendToAll(msg);
             //}
             //else
 
@@ -368,13 +372,13 @@ public class SimpleServer extends AbstractServer {
         else if (msg instanceof String && msgString.startsWith("menu")) {
             String branch = msgString.substring(4);
             System.out.println("getting a menu to " + branch);
-            List<Meal> ml=null;
+            List<Meal> ml = null;
             try {
-                if(branch.equals("ALL")) {
+                if (branch.equals("ALL")) {
                     ml = MealsDB.GetAllMeals();
+                } else {
+                    ml = getmealsb(branch);
                 }
-                else{
-                    ml = getmealsb(branch);}
                 MealsList sending = new MealsList(ml);
                 client.sendToClient(sending);
             } catch (Exception e) {
@@ -400,15 +404,15 @@ public class SimpleServer extends AbstractServer {
             }
 
         }
-        else if (msg.toString().startsWith("DeleteMeal")){
+        else if (msg.toString().startsWith("DeleteMeal")) {
             System.out.println("Deleting MEAL");
             String mealId = msgString.substring(6);
             int mealIdn = Integer.parseInt(msgString.replaceAll("\\D+", ""));
             System.out.println(mealIdn);
-            String S=deleteMeal(mealIdn);
+            String S = deleteMeal(mealIdn);
             System.out.println("ftt am7a dab3at esa");
             // Build structured message
-            String response = "delete"+" "+mealId+" "+S;
+            String response = "delete" + " " + mealId + " " + S;
 
             try {
                 System.out.println("Sending " + response);
@@ -482,15 +486,13 @@ public class SimpleServer extends AbstractServer {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            }
-            else if (((UserCheck) msg).isState() == 5) {//if changing the info
+            } else if (((UserCheck) msg).isState() == 5) {//if changing the info
                 try {
                     UpdateEmailAndPassword((UserCheck) msg);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            }
-            else if (((UserCheck) msg).isState() == 9) {//Update in db
+            } else if (((UserCheck) msg).isState() == 9) {//Update in db
                 try {
                     UsersDB.UpdateUser((UserCheck) msg);
                 } catch (Exception e) {
@@ -498,9 +500,9 @@ public class SimpleServer extends AbstractServer {
                 }
             }
         }
-        else if (msg instanceof String && ((String)msg).equals("Get all users")) {
+        else if (msg instanceof String && ((String) msg).equals("Get all users")) {
             System.out.println("Getting all users");
-            List<Users> users= UsersDB.getUsers();
+            List<Users> users = UsersDB.getUsers();
             try {
                 client.sendToClient(users);
                 sendToAll(users);
@@ -508,11 +510,10 @@ public class SimpleServer extends AbstractServer {
                 throw new RuntimeException(e);
             }
         }
-        else if(msg instanceof UserManagement){
-            if(((UserManagement) msg).getMethod().equals("update")){
-               // String response = UsersDB.UpdateUser((UserManagement) msg);
-            }
-            else {
+        else if (msg instanceof UserManagement) {
+            if (((UserManagement) msg).getMethod().equals("update")) {
+                // String response = UsersDB.UpdateUser((UserManagement) msg);
+            } else {
                 System.out.println("Invalid method BUT I WILL DELETE THE USER");
                 try {
                     UsersDB.delete(((UserManagement) msg).getUsername());
@@ -539,82 +540,75 @@ public class SimpleServer extends AbstractServer {
                 CreditCard newCC = paymentCheck.getCreditCard();
                 PersonalDetails newPD = paymentCheck.getPersonalDetails();
 
-                if(paymentCheck.getMode().equals("Order")){
-                Order newOrder = paymentCheck.getOrder();
-                newOrder.setRestaurantId(getRestaurantIdByName(newOrder.getRestaurantName()));
+                if (paymentCheck.getMode().equals("Order")) {
+                    Order newOrder = paymentCheck.getOrder();
+                    newOrder.setRestaurantId(getRestaurantIdByName(newOrder.getRestaurantName()));
 
 
-                /*saves the customizations of every meal in the order*/
-                for(MealInTheCart meal : newOrder.getMeals())
-                    saveCustomizationsbool(meal.getMeal().getCustomizationsList());
+                    /*saves the customizations of every meal in the order*/
+                    for (MealInTheCart meal : newOrder.getMeals())
+                        saveCustomizationsbool(meal.getMeal().getCustomizationsList());
 
 
+                    if (cc == null) {
 
-                if (cc == null) {
 
+                        if (personalDetailsDB == null) {
+                            //System.out.println("the personal details is null and cc is null");
+                            newOrder.setCreditCard_num(newCC.getCardNumber());
+                            paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
+                            addCreditCardDetails(newCC, newPD, newOrder);
+                        } else {
+                            //System.out.println("the personal details is already added but cc is null");
+                            paymentCheck.setResponse("Added the Credit Card to the database.");
 
-                    if (personalDetailsDB == null) {
-                        //System.out.println("the personal details is null and cc is null");
-                        newOrder.setCreditCard_num(newCC.getCardNumber());
-                        paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
-                        addCreditCardDetails(newCC, newPD,newOrder);
+                            newOrder.setCreditCard_num(newCC.getCardNumber());
+                            addCreditCardToExistingPersonalDetails(newCC, personalDetailsDB, newOrder);
+                        }
+                        client.sendToClient(paymentCheck);
+                    } else {
+                        //System.out.println("not new credit card");
+                        if (personalDetailsDB == null) {
+                            //System.out.println("personal details null but cc is not null");
+                            //System.out.println("new personal details");
+                            newOrder.setCreditCard_num(cc.getCardNumber());
+
+                            paymentCheck.setResponse("Added the personal details to the database");
+                            addPersonalDetailsAndAssociateWithCreditCard(newPD, cc, newOrder);
+                        } else {
+                            //System.out.println("not null both");
+                            paymentCheck.setResponse("Updated the personal details to the database.");
+
+                            newOrder.setCreditCard_num(cc.getCardNumber());
+
+                            addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc, newOrder);
+                        }
+                        client.sendToClient(paymentCheck);
                     }
-                    else {
-                        //System.out.println("the personal details is already added but cc is null");
-                        paymentCheck.setResponse("Added the Credit Card to the database.");
-
-                        newOrder.setCreditCard_num(newCC.getCardNumber());
-                        addCreditCardToExistingPersonalDetails(newCC, personalDetailsDB,newOrder);
-                    }
-                    client.sendToClient(paymentCheck);
                 } else {
-                    //System.out.println("not new credit card");
-                    if(personalDetailsDB == null) {
-                        //System.out.println("personal details null but cc is not null");
-                        //System.out.println("new personal details");
-                        newOrder.setCreditCard_num(cc.getCardNumber());
-
-                        paymentCheck.setResponse("Added the personal details to the database");
-                        addPersonalDetailsAndAssociateWithCreditCard(newPD, cc,newOrder);
-                    }
-
-                    else {
-                        //System.out.println("not null both");
-                        paymentCheck.setResponse("Updated the personal details to the database.");
-
-                        newOrder.setCreditCard_num(cc.getCardNumber());
-
-                        addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc, newOrder);
-                    }
-                    client.sendToClient(paymentCheck);
-                }
-            }
-                else {
-                    ReservationSave newReservation= ((PaymentCheck) msg).getReservationEvent();
+                    ReservationSave newReservation = ((PaymentCheck) msg).getReservationEvent();
                     boolean result;
                     if (cc == null) {
 
 
                         if (personalDetailsDB == null) {
                             newReservation.setCreditCard_num(newCC.getCardNumber());
-                            result= handleSavingReservation(newReservation, client);
-                            if(result){
+                            result = handleSavingReservation(newReservation, client);
+                            if (result) {
                                 paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
-                                addCreditCardDetailsForRes(newCC, newPD,newReservation);}
-                            else{
+                                addCreditCardDetailsForRes(newCC, newPD, newReservation);
+                            } else {
                                 paymentCheck.setResponse("Payment Failed");
                             }
-                        }
-                        else {
+                        } else {
                             //System.out.println("the personal details is already added but cc is null");
 
-                            result= handleSavingReservation(newReservation, client);
-                            if(result){
+                            result = handleSavingReservation(newReservation, client);
+                            if (result) {
                                 paymentCheck.setResponse("Added the Credit Card to the database.");
                                 newReservation.setCreditCard_num(newCC.getCardNumber());
-                                addCreditCardToExistingPersonalDetailsForRes(newCC, personalDetailsDB,newReservation);
-                            }
-                            else{
+                                addCreditCardToExistingPersonalDetailsForRes(newCC, personalDetailsDB, newReservation);
+                            } else {
                                 paymentCheck.setResponse("Payment Failed");
                             }
 
@@ -622,32 +616,28 @@ public class SimpleServer extends AbstractServer {
                         client.sendToClient(paymentCheck);
                     } else {
                         //System.out.println("not new credit card");
-                        if(personalDetailsDB == null) {
+                        if (personalDetailsDB == null) {
                             //System.out.println("personal details null but cc is not null");
                             //System.out.println("new personal details");
-                            result= handleSavingReservation(newReservation, client);
-                            if(result){
+                            result = handleSavingReservation(newReservation, client);
+                            if (result) {
                                 newReservation.setCreditCard_num(cc.getCardNumber());
 
                                 paymentCheck.setResponse("Added the personal details to the database");
-                                addPersonalDetailsAndAssociateWithCreditCardForRes(newPD, cc,newReservation);
-                            }
-                            else{
+                                addPersonalDetailsAndAssociateWithCreditCardForRes(newPD, cc, newReservation);
+                            } else {
                                 paymentCheck.setResponse("Payment Failed");
                             }
 
-                        }
-
-                        else {
+                        } else {
                             //System.out.println("not null both");
 
-                            result =handleSavingReservation(newReservation, client);
-                            if(result){
+                            result = handleSavingReservation(newReservation, client);
+                            if (result) {
                                 newReservation.setCreditCard_num(cc.getCardNumber());
                                 paymentCheck.setResponse("Updated the personal details to the database.");
-                                addCreditCardToPersonalDetailsIfBothExistsForRes(personalDetailsDB, cc,newReservation);
-                            }
-                            else{
+                                addCreditCardToPersonalDetailsIfBothExistsForRes(personalDetailsDB, cc, newReservation);
+                            } else {
                                 paymentCheck.setResponse("Payment Failed");
                             }
                         }
@@ -674,7 +664,7 @@ public class SimpleServer extends AbstractServer {
                     if (creditCards != null && !creditCards.isEmpty()) {
                         System.out.println("in personal details simple server");
                         System.out.println(creditCards + " ^6666^^^^^^^^^");
-                        ListOfCC loc= new ListOfCC(creditCards);
+                        ListOfCC loc = new ListOfCC(creditCards);
                         client.sendToClient(loc);  // Send credit card details back to the client
                     } else {
                         client.sendToClient("No credit card details found for " + personal.getEmail());
@@ -692,7 +682,7 @@ public class SimpleServer extends AbstractServer {
             CancelOrderEvent cancelEvent = (CancelOrderEvent) msg;
             int orderNumber = Integer.parseInt(cancelEvent.getOrderNumber());
             Order order = OrdersDB.getOrderById(orderNumber);
-            String email= cancelEvent.getCustomerEmail();
+            String email = cancelEvent.getCustomerEmail();
 
             try {
                 CancelOrderEvent event = new CancelOrderEvent(order, cancelEvent.getOrderNumber());
@@ -701,8 +691,7 @@ public class SimpleServer extends AbstractServer {
                 } else {
                     if (order.getCustomerEmail().equals(email)) {
                         event.setStatus("Order found");
-                    }
-                    else {
+                    } else {
                         event.setStatus("Order not found with email: " + email);
                     }
 
@@ -721,8 +710,7 @@ public class SimpleServer extends AbstractServer {
                 if (order == null) {
                     System.out.println("Order not found.");
                     client.sendToClient("Order not found.");
-                }
-                else client.sendToClient(order);
+                } else client.sendToClient(order);
                 //System.out.println("sending back the order to the client "+order);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -734,25 +722,19 @@ public class SimpleServer extends AbstractServer {
         else if (msg instanceof complainEvent) {
             System.out.println("Received adding new complainEvent ");
             complainEvent ce = (complainEvent) msg;
-            if(Objects.equals(ce.getKind(), "Complaint"))
-            {
+            if (Objects.equals(ce.getKind(), "Complaint")) {
                 Order order = OrderById(Integer.parseInt(ce.getOrderNum()));
-                if(order == null)
-                {
+                if (order == null) {
                     try {
                         client.sendToClient("No order!");
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                }
-                else
-                {
-                    if(Objects.equals(order.getRestaurantName(), ce.getRestaurant().getRestaurantName())) {
-                        addComplainIntoDatabase(ce,client);
+                } else {
+                    if (Objects.equals(order.getRestaurantName(), ce.getRestaurant().getRestaurantName())) {
+                        addComplainIntoDatabase(ce, client);
                         sendToAll(msg);
-                    }
-                    else
-                    {
+                    } else {
                         try {
                             client.sendToClient("Not same restaurant!");
                         } catch (IOException e) {
@@ -761,8 +743,7 @@ public class SimpleServer extends AbstractServer {
                     }
                 }
 
-            }
-            else {
+            } else {
                 addComplainIntoDatabase(ce, client);
                 sendToAll(msg);
             }
@@ -893,22 +874,22 @@ public class SimpleServer extends AbstractServer {
                     break;
                 case "deliveryReport":
                     OrderTypeReport deliveryReport = new OrderTypeReport();
-                    response = deliveryReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "DELIVERY");
+                    response = deliveryReport.generate(reportRequest.getDate(), reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "DELIVERY");
                     break;
                 case "pickupReport":
                     OrderTypeReport pickupReport = new OrderTypeReport();
-                    response = pickupReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "PICKUP");
+                    response = pickupReport.generate(reportRequest.getDate(), reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "PICKUP");
                     break;
                 case "allOrdersReport":
                     OrderTypeReport allOrdersReport = new OrderTypeReport();
-                    response = allOrdersReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "ALL");
+                    response = allOrdersReport.generate(reportRequest.getDate(), reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "ALL");
                     break;
                 case "ComplainReport":
                     ComplainReport complainReport = new ComplainReport();
-                    if(reportRequest.getTargetRestaurant().equals("ALL"))
-                        response = complainReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "ALL");
+                    if (reportRequest.getTargetRestaurant().equals("ALL"))
+                        response = complainReport.generate(reportRequest.getDate(), reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "ALL");
                     else
-                        response = complainReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "ONE");
+                        response = complainReport.generate(reportRequest.getDate(), reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "ONE");
                     break;
 
                 // You can add more cases here for other report types in the future
@@ -966,19 +947,18 @@ public class SimpleServer extends AbstractServer {
                 // Retrieve current meals based on branch name
                 List<Meal> currentMeals;
 
-                if (options.getBranchName().equals("ALL")) {
+                if (options.getBranchName().toLowerCase().equals("all")) {
                     currentMeals = getAllMeals();
-                }
-                else{
+                } else {
                     currentMeals = getRestaurantByName(options.getBranchName()).getMeals();
                 }
                 System.out.println("Current meals for branch " + options.getBranchName() + ": " + currentMeals.size());
 
                 // Handle reset option: Send all meals if no filters are applied
-                if (options.getCustomizationNames().isEmpty() && options.getRestaurantNames().isEmpty()) {
+                if (options.getCustomizationNames().isEmpty() && options.getRestaurantNames().isEmpty()||(options.getBranchName().toLowerCase().equals("all")&&options.getCustomizationNames().isEmpty())) {
                     System.out.println("No filters applied. Sending all meals.");
                     try {
-                        client.sendToClient(currentMeals);
+                        client.sendToClient(new MealsList(currentMeals));
                         return;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -1021,8 +1001,8 @@ public class SimpleServer extends AbstractServer {
                 while (iterator.hasNext()) {
                     Meal meal = iterator.next();
                     boolean flag = false;
-                    for(Meal ml : currentMeals){
-                        if(ml.getName().equals(meal.getName())){
+                    for (Meal ml : currentMeals) {
+                        if (ml.getName().equals(meal.getName())) {
                             flag = true;
                         }
                     }
@@ -1094,21 +1074,21 @@ public class SimpleServer extends AbstractServer {
             System.out.println("Received update price message from client ");
             //sendToAllClients(msg);
             try {
-                if(((updatePrice) msg).getPurpose().equals("changing")){
-                    updatePrice req=(updatePrice)msg;
+                if (((updatePrice) msg).getPurpose().equals("changing")) {
+                    updatePrice req = (updatePrice) msg;
                     updateMealPriceInDatabase(req);
                     //String mealId = String.valueOf(req.getIdMeal());
                     deletePriceChangeReq(req.getIdMeal());
                     client.sendToClient(msg);
                     sendToAll(msg);
                 } else if (((updatePrice) msg).getPurpose().equals("denying")) {
-                    deletePriceChangeReq( ((updatePrice) msg).getIdMeal());
+                    deletePriceChangeReq(((updatePrice) msg).getIdMeal());
                     client.sendToClient(msg);
                     sendToAll(msg);
 
-                } else{
-                    MealUpdateRequest req= new MealUpdateRequest();
-                    req=AddUpdatePriceRequest((updatePrice) msg);
+                } else {
+                    MealUpdateRequest req = new MealUpdateRequest();
+                    req = AddUpdatePriceRequest((updatePrice) msg);
                     client.sendToClient(req);
                     sendToAll(req);
                 }
@@ -1119,8 +1099,8 @@ public class SimpleServer extends AbstractServer {
             }
 
         }
-        else if (msg instanceof String && msgString.equals("show change price requests")){
-            List<MealUpdateRequest> requests=null;
+        else if (msg instanceof String && msgString.equals("show change price requests")) {
+            List<MealUpdateRequest> requests = null;
             try {
                 requests = getAllRequestsWithMealDetails();
                 PCRequestsList sending = new PCRequestsList(requests);
@@ -1218,7 +1198,8 @@ public class SimpleServer extends AbstractServer {
         return restaurant; // Returns null if no restaurant is found
     }
 
-    private List<TableNode> getAvailableTables(String restaurantName, LocalDateTime reservationDateTime, int seats, boolean isInside) {
+    private List<TableNode> getAvailableTables(String restaurantName, LocalDateTime reservationDateTime, int seats,
+                                               boolean isInside) {
         List<TableNode> availableTables = new ArrayList<>();
 
         try (Session session = getSessionFactory().openSession()) {
@@ -1256,7 +1237,8 @@ public class SimpleServer extends AbstractServer {
         return availableTables;
     }
 
-    private List<TableNode> findMinimalTableCombination(List<TableNode> tables, int seats, LocalDateTime reservationDateTime) {
+    private List<TableNode> findMinimalTableCombination(List<TableNode> tables, int seats, LocalDateTime
+            reservationDateTime) {
         // Sort tables in descending order by capacity
         tables.sort((a, b) -> Integer.compare(b.getCapacity(), a.getCapacity()));
 
@@ -1288,7 +1270,8 @@ public class SimpleServer extends AbstractServer {
     }
 
 
-    private void debugPrintTableSelection(List<TableNode> selectedTables, int requiredSeats, LocalDateTime reservationDateTime) {
+    private void debugPrintTableSelection(List<TableNode> selectedTables, int requiredSeats, LocalDateTime
+            reservationDateTime) {
         System.out.println("********************************************************");
         System.out.println("DEBUGGING TABLE SELECTION");
         System.out.println("Reservation Time: " + reservationDateTime);
@@ -1332,7 +1315,8 @@ public class SimpleServer extends AbstractServer {
         return true; // Table is available
     }
 
-    private void assignTablesToReservation(List<TableNode> tables, LocalDateTime reservationDateTime, boolean isInside, String restaurantName) {
+    private void assignTablesToReservation(List<TableNode> tables, LocalDateTime reservationDateTime,
+                                           boolean isInside, String restaurantName) {
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
             LocalTime closingHour = getRestaurantByName(restaurantName).getClosingTime();
@@ -1369,7 +1353,6 @@ public class SimpleServer extends AbstractServer {
         System.out.println("i am in assigdTablesToReservation ");
 
     }
-
 
 
     private List<ReservationEvent> check_Available_Reservation(ReservationEvent reservation) {
@@ -1830,7 +1813,6 @@ public class SimpleServer extends AbstractServer {
     }
 
 
-
 //    public List<Meal> getAllMeals() {
 //        try (Session session = App.getSessionFactory().openSession()) {
 //            session.beginTransaction();
@@ -1849,7 +1831,7 @@ public class SimpleServer extends AbstractServer {
 //            return new ArrayList<>();
 //        }
 //    }
-  
+
 
     private String getTableDetails(int tableID) {
         StringBuilder details = new StringBuilder();
@@ -1991,7 +1973,7 @@ public class SimpleServer extends AbstractServer {
     }
 
 
-    private void handleCancellationRequest(String msg, ConnectionToClient client)throws Exception{
+    private void handleCancellationRequest(String msg, ConnectionToClient client) throws Exception {
         try {
             // Parse the message
             String data = msg.substring("Cancel Reservation:".length()).trim();
@@ -2199,7 +2181,7 @@ public class SimpleServer extends AbstractServer {
             for (UpdatePriceRequest request : requests) {
                 Meal meal = request.getMeal();
                 dtos.add(new MealUpdateRequest(
-                        String.valueOf(meal.getId()) ,
+                        String.valueOf(meal.getId()),
                         meal.getName(),
                         meal.getDescription(),
                         meal.getImage(),
@@ -2214,181 +2196,183 @@ public class SimpleServer extends AbstractServer {
             return new ArrayList<>();
         }
     }
-    private void handleCancellationRequest(String msg, ConnectionToClient client)throws Exception{
-        try {
-            // Parse the message
-            String data = msg.substring("Cancel Reservation:".length()).trim();
-            String[] parts = data.split(",");
 
-            if (parts.length != 2) {
-                client.sendToClient("Error: Invalid cancellation request format");
-                return;
-            }
+//    private void handleCancellationRequest(String msg, ConnectionToClient client) throws Exception {
+//        try {
+//            // Parse the message
+//            String data = msg.substring("Cancel Reservation:".length()).trim();
+//            String[] parts = data.split(",");
+//
+//            if (parts.length != 2) {
+//                client.sendToClient("Error: Invalid cancellation request format");
+//                return;
+//            }
+//
+//            String name = parts[0].trim();
+//            int reservationId;
+//
+//            try {
+//                reservationId = Integer.parseInt(parts[1].trim());
+//            } catch (NumberFormatException e) {
+//                client.sendToClient("Error: Reservation ID must be a number");
+//                return;
+//            }
+//
+//            // Process cancellation
+//            String result = cancelReservation(name, reservationId);
+//            client.sendToClient("Cancel Reservation " + result);
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            client.sendToClient("Error: " + e.getMessage());
+//        }
+//    }
+//
+//    public String cancelReservation(String name, int reservationId) {
+//        Session session = App.getSessionFactory().openSession();
+//        try {
+//            session.beginTransaction();
+//            // Get reservation by ID
+//            ReservationSave reservationToCancel = session.get(ReservationSave.class, reservationId);
+//
+//            // Validate reservation exists and name matches
+//            if (reservationToCancel == null) {
+//                return "Error: No reservation found with ID " + reservationId;
+//            }
+//
+//            if (!reservationToCancel.getFullName().equalsIgnoreCase(name)) {
+//                return "Error: Name doesn't match the reservation";
+//            }
+//
+//            // Check if reservation is in the future
+//            LocalDateTime now = LocalDateTime.now();
+//            if (reservationToCancel.getReservationDateTime().isBefore(now)) {
+//                return "Error: Cannot cancel past reservation";
+//            }
+//            // Calculate charge
+//            int charge = calculateCancellationCharge(reservationToCancel, now);
+//
+//            // Free tables and remove reservation
+//            Hibernate.initialize(reservationToCancel.getTables());
+//            for (TableNode table : reservationToCancel.getTables()) {
+//                Hibernate.initialize(table.getReservationStartTimes());
+//                Hibernate.initialize(table.getReservationEndTimes());
+//                removeReservationTimes(table, reservationToCancel.getReservationDateTime());
+//                session.update(table);
+//            }
+//            session.delete(reservationToCancel);
+//
+//            session.getTransaction().commit();
+//
+//            // Send cancellation email
+//            String emailContent = buildCancellationEmail(reservationToCancel, charge);
+//            EmailSender.sendEmail("Reservation Cancellation Confirmation",
+//                    emailContent,
+//                    reservationToCancel.getEmail());
+//
+//
+//            return charge > 0 ?
+//                    "Success: Cancelled with charge of " + charge + " ILS" :
+//                    "Success: Cancelled with no charge";
+//
+//        } catch (Exception e) {
+//            if (session.getTransaction().isActive()) {
+//                session.getTransaction().rollback();
+//            }
+//            return "Error: Failed to cancel reservation - " + e.getMessage();
+//        } finally {
+//            session.close();
+//        }
+//    }
+//
+//    private String buildCancellationEmail(ReservationSave reservation, int charge) {
+//        return String.format(
+//                "Dear %s,\n\n" +
+//                        "We confirm your reservation cancellation at %s:\n\n" +
+//                        "Reservation Details:\n" +
+//                        "- Date/Time: %s\n" +
+//                        "- Number of Guests: %d\n" +
+//                        "- Cancellation Processed: %s\n\n" +
+//                        "%s\n\n" + // Charge information
+//                        "Cancellation Policy:\n" +
+//                        "- Cancellations within 1 hour of reservation incur 10 ILS per seat\n\n" +
+//                        "Thank you for your patronage. We hope to serve you again soon.\n\n" +
+//                        "Best regards,\n" +
+//                        "Customer Service Team\n" +
+//                        "%s",
+//                reservation.getFullName(),
+//                reservation.getRestaurantName(),
+//                reservation.getReservationDateTime().toString(),
+//                reservation.getSeats(),
+//                LocalDateTime.now().toString(),
+//                charge > 0 ? String.format("Cancellation Charge: %d ILS", charge)
+//                        : "No cancellation charges applied",
+//                reservation.getRestaurantName()
+//        );
+//    }
+//
+//    private int calculateCancellationCharge(ReservationSave reservation, LocalDateTime cancellationTime) {
+//        // Check if cancellation is within 1 hour of reservation time
+//        LocalDateTime reservationTime = reservation.getReservationDateTime();
+//        Duration timeDifference = Duration.between(cancellationTime, reservationTime);
+//
+//        // If cancellation is within 1 hour before reservation
+//        if (!timeDifference.isNegative() && timeDifference.toHours() < 1) {
+//            // Charge 10 ILS per seat
+//            return reservation.getSeats() * 10;
+//        }
+//        return 0;
+//    }
+//
+//    private List<ReservationSave> findReservations(Session session, String name,
+//                                                   String phone, String email) {
+//        return session.createQuery(
+//                        "FROM ReservationSave r WHERE " +
+//                                "r.fullName = :name AND " +
+//                                "r.phoneNumber = :phone AND " +
+//                                "r.email = :email", ReservationSave.class)
+//                .setParameter("name", name)
+//                .setParameter("phone", phone)
+//                .setParameter("email", email)
+//                .getResultList();
+//    }
+//
+//    private void cancelSingleReservation(Session session, ReservationSave reservation) {
+//        // Initialize lazy-loaded collections
+//        Hibernate.initialize(reservation.getTables());
+//
+//        // Process each table in the reservation
+//        for (TableNode table : reservation.getTables()) {
+//            // Initialize time collections
+//            Hibernate.initialize(table.getReservationStartTimes());
+//            Hibernate.initialize(table.getReservationEndTimes());
+//
+//            // Remove the reservation times
+//            removeReservationTimes(table, reservation.getReservationDateTime());
+//
+//            // Update table status
+//            table.setStatus(table.getStatus()); // Triggers status recalculation
+//            session.update(table);
+//        }
+//
+//        // Delete the reservation
+//        session.delete(reservation);
+//    }
+//
+//    private void removeReservationTimes(TableNode table, LocalDateTime reservationTime) {
+//        List<LocalDateTime> starts = table.getReservationStartTimes();
+//        List<LocalDateTime> ends = table.getReservationEndTimes();
+//
+//        // Find matching time slot (assuming exact match on start time)
+//        for (int i = 0; i < starts.size(); i++) {
+//            if (starts.get(i).equals(reservationTime)) {
+//                starts.remove(i);
+//                ends.remove(i);
+//                break;
+//            }
+//        }
+//    }
 
-            String name = parts[0].trim();
-            int reservationId;
-
-            try {
-                reservationId = Integer.parseInt(parts[1].trim());
-            } catch (NumberFormatException e) {
-                client.sendToClient("Error: Reservation ID must be a number");
-                return;
-            }
-
-            // Process cancellation
-            String result = cancelReservation(name, reservationId);
-            client.sendToClient("Cancel Reservation " + result);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            client.sendToClient("Error: " + e.getMessage());
-        }
-    }
-
-    public String cancelReservation(String name, int reservationId) {
-        Session session = App.getSessionFactory().openSession();
-        try {
-            session.beginTransaction();
-            // Get reservation by ID
-            ReservationSave reservationToCancel = session.get(ReservationSave.class, reservationId);
-
-        // Validate reservation exists and name matches
-            if (reservationToCancel == null) {
-                return "Error: No reservation found with ID " + reservationId;
-            }
-
-            if (!reservationToCancel.getFullName().equalsIgnoreCase(name)) {
-                return "Error: Name doesn't match the reservation";
-            }
-
-            // Check if reservation is in the future
-            LocalDateTime now = LocalDateTime.now();
-            if (reservationToCancel.getReservationDateTime().isBefore(now)) {
-                return "Error: Cannot cancel past reservation";
-            }
-            // Calculate charge
-            int charge = calculateCancellationCharge(reservationToCancel, now);
-
-            // Free tables and remove reservation
-            Hibernate.initialize(reservationToCancel.getTables());
-            for (TableNode table : reservationToCancel.getTables()) {
-                Hibernate.initialize(table.getReservationStartTimes());
-                Hibernate.initialize(table.getReservationEndTimes());
-                removeReservationTimes(table, reservationToCancel.getReservationDateTime());
-                session.update(table);
-            }
-            session.delete(reservationToCancel);
-
-            session.getTransaction().commit();
-
-            // Send cancellation email
-            String emailContent = buildCancellationEmail(reservationToCancel, charge);
-            EmailSender.sendEmail("Reservation Cancellation Confirmation",
-                    emailContent,
-                    reservationToCancel.getEmail());
-
-
-            return charge > 0 ?
-                    "Success: Cancelled with charge of " + charge + " ILS" :
-                    "Success: Cancelled with no charge";
-
-        } catch (Exception e) {
-            if (session.getTransaction().isActive()) {
-                session.getTransaction().rollback();
-            }
-            return "Error: Failed to cancel reservation - " + e.getMessage();
-        } finally {
-            session.close();
-        }
-    }
-
-    private String buildCancellationEmail(ReservationSave reservation, int charge) {
-        return String.format(
-                "Dear %s,\n\n" +
-                        "We confirm your reservation cancellation at %s:\n\n" +
-                        "Reservation Details:\n" +
-                        "- Date/Time: %s\n" +
-                        "- Number of Guests: %d\n" +
-                        "- Cancellation Processed: %s\n\n" +
-                        "%s\n\n" + // Charge information
-                        "Cancellation Policy:\n" +
-                        "- Cancellations within 1 hour of reservation incur 10 ILS per seat\n\n" +
-                        "Thank you for your patronage. We hope to serve you again soon.\n\n" +
-                        "Best regards,\n" +
-                        "Customer Service Team\n" +
-                        "%s",
-                reservation.getFullName(),
-                reservation.getRestaurantName(),
-                reservation.getReservationDateTime().toString(),
-                reservation.getSeats(),
-                LocalDateTime.now().toString(),
-                charge > 0 ? String.format("Cancellation Charge: %d ILS", charge)
-                        : "No cancellation charges applied",
-                reservation.getRestaurantName()
-        );
-    }
-
-    private int calculateCancellationCharge(ReservationSave reservation, LocalDateTime cancellationTime) {
-        // Check if cancellation is within 1 hour of reservation time
-        LocalDateTime reservationTime = reservation.getReservationDateTime();
-        Duration timeDifference = Duration.between(cancellationTime, reservationTime);
-
-        // If cancellation is within 1 hour before reservation
-        if (!timeDifference.isNegative() && timeDifference.toHours() < 1) {
-            // Charge 10 ILS per seat
-            return reservation.getSeats() * 10;
-        }
-        return 0;
-    }
-
-    private List<ReservationSave> findReservations(Session session, String name,
-                                                   String phone, String email) {
-        return session.createQuery(
-                        "FROM ReservationSave r WHERE " +
-                                "r.fullName = :name AND " +
-                                "r.phoneNumber = :phone AND " +
-                                "r.email = :email", ReservationSave.class)
-                .setParameter("name", name)
-                .setParameter("phone", phone)
-                .setParameter("email", email)
-                .getResultList();
-    }
-
-    private void cancelSingleReservation(Session session, ReservationSave reservation) {
-        // Initialize lazy-loaded collections
-        Hibernate.initialize(reservation.getTables());
-
-        // Process each table in the reservation
-        for (TableNode table : reservation.getTables()) {
-            // Initialize time collections
-            Hibernate.initialize(table.getReservationStartTimes());
-            Hibernate.initialize(table.getReservationEndTimes());
-
-            // Remove the reservation times
-            removeReservationTimes(table, reservation.getReservationDateTime());
-
-            // Update table status
-            table.setStatus(table.getStatus()); // Triggers status recalculation
-            session.update(table);
-        }
-
-        // Delete the reservation
-        session.delete(reservation);
-    }
-
-    private void removeReservationTimes(TableNode table, LocalDateTime reservationTime) {
-        List<LocalDateTime> starts = table.getReservationStartTimes();
-        List<LocalDateTime> ends = table.getReservationEndTimes();
-
-        // Find matching time slot (assuming exact match on start time)
-        for (int i = 0; i < starts.size(); i++) {
-            if (starts.get(i).equals(reservationTime)) {
-                starts.remove(i);
-                ends.remove(i);
-                break;
-            }
-        }
-    }
     private boolean handleSavingReservation(ReservationSave reservation, ConnectionToClient client) {
         FinalReservationEvent event = new FinalReservationEvent(reservation.getRestaurantName(), reservation.getReservationDateTime(), reservation.getSeats()
                 , reservation.isInside(), reservation.getFullName(), reservation.getPhoneNumber(), reservation.getEmail());
