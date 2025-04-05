@@ -45,9 +45,6 @@
             </font>
         </Button>
 
-        <!-- Back Button -->
-        <Button fx:id="backButton" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#backToHome" style="-fx-font-size: 18px; -fx-text-fill: #b70236; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
-
         <!-- Status Label -->
         <Label fx:id="statusLabel" layoutX="50.0" layoutY="210.0" prefWidth="300.0" text="" textFill="red" />
     </children>

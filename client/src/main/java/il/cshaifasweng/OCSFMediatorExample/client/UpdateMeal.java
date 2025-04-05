@@ -253,16 +253,18 @@ public class UpdateMeal {
 
 
         // Add to UI and storage
-        chosenCustomizationNames.add(customizationName);
+        //chosenCustomizationNames.add(customizationName);
         fillRow(customizationName);
         clearInput();
     }
 
     public void addToListRestaurant(ActionEvent actionEvent) {
+        System.out.println("0:  "+chosenRestaurantsNames.size());
         String selectedValue = restaurant_name.getValue();
         String restaurantName;
 
         // Handle "All" selection
+
         if ("ALL".equals(selectedValue)) {
             Iterator<String> iterator = chosenRestaurantsNames.iterator();
             while (iterator.hasNext()) {
@@ -277,15 +279,14 @@ public class UpdateMeal {
                     iterator.remove(); // Safe removal
                 }
             }
-
         }
-        restaurantName = selectedValue.trim();
-
         // Validation
-        if (restaurantName.isEmpty()) {
+        if (selectedValue == null) {
             showError(errorLabel1,"Please enter/select a restaurant!");
             return;
         }
+        restaurantName = selectedValue.trim();
+
 
         // Check duplicates
         if (restaurantrowMap.containsKey(restaurantName)) {
@@ -296,8 +297,7 @@ public class UpdateMeal {
 
 
         // Add to UI and storage
-        chosenRestaurantsNames.add(restaurantName);
-        fillRow(restaurantName);
+        fillRowRestaurants(restaurantName);
         clearInput();
     }
 
@@ -327,6 +327,7 @@ public class UpdateMeal {
     }
 
     private void handleDeleteRestaurant(String restaurantName) {
+        System.out.println(chosenRestaurantsNames.size());
         HBox row = restaurantrowMap.get(restaurantName);
         if (row != null) {
             // Remove from UI immediately
@@ -380,8 +381,13 @@ public class UpdateMeal {
             showError(errorLabel,"At least one customization required!");
             return;
         }
+        if (chosenRestaurantsNames.isEmpty()) {
+            showError(errorLabel,"At least one restaurant required!");
+            return;
+        }
 
         Iterator<String> iterator = chosenRestaurantsNames.iterator();
+
 
         if(!chosenRestaurantsNames.get(0).equals("ALL")) {
             while (iterator.hasNext()) {
@@ -404,7 +410,6 @@ public class UpdateMeal {
             SimpleClient.getClient().sendToServer(updateRequest);
             showError(errorLabel,"Changes saved successfully!");
             mealDescriptionField.getScene().getWindow().hide();
-            // Update original values after successful save
             this.originalDescription = newDescription;
             this.originalCustomizations = new ArrayList<>(newCustomizations);
         } catch (IOException e) {

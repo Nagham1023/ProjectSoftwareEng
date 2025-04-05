@@ -662,8 +662,10 @@ public class ReservationController {
             stopLoading();
             try {
                 //showAlert("Reservation Confirmed", resultMessage);
+                System.out.println("going to pay!!");
                 done_Reservation=msg;
                 CreditDetailsController.personalDetails = personalDetails;
+                EventBus.getDefault().unregister(this);
                 App.setRoot("CreditDetails");
             } catch (IOException e) {
                 System.err.println("Error in handleContinueAction: " + e.getMessage());
@@ -675,13 +677,15 @@ public class ReservationController {
 
     @Subscribe
     public void reConfirmFunction(ReConfirmEvent reConfirmEvent) {
-        try {
+        Platform.runLater(() -> {
             if(loadingGif.isVisible()&&anchorPane.isDisabled())
                 return;
-            handleConfirm();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            try {
+                handleConfirm();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Subscribe

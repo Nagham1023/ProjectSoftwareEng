@@ -36,14 +36,14 @@ public class SimpleClient extends AbstractClient {
 		else if (msg instanceof UpdateMealRequest) {
 			EventBus.getDefault().post(msg);
 		}
-		if (msg instanceof MealUpdateRequest) {
+		else if (msg instanceof MealUpdateRequest) {
 			System.out.println("the message is an update price request");
 			EventBus.getDefault().post((MealUpdateRequest) msg);
 		}
         else if (msg instanceof PCRequestsList) {
             EventBus.getDefault().post((PCRequestsList) msg);
         }
-		if (msg instanceof UserCheck) {
+		else if (msg instanceof UserCheck) {
 			EventBus.getDefault().post(msg);
 		}
 		else if (msg instanceof PersonalDetails) {
@@ -106,7 +106,7 @@ public class SimpleClient extends AbstractClient {
 		else if (msg.getClass().equals(Warning.class)) {
 				EventBus.getDefault().post(new WarningEvent((Warning) msg));
 		}
-		if(msg instanceof SearchOptions){
+		else if(msg instanceof SearchOptions){
 			EventBus.getDefault().post(msg);
 		}
         else if (msg instanceof RestaurantList) {
@@ -117,7 +117,7 @@ public class SimpleClient extends AbstractClient {
         }
         else if (msg instanceof String) {
             String message = (String) msg;
-            handleStringMessage((String) msg);
+			handleStringMessage((String) msg);
         }
         /*
 		if(msg instanceof String) {
@@ -159,17 +159,17 @@ public class SimpleClient extends AbstractClient {
 				System.out.println("Unhandled message: " + message);
 			}
 		}*/
-        if (msg instanceof RestaurantList) {
+        else if (msg instanceof RestaurantList) {
             RestaurantList restaurantList = (RestaurantList) msg;
 
             //print restaurants names
             System.out.println("Received restaurant list: " + restaurantList.toString());
             EventBus.getDefault().post(restaurantList);
         }
-        if(msg instanceof PCRequestsList) {
+        else if(msg instanceof PCRequestsList) {
             EventBus.getDefault().post(msg);
         }
-		if(msg instanceof tablesStatus){
+		else if(msg instanceof tablesStatus){
 			EventBus.getDefault().post(msg);
 		}
 		else if (msg instanceof ReConfirmEvent) {
@@ -194,6 +194,7 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post((ReservationSave)msg);
 		}
 		else {
+				System.out.println("received unknown message");
 				System.out.println("Unhandled message: " + (String) msg);
 			}
 		//*********************** deleted functions?*****************//
@@ -324,7 +325,15 @@ public class SimpleClient extends AbstractClient {
 		else if(message.equals("go To payment check")){
 			EventBus.getDefault().post(message);
 		}
+		else if(message.startsWith("Cancel Reservation Error:")){
+			//System.out.println("cancleddddd");
+			EventBus.getDefault().post(message);
+		}
+		else if (message.startsWith("Cancel Reservation Success:")){
+			EventBus.getDefault().post(message);
+		}
 		else {
+			//System.out.println("inserting here");
 			switch (message) {
 				case "Reservation confirmed successfully.":
 					EventBus.getDefault().post(message);
@@ -343,6 +352,46 @@ public class SimpleClient extends AbstractClient {
 			}
 		}
 	}
+	/*
+		if(msg instanceof String) {
+			String message = (String) msg;
+			if(message.startsWith("table details: ")){
+				// Extract the table details from the message
+				String tableDetails = message.substring("table details: ".length());
+
+				// Send the table details to the EventBus
+				EventBus.getDefault().post(tableDetails);
+			}
+			else if (message.startsWith("ReportResponse")) {
+				// Split the message by "\n" to extract the report content
+				String[] parts = message.split("\n", 2); // Limit to 2 splits
+				if (parts.length == 2) {
+					String report = parts[1]; // The actual report content
+					System.out.println("Received report: " + report);
+
+
+					// Publish the event to the EventBus
+					EventBus.getDefault().post(new ReportResponseEvent(report));
+				} else {
+					System.err.println("Malformed report response from server.");
+				}
+			} else if (message.equals("Reservation confirmed successfully.")) {
+				EventBus.getDefault().post(msg);
+			} else if (message.equals("Order not found."))
+			{
+				EventBus.getDefault().post(msg);
+			} else if (message.equals("No order!"))
+			{
+				EventBus.getDefault().post(msg);
+			}else if (message.equals("Not same restaurant!"))
+			{
+			}
+			else if (message.equals("Reservation confirmed successfully.")) {
+				EventBus.getDefault().post(msg);
+			}else {
+				System.out.println("Unhandled message: " + message);
+			}
+		}*/
 	private void handleReportResponse(String message) {
 		// Split the message by "\n" to extract the report content
 		String[] parts = message.split("\n", 2);
