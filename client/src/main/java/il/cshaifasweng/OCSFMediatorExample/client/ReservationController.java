@@ -32,6 +32,8 @@ import java.util.Random;
 public class ReservationController {
 
     PersonalDetails personalDetails = new PersonalDetails();
+    private boolean hasBeenHereBefore= false;
+    static public boolean noValidation;
 
     @FXML
     private ScrollPane scrollPane; // Inject the ScrollPane from the FXML file
@@ -89,33 +91,15 @@ public class ReservationController {
         startLoading();
     }
 
-    @Subscribe
-    public void putResturants(RestaurantList restaurants) {
+    @FXML
+    void backToHome() throws IOException {
         Platform.runLater(() -> {
-            System.out.println("Received restaurant list: " + restaurants);
-            restaurantsComboBox.getItems().clear(); // Clear previous items
-
-            // Populate the combo box
-            restaurants.getRestaurantList().forEach(restaurant ->
-                    restaurantsComboBox.getItems().add(restaurant.getRestaurantName()) // Assuming Restaurant has getRestaurantName()
-            );
-            stopLoading();
-        });
-    }
-
-    // Show loading animation and disable UI
-    private void startLoading() {
-        Platform.runLater(() -> {
-            loadingGif.setVisible(true);
-            anchorPane.setDisable(true); // Disable all UI components
-        });
-    }
-
-    // Hide loading animation and enable UI
-    private void stopLoading() {
-        Platform.runLater(() -> {
-            loadingGif.setVisible(false);
-            anchorPane.setDisable(false); // Enable all UI components
+            try {
+                EventBus.getDefault().unregister(this);
+                App.setRoot("mainScreen"); // Navigate back to the main screen
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
     }
 
@@ -184,146 +168,24 @@ public class ReservationController {
         ReservationEvent reservationEvent = new ReservationEvent(restaurantName, selectedDateTime, seats, isInside);
         SimpleClient.getClient().sendToServer(reservationEvent); // Send it to the server
     }
-    @Subscribe
-    public void showDifferentAvailableReservation(DifferentResrvation availableReservations) {
+
+
+    // Show loading animation and disable UI
+    private void startLoading() {
         Platform.runLater(() -> {
-            // Stop loading animation
-            stopLoading();
-            // Clear any existing buttons for available reservations
-            anchorPane.getChildren().removeIf(node -> node.getId() != null && node.getId().equals("reservationButton"));
-
-            if (availableReservations.getAvailableTimeSlots() == null) {
-                // No available reservations at the requested time, show a message
-                showAlert("No Available Reservations", "There are no available reservations for the selected time.\nPlease check alternative time slots.");
-            } else {
-                showAlert("No Available Reservations", "There are no available reservations for the selected time.\nHere are different available time slots");
-                double layoutY = 350.0; // Starting Y position for the buttons
-
-                List<LocalDateTime> availableTimeSlots = availableReservations.getAvailableTimeSlots(); // Now correctly using LocalDateTime
-
-                for (LocalDateTime timeSlot : availableTimeSlots) {
-                    // Create a button for each available time slot
-                    String reservationDetails = String.format(
-                            "Date: %s, Time: %s, Restaurant: %s, Seats: %d, %s",
-                            timeSlot.toLocalDate().toString(), // Date
-                            timeSlot.toLocalTime().toString(), // Alternative available time
-                            availableReservations.getRestaurantName(), // Restaurant name
-                            availableReservations.getSeats(), // Number of seats
-                            availableReservations.isInside() ? "Inside" : "Outside" // Inside/Outside
-                    );
-
-                    Button reservationButton = new Button(reservationDetails);
-                    reservationButton.setId("reservationButton");
-                    reservationButton.setLayoutX(50.0);
-                    reservationButton.setLayoutY(layoutY);
-                    reservationButton.getStyleClass().add("button"); // Apply the same button style as the confirm button
-
-                    reservationButton.setOnAction(event -> {
-                        try {
-                            startLoading();
-                            handleTimeButtonClick(reservationButton.getText());
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    });
-
-                    // Add the button to the UI
-                    anchorPane.getChildren().add(reservationButton);
-                    layoutY += 50.0; // Move Y position down for the next button
-                }
-            }
+            loadingGif.setVisible(true);
+            anchorPane.setDisable(true); // Disable all UI components
         });
     }
 
-    @Subscribe
-    public void showAvailableReservation(List<ReservationEvent> availableReservations) {
+    // Hide loading animation and enable UI
+    private void stopLoading() {
         Platform.runLater(() -> {
-            // Stop loading animation
-            stopLoading();
-            // Clear any existing buttons for available reservations
-            anchorPane.getChildren().removeIf(node -> node.getId() != null && node.getId().equals("reservationButton"));
-
-            if (availableReservations.isEmpty() || availableReservations.getFirst().getReservationDateTime() == null) {
-                // Show an alert if no available reservations are found
-                showAlert("No Available Reservations", "There are no available reservations for this date and restaurant.");
-            } else {
-                // Create buttons for each available reservation
-                double layoutY = 350.0; // Starting Y position for the buttons
-                for (ReservationEvent reservation : availableReservations) {
-                    // Create a detailed description for the button (including date and time)
-                    String reservationDetails = String.format(
-                            "Date: %s, Time: %s, Restaurant: %s, Seats: %d, %s",
-                            reservation.getReservationDateTime().toLocalDate().toString(), // Date
-                            reservation.getReservationDateTime().toLocalTime().toString(), // Time
-                            reservation.getRestaurantName(), // Restaurant name
-                            reservation.getSeats(), // Number of seats
-                            reservation.isInside() ? "Inside" : "Outside" // Inside/Outside
-                    );
-
-                    // Create the button with the reservation details
-                    Button reservationButton = new Button(reservationDetails);
-                    reservationButton.setId("reservationButton"); // Set an ID to identify these buttons later
-                    reservationButton.setLayoutX(50.0); // X position for the buttons
-                    reservationButton.setLayoutY(layoutY); // Y position for the buttons
-                    reservationButton.getStyleClass().add("button"); // Apply the same button style as the confirm button
-
-                    reservationButton.setOnAction(event -> {
-                        try {
-                            // Start loading animation
-                            startLoading();
-
-                            // Pass the button's text to handleTimeButtonClick
-                            handleTimeButtonClick(reservationButton.getText());
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }); // Handle button click
-
-                    // Add the button to the AnchorPane
-                    anchorPane.getChildren().add(reservationButton);
-
-                    // Increment the Y position for the next button
-                    layoutY += 50.0;
-                }
-            }
+            loadingGif.setVisible(false);
+            anchorPane.setDisable(false); // Enable all UI components
         });
     }
 
-    @Subscribe
-    public void reservationConfirmed(ReservationSave msg) {
-        Platform.runLater(() -> {
-            //if (msg.equals("Reservation confirmed successfully.")) {
-            //if (msg.equals("go To payment check")) {
-
-                //showAlert("Reservation Confirmed", "Your reservation has been confirmed successfully!");
-
-                // Clear all fields and reset the page
-                clearAllFields();
-                // Stop loading animation
-                stopLoading();
-                try {
-
-                    //showAlert("Reservation Confirmed", resultMessage);
-                    done_Reservation=msg;
-                    CreditDetailsController.personalDetails = personalDetails;
-                    App.setRoot("CreditDetails");
-                } catch (IOException e) {
-                    System.err.println("Error in handleContinueAction: " + e.getMessage());
-                    e.printStackTrace();
-                }
-            //}
-        });
-    }
-    @Subscribe
-    public void reConfirmFunction(ReConfirmEvent reConfirmEvent) {
-        try {
-            if(loadingGif.isVisible()&&anchorPane.isDisabled())
-                return;
-            handleConfirm();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
     private void clearAllFields() {
         Platform.runLater(() -> {
             // Reset the date picker
@@ -347,9 +209,6 @@ public class ReservationController {
         });
     }
 
-
-
-
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
@@ -360,6 +219,9 @@ public class ReservationController {
 
     private void handleTimeButtonClick(String buttonText) throws IOException {
         boolean reservationSuccessful = false;
+        //hasBeenHereBefore= noValidation;
+        //if(hasBeenHereBefore)
+           // reservationSuccessful = true;
 
         while (!reservationSuccessful) {
             // Extract reservation details
@@ -376,6 +238,7 @@ public class ReservationController {
             int seats = Integer.parseInt(seatsPart);
             boolean isInside = insideOutsidePart.equals("Inside");
             LocalDateTime selectedDateTime = LocalDateTime.of(selectedDate, selectedTime);
+
 
             // Create input dialog for user details
             Dialog<Pair<String, String>> dialog = new Dialog<>();
@@ -495,6 +358,7 @@ public class ReservationController {
                     continue; // Retry the reservation process
                 }
 
+
                 // Successfully verified
                 personalDetails.setName(fullName);
                 personalDetails.setEmail(email);
@@ -503,7 +367,7 @@ public class ReservationController {
                         restaurantName, selectedDateTime, seats, isInside, fullName, phoneNumber, email
                 );
                 //done_Reservation = finalReservationEvent;
-                CreditDetailsController.mode= "Reservation";
+                CreditDetailsController.mode = "Reservation";
 
                 try {
                     SimpleClient.getClient().sendToServer(finalReservationEvent);
@@ -514,12 +378,12 @@ public class ReservationController {
                 }
                 String resultMessage = String.format(
                         """
-                                Reservation Details:
-                               \s
-                                Name: %s\s
-                                Phone: %s\s
-                                Email: %s\s
-                               \s""",
+                                 Reservation Details:
+                                \s
+                                 Name: %s\s
+                                 Phone: %s\s
+                                 Email: %s\s
+                                \s""",
                         fullName,
                         phoneNumber,
                         email
@@ -530,10 +394,45 @@ public class ReservationController {
                 stopLoading();
                 return; // Exit the function
             }
+
         }
+//        if (hasBeenHereBefore) {
+//            // Extract reservation details
+//            String[] parts = buttonText.split(", ");
+//            String datePart = parts[0].replace("Date: ", "");
+//            String timePart = parts[1].replace("Time: ", "");
+//            String restaurantPart = parts[2].replace("Restaurant: ", "");
+//            String seatsPart = parts[3].replace("Seats: ", "");
+//            String insideOutsidePart = parts[4];
+//
+//            LocalDate selectedDate = LocalDate.parse(datePart);
+//            LocalTime selectedTime = LocalTime.parse(timePart);
+//            String restaurantName = restaurantPart;
+//            int seats = Integer.parseInt(seatsPart);
+//            boolean isInside = insideOutsidePart.equals("Inside");
+//            LocalDateTime selectedDateTime = LocalDateTime.of(selectedDate, selectedTime);
+//
+//            FinalReservationEvent finalReservationEvent = new FinalReservationEvent(
+//                    restaurantName, selectedDateTime, seats, isInside, personalDetails.getName(), personalDetails.getPhoneNumber(), personalDetails.getEmail()
+//            );
+//            System.out.println("first step sending request to reConfirm");
+//            //done_Reservation = finalReservationEvent;
+//            CreditDetailsController.mode = "Reservation";
+//
+//            try {
+//                SimpleClient.getClient().sendToServer(finalReservationEvent);
+//                reservationSuccessful = true;
+//            } catch (IOException e) {
+//                showAlert("Error", "Failed to send reservation to the server. Please try again.");
+//                e.printStackTrace();
+//            }
+//            stopLoading();
+//            shutdown();
+//            return; // Exit the function
+//        }
+
+
     }
-
-
 
     private boolean verifyCode(String generatedCode) {
         Dialog<String> codeDialog = new Dialog<>();
@@ -602,19 +501,6 @@ public class ReservationController {
         return true;
     }
 
-
-    @FXML
-    void backToHome() throws IOException {
-        Platform.runLater(() -> {
-            try {
-                EventBus.getDefault().unregister(this);
-                App.setRoot("mainScreen"); // Navigate back to the main screen
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-
     private void addMouseGlowEffect(Button button) {
         InnerShadow shadowEffect = new InnerShadow();
         shadowEffect.setRadius(30);  // Controls the light size
@@ -636,10 +522,190 @@ public class ReservationController {
         effect.setOffsetX(x);
         effect.setOffsetY(y);
     }
-    @Subscribe
-    public void creditCardPge(String message) {
-        if(message.equals("go To payment check")){
 
+    public PersonalDetails getPersonalDetails() {
+        return personalDetails;
+    }
+
+    public void setPersonalDetails(PersonalDetails personalDetails) {
+        this.personalDetails = personalDetails;
+    }
+
+    public boolean isHasBeenHereBefore() {
+        return hasBeenHereBefore;
+    }
+
+    public void setHasBeenHereBefore(boolean hasBeenHereBefore) {
+        this.hasBeenHereBefore = hasBeenHereBefore;
+    }
+
+    public void shutdown() {
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe
+    public void showDifferentAvailableReservation(DifferentResrvation availableReservations) {
+        Platform.runLater(() -> {
+            // Stop loading animation
+            stopLoading();
+            // Clear any existing buttons for available reservations
+            anchorPane.getChildren().removeIf(node -> node.getId() != null && node.getId().equals("reservationButton"));
+
+            if (availableReservations.getAvailableTimeSlots() == null) {
+                // No available reservations at the requested time, show a message
+                showAlert("No Available Reservations", "There are no available reservations for the selected time.\nPlease check alternative time slots.");
+            } else {
+                showAlert("No Available Reservations", "There are no available reservations for the selected time.\nHere are different available time slots");
+                double layoutY = 350.0; // Starting Y position for the buttons
+
+                List<LocalDateTime> availableTimeSlots = availableReservations.getAvailableTimeSlots(); // Now correctly using LocalDateTime
+
+                for (LocalDateTime timeSlot : availableTimeSlots) {
+                    // Create a button for each available time slot
+                    String reservationDetails = String.format(
+                            "Date: %s, Time: %s, Restaurant: %s, Seats: %d, %s",
+                            timeSlot.toLocalDate().toString(), // Date
+                            timeSlot.toLocalTime().toString(), // Alternative available time
+                            availableReservations.getRestaurantName(), // Restaurant name
+                            availableReservations.getSeats(), // Number of seats
+                            availableReservations.isInside() ? "Inside" : "Outside" // Inside/Outside
+                    );
+
+                    Button reservationButton = new Button(reservationDetails);
+                    reservationButton.setId("reservationButton");
+                    reservationButton.setLayoutX(50.0);
+                    reservationButton.setLayoutY(layoutY);
+                    reservationButton.getStyleClass().add("button"); // Apply the same button style as the confirm button
+
+                    reservationButton.setOnAction(event -> {
+                        try {
+                            startLoading();
+                            handleTimeButtonClick(reservationButton.getText());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+
+                    // Add the button to the UI
+                    anchorPane.getChildren().add(reservationButton);
+                    layoutY += 50.0; // Move Y position down for the next button
+                }
+            }
+        });
+    }
+
+    @Subscribe
+    public void showAvailableReservation(List<ReservationEvent> availableReservations) {
+        Platform.runLater(() -> {
+            // Stop loading animation
+            stopLoading();
+            // Clear any existing buttons for available reservations
+            anchorPane.getChildren().removeIf(node -> node.getId() != null && node.getId().equals("reservationButton"));
+
+            if (availableReservations.isEmpty() || availableReservations.getFirst().getReservationDateTime() == null) {
+                // Show an alert if no available reservations are found
+                showAlert("No Available Reservations", "There are no available reservations for this date and restaurant.");
+            } else {
+                // Create buttons for each available reservation
+                double layoutY = 350.0; // Starting Y position for the buttons
+                for (ReservationEvent reservation : availableReservations) {
+                    // Create a detailed description for the button (including date and time)
+                    String reservationDetails = String.format(
+                            "Date: %s, Time: %s, Restaurant: %s, Seats: %d, %s",
+                            reservation.getReservationDateTime().toLocalDate().toString(), // Date
+                            reservation.getReservationDateTime().toLocalTime().toString(), // Time
+                            reservation.getRestaurantName(), // Restaurant name
+                            reservation.getSeats(), // Number of seats
+                            reservation.isInside() ? "Inside" : "Outside" // Inside/Outside
+                    );
+
+                    // Create the button with the reservation details
+                    Button reservationButton = new Button(reservationDetails);
+                    reservationButton.setId("reservationButton"); // Set an ID to identify these buttons later
+                    reservationButton.setLayoutX(50.0); // X position for the buttons
+                    reservationButton.setLayoutY(layoutY); // Y position for the buttons
+                    reservationButton.getStyleClass().add("button"); // Apply the same button style as the confirm button
+
+                    reservationButton.setOnAction(event -> {
+                        try {
+                            // Start loading animation
+                            startLoading();
+
+                            // Pass the button's text to handleTimeButtonClick
+                            handleTimeButtonClick(reservationButton.getText());
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }); // Handle button click
+
+                    // Add the button to the AnchorPane
+                    anchorPane.getChildren().add(reservationButton);
+
+                    // Increment the Y position for the next button
+                    layoutY += 50.0;
+                }
+            }
+        });
+    }
+
+    @Subscribe
+    public void reservationConfirmed(ReservationSave msg) {
+        Platform.runLater(() -> {
+            //if (msg.equals("Reservation confirmed successfully.")) {
+            //if (msg.equals("go To payment check")) {
+            //showAlert("Reservation Confirmed", "Your reservation has been confirmed successfully!");
+            // Clear all fields and reset the page
+
+
+            clearAllFields();
+            // Stop loading animation
+            stopLoading();
+            try {
+                //showAlert("Reservation Confirmed", resultMessage);
+                done_Reservation=msg;
+                CreditDetailsController.personalDetails = personalDetails;
+                App.setRoot("CreditDetails");
+            } catch (IOException e) {
+                System.err.println("Error in handleContinueAction: " + e.getMessage());
+                e.printStackTrace();
+            }
+            //}
+        });
+    }
+
+    @Subscribe
+    public void reConfirmFunction(ReConfirmEvent reConfirmEvent) {
+        try {
+            if(loadingGif.isVisible()&&anchorPane.isDisabled())
+                return;
+            handleConfirm();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    @Subscribe
+    public void putResturants(RestaurantList restaurants) {
+        Platform.runLater(() -> {
+            System.out.println("Received restaurant list: " + restaurants);
+            restaurantsComboBox.getItems().clear(); // Clear previous items
+
+            // Populate the combo box
+            restaurants.getRestaurantList().forEach(restaurant ->
+                    restaurantsComboBox.getItems().add(restaurant.getRestaurantName()) // Assuming Restaurant has getRestaurantName()
+            );
+            stopLoading();
+        });
+    }
+
+    @Subscribe
+    public void creditCardPageS(FaildPayRes message) {
+        hasBeenHereBefore= message.getHasBeenHereBefore();
+        personalDetails= message.getPersonalDetails();
+        List<ReservationEvent> availableReservations = message.getReservationList();
+
+        //Post the event to EventBus
+        EventBus.getDefault().post(availableReservations);
+
     }
 }

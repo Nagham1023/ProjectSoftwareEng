@@ -136,6 +136,10 @@ public class SimpleClient extends AbstractClient {
 			handleUserManagement((UserManagement)msg);
 		}
 		else if (msg instanceof ReservationSave) {
+			System.out.println("Third step: received reservation");
+			EventBus.getDefault().post((ReservationSave)msg);
+		}
+		else if (msg instanceof FaildPayRes) {
 			EventBus.getDefault().post((ReservationSave)msg);
 		}
 		else {
@@ -401,5 +405,8 @@ public class SimpleClient extends AbstractClient {
 
 
 		EmailSender.sendEmail(subject, message.toString(), response.getEmailComplain());
+	}
+	public void triggerEvent(List<ReservationEvent> availableReservations) {
+		EventBus.getDefault().post(availableReservations);
 	}
 }

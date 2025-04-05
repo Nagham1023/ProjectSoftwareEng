@@ -7,11 +7,16 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import java.awt.*;
 import java.io.IOException;
@@ -27,6 +32,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import static il.cshaifasweng.OCSFMediatorExample.client.ReservationController.noValidation;
 
 public class CreditDetailsController {
 
@@ -87,6 +93,7 @@ public class CreditDetailsController {
         savecreditButton.setOnAction(event -> sendCreditCardDetailsToServer());
 
     }
+
     private void handleCardSelection() {
         CreditCard selectedCard = savedCardsComboBox.getValue();
 
@@ -338,8 +345,12 @@ public class CreditDetailsController {
     private void setuparrowButton() {
         arrow.setOnAction(event -> {
             try {
+                if(mode.equals("Order")){
                 System.out.println("Arrow button pressed.");
-                App.setRoot("deliverypage");
+                App.setRoot("deliverypage");}
+                else{
+                    App.setRoot("Reservation");
+                }
             } catch (IOException e) {
                 e.printStackTrace(); // Proper error handling
             }
@@ -366,14 +377,17 @@ public class CreditDetailsController {
                 try {
                     //errorLabel.setText(creditCardCheck.getResponse());
                     errorLabel.setText(creditCardCheck.getResponse());
+                    if(!(creditCardCheck.getResponse().equals("Payment Failed"))){
                     sendReservationConfirmationEmail(CreditDetailsController.personalDetails,done_Reservation.getReservationSaveID(), done_Reservation.getRestaurantName(),done_Reservation.getSeats() );
                     App.setRoot("mainScreen");
+                    }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             });
         }
     }
+
     public void sendCreditCardDetailsToServer() {
         String cardNumber = cardNumberField.getText().trim();
         String cardholderName = cardholderNameField.getText().trim();
@@ -442,14 +456,15 @@ public class CreditDetailsController {
 
         });
     }
+
     @Subscribe
-    public void noCc(String msg)
-    {
+    public void noCc(String msg) {
         System.out.println(msg);
         savedCardsComboBox.getItems().clear();
         savedCardsComboBox.getItems().add(null); // First option
         savedCardsComboBox.getSelectionModel().selectFirst();
     }
+
     public static void sendReservationConfirmationEmail(PersonalDetails customer, int orderNumber,
                                                   String restaurantName, int seats) {
         // Create the subject
@@ -475,6 +490,23 @@ public class CreditDetailsController {
 
         // Now you can call the email sender with the subject, body, and the customer's email
         EmailSender.sendEmail(subject, body.toString(), customer.getEmail());
+    }
+    @Subscribe
+    public void goBackToReservation(FaildPayRes event){
+        Platform.runLater(() -> {
+            try {
+                event.setPersonalDetails(personalDetails);
+                event.setHasBeenHereBefore(true);
+                SimpleClient client = SimpleClient.getClient();
+                client.sendToServer(event);
+                EventBus.getDefault().unregister(this);
+                App.setRoot("Reservation");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+
+        });
     }
 }
 

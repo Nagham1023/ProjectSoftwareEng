@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import static il.cshaifasweng.OCSFMediatorExample.client.ReservationController.noValidation;
 
 public class mainScreenController {
     @FXML

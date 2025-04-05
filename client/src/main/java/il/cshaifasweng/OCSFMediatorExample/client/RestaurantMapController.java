@@ -4,6 +4,9 @@ import il.cshaifasweng.OCSFMediatorExample.entities.ReConfirmEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.RestaurantList;
 import il.cshaifasweng.OCSFMediatorExample.entities.TableNode;
 import il.cshaifasweng.OCSFMediatorExample.entities.tablesStatus;
+import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,11 +19,13 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.geometry.Pos;
+import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 
 import java.io.IOException;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,11 +54,12 @@ public class RestaurantMapController {
     @FXML
     private Label restaurantLabel;
 
+    private Timeline refreshTimeline;
+
     @FXML
     public void initialize() throws IOException {
         EventBus.getDefault().register(this);
-
-
+        setupAutoRefresh();
         // Fetch all restaurants
         SimpleClient.getClient().sendToServer("getAllRestaurants");
 
@@ -399,6 +405,51 @@ public class RestaurantMapController {
             SimpleClient.getClient().sendToServer(table);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    private void setupAutoRefresh() {
+        // Get current time
+        LocalTime now = LocalTime.now();
+
+        // Calculate minutes past the last 15-minute interval
+        int minutesPast = now.getMinute() % 15;
+
+        // Calculate seconds past the last 15-minute interval
+        int secondsPast = now.getSecond();
+
+        // Calculate milliseconds past the last 15-minute interval
+        int millisPast = now.getNano() / 1_000_000;
+
+        // Calculate delay until next 15-minute mark
+        long initialDelayMillis = ((15 - minutesPast) * 60 - secondsPast) * 1000L - millisPast;
+
+        // Create initial delay
+        PauseTransition initialDelay = new PauseTransition(Duration.millis(initialDelayMillis));
+        initialDelay.setOnFinished(event -> {
+            // First refresh at the next 15-minute mark
+            refreshTables();
+
+            // Then set up regular 15-minute refreshes
+            refreshTimeline = new Timeline(
+                    new KeyFrame(Duration.minutes(15), e -> refreshTables())
+            );
+            refreshTimeline.setCycleCount(Timeline.INDEFINITE);
+            refreshTimeline.play();
+        });
+
+        initialDelay.play();
+    }
+
+    private void refreshTables() {
+        if ( restaurantsComboBox.getValue() != null && !restaurantsComboBox.getValue().isEmpty()) {
+            Platform.runLater(() -> {
+                try {
+                    System.out.println("Auto-refreshing tables for: " + restaurantsComboBox.getValue());
+                    SimpleClient.getClient().sendToServer("getTablesForRestaurant: " + restaurantsComboBox.getValue());
+                } catch (IOException e) {
+                    System.err.println("Failed to send refresh message: " + e.getMessage());
+                }
+            });
         }
     }
 }
