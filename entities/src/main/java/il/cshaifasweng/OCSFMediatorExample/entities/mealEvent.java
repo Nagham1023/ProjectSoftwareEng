@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class mealEvent implements Serializable {
     private static final long serialVersionUID = -8224097662914849956L;
@@ -10,6 +11,10 @@ public class mealEvent implements Serializable {
     private String price;
     private String Id;
     private byte[] image;
+    private boolean isCompany;
+    private List<String> customizationList;
+    private String branch;
+    private Meal meal;
 
     public mealEvent(String mealName, String mealDisc, String price,String Id, byte[] image) {
         this.mealName = mealName;
@@ -26,6 +31,24 @@ public class mealEvent implements Serializable {
         this.image = image;
 
     }
+
+    public mealEvent(String mealName, String mealDisc, String price, byte[] image, boolean isCompany, List<String> customizationList, String branch) {
+        this.mealName = mealName;
+        this.mealDisc = mealDisc;
+        this.price = price;
+        this.image = image;
+        this.isCompany = isCompany;
+        this.customizationList = customizationList;
+        this.branch = branch;
+    }
+
+    public mealEvent(String mealName, String price, String id, Meal meal) {
+        this.mealName = mealName;
+        this.price = price;
+        Id = id;
+        this.meal = meal;
+    }
+
     public byte[] getImage() {
         return image;
     }
@@ -56,6 +79,39 @@ public class mealEvent implements Serializable {
     public void setId(String Id) {
         this.Id = Id;
     }
+
+    public List<String> getCustomizationList() {
+        return customizationList;
+    }
+
+    public void setCustomizationList(List<String> customizationList) {
+        this.customizationList = customizationList;
+    }
+
+    public boolean isCompany() {
+        return isCompany;
+    }
+
+    public void setCompany(boolean company) {
+        isCompany = company;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
+
+    public Meal getMeal() {
+        return meal;
+    }
+
+    public void setMeal(Meal meal) {
+        this.meal = meal;
+    }
+
     @Override
     public String toString() {
         return "mealEvent{" +

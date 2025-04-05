@@ -1,40 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.scene.paint.LinearGradient?>
+<?import javafx.scene.paint.Stop?>
 <?import javafx.scene.text.Font?>
 
-<VBox spacing="20" style="-fx-padding: 20; -fx-background-color: #f8f5f1;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AddMealController">
-    <!-- Header with Back Arrow -->
-    <HBox spacing="10" style="-fx-alignment: center-left; -fx-padding: 10;">
-        <Button fx:id="backButton" onAction="#backToHome" style="-fx-font-size: 18px; -fx-text-fill: #4CAF50; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
-        <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #4CAF50;" text="Add New Meal" />
-    </HBox>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.String?>
+<StackPane fx:id="stackPane" prefHeight="600" prefWidth="800" style="-fx-background-color: #f8f5f1;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AddMealController">
 
-    <!-- Meal Name -->
-    <TextField fx:id="mealNameField" promptText="Enter meal name" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0;" />
+    <!-- Main Scrollable Content -->
+    <ScrollPane fx:id="scrollPane" prefHeight="600" prefWidth="800">
+        <content>
+            <VBox fx:id="menuContainer" spacing="20" style="-fx-padding: 20;">
 
-    <!-- Meal Description -->
-    <TextArea fx:id="mealDescriptionField" prefHeight="100" promptText="Enter meal description" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0;" wrapText="true" />
+                <!-- Header with Back Arrow -->
+                <HBox spacing="10" style="-fx-alignment: center-left; -fx-padding: 10;">
+                    <Button fx:id="backButton" onAction="#backToHome" style="-fx-font-size: 18px; -fx-text-fill: #b70236; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
+                    <Label fx:id="titleLabel" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #b70236;" text="Add New Meal" />
+                </HBox>
 
-    <!-- Meal Price -->
-    <TextField fx:id="mealPriceField" promptText="Enter price (e.g., 15.99)" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0;" />
+                <!-- Meal Name -->
+                <TextField fx:id="mealNameField" promptText="Enter meal name" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-padding: 10px;" />
 
-    <!-- Select Image -->
-    <Button fx:id="selectImageButton" onAction="#onSelectImageClicked" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;" text="Select Image" />
-    <ImageView fx:id="mealImageView" fitHeight="150" fitWidth="200" preserveRatio="true" />
+                <!-- Meal Description -->
+                <TextArea fx:id="mealDescriptionField" prefHeight="100" promptText="Enter meal description" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-padding: 10px;" wrapText="true" />
 
-    <!-- Add Meal Button -->
-    <Button fx:id="addMealButton" onAction="#onAddMealClicked" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;" text="Add Meal" />
+                <!-- Meal Price -->
+                <TextField fx:id="mealPriceField" promptText="Enter price (e.g., 15.99)" style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-padding: 10px;" />
 
-    <!-- Feedback Label -->
-    <Label fx:id="feedbackLabel" style="-fx-text-fill: red; -fx-font-size: 14px;">
-      <font>
-         <Font name="System Bold" size="13.0" />
-      </font></Label>
-</VBox>
+                <!-- Choose Branch -->
+                <HBox spacing="10" style="-fx-alignment: center-left;">
+                    <Label text="Choose Branch:" style="-fx-font-size: 16px; -fx-text-fill: #333;" />
+                    <ChoiceBox fx:id="restaurant_name" prefWidth="150">
+                        <items>
+                            <FXCollections fx:factory="observableArrayList">
+                                <String fx:value="Restaurant A" />
+                                <String fx:value="Restaurant B" />
+                                <String fx:value="Restaurant C" />
+                            </FXCollections>
+                        </items>
+                    </ChoiceBox>
+                    <Button mnemonicParsing="false" onAction="#addToListRestaurant" style="-fx-background-color: #b70236; -fx-text-fill: white; -fx-border-radius: 10px; -fx-padding: 5px 15px;" text="Add" />
+                </HBox>
+                <Label fx:id="errorLabel1" style="-fx-text-fill: red; -fx-font-size: 14px;" text="" />
+
+                <!-- Dynamic Restaurant List -->
+                <VBox fx:id="dynamicRestaurantContainer" spacing="10" style="-fx-padding: 10;" />
+
+                <!-- Customization Section -->
+                <VBox spacing="10">
+                    <Label text="Add Customization" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;" />
+                    <HBox spacing="10" style="-fx-alignment: center-left;">
+                        <ComboBox fx:id="costumazation_name" prefWidth="150.0" promptText="Choose Customization" />
+                        <Button mnemonicParsing="false" onAction="#addToListCustom" style="-fx-background-color: #b70236; -fx-text-fill: white; -fx-border-radius: 10px; -fx-padding: 5px 15px;" text="Add" />
+                    </HBox>
+                    <Label fx:id="errorLabel" style="-fx-text-fill: red; -fx-font-size: 14px;" text="" />
+                </VBox>
+
+                <!-- Dynamic Customization List -->
+                <VBox fx:id="dynamicCustomizationContainer" spacing="10" style="-fx-padding: 10;" />
+
+                <!-- Select Image -->
+                <Button fx:id="selectImageButton" onAction="#onSelectImageClicked" style="-fx-background-color: #b70236; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px;" text="Select Image" />
+                <ImageView fx:id="mealImageView" fitHeight="150" fitWidth="200" preserveRatio="true" />
+
+                <!-- Add Meal Button -->
+                <Button fx:id="addMealButton" onAction="#onAddMealClicked" style="-fx-background-color: #b70236; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px;" text="Add Meal" />
+
+                <!-- Feedback Label -->
+                <Label fx:id="feedbackLabel" style="-fx-text-fill: red; -fx-font-size: 14px;">
+                    <font>
+                        <Font name="System Bold" size="13.0" />
+                    </font>
+                </Label>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+
+    <!-- Floating Scroll Arrow -->
+    <ImageView fx:id="scrollArrow" fitHeight="40" fitWidth="40" layoutX="500" layoutY="300" preserveRatio="true" style="-fx-alignment: center;">
+        <StackPane.margin>
+            <Insets top="400.0" />
+        </StackPane.margin>
+    </ImageView>
+
+</StackPane>

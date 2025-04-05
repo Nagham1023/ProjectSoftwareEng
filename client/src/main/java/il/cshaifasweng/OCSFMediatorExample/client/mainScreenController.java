@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.awt.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import static il.cshaifasweng.OCSFMediatorExample.client.ReservationController.noValidation;
 
 public class mainScreenController {
     @FXML
@@ -67,6 +68,11 @@ public class mainScreenController {
     @FXML
     void clickedOnComplaints(ActionEvent event)throws IOException {
         App.setRoot("addcomplain");
+    }
+
+    @FXML
+    void clickedOnCancellation(ActionEvent event)throws IOException {
+        App.setRoot("CancellationPage");
     }
 
     @FXML

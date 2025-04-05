@@ -6,6 +6,6 @@ import org.hibernate.Session;
 import java.time.LocalDate;
 
 public interface ReportStrategy {
-    String generate(LocalDate month, String restaurantName, TimeFrame timeFrame);
+    String generate(LocalDate month, String restaurantName, TimeFrame timeFrame,String note);
 }
 

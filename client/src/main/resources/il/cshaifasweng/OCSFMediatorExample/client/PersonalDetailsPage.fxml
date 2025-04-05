@@ -1,37 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
-
 <AnchorPane prefHeight="400.0" prefWidth="400.0" style="-fx-background-color: #fbebf4;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.PersonalDetailsPageController">
-   <children>
-      <Label layoutY="-1.0" prefHeight="54.0" prefWidth="539.0" style="-fx-background-color: #832018;" text="                             Personal Details" textAlignment="CENTER" textFill="WHITE">
-         <font>
-            <Font name="System Bold" size="22.0" />
-         </font>
-      </Label>
-      <TextField fx:id="NamePersonalDetails" layoutX="62.0" layoutY="99.0" prefHeight="43.0" prefWidth="416.0" promptText="Name *" />
-       <Label fx:id="nameErrorLabel" layoutX="62.0" layoutY="142.0" prefHeight="17.0" prefWidth="416.0" textFill="red" />
-       <TextField fx:id="PhoneNumberPersonalDetails" layoutX="62.0" layoutY="171.0" prefHeight="43.0" prefWidth="416.0" promptText="Phone Number *" />
-       <Label fx:id="phoneNumberErrorLabel" layoutX="62.0" layoutY="215.0" prefHeight="17.0" prefWidth="416.0" textFill="red" />
-       <TextField fx:id="EmailPersonalDetails" layoutX="62.0" layoutY="243.0" prefHeight="43.0" prefWidth="416.0" promptText="Email *" />
-       <Label fx:id="emailErrorLabel" layoutX="62.0" layoutY="286.0" prefHeight="17.0" prefWidth="416.0" textFill="red" />
-       <Button fx:id="ContinuePersonalDetails" layoutX="212.0" layoutY="321.0" prefHeight="52.0" prefWidth="115.0" style="-fx-background-color: #832018; -fx-background-radius: 20;" text="Continue" textFill="#ffffff" >
-         <font>
-            <Font name="System Bold" size="17.0" />
-         </font></Button>
-      <Button fx:id="arrowPersonalDetails" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" prefHeight="24.0" prefWidth="24.0" style="-fx-background-radius: 30; -fx-background-color: #fbebf4;" text="&lt;" textFill="#832018">
-         <font>
-            <Font name="System Bold Italic" size="11.0" />
-         </font>
-      </Button>
-       <Label fx:id="nameLabel" layoutX="62.0" layoutY="60.0" prefHeight="17.0" prefWidth="416.0" textFill="black" />
-       <Label fx:id="emailLabel" layoutX="62.0" layoutY="250.0" prefHeight="17.0" prefWidth="416.0" textFill="black" />
-       <Label fx:id="phoneNumberLabel" layoutX="62.0" layoutY="180.0" prefHeight="17.0" prefWidth="416.0" textFill="black" />
-       <Label fx:id="statusLabel" layoutX="62.0" layoutY="350.0" prefHeight="17.0" prefWidth="416.0" textFill="red" />
-
-   </children>
+    <children>
+        <Label layoutY="-1.0" prefHeight="54.0" prefWidth="539.0" style="-fx-background-color: #832018;" text="                             Personal Details" textAlignment="CENTER" textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="22.0" />
+            </font>
+        </Label>
+        <TextField fx:id="NamePersonalDetails" layoutX="62.0" layoutY="99.0" prefHeight="43.0" prefWidth="416.0" promptText="Name *" />
+        <Label fx:id="nameErrorLabel" layoutX="62.0" layoutY="142.0" prefHeight="17.0" prefWidth="416.0" textFill="red" />
+        <TextField fx:id="PhoneNumberPersonalDetails" layoutX="62.0" layoutY="171.0" prefHeight="43.0" prefWidth="416.0" promptText="Phone Number *" />
+        <Label fx:id="phoneNumberErrorLabel" layoutX="62.0" layoutY="215.0" prefHeight="17.0" prefWidth="416.0" textFill="red" />
+        <TextField fx:id="EmailPersonalDetails" layoutX="62.0" layoutY="243.0" prefHeight="43.0" prefWidth="416.0" promptText="Email *" />
+        <Label fx:id="emailErrorLabel" layoutX="62.0" layoutY="286.0" prefHeight="17.0" prefWidth="416.0" textFill="red" />
+        <Button fx:id="ContinuePersonalDetails" layoutX="212.0" layoutY="321.0" prefHeight="52.0" prefWidth="115.0" style="-fx-background-color: #832018; -fx-background-radius: 20;" text="Continue" textFill="#ffffff">
+            <font>
+                <Font name="System Bold" size="17.0" />
+            </font></Button>
+        <Button fx:id="arrowPersonalDetails" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#backToCart" prefHeight="24.0" prefWidth="24.0" style="-fx-background-radius: 30; -fx-background-color: #fbebf4;" text="&lt;" textFill="#832018">
+            <font>
+                <Font name="System Bold Italic" size="11.0" />
+            </font>
+        </Button>
+        <Label fx:id="nameLabel" layoutX="62.0" layoutY="60.0" prefHeight="17.0" prefWidth="416.0" textFill="black" />
+        <Label fx:id="emailLabel" layoutX="62.0" layoutY="250.0" prefHeight="17.0" prefWidth="416.0" textFill="black" />
+        <Label fx:id="phoneNumberLabel" layoutX="62.0" layoutY="180.0" prefHeight="17.0" prefWidth="416.0" textFill="black" />
+        <Label fx:id="statusLabel" layoutX="62.0" layoutY="350.0" prefHeight="17.0" prefWidth="416.0" textFill="red" />
+    </children>
 </AnchorPane>

@@ -1,38 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
-
-<?import javafx.scene.control.TextField?>
 <AnchorPane prefHeight="647.0" prefWidth="580.0" style="-fx-background-color: #ffffff; -fx-border-color: #832018; -fx-border-width: 6;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.DeliveryPageController">
    <children>
-      <Pane layoutX="45.0" layoutY="33.0" prefHeight="189.0" prefWidth="492.0" style="-fx-background-radius: 15; -fx-border-width: 15; -fx-background-color: #fbebf4;">
+      <Pane layoutX="45.0" layoutY="33.0" prefHeight="190.0" prefWidth="492.0" style="-fx-background-radius: 15; -fx-border-width: 15; -fx-background-color: #fbebf4;">
          <children>
             <Button fx:id="Delivery" layoutX="276.0" layoutY="85.0" mnemonicParsing="false" prefHeight="70.0" prefWidth="150.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-border-color: #832018; -fx-border-width: 2; -fx-text-fill: #832018; -fx-border-radius: 20;" text="Delivery">
                <font>
                   <Font name="System Bold" size="18.0" />
                </font>
             </Button>
-            <TextField fx:id="addressField" layoutX="240.0" layoutY="170.0" prefWidth="120.0" prefHeight="30.0" promptText="Enter your address" visible="false" style="-fx-border-color: #832018; -fx-border-width: 2; -fx-border-radius: 3;" />
-            <TextField fx:id="homeNumberField" layoutX="370.0" layoutY="170.0" prefWidth="120.0" prefHeight="30.0" promptText="Home number" visible="false" style="-fx-border-color: #832018; -fx-border-width: 2; -fx-border-radius: 3;" />
+            <TextField fx:id="addressField" layoutX="240.0" layoutY="170.0" prefHeight="30.0" prefWidth="120.0" promptText="Enter your address" style="-fx-border-color: #832018; -fx-border-width: 2; -fx-border-radius: 3;" visible="false" />
+            <TextField fx:id="homeNumberField" layoutX="370.0" layoutY="170.0" prefHeight="30.0" prefWidth="120.0" promptText="Home number" style="-fx-border-color: #832018; -fx-border-width: 2; -fx-border-radius: 3;" visible="false" />
             <Button fx:id="selfPickup" layoutX="64.0" layoutY="85.0" mnemonicParsing="false" prefHeight="70.0" prefWidth="150.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-border-color: #832018; -fx-border-width: 2; -fx-text-fill: #832018; -fx-border-radius: 20;" text="Self-pickup">
                <font>
                   <Font name="System Bold" size="18.0" />
                </font>
             </Button>
-            <Label fx:id="pickupMessageLabel" layoutX="5.0" layoutY="160.0" prefWidth="390.0" prefHeight="30.0" text="Drive safe, come hungry—and we'll take care of the rest :)" visible="false" wrapText="true" style="-fx-text-fill: #832018; -fx-font-size: 14; -fx-font-weight: bold;">
+            <Label fx:id="pickupMessageLabel" layoutX="5.0" layoutY="160.0" prefHeight="30.0" prefWidth="390.0" style="-fx-text-fill: #832018; -fx-font-size: 14; -fx-font-weight: bold;" text="Drive safe, come hungry—and we'll take care of the rest :)" visible="false" wrapText="true">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
             </Label>
-
             <Label layoutX="125.0" layoutY="27.0" prefHeight="37.0" prefWidth="242.0" style="-fx-border-color: #832018; -fx-border-radius: 15; -fx-text-fill: #832018; -fx-border-image-width: 10; -fx-border-width: 3;" text="      Shipping method" textAlignment="CENTER">
                <font>
                   <Font name="System Bold" size="20.0" />
@@ -50,7 +48,7 @@
             <ComboBox fx:id="orderTimeComboBox" layoutX="140.0" layoutY="28.0" prefHeight="37.0" prefWidth="138.0" promptText="Today" style="-fx-background-color: #fbebf4; -fx-text-fill: #fbebf4; -fx-border-color: #832018; -fx-border-width: 3;" />
          </children>
       </Pane>
-      <Pane layoutX="45.0" layoutY="362.0" prefHeight="144.0" prefWidth="492.0" style="-fx-background-radius: 15; -fx-border-width: 15; -fx-background-color: #fbebf4;">
+      <Pane layoutX="45.0" layoutY="362.0" prefHeight="178.0" prefWidth="492.0" style="-fx-background-radius: 15; -fx-border-width: 15; -fx-background-color: #fbebf4;">
          <children>
             <Label layoutX="125.0" layoutY="14.0" prefHeight="37.0" prefWidth="242.0" style="-fx-border-color: #832018; -fx-border-radius: 15; -fx-text-fill: #832018; -fx-border-image-width: 10; -fx-border-width: 3;" text="      Payment method" textAlignment="CENTER">
                <font>
@@ -96,16 +94,25 @@
                   <Image url="@/images/DollarImage.png" />
                </image>
             </ImageView>
+            <!-- ListView for displaying credit card details -->
+            <ListView fx:id="creditCardListView" layoutX="127.0" layoutY="135.0" prefHeight="37.0" prefWidth="250.0" style="-fx-background-color: #fbebf4; -fx-border-color: #832018;">
+               <!-- Optional: Set cell factory if you want to customize the display of each credit card -->
+            </ListView>
          </children>
       </Pane>
-      <Button fx:id="PlaceYourOrder" layoutX="203.0" layoutY="591.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="193.0" style="-fx-background-color: #832018;" text="Place your order" textFill="#fbebf4">
+      <Button fx:id="PlaceYourOrder" layoutX="203.0" layoutY="599.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="193.0" style="-fx-background-color: #832018;" text="Place your order" textFill="#fbebf4">
          <font>
             <Font name="System Bold Italic" size="18.0" />
          </font>
       </Button>
-      <Pane fx:id="orderPrice" layoutX="47.0" layoutY="525.0" prefHeight="37.0" prefWidth="492.0" style="-fx-background-radius: 15; -fx-border-width: 15; -fx-background-color: #fbebf4;">
+      <Pane fx:id="orderPrice" layoutX="44.0" layoutY="550.0" prefHeight="37.0" prefWidth="492.0" style="-fx-background-radius: 15; -fx-border-width: 15; -fx-background-color: #fbebf4;">
          <children>
-            <Label layoutX="14.0" layoutY="6.0" prefHeight="25.0" prefWidth="106.0" text="Order price:" textFill="#832018">
+            <Label layoutX="14.0" layoutY="6.0" prefHeight="25.0" prefWidth="88.0" text="Order price:" textFill="#832018">
+               <font>
+                  <Font name="System Bold Italic" size="15.0" />
+               </font>
+            </Label>
+            <Label fx:id="price" layoutX="102.0" layoutY="6.0" prefHeight="25.0" prefWidth="88.0">
                <font>
                   <Font name="System Bold Italic" size="15.0" />
                </font>

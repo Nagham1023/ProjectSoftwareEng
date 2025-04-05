@@ -1,38 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.geometry.Insets?>
 
-<VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReservationCancellationController" spacing="10" alignment="CENTER" >
-    <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
-    </padding>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
-    <Text text="Cancel Reservation" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
-    <Text text="Please enter your name and reservation ID to cancel" style="-fx-font-size: 14px;"/>
+<AnchorPane prefHeight="250.0" prefWidth="400.0" style="-fx-background-color: #fbebf4;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReservationCancellationController">
+    <children>
+        <!-- Page Title -->
+        <Label layoutX="90.0" layoutY="20.0" prefHeight="30.0" prefWidth="250.0" text="Cancel Reservation" textAlignment="CENTER" textFill="#832018">
+            <font>
+                <Font name="Bell MT" size="20.0" />
+            </font>
+        </Label>
 
-    <Separator/>
-    <Button fx:id="backButton" onAction="#backToHome" style="-fx-font-size: 18px; -fx-text-fill: #b70236; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
+        <!-- Full Name Input -->
+        <Label layoutX="50.0" layoutY="60.0" text="Full Name:" textFill="#832018">
+            <font>
+                <Font name="Bell MT" size="14.0" />
+            </font>
+        </Label>
+        <TextField fx:id="nameField" layoutX="150.0" layoutY="58.0" prefHeight="22.0" prefWidth="200.0" />
 
-    <GridPane hgap="10" vgap="10">
-        <columnConstraints>
-            <ColumnConstraints halignment="RIGHT" minWidth="100"/>
-            <ColumnConstraints halignment="LEFT" minWidth="200"/>
-        </columnConstraints>
+        <!-- Phone Number Input -->
+        <Label layoutY="92.0" text="Reservation ID Number:" textFill="#832018">
+            <font>
+                <Font name="Bell MT" size="14.0" />
+            </font>
+        </Label>
+        <TextField fx:id="reservationIdField" layoutX="150.0" layoutY="88.0" prefHeight="22.0" prefWidth="200.0" />
 
-        <Label text="Full Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-        <TextField fx:id="nameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <!-- Cancel Button -->
+        <Button fx:id="cancelButton" layoutX="80.0" layoutY="170.0" mnemonicParsing="false" onAction="#handleCancelReservation" style="-fx-background-color: #832018; -fx-border-radius: 10px;" text="Cancel Reservation" textFill="#fbebf4">
+            <font>
+                <Font name="Bell MT" size="12.0" />
+            </font>
+        </Button>
 
-        <Label text="Reservation ID:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-        <TextField fx:id="reservationIdField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-    </GridPane>
+        <!-- Clear Button -->
+        <Button fx:id="clearButton" layoutX="240.0" layoutY="170.0" mnemonicParsing="false" onAction="#handleClearFields" style="-fx-background-color: #832018; -fx-border-radius: 10px;" text="Clear" textFill="#fbebf4">
+            <font>
+                <Font name="Bell MT" size="12.0" />
+            </font>
+        </Button>
 
-    <HBox spacing="10" alignment="CENTER">
-        <Button text="Cancel Reservation" fx:id="cancelButton" defaultButton="true" onAction="#handleCancelReservation"/>
-        <Button text="Clear" fx:id="clearButton" onAction="#handleClearFields"/>
-    </HBox>
+        <!-- Back Button -->
+        <Button fx:id="backButton" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#backToHome" style="-fx-font-size: 18px; -fx-text-fill: #b70236; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
 
-    <Label fx:id="statusLabel" style="-fx-text-fill: red;"/>
-</VBox>
+        <!-- Status Label -->
+        <Label fx:id="statusLabel" layoutX="50.0" layoutY="210.0" prefWidth="300.0" text="" textFill="red" />
+    </children>
+</AnchorPane>

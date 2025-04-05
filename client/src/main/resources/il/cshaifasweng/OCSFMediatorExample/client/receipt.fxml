@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="601.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.receiptController">
+
+    <!-- Main VBox to hold all elements -->
+    <VBox alignment="TOP_CENTER" layoutY="216.0" prefHeight="332.0" prefWidth="580.0" spacing="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="216.0">
+
+        <!-- Order Summary with ScrollPane -->
+        <ScrollPane fitToWidth="true" maxHeight="461.0" prefHeight="399.0" prefWidth="569.0">
+            <VBox fx:id="mealDetailsContainer" prefHeight="36.0" prefWidth="578.0" spacing="5" style="-fx-padding: 10px;">
+                <!-- Dynamically populated order items will go here -->
+            </VBox>
+        </ScrollPane>
+
+    </VBox>
+
+    <!-- Order Number with Gradient Rectangle -->
+    <HBox alignment="CENTER" layoutX="150.0" layoutY="172.0" prefHeight="33.0" prefWidth="300.0" style="-fx-background-color: linear-gradient(to right, #fdeaf6, #f0c6d8); -fx-padding: 5px;">
+        <Label fx:id="OrderNumField" style="-fx-text-fill: black; -fx-font-weight: bold; -fx-font-size: 18px;" text="Order Number: 123456" />
+    </HBox>
+
+    <!-- Date and Restaurant Name -->
+    <Label fx:id="dateField" layoutX="150.0" layoutY="150.0" style="-fx-font-size: 14px;" text="2023-10-01" />
+    <Label fx:id="branchField" layoutX="352.0" layoutY="149.0" style="-fx-font-size: 16px;" text="My Restaurant" />
+
+    <!-- Restaurant Logo -->
+    <ImageView fitHeight="111.0" fitWidth="115.0" layoutX="243.0" layoutY="7.0" pickOnBounds="true" preserveRatio="true">
+        <image>
+            <Image url="@../../../../images/mamas_kitchen_final.png" />
+        </image>
+    </ImageView>
+    <Label layoutX="151.0" layoutY="120.0" style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Bon appétit, and thank you for dining with us!" />
+    <Label fx:id="PaidField" layoutX="14.0" layoutY="567.0" prefHeight="20.0" prefWidth="565.0" style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Paid 10 with credit card number : " />
+    <ImageView fitHeight="48.0" fitWidth="64.0" layoutX="10.0" layoutY="11.0" onMouseClicked="#goToMainScreen" pickOnBounds="true" preserveRatio="true">
+        <image>
+            <Image url="@../../../../images/menu_icon.png" />
+        </image>
+    </ImageView>
+
+</AnchorPane>

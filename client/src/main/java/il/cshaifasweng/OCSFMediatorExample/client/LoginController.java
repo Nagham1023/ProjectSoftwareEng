@@ -1,5 +1,4 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
-
 import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -11,10 +10,11 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Objects;
+
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.isLog;
 
 public class LoginController {
 
@@ -23,22 +23,17 @@ public class LoginController {
     private Label respondField;
     @FXML
     private ImageView accountimg;
-
     @FXML
     private ImageView imglogo;
-
     @FXML
     private ImageView lockimg;
     @FXML
     private Button back;
-
-
     @FXML
     private PasswordField passwordField;
     @FXML
     private TextField passwordField2;
     private String hiddenPassword = "";
-
     @FXML
     private TextField usernameField;
     @FXML
@@ -47,13 +42,22 @@ public class LoginController {
 
     @FXML
     public void initialize(){
+        if(isLog())
+        {
+            Platform.runLater(()->{
+                try {
+                    App.setRoot("worker_screen");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        }
         EventBus.getDefault().register(this);
         imglogo.setImage(new Image(getClass().getResourceAsStream("/images/Mom_Sticker.gif")));
         accountimg.setImage(new Image(getClass().getResourceAsStream("/images/account_circle.png")));
         lockimg.setImage(new Image(getClass().getResourceAsStream("/images/Black_Lock.png")));
         passimg.setImage(new Image(getClass().getResourceAsStream("/images/show_password.png")));
         passwordField2.setVisible(false);
-
     }
     @FXML
     void backToHome() {
@@ -84,7 +88,6 @@ public class LoginController {
     }
     @FXML
     void LoginButton() throws IOException {
-
         if(passImgState == 0)
             hiddenPassword = passwordField.getText();
         else hiddenPassword = passwordField2.getText();
@@ -95,7 +98,6 @@ public class LoginController {
         UserCheck user = new UserCheck(usernameField.getText(), hiddenPassword,1);
         SimpleClient client = SimpleClient.getClient();
         client.sendToServer(user);
-
     }
     @Subscribe
     public void LoginResponse(UserCheck response) {
@@ -132,5 +134,4 @@ public class LoginController {
             throw new RuntimeException(e);
         }
     }
-
 }

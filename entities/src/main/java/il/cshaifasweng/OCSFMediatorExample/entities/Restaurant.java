@@ -3,6 +3,7 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -42,6 +43,7 @@ public class Restaurant implements Serializable {
 
     @Column(name = "closing_time")
     private LocalTime closingTime; // New attribute for closing time
+
 
     // Default constructor
     public Restaurant() {

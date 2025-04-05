@@ -67,6 +67,10 @@ public class App {
         configuration.addAnnotatedClass(ReservationSave.class);
         configuration.addAnnotatedClass(PersonalDetails.class);
         configuration.addAnnotatedClass(CreditCard.class);
+        configuration.addAnnotatedClass(UpdatePriceRequest.class);
+        configuration.addAnnotatedClass(personal_Meal.class);
+        configuration.addAnnotatedClass(MealInTheCart.class);
+        configuration.addAnnotatedClass(CustomizationWithBoolean.class);
 
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySettings(configuration.getProperties())
@@ -121,9 +125,14 @@ public class App {
             three.setDate(LocalDate.parse("2025-02-10"));
             three.setTotal_price(150);
             three.setRestaurantName("Nazareth");
-            four.setDate(LocalDate.parse("2025-01-17"));
+            four.setDate(LocalDate.parse("2025-03-16"));
             four.setTotal_price(150);
             four.setRestaurantName("Nazareth");
+            four.setCustomerEmail("lamisawawdi2003@gmail.com");
+            // Create specific order time
+            LocalDateTime customTime = LocalDateTime.now().plusHours(4);
+            four.setOrderTime(customTime);
+
 
             // List of Orders to add
             List<Order> newOrders = Arrays.asList(one, two, three, four);
@@ -142,7 +151,6 @@ public class App {
             session.save(five);
 
             session.flush();
-            // Commit the transaction after all operations are done
             session.getTransaction().commit();
 
         } catch (Exception e) {
@@ -180,10 +188,18 @@ public class App {
             nagham.setUsername("naghamTheManager");
             nagham.setGender("other");
             nagham.setAge(22);
+            Users shada = new Users();
+            shada.setRole("Dietation");
+            shada.setEmail("shadamazzawi@gmail.com");
+            shada.setPassword("123");
+            shada.setUsername("shada");
+            shada.setGender("other");
+            shada.setAge(22);
+
 
 
             // List of Orders to add
-            List<Users> newOrders = Arrays.asList(nagham);
+            List<Users> newOrders = Arrays.asList(nagham,shada);
 
             // Fetch existing meals from the database
             CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -193,6 +209,7 @@ public class App {
 
             // Save customizations
             session.save(nagham);
+            session.save(shada);
             session.flush();
             session.getTransaction().commit(); // Commit the transaction
 
@@ -367,8 +384,10 @@ public class App {
         try {
             server = new SimpleServer(3000);
             server.listen();
+            deleteAllTablesAndRelatedData();
             generateData();
             printAllData();
+            generateBasicUser();
             printAllUsers();
             //generateOrders();
 
@@ -394,6 +413,17 @@ public class App {
             generateTheComplains();
             initializeSampleTables();
             generateBasicUser1();
+            // Register a shutdown hook
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println("Shutdown initiated. Performing cleanup...");
+                // Put your cleanup code here (close resources, save state, etc.)
+                try {
+                    Thread.sleep(1000); // Simulating cleanup (e.g., closing resources)
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("Cleanup completed.");
+            }));
         } catch (Exception exception) {
             System.err.println("An error occurred, changes have been rolled back.");
             exception.printStackTrace();

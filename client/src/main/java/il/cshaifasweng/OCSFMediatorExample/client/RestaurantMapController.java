@@ -60,8 +60,9 @@ public class RestaurantMapController {
     @FXML
     public void initialize() throws IOException {
         EventBus.getDefault().register(this);
-
         setupAutoRefresh();
+
+
 
         // Fetch all restaurants
         SimpleClient.getClient().sendToServer("getAllRestaurants");

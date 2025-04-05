@@ -10,6 +10,12 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+
 
 public class ReservationCancellationController {
 
@@ -31,29 +37,37 @@ public class ReservationCancellationController {
     @FXML
     private void handleCancelReservation() {
         String name = nameField.getText().trim();
-        String reservationIdStr = reservationIdField.getText().trim();
+
+        String reservationId = reservationIdField.getText().trim();
 
         // Basic validation
-        if (name.isEmpty() || reservationIdStr.isEmpty()) {
+        if (name.isEmpty() || reservationId.isEmpty()) {
+
             statusLabel.setText("Please fill in all fields");
             return;
         }
 
+
+
         try {
-            int reservationId = Integer.parseInt(reservationIdStr);
-            if (reservationId <= 0) {
+            int reservationIdInt = Integer.parseInt(reservationId);
+            if (reservationIdInt <= 0) {
                 statusLabel.setText("Please enter a valid reservation ID");
                 return;
             }
 
+
             String requestData = String.format("Cancel Reservation: %s,%d", name, reservationId);
+
             SimpleClient.getClient().sendToServer(requestData);
 
             statusLabel.setText("Processing your request...");
 
-        } catch (NumberFormatException e) {
+
+        }   catch (NumberFormatException e) {
             statusLabel.setText("Reservation ID must be a number");
-        } catch (Exception e) {
+    }  catch (Exception e) {
+
             statusLabel.setText("Error: " + e.getMessage());
         }
     }
@@ -68,6 +82,7 @@ public class ReservationCancellationController {
         nameField.clear();
         reservationIdField.clear();
     }
+
 
     @Subscribe
     public void showCancelStatus(String status) {
@@ -88,9 +103,11 @@ public class ReservationCancellationController {
         EventBus.getDefault().register(this);
     }
 
+
     @FXML
     void backToHome(ActionEvent event) throws IOException {
         EventBus.getDefault().unregister(this);
         App.setRoot("mainScreen");
     }
+
 }

@@ -1,56 +1,49 @@
-/**
- * Sample Skeleton for 'addResponse.fxml' Controller Class
- */
-
 package il.cshaifasweng.OCSFMediatorExample.client;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.EmailSender;
+import il.cshaifasweng.OCSFMediatorExample.entities.complainEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.updateResponse;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
+import org.greenrobot.eventbus.EventBus;
+
 
 public class AddResponseController {
 
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
-
     @FXML // URL location of the FXML file that was given to the FXMLLoader
     private URL location;
-
     @FXML
     private Label checkLabel;
-
     @FXML // fx:id="ClientNameLabel"
     private Label ClientNameLabel; // Value injected by FXMLLoader
-
     @FXML
     private TextField tellLabel;
-
     @FXML // fx:id="responseField"
     private TextField responseField; // Value injected by FXMLLoader
-
     @FXML // fx:id="refundField"
     private TextField refundField;
-
     @FXML // fx:id="sendResponse"
     private Button sendResponse; // Value injected by FXMLLoader
-
     private int idComplain;
     private String emailComplain;
     private String ordernumComplain = "";
     private String refundValue;
     private String kindValue;
+    private String clientName;
+    private String clientTell;
 
 
     @FXML
@@ -67,11 +60,13 @@ public class AddResponseController {
     public void setCompDetails(String clientName, String clientTell, int idComplain, String kind, String emailComplain, String ordernum) {
         this.ClientNameLabel.setText("Response to: " + clientName);
         this.tellLabel.setText("The Client Says: " + clientTell);
+        this.clientTell = clientTell;
         this.tellLabel.setEditable(false);
         this.idComplain = idComplain;
         this.emailComplain = emailComplain;
         this.ordernumComplain = ordernum;
         this.kindValue = kind;
+        this.clientName = clientName;
 
         if (kindValue.equals("Complaint"))
             refundField.setVisible(true);
@@ -85,17 +80,14 @@ public class AddResponseController {
             checkLabel.setText("Enter A Response");
             return;
         }
-
         if (kindValue.equals("Complaint") && (refundField.getText() == null || refundField.getText().trim().isEmpty())) {
             checkLabel.setText("Enter A Refund Value");
             return;
         }
-
         String newResponse = responseField.getText();
         String subject = "Thanks For Contacting MAMA's Kitchen";
         refundValue = refundField.getText();
         double refund = 0;
-
         if (kindValue.equals("Complaint")) {
             try {
                 refund = Double.parseDouble(refundValue);
@@ -104,22 +96,72 @@ public class AddResponseController {
                 return;
             }
         }
-        if (!newResponse.trim().isEmpty()) {
-            SimpleClient client = SimpleClient.getClient();
-            updateResponse uResponse = new updateResponse(newResponse, idComplain, emailComplain, ordernumComplain, refund);
-            try {
-                System.out.println("Sending updateResponse to server: " + uResponse.getnewResponse());
-                client.sendToServer(uResponse);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            checkLabel.setText("Sent Successfully");
-            Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(2), event -> {
-                responseField.getScene().getWindow().hide(); // Close the window
-            }));
-            timeline.setCycleCount(1); // להריץ פעם אחת בלבד
-            timeline.play();
+        updateResponse uResponse = new updateResponse(newResponse, idComplain, emailComplain, ordernumComplain, refund);
+        try {
+            SimpleClient.getClient().sendToServer(uResponse);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        generateResponse();
+        checkLabel.setText("Sent Successfully");
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(2), event -> {
+            responseField.getScene().getWindow().hide(); // Close the window
+        }));
+        timeline.setCycleCount(1);
+        timeline.play();
+
+        // Notify main controller to refresh
+        EventBus.getDefault().post(new complainEvent());
+    }
+
+    private void generateResponse() {
+        String orderNum = ordernumComplain.trim();
+        String clientName = this.clientName.trim();
+        String clientSays = clientTell.trim();
+        String complaintType = this.kindValue;
+        String ourResponse = responseField.getText().trim();
+        String refundAmount = refundField.getText().trim();
+
+        if (orderNum.isEmpty() || clientName.isEmpty() || complaintType == null || ourResponse.isEmpty()) {
+            showAlert("Error", "Please x in all required fields.");
+            return;
+        }
+
+        // Generate subject
+        String subject = switch (complaintType) {
+            case "Suggestion" -> "Thank You for Your Suggestion, " + clientName;
+            case "Complaint" -> "Response to Your Complaint - Order #" + orderNum;
+            case "Feedback" -> "We Appreciate Your Feedback, " + clientName;
+            default -> "Customer Service Response";
+        };
+
+        // Generate message
+        StringBuilder message = new StringBuilder("Dear " + clientName + ",\n\n");
+        message.append("Thank you for reaching out regarding your ").append(complaintType.toLowerCase()).append(".\n\n");
+        message.append("Here is a summary of your inquiry:\n\n");
+        message.append("**Order Number:** ").append(orderNum).append("\n");
+        message.append("**Your Message:** ").append(clientSays).append("\n\n");
+
+        message.append("**Our Response:**\n");
+        message.append(ourResponse).append("\n\n");
+
+        if (!refundAmount.isEmpty()) {
+            message.append("✅ **Refund Issued:** We have processed a refund of ").append(refundAmount).append("₪ to your account.\n\n");
+        }
+
+        message.append("We value you as our customer and are here to assist with any further concerns.\n\n");
+        message.append("Warm regards,\nMama's Restaurant Customer Service Team");
+
+
+        EmailSender.sendEmail(subject, message.toString(), emailComplain);
+        //checkLabel.setText("Response finished");
+    }
+
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }
