@@ -191,12 +191,14 @@ public class RequestViewController {
 
     @Subscribe
     public void addNewRequest(MealUpdateRequest req) {
-        System.out.println("adding new UpdatePrice request for this client");
+        /*System.out.println("adding new UpdatePrice request for this client");
         System.out.println("Meal's id is " + req.getMealId());
         Platform.runLater(() -> {
             onAddMealClicked(req);
         });
-        System.out.println("added the new meal for this client");
+        System.out.println("added the new meal for this client");*/
+        EventBus.getDefault().unregister(this);
+        Platform.runLater(this::initialize);
 
     }
 

@@ -403,6 +403,7 @@ public class CreditDetailsController {
                 try {
                     //errorLabel.setText(creditCardCheck.getResponse());
                     errorLabel.setText(creditCardCheck.getResponse());
+                    done_Reservation = creditCardCheck.getReservationEvent();
                     if(!(creditCardCheck.getResponse().equals("Payment Failed"))){
                         sendReservationConfirmationEmail(CreditDetailsController.personalDetails,done_Reservation.getReservationSaveID(), done_Reservation.getRestaurantName(),done_Reservation.getSeats() );
                         App.setRoot("mainScreen");

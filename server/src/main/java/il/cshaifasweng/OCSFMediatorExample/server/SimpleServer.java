@@ -923,19 +923,18 @@ public class SimpleServer extends AbstractServer {
                 // Retrieve current meals based on branch name
                 List<Meal> currentMeals;
 
-                if (options.getBranchName().equals("ALL")) {
+                if (options.getBranchName().toLowerCase().equals("all")) {
                     currentMeals = getAllMeals();
-                }
-                else{
+                } else {
                     currentMeals = getRestaurantByName(options.getBranchName()).getMeals();
                 }
                 System.out.println("Current meals for branch " + options.getBranchName() + ": " + currentMeals.size());
 
                 // Handle reset option: Send all meals if no filters are applied
-                if (options.getCustomizationNames().isEmpty() && options.getRestaurantNames().isEmpty()) {
+                if (options.getCustomizationNames().isEmpty() && options.getRestaurantNames().isEmpty()||(options.getBranchName().toLowerCase().equals("all")&&options.getCustomizationNames().isEmpty())) {
                     System.out.println("No filters applied. Sending all meals.");
                     try {
-                        client.sendToClient(currentMeals);
+                        client.sendToClient(new MealsList(currentMeals));
                         return;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -978,8 +977,8 @@ public class SimpleServer extends AbstractServer {
                 while (iterator.hasNext()) {
                     Meal meal = iterator.next();
                     boolean flag = false;
-                    for(Meal ml : currentMeals){
-                        if(ml.getName().equals(meal.getName())){
+                    for (Meal ml : currentMeals) {
+                        if (ml.getName().equals(meal.getName())) {
                             flag = true;
                         }
                     }
@@ -1064,7 +1063,7 @@ public class SimpleServer extends AbstractServer {
                     sendToAll(msg);
 
                 } else{
-                    MealUpdateRequest req= new MealUpdateRequest();
+                    MealUpdateRequest req = new MealUpdateRequest();
                     req=AddUpdatePriceRequest((updatePrice) msg);
                     client.sendToClient(req);
                     sendToAll(req);

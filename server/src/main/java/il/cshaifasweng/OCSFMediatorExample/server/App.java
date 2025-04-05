@@ -182,13 +182,13 @@ public class App {
         session.beginTransaction(); // Start a transaction
         try {
             // Create orders
-            Users nagham = new Users();
+            /*Users nagham = new Users();
             nagham.setRole("CompanyManager");
             nagham.setEmail("naghammnsor@gmail.com");
             nagham.setPassword("NaghamYes");
             nagham.setUsername("naghamTheManager");
             nagham.setGender("other");
-            nagham.setAge(22);
+            nagham.setAge(22);*/
             Users shada = new Users();
             shada.setRole("Dietation");
             shada.setEmail("shadamazzawi@gmail.com");
@@ -200,7 +200,7 @@ public class App {
 
 
             // List of Orders to add
-            List<Users> newOrders = Arrays.asList(nagham,shada);
+            List<Users> newOrders = Arrays.asList(shada);
 
             // Fetch existing meals from the database
             CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -209,7 +209,7 @@ public class App {
             List<Users> existingMeals = session.createQuery(query).getResultList();
 
             // Save customizations
-            session.save(nagham);
+            //session.save(nagham);
             session.save(shada);
             session.flush();
             session.getTransaction().commit(); // Commit the transaction
