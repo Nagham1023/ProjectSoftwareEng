@@ -8,115 +8,55 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.image.Image?>
 <SplitPane dividerPositions="0.3" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.WorkerController">
     <items>
         <VBox alignment="CENTER" minWidth="-Infinity" prefHeight="398.0" prefWidth="130.0" spacing="10.0" style="-fx-background-color: #FBEBF4;">
             <children>
-                <AnchorPane prefHeight="391.0" prefWidth="176.0">
+                <AnchorPane prefHeight="250.0" prefWidth="176.0">
                     <children>
-                        <Button fx:id="branches_managment" layoutX="13.0" layoutY="165.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Branches Managment" textAlignment="CENTER" textFill="#333333">
+                        <Button fx:id="back" layoutX="67.0" layoutY="197.0" onAction="#backToHome" style="-fx-font-size: 24px; -fx-text-fill: black; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
+                        <Button fx:id="branches_managment" layoutX="18.0" layoutY="14.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Branches Managment" textAlignment="CENTER" textFill="#333333">
                             <font>
                                 <Font name="System Italic" size="12.0" />
                             </font>
                         </Button>
-                        <Button fx:id="priceChange_requist" layoutX="13.0" layoutY="241.0" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="27.0" prefWidth="150.0" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Price Change Requists" textAlignment="CENTER" textFill="#333333">
+                        <Button fx:id="priceChange_requist" layoutX="19.0" layoutY="169.0" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="27.0" prefWidth="150.0" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Price Change Requists" textAlignment="CENTER" textFill="#333333">
                             <font>
                                 <Font name="System Italic" size="12.0" />
                             </font>
                         </Button>
-                        <Button fx:id="reports_center" layoutX="12.0" layoutY="203.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Reports Center" textAlignment="CENTER" textFill="#333333">
+                        <Button fx:id="reports_center" layoutX="18.0" layoutY="131.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Reports Center" textAlignment="CENTER" textFill="#333333">
                             <font>
                                 <Font name="System Italic" size="12.0" />
                             </font>
                         </Button>
-                        <Button fx:id="update_meals" layoutX="13.0" layoutY="165.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Update Meals" textAlignment="CENTER" textFill="#333333">
+                        <Button fx:id="update_meals" layoutX="19.0" layoutY="131.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Update Meals" textAlignment="CENTER" textFill="#333333">
                             <font>
                                 <Font name="System Italic" size="12.0" />
                             </font>
                         </Button>
-                        <Button fx:id="complaint_center" layoutX="12.0" layoutY="165.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Complaints Center" textAlignment="CENTER" textFill="#333333">
+                        <Button fx:id="complaint_center" layoutX="19.0" layoutY="131.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Complaints Center" textAlignment="CENTER" textFill="#333333">
                             <font>
                                 <Font name="System Italic" size="12.0" />
                             </font>
                         </Button>
-                        <Button fx:id="tables_reservation" layoutX="13.0" layoutY="165.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Tables Reservation" textAlignment="CENTER" textFill="#333333">
+                        <Button fx:id="tables_reservation" layoutX="19.0" layoutY="131.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Tables Reservation" textAlignment="CENTER" textFill="#333333">
                             <font>
                                 <Font name="System Italic" size="12.0" />
                             </font>
                         </Button>
-                        <Button fx:id="tables_map" layoutX="13.0" layoutY="128.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Tables Map" textAlignment="CENTER" textFill="#333333">
+                        <Button fx:id="tables_map" layoutX="19.0" layoutY="90.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Tables Map" textAlignment="CENTER" textFill="#333333">
                             <font>
                                 <Font name="System Italic" size="12.0" />
                             </font>
                         </Button>
-                        <Button fx:id="personalInf" layoutX="13.0" layoutY="92.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 5 10; -fx-min-width: 150;" text="Personal Informatin" textAlignment="CENTER" textFill="#333333">
+                        <Button fx:id="personalInf" layoutX="19.0" layoutY="53.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 5 10; -fx-min-width: 150;" text="Personal Informatin" textAlignment="CENTER" textFill="#333333">
                             <font>
                                 <Font name="System Italic" size="12.0" />
                             </font>
                         </Button>
-                  <Button fx:id="back" layoutY="-3.0" onAction="#backToHome" style="-fx-font-size: 24px; -fx-text-fill: black; -fx-background-color: transparent; -fx-border-color: transparent;" text="←" />
                     </children>
                 </AnchorPane>
-            <AnchorPane prefHeight="250.0" prefWidth="176.0">
-               <children>
-                      <Button fx:id="branches_managment" layoutX="13.0" layoutY="87.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Branches Managment" textAlignment="CENTER" textFill="#333333">
-                          <font>
-                              <Font name="System Italic" size="12.0" />
-                          </font>
-                      </Button>
-                      <Button fx:id="priceChange_requist" layoutX="13.0" layoutY="163.0" mnemonicParsing="false" onAction="#onButtonClick" prefHeight="27.0" prefWidth="150.0" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Price Change Requists" textAlignment="CENTER" textFill="#333333">
-                          <font>
-                              <Font name="System Italic" size="12.0" />
-                          </font>
-                      </Button>
-                      <Button fx:id="reports_center" layoutX="12.0" layoutY="125.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Reports Center" textAlignment="CENTER" textFill="#333333">
-                          <font>
-                              <Font name="System Italic" size="12.0" />
-                          </font>
-                      </Button>
-                      <Button fx:id="update_meals" layoutX="13.0" layoutY="87.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Update Meals" textAlignment="CENTER" textFill="#333333">
-                          <font>
-                              <Font name="System Italic" size="12.0" />
-                          </font>
-                      </Button>
-                      <Button fx:id="complaint_center" layoutX="12.0" layoutY="87.0" mnemonicParsing="false" onAction="#onButtonClick" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Complaints Center" textAlignment="CENTER" textFill="#333333">
-                          <font>
-                              <Font name="System Italic" size="12.0" />
-                          </font>
-                      </Button>
-                   <Button fx:id="tables_reservation" layoutX="13.0" layoutY="87.0"
-                           mnemonicParsing="false"
-                           onAction="#goToReservation"
-                           style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9);
-               -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2);
-               -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;"
-                           text="Tables Reservation" textAlignment="CENTER" textFill="#333333">
-                       <font>
-                           <Font name="System Italic" size="12.0" />
-                       </font>
-                   </Button>
-
-                   <Button fx:id="tables_map" layoutX="13.0" layoutY="50.0"
-                           mnemonicParsing="false"
-                           onAction="#goToMap"
-                           style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9);
-               -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2);
-               -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;"
-                           text="Tables Map" textAlignment="CENTER" textFill="#333333">
-                       <font>
-                           <Font name="System Italic" size="12.0" />
-                       </font>
-                   </Button>
-
-                      <Button fx:id="personalInf" layoutX="13.0" layoutY="14.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-background-radius: 25; -fx-border-radius: 25; -fx-padding: 5 10; -fx-min-width: 150;" text="Personal Information" textAlignment="CENTER" textFill="#333333">
-                          <font>
-                              <Font name="System Italic" size="12.0" />
-                          </font>
-                      </Button>
-               </children>
-            </AnchorPane>
             </children>
         </VBox>
         <StackPane fx:id="chartArea" prefHeight="398.0" prefWidth="425.0" style="-fx-background-color: #FFF5F9;">

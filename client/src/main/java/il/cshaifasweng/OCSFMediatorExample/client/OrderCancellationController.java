@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import org.greenrobot.eventbus.EventBus;
@@ -24,24 +25,34 @@ public class OrderCancellationController {
     private Button CancelButton;
 
     @FXML
-    private TextField OrderNumber;
+    private TextField ID;
+
+    @FXML
+    private TextField emailField;
+
+    @FXML
+    private Label idErrorLabel;
 
     @FXML
     public void initialize(){
         EventBus.getDefault().register(this);
+        idErrorLabel.setText("");
     }
 
     @FXML
     void CancelOrder(ActionEvent event) {
-        String orderNumber = OrderNumber.getText();
-        if (orderNumber == null || orderNumber.trim().isEmpty()) {
-            //show a warning if the order number field is empty
-            //Warning warning1 = new Warning("Please enter a valid order number.");
-
+        String orderNumber = ID.getText();
+        String customerEmail = emailField.getText();
+        if (orderNumber == null || orderNumber.trim().isEmpty() || customerEmail == null || customerEmail.trim().isEmpty()) {
+            idErrorLabel.setText("No field cannot be empty !");
+            idErrorLabel.setVisible(true);
+        } else if (!orderNumber.matches("\\d+")) {
+            idErrorLabel.setText("Order number must contain only numbers !");
+            idErrorLabel.setVisible(true);
         } else {  //if the order number entered is correct
-            CancelOrderEvent cancelEvent = new CancelOrderEvent(orderNumber);
+            CancelOrderEvent cancelOrder = new CancelOrderEvent(orderNumber, customerEmail);
             try {
-                SimpleClient.getClient().sendToServer(cancelEvent);
+                SimpleClient.getClient().sendToServer(cancelOrder);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -54,6 +65,15 @@ public class OrderCancellationController {
         if (cancelOrderEvent.getOrder() != null) {
             //display refund amount
             double refundAmount = calculateRefund(cancelOrderEvent.getOrder());
+            if (cancelOrderEvent.getStatus().startsWith("Order not found with email:")) {
+                Platform.runLater(() -> {
+                    try {
+                idErrorLabel.setVisible(true);
+                idErrorLabel.setText(cancelOrderEvent.getStatus());}
+                    catch (Exception e) {
+                    e.printStackTrace();}
+                });
+            } else{
 
             //display a success message
             Platform.runLater(() -> {
@@ -73,10 +93,19 @@ public class OrderCancellationController {
                     e.printStackTrace();
                 }
             });
+            }
         } else {
             // Handle case when order was not found
             Warning errorMessage = new Warning("Order not found.");
-            EventBus.getDefault().post(errorMessage);
+            Platform.runLater(() -> {
+                try {
+            idErrorLabel.setVisible(true);
+            idErrorLabel.setText("Order not found.");}
+                catch (Exception e) {
+                e.printStackTrace();
+                }
+            });
+
         }
         System.out.println("calculateRefund");
     }

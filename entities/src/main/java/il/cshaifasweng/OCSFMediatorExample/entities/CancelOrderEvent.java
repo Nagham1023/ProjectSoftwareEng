@@ -7,11 +7,17 @@ public class CancelOrderEvent implements Serializable {
     private Order order;
     private double refundAmount;
     private String Status;
+    private String customerEmail;
 
     public CancelOrderEvent(int orderNumber, Order order, double refundAmount) {
         this.orderNumber = String.valueOf(orderNumber);
         this.order = order;
         this.refundAmount = refundAmount;
+    }
+
+    public CancelOrderEvent(String orderNumber, String customerEmail) {
+        this.orderNumber = orderNumber;
+        this.customerEmail = customerEmail;
     }
 
     public CancelOrderEvent(Order order, String orderNumber) {
@@ -46,4 +52,12 @@ public class CancelOrderEvent implements Serializable {
     public void setStatus(String Status) {
         this.Status =Status;
 }
+
+    public String getCustomerEmail() {
+        return customerEmail;
+    }
+
+    public void setCustomerEmail(String customerEmail) {
+        this.customerEmail = customerEmail;
+    }
 }

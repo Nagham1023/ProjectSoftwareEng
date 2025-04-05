@@ -1,9 +1,4 @@
-/**
- * Sample Skeleton for 'addResponse.fxml' Controller Class
- */
-
 package il.cshaifasweng.OCSFMediatorExample.client;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -28,28 +23,20 @@ public class AddResponseController {
 
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
-
     @FXML // URL location of the FXML file that was given to the FXMLLoader
     private URL location;
-
     @FXML
     private Label checkLabel;
-
     @FXML // fx:id="ClientNameLabel"
     private Label ClientNameLabel; // Value injected by FXMLLoader
-
     @FXML
     private TextField tellLabel;
-
     @FXML // fx:id="responseField"
     private TextField responseField; // Value injected by FXMLLoader
-
     @FXML // fx:id="refundField"
     private TextField refundField;
-
     @FXML // fx:id="sendResponse"
     private Button sendResponse; // Value injected by FXMLLoader
-
     private int idComplain;
     private String emailComplain;
     private String ordernumComplain = "";
@@ -93,17 +80,14 @@ public class AddResponseController {
             checkLabel.setText("Enter A Response");
             return;
         }
-
         if (kindValue.equals("Complaint") && (refundField.getText() == null || refundField.getText().trim().isEmpty())) {
             checkLabel.setText("Enter A Refund Value");
             return;
         }
-
         String newResponse = responseField.getText();
         String subject = "Thanks For Contacting MAMA's Kitchen";
         refundValue = refundField.getText();
         double refund = 0;
-
         if (kindValue.equals("Complaint")) {
             try {
                 refund = Double.parseDouble(refundValue);
@@ -129,6 +113,7 @@ public class AddResponseController {
         // Notify main controller to refresh
         EventBus.getDefault().post(new complainEvent());
     }
+
     private void generateResponse() {
         String orderNum = ordernumComplain.trim();
         String clientName = this.clientName.trim();
@@ -154,7 +139,6 @@ public class AddResponseController {
         StringBuilder message = new StringBuilder("Dear " + clientName + ",\n\n");
         message.append("Thank you for reaching out regarding your ").append(complaintType.toLowerCase()).append(".\n\n");
         message.append("Here is a summary of your inquiry:\n\n");
-
         message.append("**Order Number:** ").append(orderNum).append("\n");
         message.append("**Your Message:** ").append(clientSays).append("\n\n");
 

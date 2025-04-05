@@ -27,6 +27,7 @@ import java.util.Map;
 public class RequestViewController {
     List<UpdatePriceRequestEvent> reqs;
     public boolean isModifyMode = false;
+    public String currentWorker;
 
     @FXML
     private VBox requestsContainer;  // MUST match fx:id in FXML file
@@ -39,6 +40,11 @@ public class RequestViewController {
         SimpleClient client = SimpleClient.getClient();
         System.out.println("showing change price requests");
         try{
+            if (client.getUser() != null) {
+                currentWorker = client.getUser().getRole();
+            } else {
+                System.err.println("User is null. Cannot initialize WorkerController.");
+            }
         client.sendToServer("show change price requests");
     } catch (IOException e) {
             throw new RuntimeException(e);

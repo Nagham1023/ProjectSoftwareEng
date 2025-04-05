@@ -16,12 +16,11 @@ public class Order implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private int restaurantId; /*getting in the server*/
+    private int restaurantId;
     private String restaurantName;
     private LocalDate date;
     private String orderType;
     private int total_price;
-
     private String orderStatus;
     private String customerEmail;
     private LocalDateTime orderTime;

@@ -1,12 +1,13 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "reservation_saves")
-public class ReservationSave {
+public class ReservationSave implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -20,6 +21,7 @@ public class ReservationSave {
     private String fullName;
     private String phoneNumber;
     private String email;
+    private String creditCard_num;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -120,6 +122,14 @@ public class ReservationSave {
     public void setTables(List<TableNode> tables) {
         this.tables = tables;
     }
+    public String getCreditCard_num() {
+        return creditCard_num;
+    }
+
+    public void setCreditCard_num(String creditCard_num) {
+        this.creditCard_num = creditCard_num;
+    }
+
 
     @Override
     public String toString() {
