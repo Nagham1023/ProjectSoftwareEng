@@ -16,6 +16,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 
+
 public class ReservationCancellationController {
 
     @FXML
@@ -23,7 +24,6 @@ public class ReservationCancellationController {
 
     @FXML
     private TextField reservationIdField;
-
 
     @FXML
     private Button cancelButton;
@@ -37,13 +37,16 @@ public class ReservationCancellationController {
     @FXML
     private void handleCancelReservation() {
         String name = nameField.getText().trim();
+
         String reservationId = reservationIdField.getText().trim();
 
         // Basic validation
         if (name.isEmpty() || reservationId.isEmpty()) {
+
             statusLabel.setText("Please fill in all fields");
             return;
         }
+
 
 
         try {
@@ -53,15 +56,18 @@ public class ReservationCancellationController {
                 return;
             }
 
-            String requestData = String.format("Cancel Reservation: %s,%d", name, reservationIdInt);
+
+            String requestData = String.format("Cancel Reservation: %s,%d", name, reservationId);
 
             SimpleClient.getClient().sendToServer(requestData);
 
             statusLabel.setText("Processing your request...");
 
+
         }   catch (NumberFormatException e) {
             statusLabel.setText("Reservation ID must be a number");
     }  catch (Exception e) {
+
             statusLabel.setText("Error: " + e.getMessage());
         }
     }

@@ -241,8 +241,14 @@ public class SimpleClient extends AbstractClient {
 				break;
 			case "changing":
 				EventBus.getDefault().post(msg);
+
 				EventBus.getDefault().post(event);
 				break;
+			}
+			else if(message.startsWith("Cancel Reservation ")){
+				EventBus.getDefault().post(message.substring("Cancel Reservation ".length()).trim());
+			}
+
 		}
 	}
 
