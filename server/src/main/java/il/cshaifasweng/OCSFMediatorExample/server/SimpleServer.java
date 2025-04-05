@@ -44,6 +44,7 @@ public class SimpleServer extends AbstractServer {
 
     private static ArrayList<SubscribedClient> SubscribersList = new ArrayList<>();
     private static ArrayList<ConnectionToClient> Subscribers = new ArrayList<>();
+    private static boolean ReservationOperation = false;
 
     public SimpleServer(int port) {
         super(port);
@@ -56,6 +57,8 @@ public class SimpleServer extends AbstractServer {
 
 
         if (msg instanceof ReservationEvent) {
+            while(ReservationOperation) {}
+            ReservationOperation = true;
             ReservationEvent reservation = (ReservationEvent) msg;
             printAllTablesInRestaurant(reservation.getRestaurantName());
             List<ReservationEvent> availableReservation = check_Available_Reservation(reservation);
@@ -76,7 +79,7 @@ public class SimpleServer extends AbstractServer {
                 // Define restaurant opening and closing times
                 LocalTime closingTime = getRestaurantByName(reservation.getRestaurantName()).getClosingTime();// 10:00 PM
 
-                LocalTime start = getRestaurantByName(reservation.getRestaurantName()).getOpeningTime(); // e.g., 10:00 AM
+                LocalTime start = getRestaurantByName(reservation.getRestaurantName()).getOpeningTime().plusMinutes(15); // e.g., 10:00 AM
                 LocalDate currentDate = reservation.getReservationDateTime().toLocalDate(); // Get the current date
                 LocalDateTime startTime = LocalDateTime.of(currentDate, start); // Combine date and time
 
@@ -104,7 +107,7 @@ public class SimpleServer extends AbstractServer {
                         System.out.println("there is no availale tables for this slot -" + startTime);
                     }
 
-                    // Move to the next time slot (e.g., increment by 1 hour)
+                    // Move to the next time slot (e.g., increment by 0.5 hour)
                     startTime = startTime.plusMinutes(30);
                 }
 
@@ -144,10 +147,12 @@ public class SimpleServer extends AbstractServer {
                         throw new RuntimeException(e);
                     }
                 }
-
             }
+            ReservationOperation = false;
         }
         if (msg instanceof FinalReservationEvent) {
+            while(ReservationOperation) {}
+            ReservationOperation = true;
             try {
                 FinalReservationEvent event = (FinalReservationEvent) msg;
 
@@ -165,7 +170,7 @@ public class SimpleServer extends AbstractServer {
 
                     // Define restaurant opening and closing times
                     LocalTime closingTime = getRestaurantByName(event.getRestaurantName()).getClosingTime(); // 10:00 PM
-                    LocalTime start = getRestaurantByName(event.getRestaurantName()).getOpeningTime(); // e.g., 10:00 AM
+                    LocalTime start = getRestaurantByName(event.getRestaurantName()).getOpeningTime().plusMinutes(15); // e.g., 10:00 AM
                     LocalDate currentDate = event.getReservationDateTime().toLocalDate(); // Get the current date
                     LocalDateTime startTime = LocalDateTime.of(currentDate, start); // Combine date and time
 
@@ -250,6 +255,7 @@ public class SimpleServer extends AbstractServer {
                 // Notify the client of the error
                 System.out.println("Failed to save reservation.");
             }
+            ReservationOperation = false;
         }
         if (msg instanceof String && msg.equals("getAllRestaurants")) {
             try {
@@ -331,6 +337,8 @@ public class SimpleServer extends AbstractServer {
         }
 
         if (msg instanceof String && ((String) msg).startsWith("Cancel Reservation:")) {
+            while(ReservationOperation) {}
+            ReservationOperation = true;
             printAllReservationSaves();
             try{
                 handleCancellationRequest((String) msg, client);
@@ -339,7 +347,7 @@ public class SimpleServer extends AbstractServer {
             }
             printAllReservationSaves();
             sendToAll(new ReConfirmEvent());
-
+            ReservationOperation = false;
         }
 
         if (msg instanceof specificComplains) {
@@ -1071,7 +1079,7 @@ public class SimpleServer extends AbstractServer {
 
             // Fetch restaurant opening and closing hours
 
-            LocalTime openingTime = getRestaurantByName(restaurantName).getOpeningTime();
+            LocalTime openingTime = getRestaurantByName(restaurantName).getOpeningTime().plusMinutes(15);
             LocalTime closingTime = getRestaurantByName(restaurantName).getClosingTime().minusHours(1); // One hour before closing
 
             // Validate that the requested reservation time is within business hours
@@ -1513,7 +1521,6 @@ public class SimpleServer extends AbstractServer {
             throw new RuntimeException("Failed to fetch and print ReservationSave entities.", e);
         }
     }
-
     private String getTableDetails(int tableID) {
         StringBuilder details = new StringBuilder();
 
@@ -1545,37 +1552,68 @@ public class SimpleServer extends AbstractServer {
             LocalDate currentDate = LocalDate.now();
             LocalTime currentTime = LocalTime.now();
 
-            // Filter and add reservation start times for the current date and after current time
-            details.append("Reservation Start Times (Today and after current time):\n");
-            if (table.getReservationStartTimes() == null || table.getReservationStartTimes().isEmpty()) {
-                details.append("  No reservations\n");
-            } else {
-                boolean hasReservations = false;
-                for (LocalDateTime startTime : table.getReservationStartTimes()) {
-                    if (startTime.toLocalDate().equals(currentDate) && startTime.toLocalTime().isAfter(currentTime)) {
-                        details.append("  - ").append(startTime).append("\n");
-                        hasReservations = true;
-                    }
+            // For occupied tables, show all reservations (past and future)
+            if ("occupied".equalsIgnoreCase(table.getStatus())) {
+                // Show all start times for today
+                details.append("Current Reservation:\n");
+                if (table.getReservationStartTimes() == null || table.getReservationStartTimes().isEmpty()) {
+                    details.append("  No start time recorded\n");
+                } else {
+                    // Find the most recent past start time
+                    table.getReservationStartTimes().stream()
+                            .filter(startTime -> startTime.toLocalDate().equals(currentDate))
+                            .sorted()
+                            .reduce((first, second) -> second) // get last element
+                            .ifPresentOrElse(
+                                    startTime -> details.append("  - Started at: ").append(startTime).append("\n"),
+                                    () -> details.append("  No start time recorded for today\n")
+                            );
                 }
-                if (!hasReservations) {
-                    details.append("  No reservations\n");
-                }
-            }
 
-            // Filter and add reservation end times for the current date and after current time
-            details.append("Reservation End Times (Today and after current time):\n");
-            if (table.getReservationEndTimes() == null || table.getReservationEndTimes().isEmpty()) {
-                details.append("  No reservations\n");
+                // Show upcoming end time
+                if (table.getReservationEndTimes() == null || table.getReservationEndTimes().isEmpty()) {
+                    details.append("  No end time recorded\n");
+                } else {
+                    table.getReservationEndTimes().stream()
+                            .filter(endTime -> endTime.toLocalDate().equals(currentDate))
+                            .sorted()
+                            .findFirst() // get the earliest future end time
+                            .ifPresentOrElse(
+                                    endTime -> details.append("  - Will end at: ").append(endTime).append("\n"),
+                                    () -> details.append("  No end time recorded for today\n")
+                            );
+                }
             } else {
-                boolean hasReservations = false;
-                for (LocalDateTime endTime : table.getReservationEndTimes()) {
-                    if (endTime.toLocalDate().equals(currentDate) && endTime.toLocalTime().isAfter(currentTime)) {
-                        details.append("  - ").append(endTime).append("\n");
-                        hasReservations = true;
+                // For non-occupied tables, show only future reservations
+                details.append("Upcoming Reservations (Today and after current time):\n");
+
+                // Pair start and end times
+                List<LocalDateTime> starts = table.getReservationStartTimes() != null ?
+                        new ArrayList<>(table.getReservationStartTimes()) : Collections.emptyList();
+                List<LocalDateTime> ends = table.getReservationEndTimes() != null ?
+                        new ArrayList<>(table.getReservationEndTimes()) : Collections.emptyList();
+
+                // Sort both lists
+                starts.sort(LocalDateTime::compareTo);
+                ends.sort(LocalDateTime::compareTo);
+
+                // Find matching pairs (assuming they're in order)
+                int count = 0;
+                for (int i = 0; i < starts.size(); i++) {
+                    LocalDateTime start = starts.get(i);
+                    if (start.toLocalDate().equals(currentDate) && start.toLocalTime().isAfter(currentTime)) {
+                        LocalDateTime end = i < ends.size() ? ends.get(i) : null;
+                        details.append("  - ").append(start);
+                        if (end != null) {
+                            details.append(" to ").append(end);
+                        }
+                        details.append("\n");
+                        count++;
                     }
                 }
-                if (!hasReservations) {
-                    details.append("  No reservations\n");
+
+                if (count == 0) {
+                    details.append("  No upcoming reservations\n");
                 }
             }
 
@@ -1584,7 +1622,6 @@ public class SimpleServer extends AbstractServer {
             details.append("Error: Failed to fetch table details.");
         }
 
-        // Return the constructed string
         return details.toString();
     }
 
