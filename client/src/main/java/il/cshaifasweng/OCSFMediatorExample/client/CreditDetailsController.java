@@ -35,6 +35,7 @@ import java.util.stream.IntStream;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import static il.cshaifasweng.OCSFMediatorExample.client.ReservationController.noValidation;
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.deliveryPrice;
 
 public class CreditDetailsController {
 
@@ -128,6 +129,7 @@ public class CreditDetailsController {
             monthYearComboBox.setValue(selectedCard.getExpiryDate());
             cardNumberField.setText("**** **** **** " + selectedCard.getCardNumber().substring(selectedCard.getCardNumber().length() - 4));
             CardholdersIDcardField.setText(selectedCard.getCardholdersID());
+            setupBindings();
         } else {
             clearFields();
             setupBindings();
