@@ -19,6 +19,7 @@ public class MealsDB {
 
     private static Session session;
     public static List<Meal> meatlist;
+    public static List<Customization> customizationsList;
 
     static byte[] loadImage(String fileName) throws IOException {
         try (InputStream inputStream = App.class.getClassLoader().getResourceAsStream("images/" + fileName)) {
@@ -28,7 +29,9 @@ public class MealsDB {
             return inputStream.readAllBytes();
         }
     }
+
     public static void generateData() throws Exception {
+        customizationsList= new ArrayList<>();
         Transaction transaction = null;
         try {
             if (session == null || !session.isOpen()) {
@@ -74,6 +77,7 @@ public class MealsDB {
 
                 if (!isDuplicate) {
                     session.save(customization);
+                    customizationsList.add(customization);
                     System.out.println("Added new customization: " + customization.getName());
                 } else {
                     System.out.println("Duplicate customization skipped: " + customization.getName());
@@ -84,35 +88,35 @@ public class MealsDB {
             Meal burger = new Meal();
             burger.setName("Burger");
             burger.setDescription("Juicy beef burger with fresh lettuce");
-            burger.setPrice(8.00);
+            burger.setPrice(8);
             burger.setCustomizations(Arrays.asList(moreLettuce));
             burger.setImage(loadImage("burger.jpg"));
 
             Meal spaghetti = new Meal();
             spaghetti.setName("Spaghetti");
             spaghetti.setDescription("Classic Italian spaghetti with cheese");
-            spaghetti.setPrice(10.00);
+            spaghetti.setPrice(10);
             spaghetti.setCustomizations(Arrays.asList(extraCheese));
             spaghetti.setImage(loadImage("spaghetti.jpg"));
 
             Meal avocadoSalad = new Meal();
             avocadoSalad.setName("Avocado Salad");
             avocadoSalad.setDescription("Fresh avocado salad with onions");
-            avocadoSalad.setPrice(7.00);
+            avocadoSalad.setPrice(7);
             avocadoSalad.setCustomizations(Arrays.asList(moreOnion));
             avocadoSalad.setImage(loadImage("avocado_salad.png"));
 
             Meal grills = new Meal();
             grills.setName("Grills");
             grills.setDescription("Mixed grilled meats with spices");
-            grills.setPrice(12.00);
+            grills.setPrice(12);
             grills.setCustomizations(Arrays.asList(highSpicyLevel));
             grills.setImage(loadImage("grills.jpg"));
 
             Meal toastCheese = new Meal();
             toastCheese.setName("Toast Cheese");
             toastCheese.setDescription("Cheese toast with black bread");
-            toastCheese.setPrice(5.00);
+            toastCheese.setPrice(5);
             toastCheese.setCustomizations(Arrays.asList(blackBread));
             toastCheese.setImage(loadImage("toast_cheese.jpg"));
 
@@ -155,6 +159,61 @@ public class MealsDB {
                 session.close();
                 System.out.println("Session closed.");
             }
+        }
+    }
+
+    public static void generateCompanyMeals() throws Exception {
+        try (Session session = getSessionFactory().openSession()) {
+            session.beginTransaction();
+
+            // Check if company meals already exist to avoid duplicates
+            List<Meal> existingCompanyMeals = session.createQuery("FROM Meal WHERE isCompany = true", Meal.class).list();
+            if (!existingCompanyMeals.isEmpty()) {
+                System.out.println("Company meals already exist in the database.");
+                return;
+            }
+
+            // Create new company meals
+            Meal companyMeal1 = new Meal();
+            companyMeal1.setMealName("Company Burger");
+            companyMeal1.setDescription("Premium burger for corporate events");
+            companyMeal1.setPrice(29);
+            companyMeal1.setCompany(true);
+            companyMeal1.setDelivery(true);
+            companyMeal1.setCustomizations(customizationsList);
+
+            Meal companyMeal2 = new Meal();
+            companyMeal2.setMealName("Executive Pizza");
+            companyMeal2.setDescription("Gourmet pizza for team meetings");
+            companyMeal2.setPrice(39);
+            companyMeal2.setCompany(true);
+            companyMeal2.setDelivery(false);
+            companyMeal2.setCustomizations(customizationsList);
+
+            // Save company meals to the database
+            session.persist(companyMeal1);
+            session.persist(companyMeal2);
+
+            // Fetch existing meals from the database
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Restaurant> query = builder.createQuery(Restaurant.class);
+            query.from(Restaurant.class);
+            List<Restaurant> restaurants = session.createQuery(query).getResultList();
+
+            // Add company meals to each restaurant
+            for (Restaurant restaurant : restaurants) {
+                List<Meal> currentMeals = restaurant.getMeals();
+                currentMeals.add(companyMeal1);
+                currentMeals.add(companyMeal2);
+                restaurant.setMeals(currentMeals);
+                session.update(restaurant); // Update the restaurant entity
+            }
+
+            session.getTransaction().commit();
+            System.out.println("Successfully generated company meals and associated them with all restaurants.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("Failed to generate company meals: " + e.getMessage(), e);
         }
     }
     /*********************************new get all meal*************************************/
@@ -225,7 +284,7 @@ public class MealsDB {
         return meals;
     }
     /********************************/
-    public static void updateMealPriceById(int mealId, double newPrice) {
+    public static void updateMealPriceById(int mealId, int newPrice) {
         // Check if the meatlist is initialized
         if (meatlist == null || meatlist.isEmpty()) {
             System.out.println("The meal list is empty or not initialized.");
@@ -267,7 +326,7 @@ public class MealsDB {
     public static void updateMealPriceInDatabase(updatePrice updatePrice) {
         //System.out.println("Changing the price in database.");
         int mealId = updatePrice.getIdMeal();
-        double newPrice = updatePrice.getNewPrice();
+        int newPrice = updatePrice.getNewPrice();
 
         try {
             if (session == null || !session.isOpen()) {
@@ -412,7 +471,7 @@ public class MealsDB {
             Meal newMealEntity = new Meal();
             newMealEntity.setName(newMeal.getMealName());
             newMealEntity.setDescription(newMeal.getMealDisc());
-            newMealEntity.setPrice(Double.parseDouble(newMeal.getPrice()));
+            newMealEntity.setPrice(Integer.parseInt(newMeal.getPrice()));
             newMealEntity.setImage(newMeal.getImage());
             newMealEntity.setCompany(newMeal.isCompany());
             newMealEntity.setDelivery(true);
@@ -505,6 +564,7 @@ public class MealsDB {
         // Execute the query and get the restaurant
         Restaurant Branch = session.createQuery(query).uniqueResult();
 
+        // Initialize the meals collection before closing the session
         if (Branch != null) {
             Hibernate.initialize(Branch.getMeals());
             meals = Branch.getMeals();
@@ -875,7 +935,7 @@ public class MealsDB {
             Meal newMealEntity = new Meal();
             newMealEntity.setName(newMeal.getMealName());
             newMealEntity.setDescription(newMeal.getMealDisc());
-            newMealEntity.setPrice(Double.parseDouble(newMeal.getPrice()));
+            newMealEntity.setPrice(Integer.parseInt(newMeal.getPrice()));
             newMealEntity.setImage(newMeal.getImage());
             newMealEntity.setDelivery(true);
             session.persist(newMealEntity);

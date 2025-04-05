@@ -83,91 +83,71 @@ public class ReportsViewController {
     }
 
     public void loadChartData(String reportOutput) {
-        // Determine report type and time frame from content
-        boolean isMonthlyReport = reportOutput.contains("Daily");
-        boolean isYearlyReport = reportOutput.contains("Yearly");
+        System.out.println("Raw Report Data:\n" + reportOutput); // Debug log
 
-        // Parse the report output
         String[] lines = reportOutput.split("\n");
-        Map<String, Double> revenueData = new LinkedHashMap<>();  // Maintain insertion order
-        LocalDate baseDate = LocalDate.now();  // Fallback to current date
+        Map<String, Double> revenueData = new LinkedHashMap<>();
+        LocalDate baseDate = LocalDate.now();
+        boolean isMonthly = reportOutput.contains("Daily");
 
         try {
-            // Ensure "-" exists before splitting
-            if (lines[0].contains("-")) {
-                String dateHeader = lines[0].split("- ")[1];
-
-                if (isMonthlyReport) {
-                    String[] monthYear = lines[1].split(" ");
-                    baseDate = LocalDate.of(baseDate.getYear(), baseDate.getMonthValue(), 1);
-                } else if (isYearlyReport) {
-                    int year = baseDate.getYear();
-                    baseDate = LocalDate.of(year, 1, 1);
-                }
-            } else {
-                System.err.println("Report header does not contain a date.");
-                baseDate = LocalDate.now(); // Default to today if parsing fails
+            // Parse header for date context
+            if (lines.length > 1 && lines[1].startsWith("Period: ")) {
+                String[] dateParts = lines[1].split("Period: ")[1].split(" ");
+                Month month = Month.valueOf(dateParts[0].toUpperCase());
+                int year = Integer.parseInt(dateParts[1]);
+                baseDate = LocalDate.of(year, month, 1);
             }
-        }
-        catch (Exception e) {
-            System.err.println("Error parsing report date: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error parsing date header: " + e.getMessage());
         }
 
-
-        // Parse revenue data
+        // Parse data lines
         for (String line : lines) {
-            if (line.startsWith("Day ") || line.startsWith("Month ")) {
-                String[] parts = line.split(": \\$");
-                String period = parts[0].split(" ")[1];
-                double revenue = Double.parseDouble(parts[1].trim());
-                revenueData.put(period, revenue);
+            try {
+                if (line.startsWith("Day ") || line.startsWith("Month ")) {
+                    String[] parts = line.split(": \\$");
+                    String period = parts[0].split(" ")[1];
+                    int revenue = Integer.parseInt(parts[1].trim());
+                    revenueData.put(period, (double) revenue);
+                }
+            } catch (Exception e) {
+                System.err.println("Error parsing line: " + line);
             }
         }
 
         // Create chart
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
-        BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
-        barChart.setTitle(lines[0]);  // Use the actual report header
+        BarChart<String, Number> chart = new BarChart<>(xAxis, yAxis);
+        chart.setTitle(lines[0]);
 
         XYChart.Series<String, Number> series = new XYChart.Series<>();
         series.setName("Revenue");
 
-        // Fill complete date range
-        if (isMonthlyReport) {
-            LocalDate startDate = baseDate.withDayOfMonth(1);
-            LocalDate endDate = baseDate.withDayOfMonth(baseDate.lengthOfMonth());
-
-            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-                String day = String.valueOf(date.getDayOfMonth());
+        // Fill complete timeline
+        if (isMonthly) {
+            int daysInMonth = baseDate.lengthOfMonth();
+            for (int day = 1; day <= daysInMonth; day++) {
+                String key = String.valueOf(day);
                 series.getData().add(new XYChart.Data<>(
-                        day,
-                        revenueData.getOrDefault(day, 0.0)
+                        key,
+                        revenueData.getOrDefault(key, 0.0)
                 ));
             }
-        } else if (isYearlyReport) {
+        } else {
             for (int month = 1; month <= 12; month++) {
-                String monthStr = String.valueOf(month);
+                String key = String.valueOf(month);
                 series.getData().add(new XYChart.Data<>(
                         Month.of(month).toString(),
-                        revenueData.getOrDefault(monthStr, 0.0)
+                        revenueData.getOrDefault(key, 0.0)
                 ));
             }
         }
 
-        barChart.getData().add(series);
-
-        // Style and display
-        try {
-            barChart.getStylesheets().add(
-                    getClass().getResource("chart-style.css").toExternalForm()
-            );
-        } catch (NullPointerException e) {
-            System.err.println("Chart stylesheet not found");
-        }
-
+        chart.getData().add(series);
         chartArea.getChildren().clear();
-        chartArea.getChildren().add(barChart);
+        chartArea.getChildren().add(chart);
     }
 
     @FXML
@@ -198,7 +178,7 @@ public class ReportsViewController {
     @Subscribe
     public void fillComboBox(RestaurantList restaurantList) {
         restaurant_name.getItems().clear();
-        System.out.println("here");
+        //System.out.println("here");
         List<Restaurant> restaurants = restaurantList.getRestaurantList();
         List<String> restaurantNames = new ArrayList<>();
         for (Restaurant restaurant : restaurants) {

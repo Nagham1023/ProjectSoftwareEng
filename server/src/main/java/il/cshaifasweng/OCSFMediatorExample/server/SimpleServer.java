@@ -893,11 +893,11 @@ public class SimpleServer extends AbstractServer {
                     break;
                 case "deliveryReport":
                     OrderTypeReport deliveryReport = new OrderTypeReport();
-                    response = deliveryReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "DELIVERY");
+                    response = deliveryReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "Delivery");
                     break;
                 case "pickupReport":
                     OrderTypeReport pickupReport = new OrderTypeReport();
-                    response = pickupReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "PICKUP");
+                    response = pickupReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "Pickup");
                     break;
                 case "allOrdersReport":
                     OrderTypeReport allOrdersReport = new OrderTypeReport();

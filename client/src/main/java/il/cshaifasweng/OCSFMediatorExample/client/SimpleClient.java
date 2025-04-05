@@ -20,6 +20,7 @@ public class SimpleClient extends AbstractClient {
 	public static int Port = 3000;
 	private static UserCheck UserClient = null;
 	private static boolean logged = false;
+	public static int deliveryPrice = 25;
 
 	private SimpleClient(String host, int port) {
 		super(host, port);

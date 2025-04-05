@@ -2,6 +2,8 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import com.mysql.cj.xdevapi.Client;
 import il.cshaifasweng.OCSFMediatorExample.client.events.UsersListEvent;
+import il.cshaifasweng.OCSFMediatorExample.entities.EmailSender;
+import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.entities.UserManagement;
 import javafx.animation.Animation;

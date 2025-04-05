@@ -22,12 +22,17 @@ public class OrderSummaryController {
 
     @FXML
     private Label orderSummaryTitle;
+
+
     @FXML
     private Button CheckOutbtn;
+
     @FXML
     private VBox mealDetailsContainer;  // VBox to hold meal details
+
     @FXML
     private Label orderItemsLabel;
+
     @FXML
     private Label totalAmountLabel;
 
@@ -47,7 +52,6 @@ public class OrderSummaryController {
     public List<MealInTheCart> getMeals() {
         return meals;
     }
-
     @FXML
     void CheckOut(ActionEvent event) {
 

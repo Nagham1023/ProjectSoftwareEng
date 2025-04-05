@@ -297,7 +297,7 @@ public class UpdateMeal {
 
         // Add to UI and storage
         chosenRestaurantsNames.add(restaurantName);
-        fillRow(restaurantName);
+        fillRowRestaurants(restaurantName);
         clearInput();
     }
 

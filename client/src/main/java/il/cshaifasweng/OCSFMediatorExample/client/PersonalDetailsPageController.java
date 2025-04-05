@@ -32,12 +32,16 @@ public class PersonalDetailsPageController {
 
     @FXML
     private Button ContinuePersonalDetails;
+
     @FXML
     private TextField EmailPersonalDetails;
+
     @FXML
     private TextField NamePersonalDetails;
+
     @FXML
     private Label nameErrorLabel;
+
     @FXML
     private TextField PhoneNumberPersonalDetails;
 
@@ -47,9 +51,11 @@ public class PersonalDetailsPageController {
 
     @FXML
     private Label phoneNumberErrorLabel;
+
     @FXML
     private Label emailErrorLabel;
     private BooleanProperty emailInteracted = new SimpleBooleanProperty(false);  // Track interaction
+
     @FXML
     private Label nameLabel;
     @FXML
@@ -63,10 +69,12 @@ public class PersonalDetailsPageController {
 
     @FXML
     private void initialize() {
+        //EventBus.getDefault().register(this);
         setupEmailField();
         setupPhoneNumberField();
         setupNameField();
         setupContinueButton();
+        //setupContinueeButton();
         ContinuePersonalDetails.setOnAction(event -> handleContinueAction(event));
     }
 
@@ -77,11 +85,13 @@ public class PersonalDetailsPageController {
                 validateNameField();
             }
         });
+
         // Listener for changes in the text property of the Name field
         NamePersonalDetails.textProperty().addListener((observable, oldValue, newValue) -> {
             validateNameField();
         });
     }
+
     private void validateNameField() {
         if (NamePersonalDetails.getText().trim().isEmpty()) {
             nameErrorLabel.setText("This field is required.");
@@ -89,6 +99,7 @@ public class PersonalDetailsPageController {
             nameErrorLabel.setText(""); // Clear the error message if valid
         }
     }
+
     private void setupEmailField() {
         EmailPersonalDetails.focusedProperty().addListener((observable, oldValue, isFocused) -> {
             if (!isFocused) {
@@ -96,16 +107,19 @@ public class PersonalDetailsPageController {
                 validateEmail();
             }
         });
+
         EmailPersonalDetails.textProperty().addListener((observable, oldValue, newValue) -> {
             if (emailInteracted.get()) {
                 validateEmail();
             }
         });
     }
+
     private void validateEmail() {
         if (!emailInteracted.get()) {
             return;  // Skip validation if there hasn't been any interaction
         }
+
         String email = EmailPersonalDetails.getText();
         if (email.isEmpty()) {
             emailErrorLabel.setText("This field is required.");

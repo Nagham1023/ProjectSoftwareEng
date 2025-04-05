@@ -18,6 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+
 import java.awt.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -30,9 +31,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import static il.cshaifasweng.OCSFMediatorExample.client.ReservationController.noValidation;
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.deliveryPrice;
+
 
 public class CreditDetailsController {
 
@@ -49,6 +53,7 @@ public class CreditDetailsController {
     private TextField cvvnumber;
     @FXML
     private Button savecreditButton;
+
     @FXML
     private Label errorLabel;
     @FXML
@@ -61,6 +66,7 @@ public class CreditDetailsController {
     private Label errorLabelName;
     @FXML
     private Button arrow;
+
     @FXML
     private ComboBox<String> monthYearComboBox;
     @FXML
@@ -71,6 +77,11 @@ public class CreditDetailsController {
     static public PersonalDetails personalDetails;
     @FXML
     private ComboBox<CreditCard> savedCardsComboBox;
+
+//    @FXML
+//    private ListView<CreditCard> creditCardListView; // Example component for displaying cards
+
+
     @FXML
     void initialize() {
         EventBus.getDefault().register(this);
@@ -81,6 +92,7 @@ public class CreditDetailsController {
         setupMonthYearComboBox();
         setupBindings();
         setuparrowButton();
+
         savedCardsComboBox.setOnAction(event -> handleCardSelection());
         /*sending to get all the cc*/
         try {
@@ -124,6 +136,7 @@ public class CreditDetailsController {
             monthYearComboBox.setValue(selectedCard.getExpiryDate());
             cardNumberField.setText("**** **** **** " + selectedCard.getCardNumber().substring(selectedCard.getCardNumber().length() - 4));
             CardholdersIDcardField.setText(selectedCard.getCardholdersID());
+            setupBindings();
         } else {
             clearFields();
             setupBindings();
@@ -141,6 +154,7 @@ public class CreditDetailsController {
 
     private void setupBindings() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
+
         BooleanBinding isCardNumberValid = cardNumberField.textProperty().length().isEqualTo(19);
         BooleanBinding isCardholderNameValid = cardholderNameField.textProperty().isNotEmpty();
         BooleanBinding isIDValid = CardholdersIDcardField.textProperty().length().isEqualTo(9);
@@ -157,13 +171,25 @@ public class CreditDetailsController {
             }
             return false;
         }, monthYearComboBox.valueProperty());
-        BooleanBinding isAllValid = isCardNumberValid
+
+        BooleanBinding isAllValid;
+
+        if(savedCardsComboBox.getValue() != null) {
+            isAllValid = isCardNumberValid
+                    .and(isCardholderNameValid)
+                    .and(isIDValid)
+                    .and(isMonthYearValid);
+        }
+        else isAllValid = isCardNumberValid
                 .and(isCardholderNameValid)
                 .and(isIDValid)
                 .and(isCvvValid)
                 .and(isMonthYearValid);
+//                .and(emailInteractedC);
         savecreditButton.disableProperty().bind(isAllValid.not());
     }
+
+
     private void setupCardNumberField() {
         cardNumberField.addEventFilter(KeyEvent.KEY_TYPED, event -> {
             // Only allow numeric input and spaces, block if the limit is reached
@@ -175,6 +201,7 @@ public class CreditDetailsController {
                 event.consume();  // Prevent further typing if the maximum number of digits (16) has been reached
             }
         });
+
         cardNumberField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.isEmpty()) return;  // Skip empty input
             String formattedValue = formatCardNumber(newValue);
@@ -362,6 +389,7 @@ public class CreditDetailsController {
         // This method gets called when a CreditCardCheck object is posted to the EventBus
         if(creditCardCheck.getMode().equals("Order")){
         Platform.runLater(() -> {
+
             System.out.println("Credit card is valid." + creditCardCheck.getOrder());
             errorLabel.setText(creditCardCheck.getResponse());
             done_Order = creditCardCheck.getOrder();
@@ -372,7 +400,7 @@ public class CreditDetailsController {
             }
         });
         } else {
-
+            errorLabel.setText(creditCardCheck.getResponse());
             Platform.runLater(() -> {
                 try {
                     //errorLabel.setText(creditCardCheck.getResponse());
@@ -388,6 +416,7 @@ public class CreditDetailsController {
         }
     }
 
+
     public void sendCreditCardDetailsToServer() {
         String cardNumber = cardNumberField.getText().trim();
         String cardholderName = cardholderNameField.getText().trim();
@@ -395,8 +424,14 @@ public class CreditDetailsController {
         String cvv = cvvnumber.getText().trim();
         String expiryDateStr = monthYearComboBox.getValue();  // the expiry date is selected from a ComboBox and is in the format "MM/yyyy"
         if(mode.equals("Order")){
-        done_Order.setDate(LocalDate.now());
-        done_Order.setOrderTime(LocalDateTime.now());}
+            done_Order.setDate(LocalDate.now());
+            done_Order.setOrderTime(LocalDateTime.now());
+            if(done_Order.getOrderType().equals("Delivery"))
+            {
+             done_Order.setTotal_price(done_Order.getTotal_price()+deliveryPrice);
+            }
+        }
+
         // Attempt to validate and then directly use the expiry date string
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
         try {
@@ -491,6 +526,7 @@ public class CreditDetailsController {
         // Now you can call the email sender with the subject, body, and the customer's email
         EmailSender.sendEmail(subject, body.toString(), customer.getEmail());
     }
+
     @Subscribe
     public void goBackToReservation(FaildPayRes event){
         Platform.runLater(() -> {

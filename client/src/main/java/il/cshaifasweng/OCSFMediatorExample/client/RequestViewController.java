@@ -146,11 +146,11 @@ public class RequestViewController {
     private void handlePriceUpdate(String mealId, String newPrice, String oldPrice, boolean approve) {
         try {
             if(approve) {
-                updatePrice request = new updatePrice(Double.parseDouble(newPrice), Integer.parseInt(mealId) ,"changing");
+                updatePrice request = new updatePrice(Integer.parseInt(newPrice), Integer.parseInt(mealId) ,"changing");
                 SimpleClient.getClient().sendToServer(request);
             }
             else{
-                updatePrice request = new updatePrice(Double.parseDouble(newPrice), Integer.parseInt(mealId) ,"denying");
+                updatePrice request = new updatePrice(Integer.parseInt(newPrice), Integer.parseInt(mealId) ,"denying");
                 SimpleClient.getClient().sendToServer(request);
             }
 

@@ -18,6 +18,7 @@ public class personal_Meal implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Primary key
+
     @OneToOne(mappedBy = "meal", cascade = CascadeType.ALL)
     private MealInTheCart mealInTheCart;
 
@@ -47,6 +48,7 @@ public class personal_Meal implements Serializable {
     public List<CustomizationWithBoolean> getCustomizationsList() {
         return customizationsList;
     }
+
     public void setCustomizationsList(List<CustomizationWithBoolean> customizationsList) {
         this.customizationsList = customizationsList;
     }

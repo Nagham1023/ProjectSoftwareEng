@@ -26,6 +26,8 @@ import org.greenrobot.eventbus.Subscribe;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+
+
 public class AddComplainController {
     String ComplainKind = null;
     String name;
@@ -35,41 +37,60 @@ public class AddComplainController {
     Time time;
     Restaurant restaurant_chosen = null;
     String status = "do";
+
+
     @FXML
     private ResourceBundle resources;
+
     @FXML
     private URL location;
+
     @FXML
     private Button ComplainButton;
+
     @FXML
     private Button FeedbackButton;
+
     @FXML
     private Button SuggestionButton;
+
     @FXML
     private ComboBox<String> branchesList;
+
     @FXML
     private Button backButton;
+
     @FXML
     private Label checkLabel;
+
     @FXML
     private DatePicker datePicker;
+
     @FXML
     private ImageView logoImage;
+
     @FXML
     private Button sendButton;
+
     @FXML
     private TextArea textAreaTellUs;
+
     @FXML
     private TextField textFieldEmail;
+
     @FXML
     private TextField textFieldOrderNum;
+
     @FXML
     private TextField textFieldName;
+
     private String nameValue = "";
     private RestaurantList restaurantList = new RestaurantList();
     private String response = "";
     private String orderNumValue = "";
     private double refundVal = 0;
+
+
     @FXML
     public void initialize() {
         textFieldOrderNum.setVisible(false);
@@ -89,6 +110,7 @@ public class AddComplainController {
             fillComboBox(restaurantList);
         });
     }
+
     @FXML
     private void ComplainButton(ActionEvent event) throws IOException {
         ComplainKind = "Complaint";
@@ -97,6 +119,7 @@ public class AddComplainController {
         SuggestionButton.setStyle("-fx-background-color: linear-gradient(to bottom, #832018, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);");
         textFieldOrderNum.setVisible(true);
     }
+
     @FXML
     private void FeedbackButton(ActionEvent event) throws IOException {
         ComplainKind = "Feedback";
@@ -104,6 +127,7 @@ public class AddComplainController {
         FeedbackButton.setStyle("-fx-background-color: linear-gradient(to bottom, #C76A58, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);");
         SuggestionButton.setStyle("-fx-background-color: linear-gradient(to bottom, #832018, #9a2c25); -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 4, 0, 1, 1);");
         textFieldOrderNum.setVisible(false);
+
     }
     @FXML
     private void SuggestionButton(ActionEvent event) throws IOException {
@@ -142,6 +166,7 @@ public class AddComplainController {
         }
     }
 
+
     private void sendAndSaveComplain() throws IOException {
         LocalDateTime timeNow = LocalDateTime.now(); // Get the current time
         complainEvent complainEvent = new complainEvent(ComplainKind,textFieldName.getText(),textFieldEmail.getText(),textAreaTellUs.getText(),datePicker.getValue(),timeNow,restaurant_chosen,"Do",response,textFieldOrderNum.getText(),refundVal);
@@ -154,6 +179,8 @@ public class AddComplainController {
     private void backButton(ActionEvent event)throws IOException {
         App.setRoot("mainScreen");
     }
+
+
     public void fillComboBox(RestaurantList restaurantList) {
         branchesList.getItems().clear();
         System.out.println("here");
@@ -163,7 +190,9 @@ public class AddComplainController {
             branchesList.getItems().add(restaurant.getRestaurantName()); // Add each restaurant name
         }
     }
+
     public void getRestaurantByName(RestaurantList restaurantList) {
+
         nameValue=branchesList.getValue();
         List<Restaurant> restaurants = restaurantList.getRestaurantList();
         for (Restaurant restaurant : restaurants) {
@@ -171,6 +200,7 @@ public class AddComplainController {
                 restaurant_chosen = restaurant;
             }
         }
+
     }
     @Subscribe
     public void onComplainEvent(complainEvent event) {
@@ -235,6 +265,7 @@ public class AddComplainController {
     public void noOrderEvent(String msg)
     {
         Platform.runLater(() -> {
+            System.out.println("in the noorder "+msg);
             if (msg.equals("No order!")) {
                 checkLabel.setText("There is no order with this Order Number!");
             }

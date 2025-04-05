@@ -1,4 +1,5 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
+
 import il.cshaifasweng.OCSFMediatorExample.entities.Customization;
 import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
 import il.cshaifasweng.OCSFMediatorExample.entities.UserCheck;
@@ -10,9 +11,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Stage;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Scanner;
+
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.hibernate.Hibernate;
@@ -22,16 +25,21 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
+
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+
 import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.getUser;
 import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.isLog;
+
 /**
  * JavaFX App
  */
 public class App extends Application {
+
     private static Scene scene;
     private SimpleClient client;
+
     @Override
     public void start(Stage stage) throws IOException {
         //EventBus.getDefault().register(this);
@@ -52,10 +60,12 @@ public class App extends Application {
     static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));
     }
+
     private static Parent loadFXML(String fxml) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         return fxmlLoader.load();
     }
+
 
 
     /*@Override
@@ -103,7 +113,9 @@ public class App extends Application {
             e.printStackTrace();
         }
     }
-    public static void main(String[] args) {
+
+	public static void main(String[] args) {
         launch();
     }
+
 }

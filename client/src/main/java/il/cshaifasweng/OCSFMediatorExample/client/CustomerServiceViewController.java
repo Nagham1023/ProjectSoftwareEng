@@ -27,6 +27,8 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.deliveryPrice;
+
 public class CustomerServiceViewController {
     public static String statusVal = null;
     public static String kindVal = null;
@@ -285,7 +287,7 @@ public class CustomerServiceViewController {
                 alert.showAndWait();
             } else {
                 System.out.println("gotTheOrder: " + order);
-                ShowTheMeals(order.getMeals());
+                ShowTheMeals(order);
             }
         });
 
@@ -301,15 +303,17 @@ public class CustomerServiceViewController {
                 alert.showAndWait();
             });
     }
-    private void ShowTheMeals(List<MealInTheCart> listOfMeals) {
+    private void ShowTheMeals(Order order) {
         StringBuilder orderDetails = new StringBuilder();
         double totalAmount = 0.0;
 
-        for (MealInTheCart meal : listOfMeals) {
+        for (MealInTheCart meal : order.getMeals()) {
             totalAmount += meal.getMeal().getMeal().getPrice() * meal.getQuantity();
             orderDetails.append("\n");
         }
 
+        if(order.getOrderType().equals("Delivery"))
+            totalAmount += deliveryPrice;
         String totalAmountText = "Total: " + totalAmount + "₪";
 
         try {
@@ -323,7 +327,7 @@ public class CustomerServiceViewController {
 
             VBox mealDetailsContainer = controller.getMealDetailsContainer();
 
-            for (MealInTheCart meal : listOfMeals) {
+            for (MealInTheCart meal : order.getMeals()) {
                 HBox mealRow = new HBox(10);
                 mealRow.setSpacing(10);
 
@@ -390,6 +394,38 @@ public class CustomerServiceViewController {
                 mealRow.getChildren().add(mealInfoTextFlow);
                 mealDetailsContainer.getChildren().add(mealRow);
             }
+            if(order.getOrderType().equals("Delivery")) {
+                HBox deliveryRow = new HBox(10);
+                deliveryRow.setSpacing(10);
+
+
+                Image delivery = new Image(getClass().getResourceAsStream("/images/delivery_icon.png"));
+
+                ImageView imageView = new ImageView(delivery);
+                imageView.setFitHeight(100);
+                imageView.setFitWidth(100);
+                imageView.setPreserveRatio(true);
+
+                Rectangle clip = new Rectangle(100, 100);
+                clip.setArcWidth(20);
+                clip.setArcHeight(20);
+                imageView.setClip(clip);
+
+                deliveryRow.getChildren().add(imageView);
+
+                TextFlow DeliveryInfo = new TextFlow();
+
+                Text text = new Text("Delivery - ");
+
+                Text deliveryprice = new Text("("+deliveryPrice+"₪)\n");
+                deliveryprice.setStyle("-fx-font-weight: bold;");
+
+                DeliveryInfo.getChildren().addAll(text, deliveryprice, new Text("\n"));
+
+                deliveryRow.getChildren().add(DeliveryInfo);
+
+                mealDetailsContainer.getChildren().add(deliveryRow);
+            }
 
             Stage mainStage = (Stage) anchorPane.getScene().getWindow();
             ColorAdjust blur = new ColorAdjust();
@@ -415,4 +451,3 @@ public class CustomerServiceViewController {
     }
 
 }
-

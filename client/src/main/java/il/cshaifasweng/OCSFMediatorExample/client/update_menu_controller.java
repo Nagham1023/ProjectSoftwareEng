@@ -36,7 +36,7 @@ public class update_menu_controller {
             //System.out.println("im in to change price");
             SimpleClient client;
             client = SimpleClient.getClient();
-            updatePrice uPrice = new updatePrice(Double.parseDouble(newPrice),Integer.parseInt(mealId),"asking");
+            updatePrice uPrice = new updatePrice(Integer.parseInt(newPrice),Integer.parseInt(mealId),"asking");
             try {
                 client.sendToServer(uPrice);
             } catch (IOException e) {
