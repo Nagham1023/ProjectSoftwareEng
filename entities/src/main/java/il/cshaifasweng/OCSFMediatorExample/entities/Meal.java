@@ -172,4 +172,5 @@ public class Meal implements Serializable {
                 ", imageSize=" + (image != null ? image.length : 0) + " bytes" +
                 '}';
     }
+
 }

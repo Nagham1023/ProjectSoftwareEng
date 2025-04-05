@@ -20,6 +20,7 @@ public class SimpleClient extends AbstractClient {
 	public static int Port = 3000;
 	private static UserCheck UserClient = null;
 	private static boolean logged = false;
+	public static int deliveryPrice = 25;
 
 	private SimpleClient(String host, int port) {
 		super(host, port);
@@ -35,14 +36,14 @@ public class SimpleClient extends AbstractClient {
 		else if (msg instanceof UpdateMealRequest) {
 			EventBus.getDefault().post(msg);
 		}
-		else if (msg instanceof MealUpdateRequest) {
+		if (msg instanceof MealUpdateRequest) {
 			System.out.println("the message is an update price request");
 			EventBus.getDefault().post((MealUpdateRequest) msg);
 		}
-		else if (msg instanceof PCRequestsList) {
-			EventBus.getDefault().post((PCRequestsList) msg);
-		}
-		else if (msg instanceof UserCheck) {
+        else if (msg instanceof PCRequestsList) {
+            EventBus.getDefault().post((PCRequestsList) msg);
+        }
+		if (msg instanceof UserCheck) {
 			EventBus.getDefault().post(msg);
 		}
 		else if (msg instanceof PersonalDetails) {
@@ -105,20 +106,70 @@ public class SimpleClient extends AbstractClient {
 		else if (msg.getClass().equals(Warning.class)) {
 				EventBus.getDefault().post(new WarningEvent((Warning) msg));
 		}
-		else if (msg instanceof SearchOptions) {
-				EventBus.getDefault().post(msg);
+		if(msg instanceof SearchOptions){
+			EventBus.getDefault().post(msg);
 		}
-		else if (msg instanceof RestaurantList) {
-			RestaurantList restaurantList = (RestaurantList) msg;
-			//print restaurants names
-			System.out.println("Received restaurant list: " + restaurantList.toString());
-			EventBus.getDefault().post(restaurantList);
-		}
-		else if (msg instanceof String) {
+        else if (msg instanceof RestaurantList) {
+            RestaurantList restaurantList = (RestaurantList) msg;
+            //print restaurants names
+            System.out.println("Received restaurant list: " + restaurantList.toString());
+            EventBus.getDefault().post(restaurantList);
+        }
+        else if (msg instanceof String) {
+            String message = (String) msg;
+            handleStringMessage((String) msg);
+        }
+        /*
+		if(msg instanceof String) {
 			String message = (String) msg;
-			handleStringMessage((String) msg);
-		}
-		else if (msg instanceof tablesStatus) {
+			if(message.startsWith("table details: ")){
+				// Extract the table details from the message
+				String tableDetails = message.substring("table details: ".length());
+
+				// Send the table details to the EventBus
+				EventBus.getDefault().post(tableDetails);
+			}
+			else if (message.startsWith("ReportResponse")) {
+				// Split the message by "\n" to extract the report content
+				String[] parts = message.split("\n", 2); // Limit to 2 splits
+				if (parts.length == 2) {
+					String report = parts[1]; // The actual report content
+					System.out.println("Received report: " + report);
+
+
+					// Publish the event to the EventBus
+					EventBus.getDefault().post(new ReportResponseEvent(report));
+				} else {
+					System.err.println("Malformed report response from server.");
+				}
+			} else if (message.equals("Reservation confirmed successfully.")) {
+				EventBus.getDefault().post(msg);
+			} else if (message.equals("Order not found."))
+			{
+				EventBus.getDefault().post(msg);
+			} else if (message.equals("No order!"))
+			{
+				EventBus.getDefault().post(msg);
+			}else if (message.equals("Not same restaurant!"))
+			{
+			}
+			else if (message.equals("Reservation confirmed successfully.")) {
+				EventBus.getDefault().post(msg);
+			}else {
+				System.out.println("Unhandled message: " + message);
+			}
+		}*/
+        if (msg instanceof RestaurantList) {
+            RestaurantList restaurantList = (RestaurantList) msg;
+
+            //print restaurants names
+            System.out.println("Received restaurant list: " + restaurantList.toString());
+            EventBus.getDefault().post(restaurantList);
+        }
+        if(msg instanceof PCRequestsList) {
+            EventBus.getDefault().post(msg);
+        }
+		if(msg instanceof tablesStatus){
 			EventBus.getDefault().post(msg);
 		}
 		else if (msg instanceof ReConfirmEvent) {
@@ -147,59 +198,6 @@ public class SimpleClient extends AbstractClient {
 			}
 		//*********************** deleted functions?*****************//
 
-		//                if (msg instanceof List<?>) {
-//                        System.out.println("The message is a list");
-//                        List<?> list = (List<?>) msg;
-//                        if (!list.isEmpty() && list.get(0) instanceof CreditCard) {
-//                                List<CreditCard> creditCards = new ArrayList<>(list.size());
-//                                for (Object item : list) {
-//                                        if (item instanceof CreditCard) {
-//                                                creditCards.add((CreditCard) item);
-//                                        }
-//                                }
-//                                EventBus.getDefault().post(creditCards);
-//                        }
-//                }
-//                if (msg instanceof List<?>) { // Check if msg is a list
-//                        System.out.println("the message is a list");
-//                        List<?> list = (List<?>) msg;
-//                        if (!list.isEmpty() && list.get(0) instanceof CreditCard) { // Ensure it's a List<Meal>
-//                                System.out.println("list of creditcards");
-//                                EventBus.getDefault().post(msg);
-//                        }
-//                }
-		//********************************************//
-		//                        else if (!list.isEmpty() && list.get(0) instanceof CreditCard) {
-//                                        System.out.println("The message is a list");
-//                                        List<CreditCard> creditCards = new ArrayList<>(list.size());
-//                                        for (Object item : list) {
-//                                                if (item instanceof CreditCard) {
-//                                                        creditCards.add((CreditCard) item);
-//                                                }
-//                                        }
-//                                System.out.println("Posting credit card details to EventBus.");
-//                                        System.out.println(creditCards + " credddddit ");
-//                                System.out.println(" credit card get class " + creditCards.getClass().getName());
-//
-//                                EventBus.getDefault().post(creditCards);
-//                                }
-		//******************************************************************//
-		//			} else if (message.equals("Order not found.")) {
-//				EventBus.getDefault().post(msg);
-//			} else if (message.equals("No order!")) {
-//				EventBus.getDefault().post(msg);
-//			} else if (message.equals("Not same restaurant!")) {
-//			} else if (message.equals("Reservation confirmed successfully.")) {
-//				EventBus.getDefault().post(msg);
-			/// ////////////*****************************************************///
-//
-//			if (msg instanceof ListComplainList) {
-//				ListComplainList listComplainList = (ListComplainList) msg;
-//				System.out.println("Received complaint list: " + listComplainList.toString());
-//				EventBus.getDefault().post(listComplainList);
-//			}
-//
-//		}
 	}
 
 		public static SimpleClient getClient () {

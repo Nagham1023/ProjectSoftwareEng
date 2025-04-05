@@ -355,7 +355,14 @@ public class menu_controller {
             addToCartBTN.setStyle("-fx-background-color: #222222; -fx-text-fill: #f3f3f3; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
             addToCartBTN.setOnAction(event -> openMealPopup(meal));
             mealRow.getChildren().addAll(imageView, detailsBox, priceLabel, addToCartBTN);
-
+            /*
+            addToCartBTN.setOnAction(event ->
+                    {
+                        openMealPopup(meal);
+                    }
+            );
+            mealRow.getChildren().addAll(imageView, detailsBox, priceLabel);
+            */
         }
 
 

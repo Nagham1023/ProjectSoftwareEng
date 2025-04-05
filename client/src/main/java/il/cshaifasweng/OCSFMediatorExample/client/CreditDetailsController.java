@@ -1,4 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
+
+//import il.cshaifasweng.OCSFMediatorExample.entities.CreditCardCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -33,6 +35,7 @@ import java.util.stream.IntStream;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import static il.cshaifasweng.OCSFMediatorExample.client.ReservationController.noValidation;
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.deliveryPrice;
 
 public class CreditDetailsController {
 
@@ -49,6 +52,7 @@ public class CreditDetailsController {
     private TextField cvvnumber;
     @FXML
     private Button savecreditButton;
+
     @FXML
     private Label errorLabel;
     @FXML
@@ -61,6 +65,7 @@ public class CreditDetailsController {
     private Label errorLabelName;
     @FXML
     private Button arrow;
+
     @FXML
     private ComboBox<String> monthYearComboBox;
     @FXML
@@ -124,6 +129,7 @@ public class CreditDetailsController {
             monthYearComboBox.setValue(selectedCard.getExpiryDate());
             cardNumberField.setText("**** **** **** " + selectedCard.getCardNumber().substring(selectedCard.getCardNumber().length() - 4));
             CardholdersIDcardField.setText(selectedCard.getCardholdersID());
+            setupBindings();
         } else {
             clearFields();
             setupBindings();
@@ -141,6 +147,7 @@ public class CreditDetailsController {
 
     private void setupBindings() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
+
         BooleanBinding isCardNumberValid = cardNumberField.textProperty().length().isEqualTo(19);
         BooleanBinding isCardholderNameValid = cardholderNameField.textProperty().isNotEmpty();
         BooleanBinding isIDValid = CardholdersIDcardField.textProperty().length().isEqualTo(9);
@@ -157,11 +164,21 @@ public class CreditDetailsController {
             }
             return false;
         }, monthYearComboBox.valueProperty());
-        BooleanBinding isAllValid = isCardNumberValid
+
+        BooleanBinding isAllValid;
+
+        if(savedCardsComboBox.getValue() != null) {
+            isAllValid = isCardNumberValid
+                    .and(isCardholderNameValid)
+                    .and(isIDValid)
+                    .and(isMonthYearValid);
+        }
+        else isAllValid = isCardNumberValid
                 .and(isCardholderNameValid)
                 .and(isIDValid)
                 .and(isCvvValid)
                 .and(isMonthYearValid);
+//                .and(emailInteractedC);
         savecreditButton.disableProperty().bind(isAllValid.not());
     }
     private void setupCardNumberField() {
@@ -287,10 +304,12 @@ public class CreditDetailsController {
         }
         return formatted.toString();
     }
+
     private void adjustCaretPosition(String formattedText) {
         // Move caret position to the end of text
         Platform.runLater(() -> cardNumberField.positionCaret(formattedText.length()));
     }
+
     private void setupIDCardField() {
         CardholdersIDcardField.addEventFilter(KeyEvent.KEY_TYPED, event -> {
             String input = event.getCharacter();
@@ -298,11 +317,13 @@ public class CreditDetailsController {
                 event.consume();
             }
         });
+
         CardholdersIDcardField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.length() > 9) {
                 CardholdersIDcardField.setText(oldValue); // Limit to 9 digits
             }
         });
+
         CardholdersIDcardField.focusedProperty().addListener((observable, oldValue, isFocused) -> {
             System.out.println("Focus lost: " + CardholdersIDcardField.getText()); // Debug output
             if (!isFocused && CardholdersIDcardField.getText().length() != 9) {
@@ -313,12 +334,15 @@ public class CreditDetailsController {
             }
         });
     }
+
+
     private void setupCVVField() {
         cvvnumber.addEventFilter(KeyEvent.KEY_TYPED, event -> {
             if (!event.getCharacter().matches("\\d")) { // Allow only digits
                 event.consume(); // Ignore non-digits
             }
         });
+
         cvvnumber.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d{0,3}")) { // Allow up to 3 digits only
                 cvvnumber.setText(oldValue);
@@ -328,12 +352,14 @@ public class CreditDetailsController {
                 errorLabelcvv.setText("");
             }
         });
+
         cvvnumber.focusedProperty().addListener((observable, wasFocused, isNowFocused) -> {
             if (!isNowFocused) { // Only when focus is lost
                 validateCVV(); // Validate CVV when field loses focus
             }
         });
     }
+
     private void validateCVV() {
         // Check if the CVV length is exactly 3 digits
         if (cvvnumber.getText().length() != 3) {
@@ -346,8 +372,8 @@ public class CreditDetailsController {
         arrow.setOnAction(event -> {
             try {
                 if(mode.equals("Order")){
-                System.out.println("Arrow button pressed.");
-                App.setRoot("deliverypage");}
+                    System.out.println("Arrow button pressed.");
+                    App.setRoot("deliverypage");}
                 else{
                     App.setRoot("Reservation");
                 }
@@ -378,8 +404,8 @@ public class CreditDetailsController {
                     //errorLabel.setText(creditCardCheck.getResponse());
                     errorLabel.setText(creditCardCheck.getResponse());
                     if(!(creditCardCheck.getResponse().equals("Payment Failed"))){
-                    sendReservationConfirmationEmail(CreditDetailsController.personalDetails,done_Reservation.getReservationSaveID(), done_Reservation.getRestaurantName(),done_Reservation.getSeats() );
-                    App.setRoot("mainScreen");
+                        sendReservationConfirmationEmail(CreditDetailsController.personalDetails,done_Reservation.getReservationSaveID(), done_Reservation.getRestaurantName(),done_Reservation.getSeats() );
+                        App.setRoot("mainScreen");
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -388,6 +414,7 @@ public class CreditDetailsController {
         }
     }
 
+
     public void sendCreditCardDetailsToServer() {
         String cardNumber = cardNumberField.getText().trim();
         String cardholderName = cardholderNameField.getText().trim();
@@ -395,14 +422,20 @@ public class CreditDetailsController {
         String cvv = cvvnumber.getText().trim();
         String expiryDateStr = monthYearComboBox.getValue();  // the expiry date is selected from a ComboBox and is in the format "MM/yyyy"
         if(mode.equals("Order")){
-        done_Order.setDate(LocalDate.now());
-        done_Order.setOrderTime(LocalDateTime.now());}
+            done_Order.setDate(LocalDate.now());
+            done_Order.setOrderTime(LocalDateTime.now());
+            if(done_Order.getOrderType().equals("Delivery"))
+            {
+                done_Order.setTotal_price(done_Order.getTotal_price()+deliveryPrice);
+            }
+        }
         // Attempt to validate and then directly use the expiry date string
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yyyy");
         try {
             System.out.println("Inserting credit card details to server...");
             // This is just for validation to ensure the format is correct
             YearMonth.parse(expiryDateStr, formatter);
+
             // Since the format is correct, assign it directly
             CreditCard creditcard = new CreditCard();
             creditcard.setCardNumber(cardNumber);
@@ -430,6 +463,7 @@ public class CreditDetailsController {
 
                 System.out.println("new credit card");
             }
+
             try {
                 SimpleClient client = SimpleClient.getClient();
                 client.sendToServer(paymentCheck);

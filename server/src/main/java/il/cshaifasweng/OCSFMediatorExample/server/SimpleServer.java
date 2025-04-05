@@ -1152,7 +1152,6 @@ public class SimpleServer extends AbstractServer {
         else System.out.println("unknown message");
     }
 
-    //----------------------------------helper function--------------------------------------------//
     public Restaurant getRestaurantByName(String restaurantName) {
         Restaurant restaurant = null;
 
@@ -1805,7 +1804,7 @@ public class SimpleServer extends AbstractServer {
 //            return new ArrayList<>();
 //        }
 //    }
-  
+
     private String getTableDetails(int tableID) {
         StringBuilder details = new StringBuilder();
 

@@ -72,6 +72,7 @@ public class App {
         configuration.addAnnotatedClass(MealInTheCart.class);
         configuration.addAnnotatedClass(CustomizationWithBoolean.class);
 
+
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySettings(configuration.getProperties())
                 .build();
@@ -387,7 +388,7 @@ public class App {
             deleteAllTablesAndRelatedData();
             generateData();
             printAllData();
-            generateBasicUser();
+            //generateBasicUser();
             printAllUsers();
             //generateOrders();
 
