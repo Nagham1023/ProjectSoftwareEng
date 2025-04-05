@@ -1,5 +1,4 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
-
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import org.hibernate.HibernateException;
@@ -105,9 +104,6 @@ public class ComplainDB {
                 session.update(complain); // Persist the changes
                 System.out.println("updated Complain Response In Database after setting response");
                 session.getTransaction().commit(); // Commit the transaction
-                /*updateCompResponseById(Idcomp, newRes);
-                sendResToEmail(emailComp, newRes);
-                giveBackTheRefund(orderNum,refund);*/
             }
         } catch (Exception e) {
             //System.out.println("An error occurred during the update operation.");
@@ -126,12 +122,10 @@ public class ComplainDB {
     public static String addComplainIntoDatabase(complainEvent newComplain, ConnectionToClient client) {
         Session session = null;
         Transaction transaction = null;
-
         try {
             SessionFactory sessionFactory = getSessionFactory();
             session = sessionFactory.openSession();
             transaction = session.beginTransaction();
-
             Complain newComp = new Complain();
             // Set all fields EXCEPT ID
             newComp.setKind(newComplain.getKind());
@@ -145,13 +139,11 @@ public class ComplainDB {
             newComp.setOrderNum(newComplain.getOrderNum());
             newComp.setRefund(newComplain.getRefund());
             newComp.setRestaurant(newComplain.getRestaurant());
-
             session.save(newComp);
             transaction.commit();
             complaintAutoResponse(newComp,client);
             System.out.println("New Comp added successfully with ID: " + newComp.getId());
             return "added";
-
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             e.printStackTrace();

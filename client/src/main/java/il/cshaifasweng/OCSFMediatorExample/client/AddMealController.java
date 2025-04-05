@@ -130,6 +130,7 @@ public class AddMealController {
         }
 
     }
+
     @FXML
     public void onSelectImageClicked() {
         FileChooser fileChooser = new FileChooser();
@@ -148,10 +149,12 @@ public class AddMealController {
             mealImageView.setImage(image);
         }
     }
+
     @FXML
     void backToHome(ActionEvent event) throws IOException {
         App.setRoot("primary");
     }
+
     @FXML
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
@@ -162,6 +165,7 @@ public class AddMealController {
             throw new RuntimeException(e);
         }
     }
+
     @Subscribe
     public void putSearchOptions(SearchOptions options) {
         // Handle the event sent from the server

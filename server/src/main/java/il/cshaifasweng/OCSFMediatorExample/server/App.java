@@ -72,7 +72,6 @@ public class App {
         configuration.addAnnotatedClass(MealInTheCart.class);
         configuration.addAnnotatedClass(CustomizationWithBoolean.class);
 
-        configuration.addAnnotatedClass(UpdatePriceRequest.class);
 
         ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                 .applySettings(configuration.getProperties())

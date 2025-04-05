@@ -13,7 +13,6 @@ import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
-import java.time.LocalTime;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -46,6 +45,7 @@ public class SimpleServer extends AbstractServer {
 
     private static ArrayList<SubscribedClient> SubscribersList = new ArrayList<>();
     private static ArrayList<ConnectionToClient> Subscribers = new ArrayList<>();
+    private static boolean ReservationOperation = false;
 
     public SimpleServer(int port) {
         super(port);
@@ -59,11 +59,12 @@ public class SimpleServer extends AbstractServer {
 
         //Reservation Management - omar
         if (msg instanceof ReservationEvent) {
+            while(ReservationOperation) {}
+            ReservationOperation = true;
             ReservationEvent reservation = (ReservationEvent) msg;
             printAllTablesInRestaurant(reservation.getRestaurantName());
             List<ReservationEvent> availableReservation = check_Available_Reservation(reservation);
             System.out.println("the available times are :" + availableReservation);
-
             if (!availableReservation.isEmpty()) {
                 try {
                     client.sendToClient(availableReservation);
@@ -75,14 +76,11 @@ public class SimpleServer extends AbstractServer {
                 System.out.println("No available tables for the selected time and seats.");
                 System.out.println("Checking other time slots...");
                 System.out.println("*********************************************");
-
                 // Define restaurant opening and closing times
                 LocalTime closingTime = getRestaurantByName(reservation.getRestaurantName()).getClosingTime();// 10:00 PM
-
-                LocalTime start = getRestaurantByName(reservation.getRestaurantName()).getOpeningTime(); // e.g., 10:00 AM
+                LocalTime start = getRestaurantByName(reservation.getRestaurantName()).getOpeningTime().plusMinutes(15); // e.g., 10:00 AM
                 LocalDate currentDate = reservation.getReservationDateTime().toLocalDate(); // Get the current date
                 LocalDateTime startTime = LocalDateTime.of(currentDate, start); // Combine date and time
-
                 // Iterate through all time slots from the current time to the closing time
                 List<LocalDateTime> availableTimeSlots = new ArrayList<>();
                 System.out.println("*********************************************");
@@ -90,27 +88,21 @@ public class SimpleServer extends AbstractServer {
                 System.out.println("the closing hour is: " + closingTime);
                 System.out.println("the start time is: " + startTime);
                 System.out.println("*********************************************");
-
-
                 while (startTime.toLocalTime().isBefore(closingTime.minusMinutes(30))) {
-
                     // Check if tables are available for this time slot
                     System.out.println("*********************************************");
                     System.out.println("checking this tims slot: " + startTime);
                     System.out.println("*********************************************");
                     List<TableNode> tablesForSlot = getAvailableTables(reservation.getRestaurantName(), startTime, reservation.getSeats(), reservation.isInside());
-
                     if (!tablesForSlot.isEmpty() && startTime.isAfter(LocalDateTime.now())) {
                         // If tables are available, add the time slot to the list
                         availableTimeSlots.add(startTime);
                     } else {
                         System.out.println("there is no availale tables for this slot -" + startTime);
                     }
-
-                    // Move to the next time slot (e.g., increment by 1 hour)
+                    // Move to the next time slot (e.g., increment by 0.5 hour)
                     startTime = startTime.plusMinutes(30);
                 }
-
                 if (!availableTimeSlots.isEmpty()) {
                     // Notify the client of available time slots
                     System.out.println("*********************************************");
@@ -119,7 +111,6 @@ public class SimpleServer extends AbstractServer {
                         System.out.println("  - " + slot.toLocalTime());
                     }
                     System.out.println("*********************************************");
-
                     try {
                         // Create a new ReservationEvent with all available time slots
                         DifferentResrvation available_Reservation_for_client = new DifferentResrvation(reservation.getRestaurantName(), // Use the restaurant name from the event
@@ -147,10 +138,12 @@ public class SimpleServer extends AbstractServer {
                         throw new RuntimeException(e);
                     }
                 }
-
             }
+            ReservationOperation = false;
         }
         else if (msg instanceof FinalReservationEvent) {
+            while(ReservationOperation) {}
+            ReservationOperation = true;
             try {
                 FinalReservationEvent event = (FinalReservationEvent) msg;
 
@@ -168,7 +161,7 @@ public class SimpleServer extends AbstractServer {
 
                     // Define restaurant opening and closing times
                     LocalTime closingTime = getRestaurantByName(event.getRestaurantName()).getClosingTime(); // 10:00 PM
-                    LocalTime start = getRestaurantByName(event.getRestaurantName()).getOpeningTime(); // e.g., 10:00 AM
+                    LocalTime start = getRestaurantByName(event.getRestaurantName()).getOpeningTime().plusMinutes(15); // e.g., 10:00 AM
                     LocalDate currentDate = event.getReservationDateTime().toLocalDate(); // Get the current date
                     LocalDateTime startTime = LocalDateTime.of(currentDate, start); // Combine date and time
 
@@ -226,7 +219,8 @@ public class SimpleServer extends AbstractServer {
                             throw new RuntimeException(e);
                         }
                     }
-                } else {
+                }
+                else {
                     System.out.println("*********************************************");
                     System.out.println("The available tables are: " + availableTables);
                     System.out.println("*********************************************");
@@ -240,28 +234,43 @@ public class SimpleServer extends AbstractServer {
                     ReservationSave reservationSave = new ReservationSave(event.getRestaurantName(), event.getReservationDateTime(), event.getSeats(), event.isInside(), event.getFullName(), event.getPhoneNumber(), event.getEmail(), availableTables);
 
                     // Save the reservation to the database
-                    saveReservationToDatabase(reservationSave);
-                    sendToAll(new ReConfirmEvent());
-                    printAllReservationSaves();
+                    //saveReservationToDatabase(reservationSave);
                     // Notify the client that the reservation was successful
                     System.out.println("Reservation confirmed successfully.");
-                    client.sendToClient("Reservation confirmed successfully.");
-                    wait(500);
-                    sendToAll(new ReConfirmEvent());
-                    printAllReservationSaves();
+                    //client.sendToClient("Reservation confirmed successfully.");
+                    /// in zoom
+                    System.out.println(" Step 2: go To payment check");
+                    client.sendToClient(reservationSave);
+                    //wait(500);
+                    //sendToAll(new ReConfirmEvent());
+                    //printAllReservationSaves();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 // Notify the client of the error
                 System.out.println("Failed to save reservation.");
             }
+            ReservationOperation = false;
         }
         else if (msg instanceof String && ((String) msg).startsWith("Cancel Reservation:")) {
-            printAllReservationSaves();
-            handleCancellationRequest((String) msg, client);
+            while(ReservationOperation) {}
+            ReservationOperation = true;
+            try{
+                handleCancellationRequest((String) msg, client);
+            }catch(Exception e){
+                e.printStackTrace();
+            }
             printAllReservationSaves();
             sendToAll(new ReConfirmEvent());
+            ReservationOperation = false;
 
+        }
+        else if(msg instanceof FaildPayRes){
+            try{
+            client.sendToClient(msg);}
+            catch(Exception e){
+                e.printStackTrace();
+            }
         }
 
         //Restaurant & Menu Operations - Yousef Adan Nagham Shada
@@ -289,19 +298,20 @@ public class SimpleServer extends AbstractServer {
             MealEventUpgraded UpdateMealEvent = (MealEventUpgraded) msg;
             Meal addResult=AddNewMealUpgraded((MealEventUpgraded) msg);
             mealEvent messagee= new mealEvent(UpdateMealEvent.getMealName(), UpdateMealEvent.getPrice(), String.valueOf(addResult.getId()),addResult);
-            sendToAll(msg);
-            if (addResult != null)
-                sendToAll("added");
+            sendToAll(messagee);
+            //if (addResult != null)
+                //sendToAll("added");
         }
         else if (msg instanceof UpdateMealRequest) {
             //here we're adding new meal !!
             //System.out.println("Received adding new UpdateMealRequest ");
             String addResult = updateMeal((UpdateMealRequest) msg);//if "added" then successed if "not exist" then failed bcs there is no meal like that
             System.out.println("Added new UpdateMealRequest to the database");
-            sendToAll(msg);
-            if (Objects.equals(addResult, "added")) {
+            //sendToAll(msg);
+            //if (Objects.equals(addResult, "added")) {
                 sendToAll(msg);
-            }
+            //}
+            //else
 
         }
         else if (msg instanceof String && msgString.equals("toMenuPage")) {
@@ -410,7 +420,7 @@ public class SimpleServer extends AbstractServer {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            } else if (((UserCheck) msg).isState() == 3) {//if just a name check
+            } else if (((UserCheck) msg).isState() == 3 || (((UserCheck) msg).isState() == 8)) {//if just a name check
                 try {
                     if (checkUserName(((UserCheck) msg).getUsername())) {
                         ((UserCheck) msg).setRespond("notValid");
@@ -436,9 +446,42 @@ public class SimpleServer extends AbstractServer {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-
             }
-
+            else if (((UserCheck) msg).isState() == 9) {//Update in db
+                try {
+                    UsersDB.UpdateUser((UserCheck) msg);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        else if (msg instanceof String && ((String)msg).equals("Get all users")) {
+            System.out.println("Getting all users");
+            List<Users> users= UsersDB.getUsers();
+            try {
+                client.sendToClient(users);
+                sendToAll(users);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else if(msg instanceof UserManagement){
+            if(((UserManagement) msg).getMethod().equals("update")){
+               // String response = UsersDB.UpdateUser((UserManagement) msg);
+            }
+            else {
+                System.out.println("Invalid method BUT I WILL DELETE THE USER");
+                try {
+                    UsersDB.delete(((UserManagement) msg).getUsername());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            try {
+                client.sendToClient((UserManagement) msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         //Payment Processing -Adan
@@ -472,7 +515,8 @@ public class SimpleServer extends AbstractServer {
                         newOrder.setCreditCard_num(newCC.getCardNumber());
                         paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
                         addCreditCardDetails(newCC, newPD,newOrder);
-                    } else {
+                    }
+                    else {
                         //System.out.println("the personal details is already added but cc is null");
                         paymentCheck.setResponse("Added the Credit Card to the database.");
 
@@ -500,20 +544,37 @@ public class SimpleServer extends AbstractServer {
                         addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc, newOrder);
                     }
                     client.sendToClient(paymentCheck);
-                } }
+                }
+            }
                 else {
+                    ReservationSave newReservation= ((PaymentCheck) msg).getReservationEvent();
+                    boolean result;
                     if (cc == null) {
 
 
                         if (personalDetailsDB == null) {
-                            //System.out.println("the personal details is null and cc is null in the reservation part");
-
-                            paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
-                            addCreditCardDetailsForRes(newCC, newPD);
-                        } else {
+                            newReservation.setCreditCard_num(newCC.getCardNumber());
+                            result= handleSavingReservation(newReservation, client);
+                            if(result){
+                                paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
+                                addCreditCardDetailsForRes(newCC, newPD,newReservation);}
+                            else{
+                                paymentCheck.setResponse("Payment Failed");
+                            }
+                        }
+                        else {
                             //System.out.println("the personal details is already added but cc is null");
-                            paymentCheck.setResponse("Added the Credit Card to the database.");
-                            addCreditCardToExistingPersonalDetailsForRes(newCC, personalDetailsDB);
+
+                            result= handleSavingReservation(newReservation, client);
+                            if(result){
+                                paymentCheck.setResponse("Added the Credit Card to the database.");
+                                newReservation.setCreditCard_num(newCC.getCardNumber());
+                                addCreditCardToExistingPersonalDetailsForRes(newCC, personalDetailsDB,newReservation);
+                            }
+                            else{
+                                paymentCheck.setResponse("Payment Failed");
+                            }
+
                         }
                         client.sendToClient(paymentCheck);
                     } else {
@@ -521,19 +582,31 @@ public class SimpleServer extends AbstractServer {
                         if(personalDetailsDB == null) {
                             //System.out.println("personal details null but cc is not null");
                             //System.out.println("new personal details");
-                            //newOrder.setCreditCard_num(cc.getCardNumber());
+                            result= handleSavingReservation(newReservation, client);
+                            if(result){
+                                newReservation.setCreditCard_num(cc.getCardNumber());
 
-                            paymentCheck.setResponse("Added the personal details to the database");
-                            addPersonalDetailsAndAssociateWithCreditCardForRes(newPD, cc);
+                                paymentCheck.setResponse("Added the personal details to the database");
+                                addPersonalDetailsAndAssociateWithCreditCardForRes(newPD, cc,newReservation);
+                            }
+                            else{
+                                paymentCheck.setResponse("Payment Failed");
+                            }
+
                         }
 
                         else {
                             //System.out.println("not null both");
-                            paymentCheck.setResponse("Updated the personal details to the database.");
 
-                            //newOrder.setCreditCard_num(cc.getCardNumber());
-
-                            addCreditCardToPersonalDetailsIfBothExistsForRes(personalDetailsDB, cc);
+                            result =handleSavingReservation(newReservation, client);
+                            if(result){
+                                newReservation.setCreditCard_num(cc.getCardNumber());
+                                paymentCheck.setResponse("Updated the personal details to the database.");
+                                addCreditCardToPersonalDetailsIfBothExistsForRes(personalDetailsDB, cc,newReservation);
+                            }
+                            else{
+                                paymentCheck.setResponse("Payment Failed");
+                            }
                         }
                         client.sendToClient(paymentCheck);
                     }
@@ -708,7 +781,6 @@ public class SimpleServer extends AbstractServer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
         else if (msg instanceof String && msg.equals("getAllComplaints")) {
             try {
@@ -1080,7 +1152,6 @@ public class SimpleServer extends AbstractServer {
         else System.out.println("unknown message");
     }
 
-    //----------------------------------helper function--------------------------------------------//
     public Restaurant getRestaurantByName(String restaurantName) {
         Restaurant restaurant = null;
 
@@ -1268,7 +1339,7 @@ public class SimpleServer extends AbstractServer {
 
             // Fetch restaurant opening and closing hours
 
-            LocalTime openingTime = getRestaurantByName(restaurantName).getOpeningTime();
+            LocalTime openingTime = getRestaurantByName(restaurantName).getOpeningTime().plusMinutes(15);
             LocalTime closingTime = getRestaurantByName(restaurantName).getClosingTime().minusHours(1); // One hour before closing
 
             // Validate that the requested reservation time is within business hours
@@ -1294,6 +1365,63 @@ public class SimpleServer extends AbstractServer {
             System.out.println("Valid reservation time range: " + startTime + " to " + endTime);
 
             // Iterate over 15-minute time slots within the valid range
+//            for (LocalTime currentTimeSlot = startTime; currentTimeSlot.isBefore(endTime) || currentTimeSlot.equals(endTime); currentTimeSlot = currentTimeSlot.plusMinutes(15)) {
+//                if (currentTimeSlot.isBefore(openingTime) || currentTimeSlot.isAfter(closingTime)) {
+//                    System.out.println("Requested time is outside of business hours!");
+//                    continue;
+//                }
+//                LocalTime nextTimeSlot = currentTimeSlot.plusMinutes(15);
+//                boolean isAvailable = false;
+//                int totalAvailableSeats = 0;
+//
+//                System.out.println("Checking time slot: " + currentTimeSlot + " to " + nextTimeSlot);
+//
+//                for (TableNode table : tables) {
+//                    System.out.println("Checking table: " + table);
+//
+//                    if (table.isInside() != isInside) continue; // Skip tables that don't match the preference
+//
+//                    List<LocalDateTime> startTimes = table.getReservationStartTimes();
+//                    List<LocalDateTime> endTimes = table.getReservationEndTimes();
+//                    if (startTimes == null) startTimes = new ArrayList<>();
+//                    if (endTimes == null) endTimes = new ArrayList<>();
+//
+//                    boolean slotOccupied = false;
+//
+//                    for (int i = 0; i < startTimes.size(); i++) {
+//                        try {
+//                            LocalTime start = (startTimes.get(i) != null) ? startTimes.get(i).toLocalTime() : null;
+//                            LocalTime end = (endTimes.get(i) != null) ? endTimes.get(i).toLocalTime() : null;
+//
+//                            if (start == null || end == null) continue;
+//
+//                            if (!(nextTimeSlot.isBefore(start) || currentTimeSlot.isAfter(end))) {
+//                                slotOccupied = true;
+//                                break;
+//                            }
+//                        } catch (Exception e) {
+//                            System.out.println("Error while checking reservation times: " + e.getMessage());
+//                            e.printStackTrace();
+//                        }
+//                    }
+//
+//                    if (!slotOccupied) {
+//                        totalAvailableSeats += table.getCapacity();
+//                    }
+//
+//                    if (totalAvailableSeats >= requestedSeats) {
+//                        isAvailable = true;
+//                        break;
+//                    }
+//                }
+//
+//                if (isAvailable) {
+//                    LocalDateTime availableDateTime = LocalDateTime.of(requestedTime.toLocalDate(), currentTimeSlot);
+//                    ReservationEvent availableReservation = new ReservationEvent(restaurantName, availableDateTime, requestedSeats, isInside);
+//                    availableReservations.add(availableReservation);
+//                    System.out.println("Available reservation found: " + availableReservation);
+//                }
+//            }
             for (LocalTime currentTimeSlot = startTime; currentTimeSlot.isBefore(endTime) || currentTimeSlot.equals(endTime); currentTimeSlot = currentTimeSlot.plusMinutes(15)) {
                 System.out.println("the current slot of time is: " + currentTimeSlot);
                 System.out.println("the requested time is: " + requestedTime);
@@ -1657,6 +1785,26 @@ public class SimpleServer extends AbstractServer {
         }
     }
 
+
+//    public List<Meal> getAllMeals() {
+//        try (Session session = App.getSessionFactory().openSession()) {
+//            session.beginTransaction();
+//
+//            // Fetch all meals from the database
+//            Query<Meal> query = session.createQuery("FROM Meal", Meal.class);
+//            List<Meal> meals = query.getResultList();
+//
+//            session.getTransaction().commit();
+//
+//            // Return a copy of the list to avoid external modifications
+//            return new ArrayList<>(meals);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            // Return an empty list in case of an error
+//            return new ArrayList<>();
+//        }
+//    }
+
     private String getTableDetails(int tableID) {
         StringBuilder details = new StringBuilder();
 
@@ -1688,37 +1836,67 @@ public class SimpleServer extends AbstractServer {
             LocalDate currentDate = LocalDate.now();
             LocalTime currentTime = LocalTime.now();
 
-            // Filter and add reservation start times for the current date and after current time
-            details.append("Reservation Start Times (Today and after current time):\n");
-            if (table.getReservationStartTimes() == null || table.getReservationStartTimes().isEmpty()) {
-                details.append("  No reservations\n");
-            } else {
-                boolean hasReservations = false;
-                for (LocalDateTime startTime : table.getReservationStartTimes()) {
-                    if (startTime.toLocalDate().equals(currentDate) && startTime.toLocalTime().isAfter(currentTime)) {
-                        details.append("  - ").append(startTime).append("\n");
-                        hasReservations = true;
-                    }
+            // For occupied tables, show all reservations (past and future)
+            if ("occupied".equalsIgnoreCase(table.getStatus())) {
+                // Show all start times for today
+                details.append("Current Reservation:\n");
+                if (table.getReservationStartTimes() == null || table.getReservationStartTimes().isEmpty()) {
+                    details.append("  No start time recorded\n");
+                } else {
+                    // Find the most recent past start time
+                    table.getReservationStartTimes().stream()
+                            .filter(startTime -> startTime.toLocalDate().equals(currentDate))
+                            .sorted()
+                            .reduce((first, second) -> second) // get last element
+                            .ifPresentOrElse(
+                                    startTime -> details.append("  - Started at: ").append(startTime).append("\n"),
+                                    () -> details.append("  No start time recorded for today\n")
+                            );
                 }
-                if (!hasReservations) {
-                    details.append("  No reservations\n");
-                }
-            }
 
-            // Filter and add reservation end times for the current date and after current time
-            details.append("Reservation End Times (Today and after current time):\n");
-            if (table.getReservationEndTimes() == null || table.getReservationEndTimes().isEmpty()) {
-                details.append("  No reservations\n");
+                // Show upcoming end time
+                if (table.getReservationEndTimes() == null || table.getReservationEndTimes().isEmpty()) {
+                    details.append("  No end time recorded\n");
+                } else {
+                    table.getReservationEndTimes().stream()
+                            .filter(endTime -> endTime.toLocalDate().equals(currentDate))
+                            .sorted()
+                            .findFirst() // get the earliest future end time
+                            .ifPresentOrElse(
+                                    endTime -> details.append("  - Will end at: ").append(endTime).append("\n"),
+                                    () -> details.append("  No end time recorded for today\n")
+                            );
+                }
             } else {
-                boolean hasReservations = false;
-                for (LocalDateTime endTime : table.getReservationEndTimes()) {
-                    if (endTime.toLocalDate().equals(currentDate) && endTime.toLocalTime().isAfter(currentTime)) {
-                        details.append("  - ").append(endTime).append("\n");
-                        hasReservations = true;
+                // For non-occupied tables, show only future reservations
+                details.append("Upcoming Reservations (Today and after current time):\n");
+
+                // Pair start and end times
+                List<LocalDateTime> starts = table.getReservationStartTimes() != null ?
+                        new ArrayList<>(table.getReservationStartTimes()) : Collections.emptyList();
+                List<LocalDateTime> ends = table.getReservationEndTimes() != null ?
+                        new ArrayList<>(table.getReservationEndTimes()) : Collections.emptyList();
+
+                // Sort both lists
+                starts.sort(LocalDateTime::compareTo);
+                ends.sort(LocalDateTime::compareTo);
+
+                // Find matching pairs (assuming they're in order)
+                int count = 0;
+                for (int i = 0; i < starts.size(); i++) {
+                    LocalDateTime start = starts.get(i);
+                    if (start.toLocalDate().equals(currentDate) && start.toLocalTime().isAfter(currentTime)) {
+                        LocalDateTime end = i < ends.size() ? ends.get(i) : null;
+                        details.append("  - ").append(start);
+                        if (end != null) {
+                            details.append(" to ").append(end);
+                        }
+                        details.append("\n");
+                        count++;
                     }
                 }
-                if (!hasReservations) {
-                    details.append("  No reservations\n");
+                if (count == 0) {
+                    details.append("  No upcoming reservations\n");
                 }
             }
 
@@ -1765,6 +1943,7 @@ public class SimpleServer extends AbstractServer {
             return new tablesStatus(new ArrayList<>(), new ArrayList<>());
         }
     }
+
 
     /********************adan*************************/
 // Method to validate a CreditCardCheck object
@@ -1813,59 +1992,58 @@ public class SimpleServer extends AbstractServer {
             return new ArrayList<>();
         }
     }
-    private void handleCancellationRequest(String msg, ConnectionToClient client) {
+    private void handleCancellationRequest(String msg, ConnectionToClient client)throws Exception{
         try {
             // Parse the message
             String data = msg.substring("Cancel Reservation:".length()).trim();
             String[] parts = data.split(",");
 
+            if (parts.length != 2) {
+                client.sendToClient("Error: Invalid cancellation request format");
+                return;
+            }
 
             String name = parts[0].trim();
-            String phone = parts[1].trim();
-            String email = parts[2].trim();
+            int reservationId;
+
+            try {
+                reservationId = Integer.parseInt(parts[1].trim());
+            } catch (NumberFormatException e) {
+                client.sendToClient("Error: Reservation ID must be a number");
+                return;
+            }
 
             // Process cancellation
-            String result = cancelReservation(name, phone, email);
-
-            client.sendToClient("Cancle Reservation " + result);
+            String result = cancelReservation(name, reservationId);
+            client.sendToClient("Cancel Reservation " + result);
 
         } catch (Exception e) {
             e.printStackTrace();
+            client.sendToClient("Error: " + e.getMessage());
         }
     }
 
-    public String cancelReservation(String name, String phone, String email) {
+    public String cancelReservation(String name, int reservationId) {
         Session session = App.getSessionFactory().openSession();
         try {
             session.beginTransaction();
+            // Get reservation by ID
+            ReservationSave reservationToCancel = session.get(ReservationSave.class, reservationId);
 
-            // Query for matching reservations
-            Query<ReservationSave> query = session.createQuery(
-                    "FROM ReservationSave r WHERE " +
-                            "r.fullName = :name AND " +
-                            "r.phoneNumber = :phone AND " +
-                            "r.email = :email", ReservationSave.class);
-
-            List<ReservationSave> reservations = query
-                    .setParameter("name", name)
-                    .setParameter("phone", phone)
-                    .setParameter("email", email)
-                    .getResultList();
-
-            // Filter only future reservations
-            LocalDateTime now = LocalDateTime.now();
-            List<ReservationSave> futureReservations = reservations.stream()
-                    .filter(r -> !r.getReservationDateTime().isBefore(now)) // Keep only future reservations
-                    .sorted(Comparator.comparing(ReservationSave::getReservationDateTime)) // Sort by date
-                    .collect(Collectors.toList());
-
-            if (futureReservations.isEmpty()) {
-                return "Error: No future reservation found to cancel";
+        // Validate reservation exists and name matches
+            if (reservationToCancel == null) {
+                return "Error: No reservation found with ID " + reservationId;
             }
 
-            // Take only the first future reservation
-            ReservationSave reservationToCancel = futureReservations.get(0);
+            if (!reservationToCancel.getFullName().equalsIgnoreCase(name)) {
+                return "Error: Name doesn't match the reservation";
+            }
 
+            // Check if reservation is in the future
+            LocalDateTime now = LocalDateTime.now();
+            if (reservationToCancel.getReservationDateTime().isBefore(now)) {
+                return "Error: Cannot cancel past reservation";
+            }
             // Calculate charge
             int charge = calculateCancellationCharge(reservationToCancel, now);
 
@@ -1883,7 +2061,10 @@ public class SimpleServer extends AbstractServer {
 
             // Send cancellation email
             String emailContent = buildCancellationEmail(reservationToCancel, charge);
-            EmailSender.sendEmail("Reservation Cancellation Confirmation", emailContent, email);
+            EmailSender.sendEmail("Reservation Cancellation Confirmation",
+                    emailContent,
+                    reservationToCancel.getEmail());
+
 
             return charge > 0 ?
                     "Success: Cancelled with charge of " + charge + " ILS" :
@@ -1986,5 +2167,121 @@ public class SimpleServer extends AbstractServer {
             }
         }
     }
+    private boolean handleSavingReservation(ReservationSave reservation, ConnectionToClient client) {
+        FinalReservationEvent event = new FinalReservationEvent(reservation.getRestaurantName(), reservation.getReservationDateTime(), reservation.getSeats()
+                , reservation.isInside(), reservation.getFullName(), reservation.getPhoneNumber(), reservation.getEmail());
+
+        // Print all the tables in the specified restaurant
+        //printAllTablesInRestaurant(event.getRestaurantName());
+
+        // Fetch available tables for the restaurant and time
+        List<TableNode> availableTables = getAvailableTables(event.getRestaurantName(), event.getReservationDateTime(), event.getSeats(), event.isInside());
+
+        if (availableTables.isEmpty()) {
+            System.out.println("*********************************************");
+            System.out.println("No available tables for the selected time and seats.");
+            System.out.println("Checking other time slots...");
+            System.out.println("*********************************************");
+
+            // Define restaurant opening and closing times
+            LocalTime closingTime = getRestaurantByName(event.getRestaurantName()).getClosingTime(); // 10:00 PM
+            LocalTime start = getRestaurantByName(event.getRestaurantName()).getOpeningTime(); // e.g., 10:00 AM
+            LocalDate currentDate = event.getReservationDateTime().toLocalDate(); // Get the current date
+            LocalDateTime startTime = LocalDateTime.of(currentDate, start); // Combine date and time
+
+            // Iterate through all time slots from the current time to the closing time
+            List<LocalDateTime> availableTimeSlots = new ArrayList<>();
+
+            while (startTime.toLocalTime().isBefore(closingTime)) {
+                // Check if tables are available for this time slot
+                List<TableNode> tablesForSlot = getAvailableTables(event.getRestaurantName(), startTime, event.getSeats(), event.isInside());
+
+                if (!tablesForSlot.isEmpty()) {
+                    // If tables are available, add the time slot to the list
+                    availableTimeSlots.add(startTime);
+                }
+
+                // Move to the next time slot (e.g., increment by 1 hour)
+                startTime = startTime.plusMinutes(15);
+            }
+
+            if (!availableTimeSlots.isEmpty()) {
+                // Notify the client of available time slots
+                System.out.println("*********************************************");
+                System.out.println("Available time slots for the restaurant:");
+                for (LocalDateTime slot : availableTimeSlots) {
+                    System.out.println("  - " + slot.toLocalTime());
+                }
+                System.out.println("*********************************************");
+
+                try {
+                    // Create a new ReservationEvent with all available time slots
+                    ReservationEvent available_Reservation_for_client = new ReservationEvent(event.getRestaurantName(), // Use the restaurant name from the event
+                            event.getSeats(),         // Use the number of seats from the event
+                            event.isInside(),          // Use the inside/outside preference from the event
+                            availableTimeSlots         // Pass all available time slots
+                    );
+                    List<ReservationEvent> reservationList = new ArrayList<>();
+                    reservationList.add(available_Reservation_for_client);
+                    FaildPayRes object = new FaildPayRes(reservationList);
+                    // Send the available reservation to the client
+                    client.sendToClient(object);
+                    return false;
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to send available time slots to the client.", e);
+                }
+            } else {
+                // Notify the client that no tables are available at any time
+                System.out.println("*********************************************");
+                System.out.println("No available tables at any time for the selected seats.");
+                System.out.println("*********************************************");
+                List<ReservationEvent> reservationList = new ArrayList<>();
+                // Create a new ReservationEvent with all available time slots
+                ReservationEvent available_Reservation_for_client = new ReservationEvent(event.getRestaurantName(), event.getSeats(), event.isInside());
+                reservationList.add(available_Reservation_for_client);
+                FaildPayRes object = new FaildPayRes(reservationList);
+                try {
+                    client.sendToClient(object);
+                    return false;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        } else {
+            System.out.println("*********************************************");
+            System.out.println("The available tables are: " + availableTables);
+            System.out.println("*********************************************");
+
+            // Assign tables to the reservation
+
+            assignTablesToReservation(availableTables, event.getReservationDateTime(), event.isInside(), event.getRestaurantName());
+            printAllTablesInRestaurant(event.getRestaurantName());
+
+            // Create a new ReservationSave entity to save the reservation and tables
+            //ReservationSave reservationSave = new ReservationSave(event.getRestaurantName(), event.getReservationDateTime(), event.getSeats(), event.isInside(), event.getFullName(), event.getPhoneNumber(), event.getEmail(), availableTables);
+
+            // Save the reservation to the database
+            saveReservationToDatabase(reservation);
+            // Notify the client that the reservation was successful
+            System.out.println("Reservation confirmed successfully.");
+            //client.sendToClient("Reservation confirmed successfully.");
+            /// in zoom
+
+            try {
+                System.out.println("wa Save the reservation after payment");
+                client.sendToClient(reservation);
+                wait(500);
+                sendToAll(new ReConfirmEvent());
+                return true;
+                //printAllReservationSaves();
+            } catch (Exception e) {
+                e.printStackTrace();
+                // Notify the client of the error
+                System.out.println("Failed to save reservation.");
+            }
+        }
+        return true;
+    }
+
 
 }

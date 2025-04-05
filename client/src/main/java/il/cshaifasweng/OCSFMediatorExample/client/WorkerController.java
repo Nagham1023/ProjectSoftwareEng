@@ -91,7 +91,7 @@ public class WorkerController {
                     break;
                 case "CompanyManager":
                     reports_center.setVisible(true);
-                    complaint_center.setVisible(true);
+                    //complaint_center.setVisible(true);
                     branches_managment.setVisible(true);
                     priceChange_requist.setVisible(true);
                     break;
@@ -223,6 +223,12 @@ public class WorkerController {
             {
 
                 switchScreen("Wroker-Reservation","Wroker-Reservation");
+                break;
+            }
+            case "branches_managment":
+            {
+
+                switchScreen("register","register");
                 break;
             }
             default: {

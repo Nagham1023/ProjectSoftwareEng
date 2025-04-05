@@ -22,10 +22,8 @@ public class ReservationCancellationController {
     private TextField nameField;
 
     @FXML
-    private TextField phoneField;
+    private TextField reservationIdField;
 
-    @FXML
-    private TextField emailField;
 
     @FXML
     private Button cancelButton;
@@ -39,28 +37,31 @@ public class ReservationCancellationController {
     @FXML
     private void handleCancelReservation() {
         String name = nameField.getText().trim();
-        String phone = phoneField.getText().trim();
-        String email = emailField.getText().trim();
+        String reservationId = reservationIdField.getText().trim();
 
         // Basic validation
-        if (name.isEmpty() || phone.isEmpty() || email.isEmpty()) {
+        if (name.isEmpty() || reservationId.isEmpty()) {
             statusLabel.setText("Please fill in all fields");
             return;
         }
 
-        if (!email.contains("@") || !email.contains(".")) {
-            statusLabel.setText("Please enter a valid email address");
-            return;
-        }
 
         try {
-            String requestData = String.format("Cancel Reservation: %s,%s,%s", name, phone, email);
+            int reservationIdInt = Integer.parseInt(reservationId);
+            if (reservationIdInt <= 0) {
+                statusLabel.setText("Please enter a valid reservation ID");
+                return;
+            }
+
+            String requestData = String.format("Cancel Reservation: %s,%d", name, reservationIdInt);
 
             SimpleClient.getClient().sendToServer(requestData);
 
             statusLabel.setText("Processing your request...");
 
-        } catch (Exception e) {
+        }   catch (NumberFormatException e) {
+            statusLabel.setText("Reservation ID must be a number");
+    }  catch (Exception e) {
             statusLabel.setText("Error: " + e.getMessage());
         }
     }
@@ -73,18 +74,17 @@ public class ReservationCancellationController {
 
     private void clearFields() {
         nameField.clear();
-        phoneField.clear();
-        emailField.clear();
+        reservationIdField.clear();
     }
 
 
     @Subscribe
     public void showCancelStatus(String status) {
         Platform.runLater(() -> {
-            if (status.contains("Success")) {
+            if (status.startsWith("Success")) {
                 statusLabel.setText("Reservation cancelled successfully!");
                 clearFields();
-            } else if (status.contains("Error")) {
+            } else if (status.startsWith("Error")) {
                 statusLabel.setText(status);
             } else {
                 statusLabel.setText("Server response: " + status);
@@ -100,6 +100,7 @@ public class ReservationCancellationController {
 
     @FXML
     void backToHome(ActionEvent event) throws IOException {
+        EventBus.getDefault().unregister(this);
         App.setRoot("mainScreen");
     }
 

@@ -505,7 +505,6 @@ public class MealsDB {
         // Execute the query and get the restaurant
         Restaurant Branch = session.createQuery(query).uniqueResult();
 
-        // Initialize the meals collection before closing the session
         if (Branch != null) {
             Hibernate.initialize(Branch.getMeals());
             meals = Branch.getMeals();

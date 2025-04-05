@@ -32,16 +32,12 @@ public class PersonalDetailsPageController {
 
     @FXML
     private Button ContinuePersonalDetails;
-
     @FXML
     private TextField EmailPersonalDetails;
-
     @FXML
     private TextField NamePersonalDetails;
-
     @FXML
     private Label nameErrorLabel;
-
     @FXML
     private TextField PhoneNumberPersonalDetails;
 
@@ -51,11 +47,9 @@ public class PersonalDetailsPageController {
 
     @FXML
     private Label phoneNumberErrorLabel;
-
     @FXML
     private Label emailErrorLabel;
     private BooleanProperty emailInteracted = new SimpleBooleanProperty(false);  // Track interaction
-
     @FXML
     private Label nameLabel;
     @FXML
@@ -69,12 +63,10 @@ public class PersonalDetailsPageController {
 
     @FXML
     private void initialize() {
-        //EventBus.getDefault().register(this);
         setupEmailField();
         setupPhoneNumberField();
         setupNameField();
         setupContinueButton();
-        //setupContinueeButton();
         ContinuePersonalDetails.setOnAction(event -> handleContinueAction(event));
     }
 
@@ -85,13 +77,11 @@ public class PersonalDetailsPageController {
                 validateNameField();
             }
         });
-
         // Listener for changes in the text property of the Name field
         NamePersonalDetails.textProperty().addListener((observable, oldValue, newValue) -> {
             validateNameField();
         });
     }
-
     private void validateNameField() {
         if (NamePersonalDetails.getText().trim().isEmpty()) {
             nameErrorLabel.setText("This field is required.");
@@ -99,7 +89,6 @@ public class PersonalDetailsPageController {
             nameErrorLabel.setText(""); // Clear the error message if valid
         }
     }
-
     private void setupEmailField() {
         EmailPersonalDetails.focusedProperty().addListener((observable, oldValue, isFocused) -> {
             if (!isFocused) {
@@ -107,19 +96,16 @@ public class PersonalDetailsPageController {
                 validateEmail();
             }
         });
-
         EmailPersonalDetails.textProperty().addListener((observable, oldValue, newValue) -> {
             if (emailInteracted.get()) {
                 validateEmail();
             }
         });
     }
-
     private void validateEmail() {
         if (!emailInteracted.get()) {
             return;  // Skip validation if there hasn't been any interaction
         }
-
         String email = EmailPersonalDetails.getText();
         if (email.isEmpty()) {
             emailErrorLabel.setText("This field is required.");
@@ -129,9 +115,7 @@ public class PersonalDetailsPageController {
             emailErrorLabel.setText(""); // Clear the error message if valid
         }
     }
-
     private boolean phoneNumberFieldInteracted = false; // Initialize as false
-
     private void setupPhoneNumberField() {
         TextFormatter<String> formatter = new TextFormatter<>(change -> {
             String newText = change.getControlNewText();
@@ -143,10 +127,8 @@ public class PersonalDetailsPageController {
             }
             return change;  // accept the change otherwise
         });
-
         PhoneNumberPersonalDetails.setTextFormatter(formatter);
         PhoneNumberPersonalDetails.setText("+972 5");  // Set initial text
-
         PhoneNumberPersonalDetails.focusedProperty().addListener((observable, oldValue, isFocused) -> {
             if (isFocused) {
                 phoneNumberFieldInteracted = true;  // User has interacted with the field
@@ -155,15 +137,12 @@ public class PersonalDetailsPageController {
                 validatePhoneNumber(PhoneNumberPersonalDetails.getText()); // Validate when focus is lost
             }
         });
-
         PhoneNumberPersonalDetails.textProperty().addListener((observable, oldValue, newValue) -> {
             validatePhoneNumber(newValue); // Validate after any change to dynamically clear or show the error
         });
     }
-
     private void validatePhoneNumber(String text) {
         String rawNumber = text.length() > 6 ? text.substring(7) : "";  // Skip "+972 05"
-
         if (rawNumber.length() == 7) {
             phoneNumberErrorLabel.setText("");  // Clear any error message if the number is valid
         } else if (rawNumber.isEmpty() && phoneNumberFieldInteracted) {
@@ -174,41 +153,26 @@ public class PersonalDetailsPageController {
             phoneNumberErrorLabel.setText("");  // Clear the error message if the field is still focused or the error doesn't apply
         }
     }
-
     private void setupContinueButton() {
         // Validate the name field: It should not be empty.
         BooleanBinding isNameValid = Bindings.createBooleanBinding(() ->
                         !NamePersonalDetails.getText().trim().isEmpty(),
                 NamePersonalDetails.textProperty());
-
         // Validate the phone number field: It should have exactly 15 characters (including +972 05).
         BooleanBinding isPhoneNumberValid = Bindings.createBooleanBinding(() ->
                         PhoneNumberPersonalDetails.getText().length() == 14,
                 PhoneNumberPersonalDetails.textProperty());
-
         // Validate the Email field: It should match the Gmail regex pattern.
         BooleanBinding isEmailValid = Bindings.createBooleanBinding(() -> {
             String email = EmailPersonalDetails.getText();
             return email.matches("^[\\w.+\\-]+@gmail\\.com$");
         }, EmailPersonalDetails.textProperty());
-
         // Bind the disable property of the continue button to the NOT of all fields being valid.
         ContinuePersonalDetails.disableProperty().bind(
                 isNameValid.not()
                         .or(isPhoneNumberValid.not())
                         .or(isEmailValid.not()));
     }
-
-    /*private void setupContinueeButton() {
-        ContinuePersonalDetails.setOnAction(event -> {
-            try {
-                navigateToPersonalDetails();
-            } catch (IOException e) {
-                e.printStackTrace(); // Proper error handling
-            }
-        });
-    }*/
-
     /******************************************************/
     @FXML
     void backToCart(ActionEvent event) {
@@ -218,8 +182,6 @@ public class PersonalDetailsPageController {
             throw new RuntimeException(e);
         }
     }
-
-
     @FXML
     public void handleContinueAction(ActionEvent event) {
         // Initialize and set up personalDetails here
@@ -233,19 +195,19 @@ public class PersonalDetailsPageController {
 
         // Send data to the server
         try {
-
             // Navigate to the next screen after handling the server interaction
 
             //System.out.println("here2");
 
             DeliveryPageController.personalDetails = personalDetails;
             CreditDetailsController.personalDetails = personalDetails;
+            CreditDetailsController.mode="Order";
             done_Order.setCustomerEmail(EmailPersonalDetails.getText());
             App.setRoot("deliverypage");
         } catch (IOException e) {
             System.err.println("Error in handleContinueAction: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 }
+

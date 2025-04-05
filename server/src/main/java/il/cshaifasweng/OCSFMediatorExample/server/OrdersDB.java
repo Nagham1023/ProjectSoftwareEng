@@ -71,7 +71,6 @@ public class OrdersDB {
     /*public static void saveOrder2(Order order) {
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
-
             // Persist CustomizationWithBoolean if necessary, using saveOrUpdate
             for (MealInTheCart mealInTheCart : order.getMeals()) {
                 for (CustomizationWithBoolean customization : mealInTheCart.getMeal().getCustomizationsList()) {
@@ -79,10 +78,8 @@ public class OrdersDB {
                     session.saveOrUpdate(customization);
                 }
             }
-
             // Now save or update the order (this will cascade to meals and customizations)
             session.saveOrUpdate(order);
-
             session.getTransaction().commit();
         } catch (Exception e) {
             e.printStackTrace();

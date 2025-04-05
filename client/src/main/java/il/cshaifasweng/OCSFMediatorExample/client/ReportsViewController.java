@@ -182,12 +182,12 @@ public class ReportsViewController {
                     currentRestaurant                // Target restaurant name
             );
         } else{
-            req = new ReportRequest(
-                    LocalDate.now(),          // Use the current date for now (adjust as needed)
-                    TimeFrame.valueOf(timeValue), // Convert timeValue ("MONTHLY" or "YEARLY") to TimeFrame enum
-                    typeValue,               // Report type
-                    nameValue                // Target restaurant name
-            );}
+        req = new ReportRequest(
+                LocalDate.now(),          // Use the current date for now (adjust as needed)
+                TimeFrame.valueOf(timeValue), // Convert timeValue ("MONTHLY" or "YEARLY") to TimeFrame enum
+                typeValue,               // Report type
+                nameValue                // Target restaurant name
+        );}
         // Now we have to tell the server
         try {
             SimpleClient.getClient().sendToServer(req);
@@ -212,5 +212,6 @@ public class ReportsViewController {
     }
     public void setBranch(String role) {
         this.currentRestaurant = role;
+        restaurant_name.setVisible(false);
     }
 }

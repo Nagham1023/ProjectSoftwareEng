@@ -160,7 +160,6 @@ public class menu_controller {
             } else {
                 showAlert("Error", "No restaurants available.");
             }
-
             if (customizationNames != null && !customizationNames.isEmpty()) {
                 for (String option : customizationNames) {
                     // Add a tag "customization" to each customization checkbox
@@ -172,8 +171,6 @@ public class menu_controller {
             }
             //stopLoading();
         });
-
-
     }
 
     private void showAlert(String title, String message) {
@@ -185,7 +182,6 @@ public class menu_controller {
         alert.showAndWait();
         //stopLoading();
     }
-
 
 
     @FXML
@@ -200,7 +196,6 @@ public class menu_controller {
             // Load popup FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource("meal_popup.fxml"));
             Parent root = loader.load();
-
             // Get the controller and set meal details
             meal_popup_controller popupController = loader.getController();
             popupController.setMealDetails(
@@ -212,60 +207,45 @@ public class menu_controller {
                     meal,
                     this::updateCart
             );
-
-
             Stage mainStage = (Stage) stackPane.getScene().getWindow();
             ColorAdjust blur = new ColorAdjust();
             blur.setBrightness(-0.7);  // Simulate blur effect
             mainStage.getScene().getRoot().setEffect(blur);
-
-
             // Create a new popup stage (modal window)
             Stage popupStage = new Stage();
             popupStage.setTitle("Meal Details");
             popupStage.setScene(new Scene(root));
-
             // Make the popup window undecorated (no frame) BEFORE it is shown
             popupStage.initStyle(StageStyle.UTILITY); // This must be done before showing the window
-
             // Make popup modal (disable interaction with main window)
             popupStage.initModality(Modality.APPLICATION_MODAL);
             popupStage.initOwner(mainStage); // Link popup to the main window
-
             // Remove blur effect when popup is closed
             popupStage.setOnHiding(event -> mainStage.getScene().getRoot().setEffect(null));
-
             // Show popup
             popupStage.showAndWait();  // Wait until the popup is closed
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
     private void updateCart() {
         // Iterate through the list of meals to check for duplicates
         for (int i = 0; i < listOfMeals.size(); i++) {
             MealInTheCart currentMeal = listOfMeals.get(i);
-
             // Check if this meal has already been merged with another
             for (int j = i + 1; j < listOfMeals.size(); j++) {
                 MealInTheCart nextMeal = listOfMeals.get(j);
-
                 // If both meals have the same ID and identical customizations, merge them
                 if (currentMeal.getMeal().getMeal().getId() == nextMeal.getMeal().getMeal().getId() &&
                         areCustomizationsEqual(currentMeal.getMeal().getCustomizationsList(), nextMeal.getMeal().getCustomizationsList())) {
-
                     // Merge quantities
                     currentMeal.setQuantity(currentMeal.getQuantity() + nextMeal.getQuantity());
-
                     // Remove the duplicate meal
                     listOfMeals.remove(j);
                     j--; // Adjust the index to account for the removed item
                 }
             }
         }
-
         // Update the cart badge if the number of meals has changed
         if (numberOfMeals != listOfMeals.size()) {
             numberOfMeals = listOfMeals.size();
@@ -289,7 +269,6 @@ public class menu_controller {
         if (list1.size() != list2.size()) {
             return false; // Different lengths, cannot be equal
         }
-
         // Compare each customization and its selection status
         for (CustomizationWithBoolean custom1 : list1) {
             boolean foundMatch = false;
@@ -307,8 +286,6 @@ public class menu_controller {
         return true;
     }
 
-
-
     public void onAddMealClicked(Meal meal) {
         // Create a new meal row (HBox)
         HBox mealRow = new HBox(20);
@@ -318,8 +295,6 @@ public class menu_controller {
         Label idLabel = new Label(String.valueOf(meal.getId()));
         idLabel.setVisible(false); // Make it invisible
         idLabel.setManaged(false); // Ensure it doesn't take layout space
-
-
 
 
         // Meal Image
@@ -519,26 +494,19 @@ public class menu_controller {
             // Create a Media object for the sound file
             String soundPath = getClass().getResource("/images/added.mp3").toString();
             Media sound = new Media(soundPath);
-
             // Create a MediaPlayer for playing the sound
             MediaPlayer mediaPlayer = new MediaPlayer(sound);
-
             // Set the starting time (in seconds)
             mediaPlayer.setOnReady(() -> {
                 mediaPlayer.seek(Duration.seconds(0.7)); // Start the sound from 3 seconds
                 mediaPlayer.play();
             });
-
             // Optional: Adjust volume (0.0 to 1.0)
             mediaPlayer.setVolume(0.5);
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-
-
     private void openChangePricePage(String mealName, Label priceLabel,String Id){
     try {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/update_menu.fxml"));
@@ -670,7 +638,6 @@ public class menu_controller {
 
     @Subscribe
     public void Getmeals(MealsList avMeals) {
-
         Platform.runLater(() -> {
             // Keep the first row (header) and remove only meal rows
             if (!menuContainer.getChildren().isEmpty()) {
@@ -692,7 +659,6 @@ public class menu_controller {
             }
         });
     }
-
     @Subscribe
     public void addnewmeal(mealEvent meal) {
         System.out.println("adding new meal for this client");

@@ -109,6 +109,7 @@ public class AddComplainController {
             this.restaurantList = restaurantList;
             fillComboBox(restaurantList);
         });
+
     }
 
     @FXML
@@ -148,6 +149,7 @@ public class AddComplainController {
     @FXML
     private void sendButton(ActionEvent event) throws IOException {
         getRestaurantByName(restaurantList);
+
         // Check if any field is empty
         if (ComplainKind == null || textFieldName.getText() == null || textFieldEmail.getText() == null ||
                 textAreaTellUs.getText() == null || datePicker.getValue() == null || branchesList.getValue() == null ||
@@ -274,5 +276,8 @@ public class AddComplainController {
             }
         });
     }
+
+
+
 
 }

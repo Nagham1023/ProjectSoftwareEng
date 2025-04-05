@@ -1,5 +1,4 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
-
 import il.cshaifasweng.OCSFMediatorExample.entities.Customization;
 import il.cshaifasweng.OCSFMediatorExample.entities.CustomizationWithBoolean;
 import il.cshaifasweng.OCSFMediatorExample.entities.Meal;
@@ -23,7 +22,6 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
