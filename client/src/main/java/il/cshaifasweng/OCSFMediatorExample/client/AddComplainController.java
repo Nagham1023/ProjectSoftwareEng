@@ -109,6 +109,7 @@ public class AddComplainController {
             this.restaurantList = restaurantList;
             fillComboBox(restaurantList);
         });
+
     }
 
     @FXML
@@ -148,6 +149,7 @@ public class AddComplainController {
     @FXML
     private void sendButton(ActionEvent event) throws IOException {
         getRestaurantByName(restaurantList);
+
         // Check if any field is empty
         if (ComplainKind == null || textFieldName.getText() == null || textFieldEmail.getText() == null ||
                 textAreaTellUs.getText() == null || datePicker.getValue() == null || branchesList.getValue() == null ||
@@ -205,62 +207,62 @@ public class AddComplainController {
     @Subscribe
     public void onComplainEvent(complainEvent event) {
         Platform.runLater(() -> {
-        checkLabel.setText("Complaint received successfully!");
-        String subject;
-        String body;
-        String customerMessage = event.getTell(); // Get what the customer said
+            checkLabel.setText("Complaint received successfully!");
+            String subject;
+            String body;
+            String customerMessage = event.getTell(); // Get what the customer said
 
-        switch (event.getKind()) {
-            case "Complaint": {
-                subject = "We’re Addressing Your Concern - Mama's Restaurant";
-                body = "Dear " + event.getName() + ",\n\n"
-                        + "Thank you for bringing your concern to our attention. We deeply apologize for any inconvenience you may have experienced during your visit to Mama's Restaurant.\n\n"
-                        + "Your satisfaction is our priority, and we are currently reviewing your complaint to resolve the issue promptly. Our team will reach out to you soon with a follow-up.\n\n"
-                        + "Here’s what you told us:\n"
-                        + "----------------------------------------\n"
-                        + customerMessage + "\n"
-                        + "----------------------------------------\n\n"
-                        + "We appreciate your patience and the opportunity to make things right. If there’s anything else you’d like to share, please feel free to reply to this email.\n\n"
-                        + "Warm regards,\n\n"
-                        + "Mama's Restaurant Team\n";
-                break;
+            switch (event.getKind()) {
+                case "Complaint": {
+                    subject = "We’re Addressing Your Concern - Mama's Restaurant";
+                    body = "Dear " + event.getName() + ",\n\n"
+                            + "Thank you for bringing your concern to our attention. We deeply apologize for any inconvenience you may have experienced during your visit to Mama's Restaurant.\n\n"
+                            + "Your satisfaction is our priority, and we are currently reviewing your complaint to resolve the issue promptly. Our team will reach out to you soon with a follow-up.\n\n"
+                            + "Here’s what you told us:\n"
+                            + "----------------------------------------\n"
+                            + customerMessage + "\n"
+                            + "----------------------------------------\n\n"
+                            + "We appreciate your patience and the opportunity to make things right. If there’s anything else you’d like to share, please feel free to reply to this email.\n\n"
+                            + "Warm regards,\n\n"
+                            + "Mama's Restaurant Team\n";
+                    break;
+                }
+                case "Suggestion": {
+                    subject = "Thank You for Your Suggestion - Mama's Restaurant";
+                    body = "Dear " + event.getName() + ",\n\n"
+                            + "Thank you for taking the time to share your suggestion with us. We genuinely value your input as it helps us improve and provide the best dining experience possible.\n\n"
+                            + "Your idea has been shared with our team, and we will carefully consider it as we continue enhancing our services and menu.\n\n"
+                            + "Here’s what you suggested:\n"
+                            + "----------------------------------------\n"
+                            + customerMessage + "\n"
+                            + "----------------------------------------\n\n"
+                            + "We truly appreciate your support and look forward to welcoming you back to Mama's Restaurant soon!\n\n"
+                            + "Warm regards,\n\n"
+                            + "Mama's Restaurant Team\n";
+                    break;
+                }
+                case "Feedback": {
+                    subject = "Thank You for Your Feedback - Mama's Restaurant";
+                    body = "Dear " + event.getName() + ",\n\n"
+                            + "We truly appreciate you taking the time to share your feedback with us. Your thoughts are incredibly valuable and help us maintain the quality and service our customers expect.\n\n"
+                            + "We’re always working to improve, and your feedback plays a vital role in that process. Thank you for helping us grow and become better.\n\n"
+                            + "Here’s what you shared with us:\n"
+                            + "----------------------------------------\n"
+                            + customerMessage + "\n"
+                            + "----------------------------------------\n\n"
+                            + "We look forward to serving you again soon!\n\n"
+                            + "Warm regards,\n\n"
+                            + "Mama's Restaurant Team\n";
+                    break;
+                }
+                default:
+                    subject = "";
+                    body = "";
             }
-            case "Suggestion": {
-                subject = "Thank You for Your Suggestion - Mama's Restaurant";
-                body = "Dear " + event.getName() + ",\n\n"
-                        + "Thank you for taking the time to share your suggestion with us. We genuinely value your input as it helps us improve and provide the best dining experience possible.\n\n"
-                        + "Your idea has been shared with our team, and we will carefully consider it as we continue enhancing our services and menu.\n\n"
-                        + "Here’s what you suggested:\n"
-                        + "----------------------------------------\n"
-                        + customerMessage + "\n"
-                        + "----------------------------------------\n\n"
-                        + "We truly appreciate your support and look forward to welcoming you back to Mama's Restaurant soon!\n\n"
-                        + "Warm regards,\n\n"
-                        + "Mama's Restaurant Team\n";
-                break;
-            }
-            case "Feedback": {
-                subject = "Thank You for Your Feedback - Mama's Restaurant";
-                body = "Dear " + event.getName() + ",\n\n"
-                        + "We truly appreciate you taking the time to share your feedback with us. Your thoughts are incredibly valuable and help us maintain the quality and service our customers expect.\n\n"
-                        + "We’re always working to improve, and your feedback plays a vital role in that process. Thank you for helping us grow and become better.\n\n"
-                        + "Here’s what you shared with us:\n"
-                        + "----------------------------------------\n"
-                        + customerMessage + "\n"
-                        + "----------------------------------------\n\n"
-                        + "We look forward to serving you again soon!\n\n"
-                        + "Warm regards,\n\n"
-                        + "Mama's Restaurant Team\n";
-                break;
-            }
-            default:
-                subject = "";
-                body = "";
-        }
 
             EmailSender.sendEmail(subject, body, event.getEmail());
-            });
-        }
+        });
+    }
     @Subscribe
     public void noOrderEvent(String msg)
     {

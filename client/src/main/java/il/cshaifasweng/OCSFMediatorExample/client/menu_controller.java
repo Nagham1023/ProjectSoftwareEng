@@ -129,7 +129,7 @@ public class menu_controller {
                 searchOptions = new SearchOptions(selectedRestaurants, selectedCustomizations, "ALL");
             }
             else{
-            // Create a new SearchOptions object with separate restaurant and customization filters
+                // Create a new SearchOptions object with separate restaurant and customization filters
                 searchOptions = new SearchOptions(selectedRestaurants, selectedCustomizations, branchName);
             }
 
@@ -348,7 +348,12 @@ public class menu_controller {
         VBox detailsBox = new VBox(5);
         Label nameLabel = new Label(meal.getName());
         nameLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-        Label descriptionLabel = new Label(meal.getDescription());
+        String addition= "Special meal";
+        if(meal.isCompany())
+            addition = "Company meal";
+
+        String description= meal.getDescription() + "\n" + "This meal is - "+ addition;
+        Label descriptionLabel = new Label(description);
         descriptionLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #757575;");
         detailsBox.getChildren().addAll(nameLabel, descriptionLabel);
 
@@ -461,8 +466,8 @@ public class menu_controller {
 //        } else {
 //            System.out.println("Meal not found: " + mealId);
 //            // Optional: Refresh list if meal exists but wasn't in UI
-            refreshMenu();
-       // }
+        refreshMenu();
+        // }
 
     }
 
@@ -533,21 +538,21 @@ public class menu_controller {
 
 
     private void openChangePricePage(String mealName, Label priceLabel,String Id){
-    try {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/update_menu.fxml"));
-        Stage stage = new Stage();
-        Scene scene = new Scene(loader.load());
-        stage.setScene(scene);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/update_menu.fxml"));
+            Stage stage = new Stage();
+            Scene scene = new Scene(loader.load());
+            stage.setScene(scene);
 
-        // Pass data to the Change Price Controller
-        update_menu_controller controller = loader.getController();
-        controller.setMealDetails(mealName, priceLabel,Id);
+            // Pass data to the Change Price Controller
+            update_menu_controller controller = loader.getController();
+            controller.setMealDetails(mealName, priceLabel,Id);
 
-        stage.show();
-    } catch (IOException e) {
-        e.printStackTrace();
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-}
     @FXML
     private void openAddMealPage(){
         try {

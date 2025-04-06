@@ -205,7 +205,7 @@ public class receiptController {
         deliveryRow.setSpacing(10);
 
 
-        Image delivery = new Image(getClass().getResourceAsStream("/images/delivery_icon.png"));
+        Image delivery = new Image(getClass().getResourceAsStream("/images/x`.png"));
 
         ImageView imageView = new ImageView(delivery);
         imageView.setFitHeight(100);

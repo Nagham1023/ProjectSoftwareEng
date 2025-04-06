@@ -373,8 +373,8 @@ public class CreditDetailsController {
         arrow.setOnAction(event -> {
             try {
                 if(mode.equals("Order")){
-                System.out.println("Arrow button pressed.");
-                App.setRoot("deliverypage");}
+                    System.out.println("Arrow button pressed.");
+                    App.setRoot("deliverypage");}
                 else{
                     App.setRoot("Reservation");
                 }
@@ -388,26 +388,27 @@ public class CreditDetailsController {
     public void onPaymentResponse(PaymentCheck creditCardCheck) {
         // This method gets called when a CreditCardCheck object is posted to the EventBus
         if(creditCardCheck.getMode().equals("Order")){
-        Platform.runLater(() -> {
+            Platform.runLater(() -> {
 
-            System.out.println("Credit card is valid." + creditCardCheck.getOrder());
-            errorLabel.setText(creditCardCheck.getResponse());
-            done_Order = creditCardCheck.getOrder();
-            try {
-                App.setRoot("receipt");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
+                System.out.println("Credit card is valid." + creditCardCheck.getOrder());
+                errorLabel.setText(creditCardCheck.getResponse());
+                done_Order = creditCardCheck.getOrder();
+                try {
+                    App.setRoot("receipt");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } else {
-            errorLabel.setText(creditCardCheck.getResponse());
+
             Platform.runLater(() -> {
                 try {
                     //errorLabel.setText(creditCardCheck.getResponse());
                     errorLabel.setText(creditCardCheck.getResponse());
+                    done_Reservation=creditCardCheck.getReservationEvent();
                     if(!(creditCardCheck.getResponse().equals("Payment Failed"))){
-                    sendReservationConfirmationEmail(CreditDetailsController.personalDetails,done_Reservation.getReservationSaveID(), done_Reservation.getRestaurantName(),done_Reservation.getSeats() );
-                    App.setRoot("mainScreen");
+                        sendReservationConfirmationEmail(CreditDetailsController.personalDetails,done_Reservation.getReservationSaveID(), done_Reservation.getRestaurantName(),done_Reservation.getSeats() );
+                        App.setRoot("mainScreen");
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -428,7 +429,7 @@ public class CreditDetailsController {
             done_Order.setOrderTime(LocalDateTime.now());
             if(done_Order.getOrderType().equals("Delivery"))
             {
-             done_Order.setTotal_price(done_Order.getTotal_price()+deliveryPrice);
+                done_Order.setTotal_price(done_Order.getTotal_price()+deliveryPrice);
             }
         }
 
@@ -501,7 +502,7 @@ public class CreditDetailsController {
     }
 
     public static void sendReservationConfirmationEmail(PersonalDetails customer, int orderNumber,
-                                                  String restaurantName, int seats) {
+                                                        String restaurantName, int seats) {
         // Create the subject
         String subject = "Reservation Confirmation - Order #" + orderNumber;
 

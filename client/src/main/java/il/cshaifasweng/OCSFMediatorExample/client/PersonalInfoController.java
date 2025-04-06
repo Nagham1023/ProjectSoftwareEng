@@ -113,6 +113,4 @@ public class PersonalInfoController {
         });
         statusLabel.setText("");
     }
-
 }
-

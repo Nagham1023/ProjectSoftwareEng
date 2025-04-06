@@ -88,35 +88,35 @@ public class MealsDB {
             Meal burger = new Meal();
             burger.setName("Burger");
             burger.setDescription("Juicy beef burger with fresh lettuce");
-            burger.setPrice(8);
+            burger.setPrice(8.00);
             burger.setCustomizations(Arrays.asList(moreLettuce));
             burger.setImage(loadImage("burger.jpg"));
 
             Meal spaghetti = new Meal();
             spaghetti.setName("Spaghetti");
             spaghetti.setDescription("Classic Italian spaghetti with cheese");
-            spaghetti.setPrice(10);
+            spaghetti.setPrice(10.00);
             spaghetti.setCustomizations(Arrays.asList(extraCheese));
             spaghetti.setImage(loadImage("spaghetti.jpg"));
 
             Meal avocadoSalad = new Meal();
             avocadoSalad.setName("Avocado Salad");
             avocadoSalad.setDescription("Fresh avocado salad with onions");
-            avocadoSalad.setPrice(7);
+            avocadoSalad.setPrice(7.00);
             avocadoSalad.setCustomizations(Arrays.asList(moreOnion));
             avocadoSalad.setImage(loadImage("avocado_salad.png"));
 
             Meal grills = new Meal();
             grills.setName("Grills");
             grills.setDescription("Mixed grilled meats with spices");
-            grills.setPrice(12);
+            grills.setPrice(12.00);
             grills.setCustomizations(Arrays.asList(highSpicyLevel));
             grills.setImage(loadImage("grills.jpg"));
 
             Meal toastCheese = new Meal();
             toastCheese.setName("Toast Cheese");
             toastCheese.setDescription("Cheese toast with black bread");
-            toastCheese.setPrice(5);
+            toastCheese.setPrice(5.00);
             toastCheese.setCustomizations(Arrays.asList(blackBread));
             toastCheese.setImage(loadImage("toast_cheese.jpg"));
 
@@ -181,6 +181,7 @@ public class MealsDB {
             companyMeal1.setCompany(true);
             companyMeal1.setDelivery(true);
             companyMeal1.setCustomizations(customizationsList);
+            companyMeal1.setImage(loadImage("cheeseburger.jpg"));
 
             Meal companyMeal2 = new Meal();
             companyMeal2.setMealName("Executive Pizza");
@@ -189,6 +190,7 @@ public class MealsDB {
             companyMeal2.setCompany(true);
             companyMeal2.setDelivery(false);
             companyMeal2.setCustomizations(customizationsList);
+            companyMeal2.setImage(loadImage("pizza.jpg"));
 
             // Save company meals to the database
             session.persist(companyMeal1);
@@ -284,7 +286,7 @@ public class MealsDB {
         return meals;
     }
     /********************************/
-    public static void updateMealPriceById(int mealId, int newPrice) {
+    public static void updateMealPriceById(int mealId, double newPrice) {
         // Check if the meatlist is initialized
         if (meatlist == null || meatlist.isEmpty()) {
             System.out.println("The meal list is empty or not initialized.");
@@ -326,7 +328,7 @@ public class MealsDB {
     public static void updateMealPriceInDatabase(updatePrice updatePrice) {
         //System.out.println("Changing the price in database.");
         int mealId = updatePrice.getIdMeal();
-        int newPrice = updatePrice.getNewPrice();
+        double newPrice = updatePrice.getNewPrice();
 
         try {
             if (session == null || !session.isOpen()) {
@@ -471,7 +473,7 @@ public class MealsDB {
             Meal newMealEntity = new Meal();
             newMealEntity.setName(newMeal.getMealName());
             newMealEntity.setDescription(newMeal.getMealDisc());
-            newMealEntity.setPrice(Integer.parseInt(newMeal.getPrice()));
+            newMealEntity.setPrice(Double.parseDouble(newMeal.getPrice()));
             newMealEntity.setImage(newMeal.getImage());
             newMealEntity.setCompany(newMeal.isCompany());
             newMealEntity.setDelivery(true);

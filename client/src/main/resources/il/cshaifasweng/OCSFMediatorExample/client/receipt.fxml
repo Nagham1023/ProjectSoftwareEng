@@ -39,7 +39,7 @@
     </ImageView>
     <Label layoutX="151.0" layoutY="120.0" style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Bon appétit, and thank you for dining with us!" />
     <Label fx:id="PaidField" layoutX="14.0" layoutY="567.0" prefHeight="20.0" prefWidth="565.0" style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Paid 10 with credit card number : " />
-    <ImageView fitHeight="48.0" fitWidth="64.0" layoutX="10.0" layoutY="11.0" onMouseClicked="#goToMainScreen" pickOnBounds="true" preserveRatio="true">
+    <ImageView fitHeight="48.0" fitWidth="64.0" layoutX="10.0" layoutY="11.0" onMouseClicked="#goToMainScreen" pickOnBounds="true" preserveRatio="true">-->
         <image>
             <Image url="@../../../../images/menu_icon.png" />
         </image>

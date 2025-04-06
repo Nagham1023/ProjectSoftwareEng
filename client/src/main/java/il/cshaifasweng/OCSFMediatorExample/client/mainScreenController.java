@@ -127,15 +127,6 @@ public class mainScreenController {
             }
         });
     }
-    @FXML
-    void goToReservationCancel(ActionEvent event) {
-        Platform.runLater(() -> {
-            try {
-                App.setRoot("ReservationCancellation");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
+
 
 }

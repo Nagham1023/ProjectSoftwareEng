@@ -172,11 +172,11 @@ public class UpdateMeal {
             // Buttons container
             HBox buttonBox = new HBox(10);
 
-                Button deleteB = new Button("DELETE");
+            Button deleteB = new Button("DELETE");
             deleteB.setStyle("-fx-background-color: #C75C5C; -fx-text-fill: #FFD9D1;");
             deleteB.setOnAction(e -> handleDeleteCustomization(customizationName));
 
-                buttonBox.getChildren().addAll(deleteB);
+            buttonBox.getChildren().addAll(deleteB);
 
 
             mealRow.getChildren().addAll(
@@ -253,7 +253,7 @@ public class UpdateMeal {
 
 
         // Add to UI and storage
-        chosenCustomizationNames.add(customizationName);
+        //chosenCustomizationNames.add(customizationName);
         fillRow(customizationName);
         clearInput();
     }
@@ -279,6 +279,11 @@ public class UpdateMeal {
             }
 
         }
+        // Validation
+        if (selectedValue==null) {
+            showError(errorLabel1,"Please enter/select a restaurant!");
+            return;
+        }
         restaurantName = selectedValue.trim();
 
         // Validation
@@ -296,7 +301,7 @@ public class UpdateMeal {
 
 
         // Add to UI and storage
-        chosenRestaurantsNames.add(restaurantName);
+        //chosenRestaurantsNames.add(restaurantName);
         fillRowRestaurants(restaurantName);
         clearInput();
     }
@@ -378,6 +383,10 @@ public class UpdateMeal {
 
         if (chosenCustomizationNames.isEmpty()) {
             showError(errorLabel,"At least one customization required!");
+            return;
+        }
+        if (chosenRestaurantsNames.isEmpty()) {
+            showError(errorLabel,"At least one restaurant required!");
             return;
         }
 

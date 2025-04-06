@@ -3,23 +3,23 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 import java.io.Serializable;
 
 public class updatePrice implements Serializable {
-    private int newPrice;
+    private double newPrice;
     private int idMeal;
     private String purpose;
     private static final long serialVersionUID = -8224097662914849957L;
 
-    public updatePrice(int newPrice, int idMeal,String purpose) {
+    public updatePrice(double newPrice, int idMeal,String purpose) {
         this.newPrice = newPrice;
         this.idMeal = idMeal;
         this.purpose = purpose;
     }
-    public int getNewPrice() {
+    public double getNewPrice() {
         return newPrice;
     }
     public int getIdMeal() {
         return idMeal;
     }
-    public void setNewPrice(int newPrice) {
+    public void setNewPrice(double newPrice) {
         this.newPrice = newPrice;
     }
     public void setIdMeal(int idMeal) {

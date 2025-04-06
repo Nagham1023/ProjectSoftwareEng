@@ -186,17 +186,6 @@ public class ReservationController {
         });
     }
 
-    @Subscribe
-    public void reConfirmFunction(ReConfirmEvent reConfirmEvent) {
-        try {
-            if(loadingGif.isVisible()&&anchorPane.isDisabled())
-                return;
-            handleConfirm();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private void clearAllFields() {
         Platform.runLater(() -> {
             // Reset the date picker
@@ -232,7 +221,7 @@ public class ReservationController {
         boolean reservationSuccessful = false;
         //hasBeenHereBefore= noValidation;
         //if(hasBeenHereBefore)
-           // reservationSuccessful = true;
+        // reservationSuccessful = true;
 
         while (!reservationSuccessful) {
             // Extract reservation details
@@ -613,7 +602,7 @@ public class ReservationController {
             // Clear any existing buttons for available reservations
             anchorPane.getChildren().removeIf(node -> node.getId() != null && node.getId().equals("reservationButton"));
 
-            if (availableReservations.isEmpty() || availableReservations.getFirst().getReservationDateTime() == null) {
+            if (availableReservations.isEmpty() || availableReservations.get(0).getReservationDateTime() == null) {
                 // Show an alert if no available reservations are found
                 showAlert("No Available Reservations", "There are no available reservations for this date and restaurant.");
             } else {
@@ -675,6 +664,7 @@ public class ReservationController {
                 //showAlert("Reservation Confirmed", resultMessage);
                 done_Reservation=msg;
                 CreditDetailsController.personalDetails = personalDetails;
+                EventBus.getDefault().unregister(this);
                 App.setRoot("CreditDetails");
             } catch (IOException e) {
                 System.err.println("Error in handleContinueAction: " + e.getMessage());
@@ -686,13 +676,15 @@ public class ReservationController {
 
     @Subscribe
     public void reConfirmFunction(ReConfirmEvent reConfirmEvent) {
-        try {
+        Platform.runLater(() -> {
+            try {
             if(loadingGif.isVisible()&&anchorPane.isDisabled())
                 return;
             handleConfirm();
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
+        }});
+
     }
 
     @Subscribe

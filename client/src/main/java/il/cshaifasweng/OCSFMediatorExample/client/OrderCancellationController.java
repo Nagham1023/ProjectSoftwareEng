@@ -68,41 +68,41 @@ public class OrderCancellationController {
             if (cancelOrderEvent.getStatus().startsWith("Order not found with email:")) {
                 Platform.runLater(() -> {
                     try {
-                idErrorLabel.setVisible(true);
-                idErrorLabel.setText(cancelOrderEvent.getStatus());}
+                        idErrorLabel.setVisible(true);
+                        idErrorLabel.setText(cancelOrderEvent.getStatus());}
                     catch (Exception e) {
-                    e.printStackTrace();}
+                        e.printStackTrace();}
                 });
             } else{
 
-            //display a success message
-            Platform.runLater(() -> {
-                try {
-                    String subject = "Refund from Mamas-Restaurant ";
-                    String body = "Hi,\n\nWe've received a request to cancel your order. "
-                            + "Your refund is : " + refundAmount + "\n\n"
-                            + "If you didn't request this, please ignore this email.\n\n"
-                            + "Best regards,\nMamas-Restaurant Team";
+                //display a success message
+                Platform.runLater(() -> {
+                    try {
+                        String subject = "Refund from Mamas-Restaurant ";
+                        String body = "Hi,\n\nWe've received a request to cancel your order. "
+                                + "Your refund is : " + refundAmount + "\n\n"
+                                + "If you didn't request this, please ignore this email.\n\n"
+                                + "Best regards,\nMamas-Restaurant Team";
 
-                    // Call EmailSender to send the email
-                    //EmailSender.sendEmail(response.getEmail(), subject, body);
-                    EmailSender.sendEmail(subject,body, cancelOrderEvent.getOrder().getCustomerEmail());
-                } catch (Exception e) {
-                    // Handle email sending failure
-                    System.out.println("handleCancelOrderResponse");
-                    e.printStackTrace();
-                }
-            });
+                        // Call EmailSender to send the email
+                        //EmailSender.sendEmail(response.getEmail(), subject, body);
+                        EmailSender.sendEmail(subject,body, cancelOrderEvent.getOrder().getCustomerEmail());
+                    } catch (Exception e) {
+                        // Handle email sending failure
+                        System.out.println("handleCancelOrderResponse");
+                        e.printStackTrace();
+                    }
+                });
             }
         } else {
             // Handle case when order was not found
             Warning errorMessage = new Warning("Order not found.");
             Platform.runLater(() -> {
                 try {
-            idErrorLabel.setVisible(true);
-            idErrorLabel.setText("Order not found.");}
+                    idErrorLabel.setVisible(true);
+                    idErrorLabel.setText("Order not found.");}
                 catch (Exception e) {
-                e.printStackTrace();
+                    e.printStackTrace();
                 }
             });
 

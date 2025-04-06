@@ -35,50 +35,51 @@ public class RestaurantListController {
     private HBox backButtonContainer; // To store the back button row
 
 
-        // No-argument constructor for FXMLLoader
-        public RestaurantListController() {
+    // No-argument constructor for FXMLLoader
+    public RestaurantListController() {
+    }
+
+
+    @FXML
+    public void initialize() {
+        backButtonContainer = (HBox) backButton.getParent();
+        EventBus.getDefault().register(this);
+        SimpleClient client = SimpleClient.getClient();
+        try {
+            client.sendToServer("getAllRestaurants");
+        } catch (Exception e) {
+            e.printStackTrace(); // In a real application, log this error or show an error message to the user
         }
 
+        listOfMeals.clear();
+        numberOfMeals = 0;
+    }
 
-        @FXML
-        public void initialize() {
-            backButtonContainer = (HBox) backButton.getParent();
-            EventBus.getDefault().register(this);
-            SimpleClient client = SimpleClient.getClient();
-            try {
-                client.sendToServer("getAllRestaurants");
-            } catch (Exception e) {
-                e.printStackTrace(); // In a real application, log this error or show an error message to the user
-            }
-
-            listOfMeals.clear();
-            numberOfMeals = 0;
-        }
-
-        @Subscribe
-        public void updateRestaurantList(RestaurantList restaurantList) {
-            if (restaurantList != null) {
+    @Subscribe
+    public void updateRestaurantList(RestaurantList restaurantList) {
+        if (restaurantList != null) {
 //                restaurantListContainer.getChildren().clear();  // Clear existing content
-                List<Restaurant> restaurants = restaurantList.getRestaurantList();
+            List<Restaurant> restaurants = restaurantList.getRestaurantList();
 
-                //System.out.println("Number of restaurants: " + restaurants.size());
+            //System.out.println("Number of restaurants: " + restaurants.size());
 
-                Platform.runLater(() -> {
-                    restaurantListContainer.getChildren().clear();  // Clear existing content
+            Platform.runLater(() -> {
+                restaurantListContainer.getChildren().clear();  // Clear existing content
 
-                    for (Restaurant restaurant : restaurants) {
-                        String restaurantDetails = "Restaurant" +
-                                " ID='" + restaurant.getId() + '\'' +
-                                ", RestaurantName='" + restaurant.getRestaurantName() + '\'' +
-                                ", IMG='" + restaurant.getImagePath() + '\'' +
-                                ", PhoneNumber='" + restaurant.getPhoneNumber() + '\'' +
-                                '}';
-                        //System.out.println(restaurantDetails);
-                        addRestaurantToUI(restaurant);
-                    }
-                });
-            }
+                for (Restaurant restaurant : restaurants) {
+                    String restaurantDetails = "Restaurant" +
+                            " ID='" + restaurant.getId() + '\'' +
+                            ", RestaurantName='" + restaurant.getRestaurantName() + '\'' +
+                            ", IMG='" + restaurant.getImagePath() + '\'' +
+                            ", PhoneNumber='" + restaurant.getPhoneNumber() + '\'' +
+                            ", Opening hour ='" + restaurant.getOpeningTime() + " - " +"Closing hour= '"+ restaurant.getClosingTime() + '\'' +
+                            '}';
+                    //System.out.println(restaurantDetails);
+                    addRestaurantToUI(restaurant);
+                }
+            });
         }
+    }
 
     private void addRestaurantToUI(Restaurant restaurant) {
         // Ensure the back button remains at the top
@@ -128,8 +129,11 @@ public class RestaurantListController {
         Label phoneLabel = new Label("Phone: " + restaurant.getPhoneNumber());
         phoneLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #832018;");
 
+        Label description = new Label("Opening hour ='" + restaurant.getOpeningTime() + " - " +"Closing hour= '"+ restaurant.getClosingTime());
+        description.setStyle("-fx-font-size: 16px; -fx-text-fill: #832018;");
+
         // Add details to the VBox
-        detailsVBox.getChildren().addAll(nameLabel, phoneLabel);
+        detailsVBox.getChildren().addAll(nameLabel, phoneLabel, description);
 
         // Add image and details to the restaurant row
         restaurantRow.getChildren().addAll(imageView, detailsVBox);
@@ -154,7 +158,7 @@ public class RestaurantListController {
         System.out.println("Opening menu for " + restaurant.getRestaurantName());
     }
     public static String getBranchName(){
-            return branchName;
+        return branchName;
     }
     @FXML
     void backToHome2() throws IOException {

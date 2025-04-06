@@ -45,8 +45,8 @@ public class RequestViewController {
             } else {
                 System.err.println("User is null. Cannot initialize WorkerController.");
             }
-        client.sendToServer("show change price requests");
-    } catch (IOException e) {
+            client.sendToServer("show change price requests");
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -125,7 +125,7 @@ public class RequestViewController {
         );
 
         requestsContainer.getChildren().add(mealRow);
-        System.out.println("showing change price requests for"+ req.getMealId()+req.getNewPrice());
+        System.out.println("showing change price requests for "+ req.getMealId()+req.getNewPrice());
         mealRow.getProperties().put("mealNewPriceKey", key);
         mealNewPriceLabels.put((req.getMealId()+req.getNewPrice()), mealRow);
         map.computeIfAbsent(req.getMealId(), k -> new ArrayList<>()).add(mealRow);
@@ -146,11 +146,11 @@ public class RequestViewController {
     private void handlePriceUpdate(String mealId, String newPrice, String oldPrice, boolean approve) {
         try {
             if(approve) {
-                updatePrice request = new updatePrice(Integer.parseInt(newPrice), Integer.parseInt(mealId) ,"changing");
+                updatePrice request = new updatePrice(Double.parseDouble(newPrice), Integer.parseInt(mealId) ,"changing");
                 SimpleClient.getClient().sendToServer(request);
             }
             else{
-                updatePrice request = new updatePrice(Integer.parseInt(newPrice), Integer.parseInt(mealId) ,"denying");
+                updatePrice request = new updatePrice(Double.parseDouble(newPrice), Integer.parseInt(mealId) ,"denying");
                 SimpleClient.getClient().sendToServer(request);
             }
 
@@ -191,13 +191,14 @@ public class RequestViewController {
 
     @Subscribe
     public void addNewRequest(MealUpdateRequest req) {
-        System.out.println("adding new UpdatePrice request for this client");
-        System.out.println("Meal's id is " + req.getMealId());
-        Platform.runLater(() -> {
-            onAddMealClicked(req);
-        });
-        System.out.println("added the new meal for this client");
-
+//        System.out.println("adding new UpdatePrice request for this client");
+//        System.out.println("Meal's id is " + req.getMealId());
+//        Platform.runLater(() -> {
+//            onAddMealClicked(req);
+//        });
+//        System.out.println("added the new meal for this client");
+        EventBus.getDefault().unregister(this);
+        Platform.runLater( this::initialize);
     }
 
 

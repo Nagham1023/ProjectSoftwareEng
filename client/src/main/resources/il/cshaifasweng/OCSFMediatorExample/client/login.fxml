@@ -25,7 +25,7 @@
                   <Font name="System Bold" size="40.0" />
                </font>
             </Label>
-            <Label layoutX="141.0" layoutY="94.0" prefHeight="50.0" prefWidth="272.0" text="Insert your account">
+            <Label layoutX="141.0" layoutY="96.0" prefHeight="50.0" prefWidth="363.0" text="Insert your account">
                <font>
                   <Font name="System Bold" size="30.0" />
                </font>
@@ -33,16 +33,6 @@
             <Label layoutX="100.0" layoutY="318.0" onMouseClicked="#toForgetpass" text="Forgot Your Password?" />
             <TextField fx:id="usernameField" layoutX="103.0" layoutY="201.0" prefHeight="27.0" prefWidth="248.0" promptText="Username" />
             <Button layoutX="152.0" layoutY="394.0" mnemonicParsing="false" onAction="#LoginButton" prefHeight="50.0" prefWidth="180.0" style="-fx-background-color: #262626; -fx-background-radius: 20;" text="Login" textFill="WHITE">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Button>
-            <Label layoutX="230.0" layoutY="469.0" prefHeight="27.0" prefWidth="27.0" text="Or">
-               <font>
-                  <Font size="17.0" />
-               </font>
-            </Label>
-            <Button layoutX="167.0" layoutY="515.0" mnemonicParsing="false" onAction="#RegisterButton" prefHeight="42.0" prefWidth="151.0" style="-fx-background-color: #c59dea; -fx-background-radius: 20;" text="Register" textFill="WHITE">
                <font>
                   <Font size="18.0" />
                </font>

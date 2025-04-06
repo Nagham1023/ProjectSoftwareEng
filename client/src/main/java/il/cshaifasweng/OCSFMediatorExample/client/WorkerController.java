@@ -72,9 +72,9 @@ public class WorkerController {
             update_meals.setVisible(false);
 
             if(currentWorker.startsWith("ChainManager")) {
-                    reports_center.setVisible(true);
-                    currentBranch = currentWorker.substring(13);
-                    currentWorker = "ChainManager";
+                reports_center.setVisible(true);
+                currentBranch = currentWorker.substring(13);
+                currentWorker = "ChainManager";
 
             }
 
@@ -115,7 +115,7 @@ public class WorkerController {
         this.currentWorker = role;
     }
 
-//    @FXML
+    //    @FXML
 //    public void onReportsButtonClick() {
 //        try {
 //            FXMLLoader loader = new FXMLLoader(getClass().getResource("ReportsView.fxml"));
@@ -165,7 +165,7 @@ public class WorkerController {
 
             }
 
-                Platform.runLater(() -> {
+            Platform.runLater(() -> {
                 if (chartArea != null) {
                     chartArea.getChildren().clear();
                     chartArea.getChildren().add(view);
@@ -181,9 +181,9 @@ public class WorkerController {
 
     @FXML
     public void switchScreen(String screenName,String message) {
-            Platform.runLater(() -> {
-                loadView(screenName + ".fxml", message);
-            });
+        Platform.runLater(() -> {
+            loadView(screenName + ".fxml", message);
+        });
     }
 
     @FXML

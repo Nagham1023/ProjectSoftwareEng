@@ -51,7 +51,7 @@ public class RegisterController {
 
     private Timeline timeline; // Animation refresh loop
 
-//    @FXML
+    //    @FXML
 //    private PasswordField confirmPasswordField;
     @FXML
     private ImageView loadinggif;
@@ -204,7 +204,7 @@ public class RegisterController {
             }
         });
     }
-//    @FXML
+    //    @FXML
 //    void toLogin() {
 //            Platform.runLater(() -> {
 //                try {
@@ -323,7 +323,7 @@ public class RegisterController {
             Platform.runLater(() -> {
                 errorMessageLabel.setStyle("-fx-text-fill: red;");
                 errorMessageLabel.setText("This username is already used!");
-                });
+            });
         }
     }
 
@@ -359,17 +359,17 @@ public class RegisterController {
 
 
 
-            Button DeleteButton = new Button("Delete");
-            DeleteButton.setStyle("-fx-background-color: #d9534f; -fx-text-fill: #ffffff; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
+        Button DeleteButton = new Button("Delete");
+        DeleteButton.setStyle("-fx-background-color: #d9534f; -fx-text-fill: #ffffff; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
 //            DeleteButton.setOnAction(event -> handleDeleteUserClicked(idLabel.getText()));
-            DeleteButton.setUserData(user.getUsername()); // Attach username to the button
-            DeleteButton.setOnAction(event -> handleDeleteUserClicked(DeleteButton.getUserData().toString()));
+        DeleteButton.setUserData(user.getUsername()); // Attach username to the button
+        DeleteButton.setOnAction(event -> handleDeleteUserClicked(DeleteButton.getUserData().toString()));
 
-            Button UpdteButton = new Button("Update");
-            UpdteButton.setStyle("-fx-background-color: #5bc0de; -fx-text-fill: #ffffff; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
-            UpdteButton.setOnAction(event -> handleUpdateUserClicked(nameLabel.getText(), idLabel.getText()));
-            // Add components to mealRow
-            userRow.getChildren().addAll(detailsBox, DeleteButton, UpdteButton);
+        Button UpdteButton = new Button("Update");
+        UpdteButton.setStyle("-fx-background-color: #5bc0de; -fx-text-fill: #ffffff; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
+        UpdteButton.setOnAction(event -> handleUpdateUserClicked(nameLabel.getText(), idLabel.getText()));
+        // Add components to mealRow
+        userRow.getChildren().addAll(detailsBox, DeleteButton, UpdteButton);
 
 
         // Add UserRow to dynamicUserNames
@@ -573,11 +573,11 @@ public class RegisterController {
     @Subscribe
     public void updatePage(UserManagement event) {
         //if (event.equals("Registration completed successfully")){
-            try{
-                SimpleClient.getClient().sendToServer("Get all users");
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        try{
+            SimpleClient.getClient().sendToServer("Get all users");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         //}
 
     }

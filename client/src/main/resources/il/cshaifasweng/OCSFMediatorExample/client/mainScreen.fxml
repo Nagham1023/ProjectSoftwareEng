@@ -15,74 +15,69 @@
 <?import javafx.scene.text.Text?>
 
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="563.0" prefWidth="600.0" style="-fx-background-color: #fbebf4;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.mainScreenController">
-   <children>
-      <AnchorPane layoutX="191.0" layoutY="14.0">
-         <children>
-            <HBox />
-         </children>
-      </AnchorPane>
-      <PointLight color="CHARTREUSE" layoutX="250.0" layoutY="198.0" lightOn="true" />
-      <Text fill="#832018" layoutX="166.0" layoutY="225.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Mama's Kitchen" wrappingWidth="267.36505126953125">
-         <font>
-            <Font name="System Bold Italic" size="35.0" />
-         </font>
-      </Text>
-      <Text fill="#c72066" layoutX="160.0" layoutY="274.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Where Every Meal Feels Like Home" wrappingWidth="279.36505126953125">
-         <font>
-            <Font name="System Italic" size="18.0" />
-         </font>
-      </Text>
-      <ButtonBar layoutX="200.0" layoutY="302.0" prefHeight="40.0" prefWidth="200.0" />
-      <ButtonBar layoutX="200.0" layoutY="359.0" prefHeight="40.0" prefWidth="200.0" />
-      <ButtonBar layoutX="208.0" layoutY="415.0" prefHeight="40.0" prefWidth="200.0" />
-      <ButtonBar layoutX="208.0" layoutY="472.0" prefHeight="40.0" prefWidth="200.0" />
-      <PointLight color="CHARTREUSE" lightOn="true" />
-      <ParallelCamera />
-      <PointLight lightOn="true">
-         <color>
-            <Color red="1.0" blue="0.9555837512016296" />
-         </color>
-      </PointLight>
-       <ImageView fitHeight="191.0" fitWidth="200.0" layoutX="200.0" layoutY="-1.0">
-           <Image url="@/images/mamas_kitchen_final.png" />  <!-- Single Image element -->
-       </ImageView>
-       <BorderPane layoutX="322.0" layoutY="310.0" />
-    <Button alignment="CENTER" layoutX="82.0" layoutY="302.0" mnemonicParsing="false" onAction="#goToLogin" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Log In" textAlignment="JUSTIFY" textFill="#fbebf4" textOverrun="WORD_ELLIPSIS">
-         <font>
-            <Font name="System Bold Italic" size="24.0" />
-         </font>
-      </Button>
-    <Button layoutX="84.0" layoutY="403.0" mnemonicParsing="false" onAction="#handleChooseBranchClick" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Choose Branch" textFill="#fbebf4">
-         <font>
-            <Font name="System Bold Italic" size="24.0" />
-         </font>
-      </Button>
-    <Button layoutX="322.0" layoutY="403.0" mnemonicParsing="false" onAction="#clickedOnCancellation" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Cancellation" textFill="#fbebf4">
-         <font>
-            <Font name="System Bold Italic" size="20.0" />
-         </font>
-      </Button>
-    <Button layoutX="324.0" layoutY="302.0" mnemonicParsing="false" onAction="#clickedOnComplaints" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px; -fx-border-image-width: 20px;" text="Complaints" textFill="#fbebf4">
-         <font>
-            <Font name="System Bold Italic" size="23.0" />
-         </font>
-      </Button>
-      <ImageView fitHeight="51.0" fitWidth="62.0" layoutX="528.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
-              <Image url="@/images/instaIcon.png" />  <!-- Single Image element -->
-      </ImageView>
-      <Button layoutX="533.0" layoutY="20.0" mnemonicParsing="false" onAction="#openLink" opacity="0.0" prefHeight="40.0" prefWidth="40.0" style="-fx-border-color: #832018;" />
-       <Button layoutX="202.0" layoutY="480.0" mnemonicParsing="false" onAction="#goToReservation" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Pick a Reservation" textFill="#fbebf4">
-           <font>
-               <Font name="System Bold Italic" size="20.0" />
-           </font>
-       </Button>
-       <Button layoutX="500.0" layoutY="480.0" mnemonicParsing="false" onAction="#goToReservationCancel" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Cancel a Reservation" textFill="#fbebf4">
-           <font>
-               <Font name="System Bold Italic" size="20.0" />
-           </font>
-       </Button>
-      <Button layoutX="543.0" layoutY="30.0" mnemonicParsing="false" onAction="#openLink" opacity="0.0" prefHeight="40.0" prefWidth="40.0" style="-fx-border-color: #832018;" />
+    <children>
+        <AnchorPane layoutX="191.0" layoutY="14.0">
+            <children>
+                <HBox />
+            </children>
+        </AnchorPane>
+        <PointLight color="CHARTREUSE" layoutX="250.0" layoutY="198.0" lightOn="true" />
+        <Text fill="#832018" layoutX="166.0" layoutY="225.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Mama's Kitchen" wrappingWidth="267.36505126953125">
+            <font>
+                <Font name="System Bold Italic" size="35.0" />
+            </font>
+        </Text>
+        <Text fill="#c72066" layoutX="160.0" layoutY="274.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Where Every Meal Feels Like Home" wrappingWidth="279.36505126953125">
+            <font>
+                <Font name="System Italic" size="18.0" />
+            </font>
+        </Text>
+        <ButtonBar layoutX="200.0" layoutY="302.0" prefHeight="40.0" prefWidth="200.0" />
+        <ButtonBar layoutX="200.0" layoutY="359.0" prefHeight="40.0" prefWidth="200.0" />
+        <ButtonBar layoutX="208.0" layoutY="415.0" prefHeight="40.0" prefWidth="200.0" />
+        <ButtonBar layoutX="208.0" layoutY="472.0" prefHeight="40.0" prefWidth="200.0" />
+        <PointLight color="CHARTREUSE" lightOn="true" />
+        <ParallelCamera />
+        <PointLight lightOn="true">
+            <color>
+                <Color red="1.0" blue="0.9555837512016296" />
+            </color>
+        </PointLight>
+        <ImageView fitHeight="191.0" fitWidth="200.0" layoutX="200.0" layoutY="-1.0">
+            <Image url="@/images/mamas_kitchen_final.png" />  <!-- Single Image element -->
+        </ImageView>
+        <BorderPane layoutX="322.0" layoutY="310.0" />
+        <Button alignment="CENTER" layoutX="82.0" layoutY="302.0" mnemonicParsing="false" onAction="#goToLogin" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Log In" textAlignment="JUSTIFY" textFill="#fbebf4" textOverrun="WORD_ELLIPSIS">
+            <font>
+                <Font name="System Bold Italic" size="24.0" />
+            </font>
+        </Button>
+        <Button layoutX="84.0" layoutY="403.0" mnemonicParsing="false" onAction="#handleChooseBranchClick" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Choose Branch" textFill="#fbebf4">
+            <font>
+                <Font name="System Bold Italic" size="24.0" />
+            </font>
+        </Button>
+        <Button layoutX="322.0" layoutY="403.0" mnemonicParsing="false" onAction="#clickedOnCancellation" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Cancellation" textFill="#fbebf4">
+            <font>
+                <Font name="System Bold Italic" size="20.0" />
+            </font>
+        </Button>
+        <Button layoutX="324.0" layoutY="302.0" mnemonicParsing="false" onAction="#clickedOnComplaints" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px; -fx-border-image-width: 20px;" text="Complaints" textFill="#fbebf4">
+            <font>
+                <Font name="System Bold Italic" size="23.0" />
+            </font>
+        </Button>
+        <ImageView fitHeight="51.0" fitWidth="62.0" layoutX="528.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+            <Image url="@/images/instaIcon.png" />  <!-- Single Image element -->
+        </ImageView>
+        <Button layoutX="533.0" layoutY="20.0" mnemonicParsing="false" onAction="#openLink" opacity="0.0" prefHeight="40.0" prefWidth="40.0" style="-fx-border-color: #832018;" />
+        <Button layoutX="202.0" layoutY="480.0" mnemonicParsing="false" onAction="#goToReservation" prefHeight="65.0" prefWidth="213.0" style="-fx-background-color: #832018; -fx-border-color: #832018; -fx-border-radius: 20px;" text="Pick a Reservation" textFill="#fbebf4">
+            <font>
+                <Font name="System Bold Italic" size="20.0" />
+            </font>
+        </Button>
+        <Button layoutX="543.0" layoutY="30.0" mnemonicParsing="false" onAction="#openLink" opacity="0.0" prefHeight="40.0" prefWidth="40.0" style="-fx-border-color: #832018;" />
 
-      <Button layoutX="553.0" layoutY="40.0" mnemonicParsing="false" onAction="#openLink" opacity="0.0" prefHeight="40.0" prefWidth="40.0" style="-fx-border-color: #832018;" />
-   </children>
+        <Button layoutX="553.0" layoutY="40.0" mnemonicParsing="false" onAction="#openLink" opacity="0.0" prefHeight="40.0" prefWidth="40.0" style="-fx-border-color: #832018;" />
+    </children>
 </Pane>

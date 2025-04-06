@@ -24,7 +24,7 @@ public class Meal implements Serializable {
 
     private String mealName;
     private String description;
-    private int price;
+    private double price;
     private boolean isCompany;
     private boolean isDelivery;
 
@@ -45,7 +45,7 @@ public class Meal implements Serializable {
 //    )
 //    private List<RestaurantMeal> restaurantAssociations = new ArrayList<>();
 
-//    @ManyToMany
+    //    @ManyToMany
 //    @JoinTable(
 //            name = "meal_customizations",
 //            joinColumns = {@JoinColumn(
@@ -97,11 +97,11 @@ public class Meal implements Serializable {
         this.description = description;
     }
 
-    public int getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(double price) {
         this.price = price;
     }
 

@@ -88,7 +88,7 @@ public class App {
         // List of meals with their customizations
         System.out.println("\n=== Meals List ===");
         for (Meal meal : getAllMeals()) {
-            System.out.printf("Meal: %s | Price: %d %n", meal.getName(), meal.getPrice());
+            System.out.printf("Meal: %s | Price: %.2f%n", meal.getName(), meal.getPrice());
             System.out.println("Customizations:");
             for (Customization customization : meal.getCustomizations()) {
                 System.out.printf("  - %s ", customization.getName());
