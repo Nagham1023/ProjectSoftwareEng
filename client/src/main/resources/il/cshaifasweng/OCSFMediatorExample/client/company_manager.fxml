@@ -21,45 +21,45 @@
                         <Font name="System Italic" size="12.0" />
                     </font>
                 </Button>
-            <Button fx:id="tables_reservation" layoutX="23.0" layoutY="233.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Tables Reservation" textAlignment="CENTER" textFill="#333333">
-               <font>
-                  <Font name="System Italic" size="12.0" />
-               </font>
-            </Button>
-            <Button fx:id="complaint_center" layoutX="23.0" layoutY="252.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Complaints Center" textAlignment="CENTER" textFill="#333333">
-               <font>
-                  <Font name="System Italic" size="12.0" />
-               </font>
-            </Button>
-            <Button fx:id="update_meals" layoutX="23.0" layoutY="271.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Update Meals" textAlignment="CENTER" textFill="#333333">
-               <font>
-                  <Font name="System Italic" size="12.0" />
-               </font>
-            </Button>
-            <Button fx:id="reports_center" layoutX="23.0" layoutY="289.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Reports Center" textAlignment="CENTER" textFill="#333333">
-               <font>
-                  <Font name="System Italic" size="12.0" />
-               </font>
-            </Button>
-            <Button fx:id="branches_managment" layoutX="23.0" layoutY="308.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Branches Managment" textAlignment="CENTER" textFill="#333333">
-               <font>
-                  <Font name="System Italic" size="12.0" />
-               </font>
-            </Button>
-            <Button fx:id="priceChange_requist" layoutX="23.0" layoutY="308.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Price Change Requists" textAlignment="CENTER" textFill="#333333">
-               <font>
-                  <Font name="System Italic" size="12.0" />
-               </font>
-            </Button>
+                <Button fx:id="tables_reservation" layoutX="23.0" layoutY="233.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Tables Reservation" textAlignment="CENTER" textFill="#333333">
+                    <font>
+                        <Font name="System Italic" size="12.0" />
+                    </font>
+                </Button>
+                <Button fx:id="complaint_center" layoutX="23.0" layoutY="252.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Complaints Center" textAlignment="CENTER" textFill="#333333">
+                    <font>
+                        <Font name="System Italic" size="12.0" />
+                    </font>
+                </Button>
+                <Button fx:id="update_meals" layoutX="23.0" layoutY="271.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Update Meals" textAlignment="CENTER" textFill="#333333">
+                    <font>
+                        <Font name="System Italic" size="12.0" />
+                    </font>
+                </Button>
+                <Button fx:id="reports_center" layoutX="23.0" layoutY="289.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Reports Center" textAlignment="CENTER" textFill="#333333">
+                    <font>
+                        <Font name="System Italic" size="12.0" />
+                    </font>
+                </Button>
+                <Button fx:id="branches_managment" layoutX="23.0" layoutY="308.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Branches Managment" textAlignment="CENTER" textFill="#333333">
+                    <font>
+                        <Font name="System Italic" size="12.0" />
+                    </font>
+                </Button>
+                <Button fx:id="priceChange_requist" layoutX="23.0" layoutY="308.0" mnemonicParsing="false" style="-fx-background-color: linear-gradient(to right, #ffd9d1, #fff5f9); -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 2, 2); -fx-padding: 5 10; -fx-min-width: 150; -fx-border-radius: 25; -fx-background-radius: 25;" text="Price Change Requists" textAlignment="CENTER" textFill="#333333">
+                    <font>
+                        <Font name="System Italic" size="12.0" />
+                    </font>
+                </Button>
             </children>
         </VBox>
         <StackPane prefHeight="398.0" prefWidth="425.0" style="-fx-background-color: #FFF5F9;">
-         <children>
-            <Label prefHeight="79.0" prefWidth="282.0" text="Welcome to your personal space ^-^&quot;" textAlignment="JUSTIFY" textFill="#333333" wrapText="true">
-               <font>
-                  <Font name="System Italic" size="14.0" />
-               </font>
-            </Label>
-         </children></StackPane>
+            <children>
+                <Label prefHeight="79.0" prefWidth="282.0" text="Welcome to your personal space ^-^&quot;" textAlignment="JUSTIFY" textFill="#333333" wrapText="true">
+                    <font>
+                        <Font name="System Italic" size="14.0" />
+                    </font>
+                </Label>
+            </children></StackPane>
     </items>
 </SplitPane>

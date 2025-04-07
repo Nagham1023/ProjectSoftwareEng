@@ -45,8 +45,8 @@ public class RequestViewController {
             } else {
                 System.err.println("User is null. Cannot initialize WorkerController.");
             }
-        client.sendToServer("show change price requests");
-    } catch (IOException e) {
+            client.sendToServer("show change price requests");
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

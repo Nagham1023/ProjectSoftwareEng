@@ -72,9 +72,9 @@ public class WorkerController {
             update_meals.setVisible(false);
 
             if(currentWorker.startsWith("ChainManager")) {
-                    reports_center.setVisible(true);
-                    currentBranch = currentWorker.substring(13);
-                    currentWorker = "ChainManager";
+                reports_center.setVisible(true);
+                currentBranch = currentWorker.substring(13);
+                currentWorker = "ChainManager";
 
             }
 

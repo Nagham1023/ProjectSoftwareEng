@@ -28,6 +28,7 @@ import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.add
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.getAllComplains;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
+import static il.cshaifasweng.OCSFMediatorExample.server.OrdersDB.generateOrders;
 import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.addPersonalDetails;
 import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.getAllRestaurants;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.generateBasicUser1;
@@ -96,80 +97,80 @@ public class App {
         }
     }
 
-    private static void generateOrders() throws Exception {
-        // Helper function to read image as byte[]
-        if (session == null || !session.isOpen()) { // hala added to Ensure session is opened before calling generateOrders().
-            SessionFactory sessionFactory = getSessionFactory();
-            session = sessionFactory.openSession();
-        }
-
-        session.beginTransaction(); // Start a transaction
-        try {// hala added try
-            // Create orders
-            Order one = new Order();
-            Order two = new Order();
-            Order three = new Order();
-            Order four = new Order();
-            Order five = new Order();
-            Order six = new Order();
-            Order seven = new Order();
-
-            // Create Order details
-            one.setDate(LocalDate.now());
-            one.setTotal_price(150);
-            one.setRestaurantName("Nazareth");
-
-            // Create Order details
-            two.setDate(LocalDate.parse("2025-02-07"));
-            two.setTotal_price(150);
-            two.setRestaurantName("Nazareth");
-            three.setDate(LocalDate.parse("2025-02-10"));
-            three.setTotal_price(150);
-            three.setRestaurantName("Nazareth");
-            four.setDate(LocalDate.parse("2025-03-16"));
-            four.setTotal_price(150);
-            four.setRestaurantName("Nazareth");
-            four.setCustomerEmail("lamisawawdi2003@gmail.com");
-            // Create specific order time
-            LocalDateTime customTime = LocalDateTime.now().plusHours(4);
-            four.setOrderTime(customTime);
-
-
-            // List of Orders to add
-            List<Order> newOrders = Arrays.asList(one, two, three, four);
-
-            // Fetch existing meals from the database
-            CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaQuery<Order> query = builder.createQuery(Order.class);
-            query.from(Order.class);
-            List<Order> existingMeals = session.createQuery(query).getResultList();
-
-            // Save customizations
-            session.save(one);
-            session.save(two);
-            session.save(three);
-            session.save(four);
-            session.save(five);
-
-            session.flush();
-            session.getTransaction().commit();
-
-        } catch (Exception e) {
-            // Rollback the transaction if any error occurs
-            if (session.getTransaction() != null) {
-                session.getTransaction().rollback();
-            }
-            e.printStackTrace();
-            throw new Exception("An error occurred while generating orders.", e);
-        } finally {
-            // Ensure the session is closed after the operation to avoid memory leaks
-            if (session != null && session.isOpen()) {
-                 session.close();
-            }
-        }
-
-
-    }
+//    private static void generateOrders() throws Exception {
+//        // Helper function to read image as byte[]
+//        if (session == null || !session.isOpen()) { // hala added to Ensure session is opened before calling generateOrders().
+//            SessionFactory sessionFactory = getSessionFactory();
+//            session = sessionFactory.openSession();
+//        }
+//
+//        session.beginTransaction(); // Start a transaction
+//        try {// hala added try
+//            // Create orders
+//            Order one = new Order();
+//            Order two = new Order();
+//            Order three = new Order();
+//            Order four = new Order();
+//            Order five = new Order();
+//            Order six = new Order();
+//            Order seven = new Order();
+//
+//            // Create Order details
+//            one.setDate(LocalDate.now());
+//            one.setTotal_price(150);
+//            one.setRestaurantName("Nazareth");
+//
+//            // Create Order details
+//            two.setDate(LocalDate.parse("2025-02-07"));
+//            two.setTotal_price(150);
+//            two.setRestaurantName("Nazareth");
+//            three.setDate(LocalDate.parse("2025-02-10"));
+//            three.setTotal_price(150);
+//            three.setRestaurantName("Nazareth");
+//            four.setDate(LocalDate.parse("2025-03-16"));
+//            four.setTotal_price(150);
+//            four.setRestaurantName("Nazareth");
+//            four.setCustomerEmail("lamisawawdi2003@gmail.com");
+//            // Create specific order time
+//            LocalDateTime customTime = LocalDateTime.now().plusHours(4);
+//            four.setOrderTime(customTime);
+//
+//
+//            // List of Orders to add
+//            List<Order> newOrders = Arrays.asList(one, two, three, four);
+//
+//            // Fetch existing meals from the database
+//            CriteriaBuilder builder = session.getCriteriaBuilder();
+//            CriteriaQuery<Order> query = builder.createQuery(Order.class);
+//            query.from(Order.class);
+//            List<Order> existingMeals = session.createQuery(query).getResultList();
+//
+//            // Save customizations
+//            session.save(one);
+//            session.save(two);
+//            session.save(three);
+//            session.save(four);
+//            session.save(five);
+//
+//            session.flush();
+//            session.getTransaction().commit();
+//
+//        } catch (Exception e) {
+//            // Rollback the transaction if any error occurs
+//            if (session.getTransaction() != null) {
+//                session.getTransaction().rollback();
+//            }
+//            e.printStackTrace();
+//            throw new Exception("An error occurred while generating orders.", e);
+//        } finally {
+//            // Ensure the session is closed after the operation to avoid memory leaks
+//            if (session != null && session.isOpen()) {
+//                 session.close();
+//            }
+//        }
+//
+//
+//    }
 
 
     private static void generateBasicUser() throws Exception {
@@ -182,13 +183,13 @@ public class App {
         session.beginTransaction(); // Start a transaction
         try {
             // Create orders
-            /*Users nagham = new Users();
+            Users nagham = new Users();
             nagham.setRole("CompanyManager");
             nagham.setEmail("naghammnsor@gmail.com");
             nagham.setPassword("NaghamYes");
             nagham.setUsername("naghamTheManager");
             nagham.setGender("other");
-            nagham.setAge(22);*/
+            nagham.setAge(22);
             Users shada = new Users();
             shada.setRole("Dietation");
             shada.setEmail("shadamazzawi@gmail.com");
@@ -200,7 +201,7 @@ public class App {
 
 
             // List of Orders to add
-            List<Users> newOrders = Arrays.asList(shada);
+            List<Users> newOrders = Arrays.asList(nagham,shada);
 
             // Fetch existing meals from the database
             CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -209,7 +210,7 @@ public class App {
             List<Users> existingMeals = session.createQuery(query).getResultList();
 
             // Save customizations
-            //session.save(nagham);
+            session.save(nagham);
             session.save(shada);
             session.flush();
             session.getTransaction().commit(); // Commit the transaction
@@ -237,8 +238,8 @@ public class App {
             session.beginTransaction();
 
 
-            LocalTime openingTime = LocalTime.of(10, 0); // 10:00 AM
-            LocalTime closingTime = LocalTime.of(22, 0); // 10:00 PM
+            LocalTime openingTime = LocalTime.of(0, 0); // 10:00 AM
+            LocalTime closingTime = LocalTime.of(23, 59); // 10:00 PM
 
             Restaurant nazareth = new Restaurant();
             nazareth.setRestaurantName("Nazareth");
@@ -261,27 +262,40 @@ public class App {
             telAviv.setOpeningTime(openingTime);
             telAviv.setClosingTime(closingTime);
 
+            Restaurant Sakhnin = new Restaurant();
+            Sakhnin.setRestaurantName("SAKHNIN");
+            Sakhnin.setImagePath("sakhnin.jpg");
+            Sakhnin.setPhoneNumber("345-678-9012");
+            Sakhnin.setOpeningTime(openingTime);
+            Sakhnin.setClosingTime(closingTime);
+
             List<Meal> meals = getAllMeals();
             int i = 0;
             List<Meal> nazarethMeals = new ArrayList<>();
             List<Meal> haifaMeals = new ArrayList<>();
             List<Meal> telavivMeals = new ArrayList<>();
+            List<Meal> sakhninMeals = new ArrayList<>();
             for (Meal meal : meals) {
-                if (i % 2 == 0)
+                if (i % 2 == 0){
                     nazarethMeals.add(meal);
-                if(i% 3 ==0)
+                    sakhninMeals.add(meal);
+                }
+                if(i% 3 ==0) {
                     haifaMeals.add(meal);
-                telavivMeals.add(meal);
+                    telavivMeals.add(meal);
+                }
                 i++;
             }
             telAviv.setMeals(telavivMeals);
             nazareth.setMeals(nazarethMeals);
             haifa.setMeals(haifaMeals);
+            Sakhnin.setMeals(sakhninMeals);
 
 
             session.save(nazareth);
             session.save(haifa);
             session.save(telAviv);
+            session.save(Sakhnin);
 
             session.flush();
             session.getTransaction().commit();
@@ -389,7 +403,7 @@ public class App {
             generateData();
             printAllData();
             //generateBasicUser();
-            printAllUsers();
+            //printAllUsers();
             //generateOrders();
 
             /*************************adan***************************/
@@ -411,7 +425,11 @@ public class App {
 
             // generateOrders();
             generateRestaurants();
-            generateTheComplains();
+            generateCompanyMeals();
+
+            generateOrders();
+
+            //generateTheComplains();
             initializeSampleTables();
             generateBasicUser1();
             // Register a shutdown hook

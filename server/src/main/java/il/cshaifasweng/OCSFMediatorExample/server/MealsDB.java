@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
@@ -19,6 +20,7 @@ public class MealsDB {
 
     private static Session session;
     public static List<Meal> meatlist;
+    public static List<Customization> customizationsList;
 
     static byte[] loadImage(String fileName) throws IOException {
         try (InputStream inputStream = App.class.getClassLoader().getResourceAsStream("images/" + fileName)) {
@@ -28,7 +30,9 @@ public class MealsDB {
             return inputStream.readAllBytes();
         }
     }
+
     public static void generateData() throws Exception {
+        customizationsList= new ArrayList<>();
         Transaction transaction = null;
         try {
             if (session == null || !session.isOpen()) {
@@ -74,6 +78,7 @@ public class MealsDB {
 
                 if (!isDuplicate) {
                     session.save(customization);
+                    customizationsList.add(customization);
                     System.out.println("Added new customization: " + customization.getName());
                 } else {
                     System.out.println("Duplicate customization skipped: " + customization.getName());
@@ -155,6 +160,63 @@ public class MealsDB {
                 session.close();
                 System.out.println("Session closed.");
             }
+        }
+    }
+
+    public static void generateCompanyMeals() throws Exception {
+        try (Session session = getSessionFactory().openSession()) {
+            session.beginTransaction();
+
+            // Check if company meals already exist to avoid duplicates
+            List<Meal> existingCompanyMeals = session.createQuery("FROM Meal WHERE isCompany = true", Meal.class).list();
+            if (!existingCompanyMeals.isEmpty()) {
+                System.out.println("Company meals already exist in the database.");
+                return;
+            }
+
+            // Create new company meals
+            Meal companyMeal1 = new Meal();
+            companyMeal1.setMealName("Company Burger");
+            companyMeal1.setDescription("Premium burger for corporate events");
+            companyMeal1.setPrice(29);
+            companyMeal1.setCompany(true);
+            companyMeal1.setDelivery(true);
+            companyMeal1.setCustomizations(customizationsList);
+            companyMeal1.setImage(loadImage("cheeseburger.jpg"));
+
+            Meal companyMeal2 = new Meal();
+            companyMeal2.setMealName("Executive Pizza");
+            companyMeal2.setDescription("Gourmet pizza for team meetings");
+            companyMeal2.setPrice(39);
+            companyMeal2.setCompany(true);
+            companyMeal2.setDelivery(false);
+            companyMeal2.setCustomizations(customizationsList);
+            companyMeal2.setImage(loadImage("pizza.jpg"));
+
+            // Save company meals to the database
+            session.persist(companyMeal1);
+            session.persist(companyMeal2);
+
+            // Fetch existing meals from the database
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Restaurant> query = builder.createQuery(Restaurant.class);
+            query.from(Restaurant.class);
+            List<Restaurant> restaurants = session.createQuery(query).getResultList();
+
+            // Add company meals to each restaurant
+            for (Restaurant restaurant : restaurants) {
+                List<Meal> currentMeals = restaurant.getMeals();
+                currentMeals.add(companyMeal1);
+                currentMeals.add(companyMeal2);
+                restaurant.setMeals(currentMeals);
+                session.update(restaurant); // Update the restaurant entity
+            }
+
+            session.getTransaction().commit();
+            System.out.println("Successfully generated company meals and associated them with all restaurants.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("Failed to generate company meals: " + e.getMessage(), e);
         }
     }
     /*********************************new get all meal*************************************/
@@ -505,6 +567,7 @@ public class MealsDB {
         // Execute the query and get the restaurant
         Restaurant Branch = session.createQuery(query).uniqueResult();
 
+        // Initialize the meals collection before closing the session
         if (Branch != null) {
             Hibernate.initialize(Branch.getMeals());
             meals = Branch.getMeals();
@@ -682,6 +745,8 @@ public class MealsDB {
     public static String deleteMeal(int mealId) {
         System.out.println("now I am in the function");
         String mealName = null;
+        Transaction tx = null;
+
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
 
@@ -875,7 +940,7 @@ public class MealsDB {
             Meal newMealEntity = new Meal();
             newMealEntity.setName(newMeal.getMealName());
             newMealEntity.setDescription(newMeal.getMealDisc());
-            newMealEntity.setPrice(Double.parseDouble(newMeal.getPrice()));
+            newMealEntity.setPrice(Integer.parseInt(newMeal.getPrice()));
             newMealEntity.setImage(newMeal.getImage());
             newMealEntity.setDelivery(true);
             session.persist(newMealEntity);

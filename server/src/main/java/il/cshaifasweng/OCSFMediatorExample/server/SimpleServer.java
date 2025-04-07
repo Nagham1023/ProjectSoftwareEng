@@ -300,7 +300,7 @@ public class SimpleServer extends AbstractServer {
             mealEvent messagee= new mealEvent(UpdateMealEvent.getMealName(), UpdateMealEvent.getPrice(), String.valueOf(addResult.getId()),addResult);
             sendToAll(messagee);
             //if (addResult != null)
-                //sendToAll("added");
+            //sendToAll("added");
         }
         else if (msg instanceof UpdateMealRequest) {
             //here we're adding new meal !!
@@ -309,7 +309,7 @@ public class SimpleServer extends AbstractServer {
             System.out.println("Added new UpdateMealRequest to the database");
             //sendToAll(msg);
             //if (Objects.equals(addResult, "added")) {
-                sendToAll(msg);
+            sendToAll(msg);
             //}
             //else
 
@@ -507,45 +507,45 @@ public class SimpleServer extends AbstractServer {
 
 
 
-                if (cc == null) {
+                    if (cc == null) {
 
 
-                    if (personalDetailsDB == null) {
-                        //System.out.println("the personal details is null and cc is null");
-                        newOrder.setCreditCard_num(newCC.getCardNumber());
-                        paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
-                        addCreditCardDetails(newCC, newPD,newOrder);
+                        if (personalDetailsDB == null) {
+                            //System.out.println("the personal details is null and cc is null");
+                            newOrder.setCreditCard_num(newCC.getCardNumber());
+                            paymentCheck.setResponse("Added the personal details and the Credit Card to the database");
+                            addCreditCardDetails(newCC, newPD,newOrder);
+                        }
+                        else {
+                            //System.out.println("the personal details is already added but cc is null");
+                            paymentCheck.setResponse("Added the Credit Card to the database.");
+
+                            newOrder.setCreditCard_num(newCC.getCardNumber());
+                            addCreditCardToExistingPersonalDetails(newCC, personalDetailsDB,newOrder);
+                        }
+                        client.sendToClient(paymentCheck);
+                    } else {
+                        //System.out.println("not new credit card");
+                        if(personalDetailsDB == null) {
+                            //System.out.println("personal details null but cc is not null");
+                            //System.out.println("new personal details");
+                            newOrder.setCreditCard_num(cc.getCardNumber());
+
+                            paymentCheck.setResponse("Added the personal details to the database");
+                            addPersonalDetailsAndAssociateWithCreditCard(newPD, cc,newOrder);
+                        }
+
+                        else {
+                            //System.out.println("not null both");
+                            paymentCheck.setResponse("Updated the personal details to the database.");
+
+                            newOrder.setCreditCard_num(cc.getCardNumber());
+
+                            addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc, newOrder);
+                        }
+                        client.sendToClient(paymentCheck);
                     }
-                    else {
-                        //System.out.println("the personal details is already added but cc is null");
-                        paymentCheck.setResponse("Added the Credit Card to the database.");
-
-                        newOrder.setCreditCard_num(newCC.getCardNumber());
-                        addCreditCardToExistingPersonalDetails(newCC, personalDetailsDB,newOrder);
-                    }
-                    client.sendToClient(paymentCheck);
-                } else {
-                    //System.out.println("not new credit card");
-                    if(personalDetailsDB == null) {
-                        //System.out.println("personal details null but cc is not null");
-                        //System.out.println("new personal details");
-                        newOrder.setCreditCard_num(cc.getCardNumber());
-
-                        paymentCheck.setResponse("Added the personal details to the database");
-                        addPersonalDetailsAndAssociateWithCreditCard(newPD, cc,newOrder);
-                    }
-
-                    else {
-                        //System.out.println("not null both");
-                        paymentCheck.setResponse("Updated the personal details to the database.");
-
-                        newOrder.setCreditCard_num(cc.getCardNumber());
-
-                        addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc, newOrder);
-                    }
-                    client.sendToClient(paymentCheck);
                 }
-            }
                 else {
                     ReservationSave newReservation= ((PaymentCheck) msg).getReservationEvent();
                     boolean result;
@@ -648,7 +648,7 @@ public class SimpleServer extends AbstractServer {
         else if (msg instanceof CancelOrderEvent) {
             CancelOrderEvent cancelEvent = (CancelOrderEvent) msg;
             int orderNumber = Integer.parseInt(cancelEvent.getOrderNumber());
-            Order order = OrdersDB.getOrderById(orderNumber);
+            Order order = OrdersDB.OrderById(orderNumber);
             String email= cancelEvent.getCustomerEmail();
 
             try {
@@ -657,7 +657,14 @@ public class SimpleServer extends AbstractServer {
                     event.setStatus("Order not found");
                 } else {
                     if (order.getCustomerEmail().equals(email)) {
-                        event.setStatus("Order found");
+                        if(order.getOrderStatus().equals("Cancelled")) {
+                            event.setStatus("Cancelled before");
+                        }
+                        else {
+                            getOrderById(orderNumber);
+                            event.setStatus("Order found");
+                        }
+
                     }
                     else {
                         event.setStatus("Order not found with email: " + email);
@@ -850,11 +857,11 @@ public class SimpleServer extends AbstractServer {
                     break;
                 case "deliveryReport":
                     OrderTypeReport deliveryReport = new OrderTypeReport();
-                    response = deliveryReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "DELIVERY");
+                    response = deliveryReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "Delivery");
                     break;
                 case "pickupReport":
                     OrderTypeReport pickupReport = new OrderTypeReport();
-                    response = pickupReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "PICKUP");
+                    response = pickupReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "Pickup");
                     break;
                 case "allOrdersReport":
                     OrderTypeReport allOrdersReport = new OrderTypeReport();
@@ -923,18 +930,19 @@ public class SimpleServer extends AbstractServer {
                 // Retrieve current meals based on branch name
                 List<Meal> currentMeals;
 
-                if (options.getBranchName().toLowerCase().equals("all")) {
+                if (options.getBranchName().equals("ALL")) {
                     currentMeals = getAllMeals();
-                } else {
+                }
+                else{
                     currentMeals = getRestaurantByName(options.getBranchName()).getMeals();
                 }
                 System.out.println("Current meals for branch " + options.getBranchName() + ": " + currentMeals.size());
 
                 // Handle reset option: Send all meals if no filters are applied
-                if (options.getCustomizationNames().isEmpty() && options.getRestaurantNames().isEmpty()||(options.getBranchName().toLowerCase().equals("all")&&options.getCustomizationNames().isEmpty())) {
+                if (options.getCustomizationNames().isEmpty() && options.getRestaurantNames().isEmpty()) {
                     System.out.println("No filters applied. Sending all meals.");
                     try {
-                        client.sendToClient(new MealsList(currentMeals));
+                        client.sendToClient(currentMeals);
                         return;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -1009,7 +1017,7 @@ public class SimpleServer extends AbstractServer {
                     System.out.println("Error sending meals to client.");
                     e.printStackTrace();
                 }
-                System.out.println("*************************************");
+                System.out.println("*");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -1063,7 +1071,7 @@ public class SimpleServer extends AbstractServer {
                     sendToAll(msg);
 
                 } else{
-                    MealUpdateRequest req = new MealUpdateRequest();
+                    MealUpdateRequest req= new MealUpdateRequest();
                     req=AddUpdatePriceRequest((updatePrice) msg);
                     client.sendToClient(req);
                     sendToAll(req);
@@ -2029,7 +2037,7 @@ public class SimpleServer extends AbstractServer {
             // Get reservation by ID
             ReservationSave reservationToCancel = session.get(ReservationSave.class, reservationId);
 
-        // Validate reservation exists and name matches
+            // Validate reservation exists and name matches
             if (reservationToCancel == null) {
                 return "Error: No reservation found with ID " + reservationId;
             }

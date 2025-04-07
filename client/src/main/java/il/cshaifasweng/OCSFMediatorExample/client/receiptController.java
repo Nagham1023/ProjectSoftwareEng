@@ -14,6 +14,8 @@ import javafx.scene.text.TextFlow;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import static il.cshaifasweng.OCSFMediatorExample.client.CreditDetailsController.done_Order;
@@ -67,8 +69,11 @@ public class receiptController {
         String subject = "Order Confirmation - Order #" + orderNumber;
 
         // Format the date
+        LocalDateTime orderTime = done_Order.getOrderTime();
+        Date date = Date.from(orderTime.atZone(ZoneId.systemDefault()).toInstant());
+
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String currentDate = dateFormat.format(new Date());
+        String orderDate = dateFormat.format(date);
 
         // Construct the body of the email
         StringBuilder body = new StringBuilder();
@@ -76,7 +81,7 @@ public class receiptController {
         body.append("Thank you for your order at ").append(restaurantName).append("!\n\n");
         body.append("Here are the details of your order:\n");
         body.append("Order Number: ").append(orderNumber).append("\n");
-        body.append("Order Date: ").append(currentDate).append("\n\n");
+        body.append("Order Date: ").append(orderDate).append("\n\n");
         body.append("Meals Ordered:\n");
 
         for (String meal : mealsOrdered) {
