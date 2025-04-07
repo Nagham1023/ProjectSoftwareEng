@@ -480,6 +480,13 @@ public class UsersDB {
             yousef.setUsername("ceo");
             yousef.setGender("male");
             yousef.setAge(24);
+            Users shada = new Users();
+            shada.setRole("Dietation");
+            shada.setEmail("shadamazzawi@gmail.com");
+            shada.setPassword("123");
+            shada.setUsername("shada");
+            shada.setGender("other");
+            shada.setAge(22);
             if (!isUserExists("naghamTheManager") ) {
 
                 session.save(nagham);
@@ -497,6 +504,10 @@ public class UsersDB {
             if (!isUserExists("ceo") ) {
                 session.save(yousef);
                 System.out.println("User has been created: " + yousef.getUsername());
+            }
+            if (!isUserExists("shada") ) {
+                session.save(shada);
+                System.out.println("User has been created: " + shada.getUsername());
             }
             session.flush();
             session.getTransaction().commit(); // Commit the transaction

@@ -128,8 +128,11 @@ public class RestaurantListController {
         Label phoneLabel = new Label("Phone: " + restaurant.getPhoneNumber());
         phoneLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: #832018;");
 
+        Label description = new Label("Opening hour ='" + restaurant.getOpeningTime() + " - " +"Closing hour= '"+ restaurant.getClosingTime());
+        description.setStyle("-fx-font-size: 16px; -fx-text-fill: #832018;");
+
         // Add details to the VBox
-        detailsVBox.getChildren().addAll(nameLabel, phoneLabel);
+        detailsVBox.getChildren().addAll(nameLabel, phoneLabel, description);
 
         // Add image and details to the restaurant row
         restaurantRow.getChildren().addAll(imageView, detailsVBox);
@@ -154,7 +157,7 @@ public class RestaurantListController {
         System.out.println("Opening menu for " + restaurant.getRestaurantName());
     }
     public static String getBranchName(){
-            return branchName;
+        return branchName;
     }
     @FXML
     void backToHome2() throws IOException {

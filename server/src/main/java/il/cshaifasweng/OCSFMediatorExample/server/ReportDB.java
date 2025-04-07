@@ -8,7 +8,9 @@ import org.hibernate.SessionFactory;
 
 import javax.persistence.criteria.*;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
 
@@ -33,21 +35,18 @@ public class ReportDB {
 
             // CriteriaBuilder and Root setup
             CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaQuery<Object[]> query = builder.createQuery(Object[].class); // Use Object[] for array results
+            CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
             Root<Order> root = query.from(Order.class);
 
-            // Period selection (MONTH for YEARLY, DAY for MONTHLY)
-            Expression<Integer> periodExpression;
-            if (timeFrame == TimeFrame.YEARLY) {
-                periodExpression = builder.function("MONTH", Integer.class, root.get("date")); // Group by month for yearly report
-            } else { // MONTHLY
-                periodExpression = builder.function("DAY", Integer.class, root.get("date")); // Group by day for monthly report
-            }
+            // Period selection
+            Expression<Integer> periodExpression = timeFrame == TimeFrame.YEARLY
+                    ? builder.function("MONTH", Integer.class, root.get("date"))
+                    : builder.function("DAY", Integer.class, root.get("date"));
 
-            // Sum of revenue
-            Expression<Double> revenueSum = builder.sum(root.get("total_price"));
+            // Sum as Long for integer total_price
+            Expression<Long> revenueSum = builder.sum(root.get("total_price"));
 
-            // Year predicate
+            // Date predicates
             Predicate yearPredicate = builder.equal(
                     builder.function("YEAR", Integer.class, root.get("date")),
                     month.getYear()
@@ -63,38 +62,57 @@ public class ReportDB {
                 finalPredicate = builder.and(yearPredicate, monthPredicate);
             }
 
-            // Restaurant name predicate
-            Predicate restaurantPredicate = builder.equal(root.get("restaurantName"), restaurantName);
-            finalPredicate = builder.and(finalPredicate, restaurantPredicate);
-
-            // Apply where clause
-            query.select(builder.array(periodExpression, revenueSum)); // Select array of period and revenue
-            query.where(finalPredicate);
-
-            // Group and order
-            query.groupBy(periodExpression);
-            query.orderBy(builder.asc(periodExpression));
-
-            // Execute query
-            List<Object[]> results = session.createQuery(query).getResultList();
-
-            // Build the report
-            reportBuilder.append("Revenue Report - ");
-            reportBuilder.append(timeFrame == TimeFrame.MONTHLY ? "Daily\n\n" : "Yearly\n\n");
-
-            if (results.isEmpty()) {
-                reportBuilder.append("No data found for the specified criteria.\n");
-            } else {
-                for (Object[] row : results) {
-                    reportBuilder
-                            .append(timeFrame == TimeFrame.MONTHLY ? "Day " : "Month ")
-                            .append(row[0]).append(": $").append(row[1]).append("\n");
-                }
-
+            // Handle "ALL" restaurants case
+            if (restaurantName != null && !"ALL".equalsIgnoreCase(restaurantName)) {
+                Predicate restaurantPredicate = builder.equal(root.get("restaurantName"), restaurantName);
+                finalPredicate = builder.and(finalPredicate, restaurantPredicate);
             }
 
+            // Build query
+            query.multiselect(periodExpression, revenueSum)
+                    .where(finalPredicate)
+                    .groupBy(periodExpression)
+                    .orderBy(builder.asc(periodExpression));
 
-            // Commit transaction
+            List<Object[]> results = session.createQuery(query).getResultList();
+
+            // Build report header
+            reportBuilder.append("Revenue Report - ")
+                    .append(timeFrame == TimeFrame.MONTHLY ? "Daily\n" : "Yearly\n")
+                    .append("Period: ").append(month.getMonth()).append(" ").append(month.getYear())
+                    .append("\nRestaurant: ")
+                    .append("ALL".equalsIgnoreCase(restaurantName) ? "All Restaurants" : restaurantName)
+                    .append("\n\n");
+
+            // Initialize complete period data
+            Map<Integer, Long> periodData = new LinkedHashMap<>();
+            if(timeFrame == TimeFrame.MONTHLY) {
+                int daysInMonth = month.lengthOfMonth();
+                for(int day = 1; day <= daysInMonth; day++) {
+                    periodData.put(day, 0L);
+                }
+            } else {
+                for(int m = 1; m <= 12; m++) {
+                    periodData.put(m, 0L);
+                }
+            }
+
+            // Fill with actual data
+            results.forEach(row -> {
+                Integer period = (Integer) row[0];
+                Long revenue = (Long) row[1];
+                periodData.put(period, revenue);
+            });
+
+            // Build report lines
+            periodData.forEach((period, revenue) -> {
+                reportBuilder.append(timeFrame == TimeFrame.MONTHLY ? "Day " : "Month ")
+                        .append(period)
+                        .append(": $")
+                        .append(revenue)
+                        .append("\n");
+            });
+
             session.getTransaction().commit();
 
         } catch (Exception e) {
@@ -121,11 +139,7 @@ public class ReportDB {
         Session session = null;
 
         try {
-            // Open a new session
-            SessionFactory sessionFactory = getSessionFactory();
-            session = sessionFactory.openSession();
-
-            // Begin transaction
+            session = getSessionFactory().openSession();
             session.beginTransaction();
 
             // CriteriaBuilder and Root setup
@@ -133,17 +147,12 @@ public class ReportDB {
             CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
             Root<Order> root = query.from(Order.class);
 
-            // Period selection (MONTH for YEARLY, DAY for MONTHLY)
-            Expression<Integer> periodExpression;
-            if (timeFrame == TimeFrame.YEARLY) {
-                periodExpression = builder.function("MONTH", Integer.class, root.get("date"));
-            } else { // MONTHLY
-                periodExpression = builder.function("DAY", Integer.class, root.get("date"));
-            }
+            // 1. Period selection
+            Expression<Integer> periodExpression = timeFrame == TimeFrame.YEARLY
+                    ? builder.function("MONTH", Integer.class, root.get("date"))
+                    : builder.function("DAY", Integer.class, root.get("date"));
 
-            Expression<String> orderTypeExpression = root.get("orderType");
-            Expression<Long> orderCount = builder.count(root);
-
+            // 2. Base predicates
             Predicate yearPredicate = builder.equal(
                     builder.function("YEAR", Integer.class, root.get("date")),
                     month.getYear()
@@ -155,49 +164,78 @@ public class ReportDB {
                         builder.function("MONTH", Integer.class, root.get("date")),
                         month.getMonthValue()
                 );
-                finalPredicate = builder.and(yearPredicate, monthPredicate);
+                finalPredicate = builder.and(finalPredicate, monthPredicate);
             }
 
-            Predicate restaurantPredicate = builder.equal(root.get("restaurantName"), restaurantName);
-            finalPredicate = builder.and(finalPredicate, restaurantPredicate);
-
-            // **NEW: Order Type Filtering**
-            if (orderTypeFilter != null && !orderTypeFilter.equalsIgnoreCase("ALL")) {
-                Predicate orderTypePredicate = builder.equal(root.get("orderType"), orderTypeFilter);
-                finalPredicate = builder.and(finalPredicate, orderTypePredicate);
+            // 3. Restaurant filter
+            if (!"ALL".equalsIgnoreCase(restaurantName)) {
+                Predicate restaurantPredicate = builder.equal(
+                        builder.lower(root.get("restaurantName")),
+                        restaurantName.toLowerCase()
+                );
+                finalPredicate = builder.and(finalPredicate, restaurantPredicate);
             }
 
-            query.multiselect(periodExpression, orderTypeExpression, orderCount);
-            query.where(finalPredicate);
-            query.groupBy(periodExpression, orderTypeExpression);
-            query.orderBy(builder.asc(periodExpression));
+            // 4. Order type filter (NEW)
+            if (orderTypeFilter != null && !"ALL".equalsIgnoreCase(orderTypeFilter)) {
+                Predicate typePredicate = builder.equal(
+                        builder.lower(root.get("orderType")),
+                        orderTypeFilter.toLowerCase()
+                );
+                finalPredicate = builder.and(finalPredicate, typePredicate);
+            }
+
+            // 5. Build query
+            query.multiselect(periodExpression, builder.count(root))
+                    .where(finalPredicate)
+                    .groupBy(periodExpression)
+                    .orderBy(builder.asc(periodExpression));
 
             List<Object[]> results = session.createQuery(query).getResultList();
 
-            reportBuilder.append("Order Type Report - ");
-            reportBuilder.append(timeFrame == TimeFrame.MONTHLY ? "Daily\n\n" : "Yearly\n\n");
+            // 6. Build report header
+            String address= orderTypeFilter +" Count Report - ";
+            reportBuilder.append(address)
+                    .append(timeFrame == TimeFrame.YEARLY ? "Yearly" : "Monthly")
+                    .append("\nPeriod: ")
+                    .append(month.getMonth().toString().toUpperCase())
+                    .append(" ")
+                    .append(month.getYear())
+                    .append("\nRestaurant: ")
+                    .append("ALL".equalsIgnoreCase(restaurantName) ? "All Restaurants" : restaurantName)
+                    .append("\nOrder Type: ")
+                    .append("ALL".equalsIgnoreCase(orderTypeFilter) ? "All Types" : orderTypeFilter)
+                    .append("\n\n");
 
-            if (results.isEmpty()) {
-                reportBuilder.append("No data found for the specified criteria.\n");
+            // 7. Initialize complete period data
+            Map<Integer, Long> periodData = new LinkedHashMap<>();
+            if(timeFrame == TimeFrame.YEARLY) {
+                for(int m = 1; m <= 12; m++) periodData.put(m, 0L);
             } else {
-                for (Object[] row : results) {
-                    reportBuilder.append(timeFrame == TimeFrame.MONTHLY ? "Day " : "Month ")
-                            .append(row[0]).append(", Order Type: ").append(row[1])
-                            .append(", Orders Count: ").append(row[2]).append("\n");
-                }
+                int daysInMonth = month.lengthOfMonth();
+                for(int d = 1; d <= daysInMonth; d++) periodData.put(d, 0L);
             }
+
+            // 8. Fill with actual data
+            results.forEach(row -> periodData.put((Integer) row[0], (Long) row[1]));
+
+            // 9. Format output lines
+            periodData.forEach((period, count) -> {
+                String periodLabel = timeFrame == TimeFrame.YEARLY ? "Month " : "Day ";
+                reportBuilder.append(periodLabel)
+                        .append(period)
+                        .append(": $")
+                        .append(count)
+                        .append("\n");
+            });
 
             session.getTransaction().commit();
 
         } catch (Exception e) {
-            if (session != null && session.getTransaction() != null) {
-                session.getTransaction().rollback();
-            }
-            return "Error generating report: " + e.getMessage();
+            if (session != null) session.getTransaction().rollback();
+            return "Error: " + e.getMessage();
         } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
+            if (session != null) session.close();
         }
 
         return reportBuilder.toString();

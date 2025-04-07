@@ -16,6 +16,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -141,7 +143,15 @@ public class DeliveryPageController {
             showAlert("Please enter a valid address.");
             return;
         }
+        done_Order.setDate(LocalDate.now());
+        String selectedTime = orderTimeComboBox.getValue();
+        LocalDate today = LocalDate.now();
 
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        LocalTime time = LocalTime.parse(selectedTime, timeFormatter);
+
+        LocalDateTime dateTime = LocalDateTime.of(today, time);
+        done_Order.setOrderTime(dateTime);
         App.setRoot("CreditDetails");
     }
     private boolean isDeliveryOrPickupSelected() {
@@ -171,6 +181,15 @@ public class DeliveryPageController {
             showAlert("Please enter a valid address.");
             return;
         }
+        done_Order.setDate(LocalDate.now());
+        String selectedTime = orderTimeComboBox.getValue();
+        LocalDate today = LocalDate.now();
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        LocalTime time = LocalTime.parse(selectedTime, timeFormatter);
+
+        LocalDateTime dateTime = LocalDateTime.of(today, time);
+        done_Order.setOrderTime(dateTime);
         App.setRoot("CreditDetails");
     }
 
@@ -192,6 +211,15 @@ public class DeliveryPageController {
             showAlert("Please enter a valid address.");
             return;
         }
+        done_Order.setDate(LocalDate.now());
+        String selectedTime = orderTimeComboBox.getValue();
+        LocalDate today = LocalDate.now();
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        LocalTime time = LocalTime.parse(selectedTime, timeFormatter);
+
+        LocalDateTime dateTime = LocalDateTime.of(today, time);
+        done_Order.setOrderTime(dateTime);
         App.setRoot("CreditDetails");
     }
 

@@ -210,7 +210,7 @@ public class workerReservation {
             // Clear any existing buttons for available reservations
             anchorPane.getChildren().removeIf(node -> node.getId() != null && node.getId().equals("reservationButton"));
 
-            if (availableReservations.isEmpty() || availableReservations.getFirst().getReservationDateTime() == null) {
+            if (availableReservations.isEmpty() || availableReservations.get(0).getReservationDateTime() == null) {
                 // Show an alert if no available reservations are found
                 showAlert("No Available Reservations", "There are no available reservations for this date and restaurant.");
             } else {

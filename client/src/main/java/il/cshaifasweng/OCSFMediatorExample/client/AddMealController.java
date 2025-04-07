@@ -102,14 +102,21 @@ public class AddMealController {
     }
     @FXML
     public void onAddMealClicked() throws IOException {
+        if (!validateFields()) {
+            return; // Stop if validation fails
+        }
         byte[] imageBytes = imageToByteArray(mealImageView.getImage());
         //mealEvent ME = new mealEvent(mealNameField.getText(),mealDescriptionField.getText(),mealPriceField.getText(),imageBytes);
         MealEventUpgraded ME= new MealEventUpgraded(mealNameField.getText(), mealDescriptionField.getText(), mealPriceField.getText(), imageBytes, restaurant_name.getValue().equals("ALL"), chosenCustomizationNames, chosenRestaurantsNames);
 
-            SimpleClient client;
+        SimpleClient client;
         client = SimpleClient.getClient();
         // Convert byte[] to InputStream
+        try{
         client.sendToServer(ME);
+        } catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Subscribe
@@ -403,6 +410,85 @@ public class AddMealController {
             errorLabel.setText(message);
             errorLabel.setStyle("-fx-text-fill: #760b0b; -fx-font-weight: bold;");
         });
+    }
+
+    /// //////////*******************validation********************************************///
+    // Add the following method to handle validation
+    private boolean validateFields() {
+        boolean isValid = true;
+        StringBuilder errorMessage = new StringBuilder();
+
+        // Validate meal name
+        if (mealNameField.getText() == null || mealNameField.getText().trim().isEmpty()) {
+            errorMessage.append("Meal name is required.\n");
+            isValid = false;
+        }
+
+        // Validate meal description
+        if (mealDescriptionField.getText() == null || mealDescriptionField.getText().trim().isEmpty()) {
+            errorMessage.append("Meal description is required.\n");
+            isValid = false;
+        }
+
+        // Validate meal price
+        String priceText = mealPriceField.getText().trim();
+        if (priceText.isEmpty()) {
+            errorMessage.append("Meal price is required.\n");
+            isValid = false;
+        } else {
+            try {
+                int price = Integer.parseInt(priceText);
+                if (price <= 0) {
+                    errorMessage.append("Price must be a positive number.\n");
+                    isValid = false;
+                }
+            } catch (NumberFormatException e) {
+                errorMessage.append("Invalid price format. Please enter a valid number.\n");
+                isValid = false;
+            }
+        }
+
+        // Validate image
+        if (mealImageView.getImage() == null) {
+            errorMessage.append("Please select an image.\n");
+            isValid = false;
+        }
+
+        // Validate customizations
+        if (chosenCustomizationNames.isEmpty()) {
+            errorMessage.append("At least one customization is required.\n");
+            isValid = false;
+        }
+
+        // Validate restaurants
+        String selectedRestaurant = restaurant_name.getValue();
+        if (selectedRestaurant == null) {
+            errorMessage.append("Please select a restaurant option.\n");
+            isValid = false;
+        } else {
+            if (selectedRestaurant.equals("ALL")) {
+                // "ALL" selected, no need for specific restaurants
+            } else {
+                if (chosenRestaurantsNames.isEmpty()) {
+                    errorMessage.append("At least one restaurant must be selected unless 'ALL' is chosen.\n");
+                    isValid = false;
+                }
+            }
+        }
+
+        // Display errors if any
+        if (!isValid) {
+            Platform.runLater(() -> {
+                feedbackLabel.setText(errorMessage.toString());
+                feedbackLabel.setStyle("-fx-text-fill: red;");
+            });
+        } else {
+            Platform.runLater(() -> {
+                feedbackLabel.setText("");
+            });
+        }
+
+        return isValid;
     }
 
 

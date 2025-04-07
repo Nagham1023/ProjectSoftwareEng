@@ -68,12 +68,12 @@ public class OrderCancellationController {
             if (cancelOrderEvent.getStatus().startsWith("Order not found with email:")) {
                 Platform.runLater(() -> {
                     try {
-                idErrorLabel.setVisible(true);
-                idErrorLabel.setText(cancelOrderEvent.getStatus());}
+                        idErrorLabel.setVisible(true);
+                        idErrorLabel.setText(cancelOrderEvent.getStatus());}
                     catch (Exception e) {
-                    e.printStackTrace();}
+                        e.printStackTrace();}
                 });
-            } else{
+            } else if (cancelOrderEvent.getStatus().startsWith("Order found")) {
 
             //display a success message
             Platform.runLater(() -> {
@@ -84,15 +84,23 @@ public class OrderCancellationController {
                             + "If you didn't request this, please ignore this email.\n\n"
                             + "Best regards,\nMamas-Restaurant Team";
 
-                    // Call EmailSender to send the email
-                    //EmailSender.sendEmail(response.getEmail(), subject, body);
                     EmailSender.sendEmail(subject,body, cancelOrderEvent.getOrder().getCustomerEmail());
+                    CancelButton.getScene().getWindow().hide();
                 } catch (Exception e) {
                     // Handle email sending failure
                     System.out.println("handleCancelOrderResponse");
                     e.printStackTrace();
                 }
             });
+            }
+            else {
+                Platform.runLater(() -> {
+                    try {
+                        idErrorLabel.setVisible(true);
+                        idErrorLabel.setText("this order has been cancelled before");}
+                    catch (Exception e) {
+                        e.printStackTrace();}
+                });
             }
         } else {
             // Handle case when order was not found

@@ -323,7 +323,12 @@ public class menu_controller {
         VBox detailsBox = new VBox(5);
         Label nameLabel = new Label(meal.getName());
         nameLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-        Label descriptionLabel = new Label(meal.getDescription());
+        String addition= "Special meal";
+        if(meal.isCompany())
+            addition = "Company meal";
+
+        String description= meal.getDescription() + "\n" + "This meal is - "+ addition;
+        Label descriptionLabel = new Label(description);
         descriptionLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #757575;");
         detailsBox.getChildren().addAll(nameLabel, descriptionLabel);
 
@@ -355,14 +360,7 @@ public class menu_controller {
             addToCartBTN.setStyle("-fx-background-color: #222222; -fx-text-fill: #f3f3f3; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
             addToCartBTN.setOnAction(event -> openMealPopup(meal));
             mealRow.getChildren().addAll(imageView, detailsBox, priceLabel, addToCartBTN);
-            /*
-            addToCartBTN.setOnAction(event ->
-                    {
-                        openMealPopup(meal);
-                    }
-            );
-            mealRow.getChildren().addAll(imageView, detailsBox, priceLabel);
-            */
+
         }
 
 

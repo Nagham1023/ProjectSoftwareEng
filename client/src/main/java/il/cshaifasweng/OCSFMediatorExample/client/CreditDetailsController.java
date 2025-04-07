@@ -387,26 +387,28 @@ public class CreditDetailsController {
     public void onPaymentResponse(PaymentCheck creditCardCheck) {
         // This method gets called when a CreditCardCheck object is posted to the EventBus
         if(creditCardCheck.getMode().equals("Order")){
-        Platform.runLater(() -> {
-            System.out.println("Credit card is valid." + creditCardCheck.getOrder());
-            errorLabel.setText(creditCardCheck.getResponse());
-            done_Order = creditCardCheck.getOrder();
-            try {
-                App.setRoot("receipt");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
+            Platform.runLater(() -> {
+
+                System.out.println("Credit card is valid." + creditCardCheck.getOrder());
+                errorLabel.setText(creditCardCheck.getResponse());
+                done_Order = creditCardCheck.getOrder();
+                try {
+                    App.setRoot("receipt");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } else {
 
             Platform.runLater(() -> {
+                errorLabel.setText(creditCardCheck.getResponse());
                 try {
                     //errorLabel.setText(creditCardCheck.getResponse());
                     errorLabel.setText(creditCardCheck.getResponse());
                     done_Reservation = creditCardCheck.getReservationEvent();
                     if(!(creditCardCheck.getResponse().equals("Payment Failed"))){
-                        sendReservationConfirmationEmail(CreditDetailsController.personalDetails,done_Reservation.getReservationSaveID(), done_Reservation.getRestaurantName(),done_Reservation.getSeats() );
-                        App.setRoot("mainScreen");
+                    sendReservationConfirmationEmail(CreditDetailsController.personalDetails,done_Reservation.getReservationSaveID(), done_Reservation.getRestaurantName(),done_Reservation.getSeats() );
+                    App.setRoot("mainScreen");
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -423,11 +425,9 @@ public class CreditDetailsController {
         String cvv = cvvnumber.getText().trim();
         String expiryDateStr = monthYearComboBox.getValue();  // the expiry date is selected from a ComboBox and is in the format "MM/yyyy"
         if(mode.equals("Order")){
-            done_Order.setDate(LocalDate.now());
-            done_Order.setOrderTime(LocalDateTime.now());
             if(done_Order.getOrderType().equals("Delivery"))
             {
-                done_Order.setTotal_price(done_Order.getTotal_price()+deliveryPrice);
+             done_Order.setTotal_price(done_Order.getTotal_price()+deliveryPrice);
             }
         }
         // Attempt to validate and then directly use the expiry date string

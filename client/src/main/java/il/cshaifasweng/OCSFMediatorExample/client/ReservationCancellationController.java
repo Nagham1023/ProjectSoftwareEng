@@ -61,7 +61,7 @@ public class ReservationCancellationController {
 
         }   catch (NumberFormatException e) {
             statusLabel.setText("Reservation ID must be a number");
-    }  catch (Exception e) {
+        }  catch (Exception e) {
             statusLabel.setText("Error: " + e.getMessage());
         }
     }
@@ -101,7 +101,13 @@ public class ReservationCancellationController {
     @FXML
     void backToHome(ActionEvent event) throws IOException {
         EventBus.getDefault().unregister(this);
-        App.setRoot("mainScreen");
+        Platform.runLater(() -> {
+            try {
+                App.setRoot("mainScreen");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
 }
