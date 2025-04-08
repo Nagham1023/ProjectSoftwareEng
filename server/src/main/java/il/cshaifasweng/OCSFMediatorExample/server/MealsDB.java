@@ -1027,6 +1027,7 @@ public class MealsDB {
     }
 
     public static Meal AddNewMealUpgraded(MealEventUpgraded newMeal) {
+
         Session session = null;
         Transaction transaction = null;
         try {
@@ -1060,7 +1061,6 @@ public class MealsDB {
             newMealEntity.setDelivery(true);
             session.persist(newMealEntity);
             session.flush(); // Ensure ID is generated
-
             // Add new customizations
             for (String customizationName : newMeal.getCustomizationList()) {
                 // Case-insensitive search
@@ -1120,6 +1120,26 @@ public class MealsDB {
             transaction.commit();
 
             newMeal.setId(String.valueOf(newMealEntity.getId()));
+
+            if (!allMeals.contains(newMealEntity)) {
+                allMeals.add(newMealEntity);
+            }
+            for (String branchName : newMeal.getBranch()) {
+                if ("ALL".equalsIgnoreCase(branchName)) continue;
+
+                for (Restaurant restaurant : RestMealsList) {
+                    if (restaurant.getRestaurantName().equalsIgnoreCase(branchName)) {
+                        List<Meal> mealsInBranch = restaurant.getMeals();
+                        if (mealsInBranch == null) {
+                            mealsInBranch = new ArrayList<>();
+                            restaurant.setMeals(mealsInBranch);
+                        }
+                        if (!mealsInBranch.contains(newMealEntity)) {
+                            mealsInBranch.add(newMealEntity);
+                        }
+                    }
+                }
+            }
             meatlist.add(newMealEntity);
             return newMealEntity;
 
