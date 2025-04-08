@@ -106,7 +106,6 @@ public class AddMealController {
             return; // Stop if validation fails
         }
         byte[] imageBytes = imageToByteArray(mealImageView.getImage());
-        //mealEvent ME = new mealEvent(mealNameField.getText(),mealDescriptionField.getText(),mealPriceField.getText(),imageBytes);
         MealEventUpgraded ME= new MealEventUpgraded(mealNameField.getText(), mealDescriptionField.getText(), mealPriceField.getText(), imageBytes, restaurant_name.getValue().equals("ALL"), chosenCustomizationNames, chosenRestaurantsNames);
 
         SimpleClient client;
@@ -117,6 +116,10 @@ public class AddMealController {
         } catch(Exception e){
             e.printStackTrace();
         }
+
+        // Close the window after sending
+        Stage stage = (Stage) mealNameField.getScene().getWindow();
+        stage.close();
     }
 
     @Subscribe
