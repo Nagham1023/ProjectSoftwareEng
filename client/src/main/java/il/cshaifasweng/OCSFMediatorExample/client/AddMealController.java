@@ -332,7 +332,7 @@ public class AddMealController {
 
 
         // Add to UI and storage
-        chosenCustomizationNames.add(customizationName);
+        //chosenCustomizationNames.add(customizationName);
         fillRow(customizationName);
         clearInput();
     }
@@ -356,7 +356,6 @@ public class AddMealController {
                     iterator.remove(); // Safe removal
                 }
             }
-
         }
         restaurantName = selectedValue.trim();
 
@@ -372,9 +371,16 @@ public class AddMealController {
             return;
         }
 
-
-        // Add to UI and storage
-        chosenRestaurantsNames.add(restaurantName);
+        if (!"ALL".equals(restaurantName)) {
+            // Remove "ALL" if it was previously selected
+            if (chosenRestaurantsNames.contains("ALL")) {
+                chosenRestaurantsNames.remove("ALL");
+                HBox row = restaurantrowMap.remove("ALL");
+                if (row != null) {
+                    dynamicRestaurantContainer.getChildren().remove(row);
+                }
+            }
+        }
         fillRowRestaurants(restaurantName);
         clearInput();
     }
