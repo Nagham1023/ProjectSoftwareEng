@@ -230,27 +230,59 @@ public class UsersDB {
 
 
 
-    public static boolean checkUser(String username, String password) throws Exception {
-        if (session == null || !session.isOpen()) {
-            SessionFactory sessionFactory = getSessionFactory();
-            session = sessionFactory.openSession();
+
+    public static void signIn(UserCheck user) throws Exception {
+        Session localSession = null;
+        Transaction tx = null;
+        try {
+            if (session == null || !session.isOpen()) {
+                SessionFactory sessionFactory = getSessionFactory();
+                localSession = sessionFactory.openSession();
+            } else {
+                localSession = session;
+            }
+
+            CriteriaBuilder builder = localSession.getCriteriaBuilder();
+            CriteriaQuery<Users> query = builder.createQuery(Users.class);
+            Root<Users> root = query.from(Users.class);
+            query.select(root)
+                    .where(
+                            builder.and(
+                                    builder.equal(root.get("username"), user.getUsername()),
+                                    builder.equal(root.get("password"), user.getPassword())
+                            )
+                    );
+
+            List<Users> result = localSession.createQuery(query).getResultList();
+            if (result == null || result.isEmpty()) {
+                user.setRespond("Username or password incorrect");
+                return;
+            }
+
+            Users temp = result.get(0);
+            if (temp.getSigned()) {
+                user.setRespond("Already Signed in");
+                return;
+            }
+
+            // Not signed yet
+            tx = localSession.beginTransaction();
+            temp.setSigned(true);
+            localSession.update(temp);
+            tx.commit();
+
+            user.setRespond("Valid");
+            getUserInfo(user,result.getFirst());
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
+        } finally {
+            if (localSession != null && localSession.isOpen()) {
+                localSession.close();
+            }
         }
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Long> query = builder.createQuery(Long.class);
-        Root<Users> root = query.from(Users.class);
-        query.select(builder.count(root))
-                .where(
-                        builder.and(
-                                builder.equal(root.get("username"), username),
-                                builder.equal(root.get("password"), password) // Hash password if applicable
-                        )
-                );
-        Long count = session.createQuery(query).getSingleResult();
-        if (session != null && session.isOpen()) {
-            session.close(); // Close the session after operation
-        }
-        return count > 0;
     }
+
 
     public static boolean checkEmail(UserCheck us) throws Exception {
         if (session == null || !session.isOpen()) {
@@ -301,24 +333,7 @@ public class UsersDB {
         return count > 0;
     }
 
-    public static void getUserInfo(UserCheck us) throws Exception {
-        if (session == null || !session.isOpen()) {
-            SessionFactory sessionFactory = getSessionFactory();
-            session = sessionFactory.openSession();
-        }
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<Users> query = builder.createQuery(Users.class);
-        Root<Users> root = query.from(Users.class);
-        query.select(root)
-                .where(
-                        builder.and(
-                                builder.equal(root.get("username"), us.getUsername())
-                        )
-                );
-        Users user = session.createQuery(query).uniqueResult();
-        if (session != null && session.isOpen()) {
-            session.close(); // Close the session after operation
-        }
+    public static void getUserInfo(UserCheck us,Users user) throws Exception {
         if(user != null) {
             us.setEmail(user.getEmail());
             us.setUsername(user.getUsername());

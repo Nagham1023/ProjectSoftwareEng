@@ -23,6 +23,7 @@ import java.util.List;
 
 import static il.cshaifasweng.OCSFMediatorExample.client.CartPageController.listOfMeals;
 import static il.cshaifasweng.OCSFMediatorExample.client.CartPageController.numberOfMeals;
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.restaurantList;
 import static il.cshaifasweng.OCSFMediatorExample.client.menu_controller.branchName;
 
 public class RestaurantListController {
@@ -46,7 +47,15 @@ public class RestaurantListController {
             EventBus.getDefault().register(this);
             SimpleClient client = SimpleClient.getClient();
             try {
-                client.sendToServer("getAllRestaurants");
+                if(restaurantList == null) {
+                    System.out.println("RestaurantList is null");
+                    client.sendToServer("getAllRestaurants");
+                }
+                else {
+                    System.out.println("RestaurantList is loaded");
+                    updateRestaurantList(restaurantList);
+
+                }
             } catch (Exception e) {
                 e.printStackTrace(); // In a real application, log this error or show an error message to the user
             }
@@ -57,6 +66,7 @@ public class RestaurantListController {
 
         @Subscribe
         public void updateRestaurantList(RestaurantList restaurantList) {
+            SimpleClient.restaurantList = restaurantList;
             if (restaurantList != null) {
 //                restaurantListContainer.getChildren().clear();  // Clear existing content
                 List<Restaurant> restaurants = restaurantList.getRestaurantList();

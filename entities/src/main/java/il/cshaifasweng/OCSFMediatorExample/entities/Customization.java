@@ -21,8 +21,8 @@ public class Customization implements Serializable {
 //    )
 //
 //    private List<Meal> meals;
-    @ManyToMany(fetch = FetchType.EAGER)
-    private List<Meal> meals = new ArrayList<>(); // Remove mappedBy
+    @ManyToMany(mappedBy = "customizations", fetch = FetchType.EAGER)
+    private List<Meal> meals = new ArrayList<>();
 
     // Constructor
     public Customization() {

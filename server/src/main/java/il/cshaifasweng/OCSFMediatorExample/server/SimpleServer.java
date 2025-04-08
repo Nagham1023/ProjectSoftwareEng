@@ -46,6 +46,9 @@ public class SimpleServer extends AbstractServer {
     private static ArrayList<SubscribedClient> SubscribersList = new ArrayList<>();
     private static ArrayList<ConnectionToClient> Subscribers = new ArrayList<>();
     private static boolean ReservationOperation = false;
+    public static List<Restaurant> RestMealsList;
+    public static List<Meal> allMeals;
+    public static List<Customization> allcust;
 
     public SimpleServer(int port) {
         super(port);
@@ -303,15 +306,9 @@ public class SimpleServer extends AbstractServer {
             //sendToAll("added");
         }
         else if (msg instanceof UpdateMealRequest) {
-            //here we're adding new meal !!
-            //System.out.println("Received adding new UpdateMealRequest ");
             String addResult = updateMeal((UpdateMealRequest) msg);//if "added" then successed if "not exist" then failed bcs there is no meal like that
             System.out.println("Added new UpdateMealRequest to the database");
-            //sendToAll(msg);
-            //if (Objects.equals(addResult, "added")) {
             sendToAll(msg);
-            //}
-            //else
 
         }
         else if (msg instanceof String && msgString.equals("toMenuPage")) {
@@ -331,7 +328,8 @@ public class SimpleServer extends AbstractServer {
                     ml = MealsDB.GetAllMeals();
                 }
                 else{
-                    ml = getmealsb(branch);}
+                    ml = getmealsb(branch);
+                }
                 MealsList sending = new MealsList(ml);
                 client.sendToClient(sending);
             } catch (Exception e) {
@@ -363,7 +361,8 @@ public class SimpleServer extends AbstractServer {
             int mealIdn = Integer.parseInt(msgString.replaceAll("\\D+", ""));
             System.out.println(mealIdn);
             String S=deleteMeal(mealIdn);
-            System.out.println("ftt am7a dab3at esa");
+
+
             // Build structured message
             String response = "delete"+" "+mealId+" "+S;
 
@@ -384,17 +383,8 @@ public class SimpleServer extends AbstractServer {
             {
                 try {
 
-                    if (checkUser(((UserCheck) msg).getUsername(), ((UserCheck) msg).getPassword())) {
-                        if (!checkAndUpdateUserSignInStatus(((UserCheck) msg).getUsername())) {
-                            getUserInfo((UserCheck) msg); //to update it's info so we can save them.
-                            //send to singin to the user
-                            ((UserCheck) msg).setRespond("Valid");
-                        } else ((UserCheck) msg).setRespond("Already Signed in");
-                        client.sendToClient(msg);
-                    } else {
-                        ((UserCheck) msg).setRespond("Username or password incorrect");
-                        client.sendToClient(msg);
-                    }
+                    signIn((UserCheck) msg);
+                    client.sendToClient(msg);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -507,7 +497,7 @@ public class SimpleServer extends AbstractServer {
 
 
 
-                    if (cc == null) {
+                if (cc == null) {
 
 
                         if (personalDetailsDB == null) {
@@ -711,7 +701,14 @@ public class SimpleServer extends AbstractServer {
                 }
                 else
                 {
-                    if(Objects.equals(order.getRestaurantName(), ce.getRestaurant().getRestaurantName())) {
+                    if(order.getOrderStatus().equals("Cancelled")) {
+                        try {
+                            client.sendToClient("This order has been cancelled");
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    else if(Objects.equals(order.getRestaurantName(), ce.getRestaurant().getRestaurantName())) {
                         addComplainIntoDatabase(ce,client);
                         sendToAll(msg);
                     }
@@ -861,7 +858,7 @@ public class SimpleServer extends AbstractServer {
                     break;
                 case "pickupReport":
                     OrderTypeReport pickupReport = new OrderTypeReport();
-                    response = pickupReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "Pickup");
+                    response = pickupReport.generate(reportRequest.getDate() , reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "Self PickUp");
                     break;
                 case "allOrdersReport":
                     OrderTypeReport allOrdersReport = new OrderTypeReport();
@@ -1025,7 +1022,10 @@ public class SimpleServer extends AbstractServer {
         else if (msg.toString().equals("Fetching SearchBy Options")) {
             try {
                 // Fetch all restaurants
-                List<Restaurant> restaurants = getAllRestaurants();
+                List<Restaurant> restaurants;
+                if(SimpleServer.RestMealsList == null)
+                    restaurants = getAllRestaurants();
+                else restaurants = SimpleServer.RestMealsList;
                 List<String> restaurantNames = new ArrayList<>();
                 for (Restaurant restaurant : restaurants) {
                     restaurantNames.add(restaurant.getRestaurantName());
@@ -1160,6 +1160,12 @@ public class SimpleServer extends AbstractServer {
     }
 
     public Restaurant getRestaurantByName(String restaurantName) {
+        for (Restaurant restaurant : RestMealsList) {
+            if (restaurant.getRestaurantName().equalsIgnoreCase(restaurantName)) {
+                return restaurant;
+            }
+        }
+
         Restaurant restaurant = null;
 
         try (Session session = getSessionFactory().openSession()) {
@@ -1171,6 +1177,7 @@ public class SimpleServer extends AbstractServer {
 
             // Execute the query and get the result
             restaurant = query.uniqueResult(); // Use uniqueResult() since restaurant names should be unique
+            RestMealsList.add(restaurant);
 
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -1531,7 +1538,16 @@ public class SimpleServer extends AbstractServer {
 
 
     // Method to get meals by restaurant
-    private List<Meal> getMealsByRestaurant(String restaurantName) {
+    private List<Meal> getMealsByRestaurant(String restaurantName) throws Exception {
+
+        for (Restaurant restaurant : RestMealsList) {
+            if (restaurant.getRestaurantName().equalsIgnoreCase(restaurantName)) {
+                return restaurant.getMeals();
+            }
+        }
+        if(restaurantName.equals("ALL"))
+            return getAllMeals();
+
         // Fetch the restaurant with meals (avoid fetching tables in the same query)
         String query = "SELECT r FROM Restaurant r " +
                 "LEFT JOIN FETCH r.meals " + // Fetch meals
@@ -1553,38 +1569,31 @@ public class SimpleServer extends AbstractServer {
         }
 
         // Return the meals
+        RestMealsList.add(restaurant);
         return restaurant.getMeals();
     }
 
     // Method to get meals by ingredient
     private List<Meal> getMealsByIngredient(String ingredient) throws Exception {
-        try (Session session = getSessionFactory().openSession()) {
-            session.beginTransaction();
+        // Get all meals (detached)
+        List<Meal> meals = MealsDB.GetAllMeals();
 
-            // Get all meals (detached)
-            var meals = MealsDB.GetAllMeals();
+        // Create a list to store meals that contain the ingredient in the description
+        List<Meal> mealsWithIngredient = new ArrayList<>();
 
-            // Create a list to store meals that contain the ingredient in the description
-            List<Meal> mealsWithIngredient = new ArrayList<>();
-
-            // Iterate over all meals and reattach them to the session
-            for (Meal meal : meals) {
-                session.update(meal); // Reattach the meal to the session
-                Hibernate.initialize(meal.getCustomizations()); // Initialize the collection
-                List<Customization> customizations = meal.getCustomizations();
-                for (Customization customization : customizations) {
-                    if (customization.getName().equals(ingredient)) {
-                        mealsWithIngredient.add(meal);
-                    }
+        // Iterate over all meals and reattach them to the session
+        for (Meal meal : meals) {
+            //session.update(meal); // Reattach the meal to the session
+            //Hibernate.initialize(meal.getCustomizations()); // Initialize the collection
+            Set<Customization> customizations = meal.getCustomizations();
+            for (Customization customization : customizations) {
+                if (customization.getName().equals(ingredient)) {
+                    mealsWithIngredient.add(meal);
                 }
             }
-
-            session.getTransaction().commit();
-            return mealsWithIngredient;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ArrayList<>();
         }
+
+        return mealsWithIngredient;
     }
 
     @Override
@@ -1657,6 +1666,10 @@ public class SimpleServer extends AbstractServer {
     }
 
     public List<Restaurant> getAllRestaurants() {
+        if(RestMealsList != null) {
+            System.out.println("the RestMeals is not null");
+            return RestMealsList;
+        }
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
@@ -1665,9 +1678,10 @@ public class SimpleServer extends AbstractServer {
             List<Restaurant> restaurants = query.getResultList();
 
             session.getTransaction().commit();
+            RestMealsList = restaurants;
 
             // Return a copy of the list to avoid external modifications
-            return new ArrayList<>(restaurants);
+            return RestMealsList;
         } catch (Exception e) {
             e.printStackTrace();
             // Return an empty list in case of an error
@@ -1694,21 +1708,28 @@ public class SimpleServer extends AbstractServer {
         }
     }
 
-    public List<Customization> getAllCustomizations() {
+    public static List<Customization> getAllCustomizations() {
+        if(allcust != null)
+            return allcust;
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
+
 
             // Fetch all customizations from the database
             Query<Customization> query = session.createQuery("FROM Customization", Customization.class);
             List<Customization> customizations = query.getResultList();
 
+            allcust = new ArrayList<>(customizations);
+            System.out.println("printing all customizations");
+            System.out.println(allcust);
+
+
             session.getTransaction().commit();
 
-            // Return a copy of the list to avoid external modifications
-            return new ArrayList<>(customizations);
+
+            return allcust;
         } catch (Exception e) {
             e.printStackTrace();
-            // Return an empty list in case of an error
             return new ArrayList<>();
         }
     }

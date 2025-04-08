@@ -27,6 +27,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.restaurantList;
+
 
 public class AddComplainController {
     String ComplainKind = null;
@@ -85,7 +87,7 @@ public class AddComplainController {
     private TextField textFieldName;
 
     private String nameValue = "";
-    private RestaurantList restaurantList = new RestaurantList();
+    private RestaurantList restaurantsList = new RestaurantList();
     private String response = "";
     private String orderNumValue = "";
     private double refundVal = 0;
@@ -97,17 +99,20 @@ public class AddComplainController {
         EventBus.getDefault().register(this);
         SimpleClient client = SimpleClient.getClient();
         try {
-            client.sendToServer("getAllRestaurants");
+            if(restaurantList == null)
+                client.sendToServer("getAllRestaurants");
+            else handle(restaurantList);
             System.out.println("here first");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
     @Subscribe
-    public void handle( RestaurantList restaurantList) {
+    public void handle( RestaurantList temp) {
         Platform.runLater(() -> {
-            this.restaurantList = restaurantList;
-            fillComboBox(restaurantList);
+            SimpleClient.restaurantList = temp;
+            this.restaurantsList = restaurantList;
+            fillComboBox(restaurantsList);
         });
 
     }
@@ -273,6 +278,9 @@ public class AddComplainController {
             }
             else if (msg.equals("Not same restaurant!")) {
                 checkLabel.setText("The order was not completed at the same restaurant!");
+            }
+            else if (msg.equals("This order has been cancelled")) {
+                checkLabel.setText(msg);
             }
         });
     }

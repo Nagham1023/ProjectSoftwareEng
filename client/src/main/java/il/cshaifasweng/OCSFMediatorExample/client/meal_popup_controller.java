@@ -12,7 +12,9 @@ import javafx.scene.shape.Rectangle;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static il.cshaifasweng.OCSFMediatorExample.client.CartPageController.listOfMeals;
@@ -29,7 +31,7 @@ public class meal_popup_controller {
     @FXML
     private VBox mealDetailsBox; // VBox containing the meal details
 
-    private List<CustomizationWithBoolean> customizationSelections = new ArrayList<>();
+    private Set<CustomizationWithBoolean> customizationSelections = new HashSet<>();
 
 
     Meal meal;
@@ -37,7 +39,7 @@ public class meal_popup_controller {
     private Runnable onAddToCartDone;
 
     // Initialize the popup window with meal details
-    public void setMealDetails(String name, String description, double price, byte[] bytes, List<Customization> customizations, Meal meal, Runnable onAddToCartDone) {
+    public void setMealDetails(String name, String description, double price, byte[] bytes, Set<Customization> customizations, Meal meal, Runnable onAddToCartDone) {
         mealName.setText(name);
         mealDescription.setText(description);
         mealPrice.setText(String.format("₪ %.2f", price));

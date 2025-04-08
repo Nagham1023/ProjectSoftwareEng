@@ -123,7 +123,7 @@ public class UpdateMeal {
             this.meal = event.getMeal();
             this.originalDescription = meal.getDescription(); // Store original
             mealDescriptionField.setText(event.getMeal().getDescription());
-            List<Customization> L = event.getMeal().getCustomizations();
+            Set<Customization> L = event.getMeal().getCustomizations();
             originalCustomizations.clear(); // Reset original list
             L.forEach(c -> originalCustomizations.add(c.getName()));
 

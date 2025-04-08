@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import javassist.Loader;
 import org.hibernate.*;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -12,12 +13,14 @@ import java.io.InputStream;
 import java.util.*;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.RestMealsList;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.allMeals;
 
 public class MealsDB {
 
     private static Session session;
     public static List<Meal> meatlist;
-    public static List<Customization> customizationsList;
+    public static Set<Customization> customizationsList;
 
     static byte[] loadImage(String fileName) throws IOException {
         try (InputStream inputStream = App.class.getClassLoader().getResourceAsStream("images/" + fileName)) {
@@ -29,7 +32,7 @@ public class MealsDB {
     }
 
     public static void generateData() throws Exception {
-        customizationsList = new ArrayList<>();
+        customizationsList = new HashSet<>();
         Transaction transaction = null;
         Session session = null;
 
@@ -70,35 +73,35 @@ public class MealsDB {
             burger.setName("Burger");
             burger.setDescription("Juicy beef burger with fresh lettuce");
             burger.setPrice(8.00);
-            burger.setCustomizations(Arrays.asList(savedCustomizations.get("More Lettuce")));
+            burger.setCustomizations(Set.of(savedCustomizations.get("More Lettuce")));
             burger.setImage(loadImage("burger.jpg"));
 
             Meal spaghetti = new Meal();
             spaghetti.setName("Spaghetti");
             spaghetti.setDescription("Classic Italian spaghetti with cheese");
             spaghetti.setPrice(10.00);
-            spaghetti.setCustomizations(Arrays.asList(savedCustomizations.get("Extra Cheese")));
+            spaghetti.setCustomizations(Set.of(savedCustomizations.get("Extra Cheese")));
             spaghetti.setImage(loadImage("spaghetti.jpg"));
 
             Meal avocadoSalad = new Meal();
             avocadoSalad.setName("Avocado Salad");
             avocadoSalad.setDescription("Fresh avocado salad with onions");
             avocadoSalad.setPrice(7.00);
-            avocadoSalad.setCustomizations(Arrays.asList(savedCustomizations.get("More Onion")));
+            avocadoSalad.setCustomizations(Set.of(savedCustomizations.get("More Onion")));
             avocadoSalad.setImage(loadImage("avocado_salad.png"));
 
             Meal grills = new Meal();
             grills.setName("Grills");
             grills.setDescription("Mixed grilled meats with spices");
             grills.setPrice(12.00);
-            grills.setCustomizations(Arrays.asList(savedCustomizations.get("High Spicy Level")));
+            grills.setCustomizations(Set.of(savedCustomizations.get("High Spicy Level")));
             grills.setImage(loadImage("grills.jpg"));
 
             Meal toastCheese = new Meal();
             toastCheese.setName("Toast Cheese");
             toastCheese.setDescription("Cheese toast with black bread");
             toastCheese.setPrice(5.00);
-            toastCheese.setCustomizations(Arrays.asList(savedCustomizations.get("Black Bread")));
+            toastCheese.setCustomizations(Set.of(savedCustomizations.get("Black Bread")));
             toastCheese.setImage(loadImage("toast_cheese.jpg"));
 
             List<Meal> newMeals = Arrays.asList(burger, spaghetti, avocadoSalad, grills, toastCheese);
@@ -106,9 +109,8 @@ public class MealsDB {
             // Add only unique meals
             for (Meal newMeal : newMeals) {
                 Meal existing = (Meal) session.createQuery(
-                                "FROM Meal WHERE mealName = :name AND description = :description")
+                                "FROM Meal WHERE mealName = :name")
                         .setParameter("name", newMeal.getName())
-                        .setParameter("description", newMeal.getDescription())
                         .uniqueResult();
 
                 if (existing == null) {
@@ -132,6 +134,48 @@ public class MealsDB {
             if (session != null && session.isOpen()) {
                 session.close();
                 System.out.println("Session closed.");
+            }
+        }
+    }
+
+    public static void getAllRestMeals() {
+        Session session = null;
+        Transaction transaction = null;
+
+        try {
+            System.out.println("Getting all meals from DBbbb...");
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+
+            List<Restaurant> restaurants = session.createQuery("FROM Restaurant", Restaurant.class).list();
+            List<Meal> meals = session.createQuery("FROM Meal", Meal.class).list();
+
+
+            SimpleServer.allMeals = meals;
+            RestMealsList = restaurants;
+            for (Restaurant restaurant : restaurants) {
+                System.out.println("Restaurant: " + restaurant.getRestaurantName());
+                System.out.println("Meals:");
+
+                for (Meal meal : restaurant.getMeals()) {
+                    System.out.println("  - " + meal.getName() + ": " + meal.getDescription() + " ($" + meal.getPrice() + ")");
+                }
+
+                System.out.println("------------------------------------------------");
+
+
+            }
+
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
             }
         }
     }
@@ -232,6 +276,9 @@ public class MealsDB {
     public static List<Meal> getAllMeals() throws Exception {
         Session localSession = null;
 
+        if(SimpleServer.allMeals != null) {
+            return SimpleServer.allMeals;
+        }
         List<Meal> meals = null;
         try {
             if (session == null || !session.isOpen()) {
@@ -246,6 +293,8 @@ public class MealsDB {
             query.from(Meal.class);
             meals = localSession.createQuery(query).getResultList();
             meatlist = meals;
+            allMeals = meals;
+
             for (Meal meal : meals) {
                 Hibernate.initialize(meal.getCustomizations());
             }
@@ -304,6 +353,26 @@ public class MealsDB {
         //System.out.println("Changing the price in database.");
         int mealId = updatePrice.getIdMeal();
         double newPrice = updatePrice.getNewPrice();
+        if(allMeals != null) {
+            for(Meal meal : allMeals) {
+                if (meal.getId() == mealId) {
+                    meal.setPrice(newPrice);
+                    break;
+                }
+            }
+        }
+        if (RestMealsList != null) {
+            for (Restaurant restaurant : RestMealsList) {
+                if (restaurant.getMeals() != null) {
+                    for (Meal meal : restaurant.getMeals()) {
+                        if (meal.getId() == mealId) {
+                            meal.setPrice(newPrice);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
         try {
             if (session == null || !session.isOpen()) {
@@ -518,6 +587,16 @@ public class MealsDB {
         return result;
     }
     public static List<Meal> getmealsb(String branchName) throws Exception {
+
+
+        for (Restaurant restaurant : RestMealsList) {
+            if (restaurant.getRestaurantName().equalsIgnoreCase(branchName)) {
+                System.out.println("Found restaurant: " + restaurant.getRestaurantName());
+                return restaurant.getMeals();
+            }
+        }
+        System.out.println("No restaurant found");
+
         List<Meal> meals = new ArrayList<>();
 
         // Open a session if it's not already open
@@ -562,6 +641,8 @@ public class MealsDB {
     }
 
     public static List<Meal> GetAllMeals() {
+        if(allMeals != null)
+            return allMeals;
         // Ensure the session is open
         if (session == null || !session.isOpen()) {
             try {
@@ -585,6 +666,7 @@ public class MealsDB {
             // Execute the query and get the result list
             result = query.getResultList();
             meatlist = result;
+            allMeals = result;
 
             // Commit the transaction
             session.getTransaction().commit();
@@ -717,61 +799,79 @@ public class MealsDB {
         }
     }
     public static String deleteMeal(int mealId) {
-        System.out.println("Now I am in the function");
         String mealName = null;
         Transaction tx = null;
+        Session session = null;
 
-        try (Session session = App.getSessionFactory().openSession()) {
+        try {
+            session = App.getSessionFactory().openSession();
             tx = session.beginTransaction();
 
-            // Get the meal
             Meal meal = session.get(Meal.class, mealId);
-            if (meal != null) {
-                mealName = meal.getName();
-
-                // 1. Remove meal from restaurants
-                for (Restaurant restaurant : meal.getRestaurants()) {
-                    restaurant.getMeals().remove(meal);
-                    session.update(restaurant);
-                }
-
-                // 2. Remove meal from customizations
-                for (Customization customization : meal.getCustomizations()) {
-                    customization.getMeals().remove(meal);
-                    session.update(customization);
-                }
-
-                // 3. Remove associated MealInTheCart entries
-                // First need to delete the MealInTheCart entries that reference personal_Meal
-                String deleteMealInTheCart = "DELETE FROM MealInTheCart mic WHERE mic.meal IN " +
-                        "(SELECT pm FROM personal_Meal pm WHERE pm.meal.id = :mealId)";
-                session.createQuery(deleteMealInTheCart)
-                        .setParameter("mealId", mealId)
-                        .executeUpdate();
-
-                // 4. Remove personal meals
-                String deletePersonalMeal = "DELETE FROM personal_Meal pm WHERE pm.meal.id = :mealId";
-                session.createQuery(deletePersonalMeal)
-                        .setParameter("mealId", mealId)
-                        .executeUpdate();
-
-                // 5. Finally delete the meal
-                session.delete(meal);
-
-                tx.commit();
-                System.out.println("Meal, personal meals, associated mealinthecart entries, and customizations updated/deleted.");
+            if (meal == null) {
+                return "Meal not found";
             }
+
+            mealName = meal.getName();
+
+            try {
+                session.createNativeQuery("DELETE FROM customizations_meals WHERE meals_id = :mealId")
+                        .setParameter("mealId", mealId)
+                        .executeUpdate();
+            } catch (Exception e) {
+                // Ignore if table doesn't exist
+            }
+
+            session.createNativeQuery("DELETE FROM meal_customizations WHERE meal_id = :mealId")
+                    .setParameter("mealId", mealId)
+                    .executeUpdate();
+
+            session.createNativeQuery("DELETE FROM restaurant_meals WHERE meal_id = :mealId")
+                    .setParameter("mealId", mealId)
+                    .executeUpdate();
+
+            session.createQuery("DELETE FROM UpdatePriceRequest pr WHERE pr.meal.id = :mealId")
+                    .setParameter("mealId", mealId)
+                    .executeUpdate();
+
+            session.createQuery("DELETE FROM MealInTheCart mic " +
+                            "WHERE EXISTS (SELECT 1 FROM personal_Meal pm WHERE pm.id = mic.meal.id AND pm.meal.id = :mealId)")
+                    .setParameter("mealId", mealId)
+                    .executeUpdate();
+
+            session.createQuery("DELETE FROM personal_Meal pm WHERE pm.meal.id = :mealId")
+                    .setParameter("mealId", mealId)
+                    .executeUpdate();
+
+            session.refresh(meal);
+            session.delete(meal);
+
+            tx.commit();
+
+            if (allMeals != null) {
+                allMeals.removeIf(m -> m.getId() == mealId);
+            }
+            if (RestMealsList != null) {
+                for (Restaurant restaurant : RestMealsList) {
+                    restaurant.getMeals().removeIf(m -> m.getId() == mealId);
+                }
+            }
+
+            return mealName;
 
         } catch (Exception e) {
-            if (tx != null) {
+            if (tx != null && tx.isActive()) {
                 tx.rollback();
             }
-            e.printStackTrace();
             return "Sorry, couldn't successfully delete meal.";
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
-
-        return mealName;
     }
+
+
 
     public static Meal getMealById(String mealId) {
         System.out.println("now I am in the function getMealById");
@@ -791,19 +891,35 @@ public class MealsDB {
     }
 
     public static void updateMealDetailsById(Meal mealS) {
+        System.out.println("updating the meal details");
         // Check if the meatlist is initialized
-        if (meatlist == null || meatlist.isEmpty()) {
+        if (allMeals == null || allMeals.isEmpty()) {
             System.out.println("The meal list is empty or not initialized.");
             return;
         }
 
-        // Search for the meal with the given ID
-        for (Meal meal : meatlist) {
-            if (meal.getId() == mealS.getId()) {
-                meal=mealS;
-                return; // Exit the loop after updating
+
+        for (int i = 0; i < allMeals.size(); i++) {
+            if (allMeals.get(i).getId() == mealS.getId()) {
+                allMeals.set(i, mealS); // Replace the actual object in the list
+                System.out.println("updated the meal details");
+                break;
             }
         }
+
+        for (Restaurant restaurant : RestMealsList) {
+            List<Meal> meals = restaurant.getMeals();
+            if (meals == null) continue;
+
+            for (int i = 0; i < meals.size(); i++) {
+                Meal meal = meals.get(i);
+                if (meal.getId() == mealS.getId()) {
+                    meals.set(i, mealS); // Replace old meal with the updated one
+                    System.out.println("Updated meal in restaurant: " + restaurant.getRestaurantName());
+                }
+            }
+        }
+
     }
 
     public static String updateMeal(UpdateMealRequest msg) {
@@ -896,6 +1012,7 @@ public class MealsDB {
 
             session.merge(meal);
             transaction.commit();
+            System.out.println("im in here!!");
             updateMealDetailsById(meal);
 
             return "updated";
