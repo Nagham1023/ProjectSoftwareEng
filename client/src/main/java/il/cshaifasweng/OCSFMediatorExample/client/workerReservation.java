@@ -24,6 +24,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.restaurantList;
 
 
 public class workerReservation {
@@ -65,13 +66,16 @@ public class workerReservation {
         loadingGif.setImage(loadingImage);
 
         // Fetch all restaurants
-        SimpleClient.getClient().sendToServer("getAllRestaurants");
+        if(restaurantList == null)
+            SimpleClient.getClient().sendToServer("getAllRestaurants");
+        else putResturants(restaurantList);
         startLoading();
     }
 
     @Subscribe
     public void putResturants(RestaurantList restaurants) {
         Platform.runLater(() -> {
+            SimpleClient.restaurantList = restaurants;
             System.out.println("Received restaurant list: " + restaurants);
             restaurantsComboBox.getItems().clear(); // Clear previous items
 

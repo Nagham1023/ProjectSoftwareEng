@@ -31,6 +31,8 @@ import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.OrdersDB.generateOrders;
 import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.addPersonalDetails;
 import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.getAllRestaurants;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.allcust;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.getAllCustomizations;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.generateBasicUser1;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.printAllUsers;
 public class App {
@@ -282,8 +284,8 @@ public class App {
                 }
                 if(i% 3 ==0) {
                     haifaMeals.add(meal);
-                    telavivMeals.add(meal);
                 }
+                telavivMeals.add(meal);
                 i++;
             }
             telAviv.setMeals(telavivMeals);
@@ -406,28 +408,19 @@ public class App {
             //printAllUsers();
             //generateOrders();
 
-            /*************************adan***************************/
-            PersonalDetails ps  = new PersonalDetails();
-            ps.setName("yo");
-            ps.setEmail("yousefknani9@gmail.com");
-            ps.setPhoneNumber("0502981753");
-            //addPersonalDetails(ps);
-            CreditCard creditCard = new CreditCard();
-            creditCard.setCardNumber("0000000000000000");
-            creditCard.setExpiryDate("05/2025");
-            creditCard.setCvv("123");
-            creditCard.setCardholdersID("000000000");
-            creditCard.setCardholderName("yousef");
-            creditCard.setPersonalDetails(ps);
 
-            //addCreditCardDetails(creditCard,"yousefknani9@gmail.com");
-            /*************************adan***************************/
 
-            // generateOrders();
+
+
+
             generateRestaurants();
             generateCompanyMeals();
 
             generateOrders();
+
+            getAllRestMeals();
+            System.out.println("getting all custom");
+            allcust = getAllCustomizations();
 
             //generateTheComplains();
             initializeSampleTables();

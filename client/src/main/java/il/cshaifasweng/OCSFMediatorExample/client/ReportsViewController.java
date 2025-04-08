@@ -19,6 +19,8 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.*;
 
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.restaurantList;
+
 public class ReportsViewController {
 
     @FXML
@@ -49,7 +51,9 @@ public class ReportsViewController {
             restaurant_name.setVisible(false);
         SimpleClient client = SimpleClient.getClient();
         try {
-            client.sendToServer("getAllRestaurants");
+            if(restaurantList == null)
+                client.sendToServer("getAllRestaurants");
+            else fillComboBox(restaurantList);
             System.out.println("here first");
         } catch (Exception e) {
             e.printStackTrace(); // In a real application, log this error or show an error message to the user
@@ -178,6 +182,7 @@ public class ReportsViewController {
     }
     @Subscribe
     public void fillComboBox(RestaurantList restaurantList) {
+        SimpleClient.restaurantList = restaurantList;
         restaurant_name.getItems().clear();
         //System.out.println("here");
         List<Restaurant> restaurants = restaurantList.getRestaurantList();

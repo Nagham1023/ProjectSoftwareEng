@@ -3,7 +3,9 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -37,37 +39,17 @@ public class Meal implements Serializable {
     private List<Restaurant> restaurants;
 
 
-//    // Configure cascade deletion for the relationship
-//    @OneToMany(
-//            mappedBy = "meal",
-//            cascade = CascadeType.ALL,
-//            orphanRemoval = true
-//    )
-//    private List<RestaurantMeal> restaurantAssociations = new ArrayList<>();
-
-//    @ManyToMany
-//    @JoinTable(
-//            name = "meal_customizations",
-//            joinColumns = {@JoinColumn(
-//                    name = "meal_id"
-//            )},
-//            inverseJoinColumns = {@JoinColumn(
-//                    name = "customization_id"
-//            )}
-//    )
-//    private List<Customization> customizations;
-//
     @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UpdatePriceRequest> priceRequests = new ArrayList<>();
 
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "meal_customizations",
             joinColumns = @JoinColumn(name = "meal_id"),
             inverseJoinColumns = @JoinColumn(name = "customization_id")
     )
-    private List<Customization> customizations = new ArrayList<>(); // Initialized
+    private Set<Customization> customizations = new HashSet<>();
 
 //    // Relationship with Restaurant (separate)
 //    @ManyToMany(mappedBy = "meals", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -121,11 +103,11 @@ public class Meal implements Serializable {
         isDelivery = delivery;
     }
 
-    public List<Customization> getCustomizations() {
+    public Set<Customization> getCustomizations() {
         return customizations;
     }
 
-    public void setCustomizations(List<Customization> customizations) {
+    public void setCustomizations(Set<Customization> customizations) {
         this.customizations = customizations;
     }
 

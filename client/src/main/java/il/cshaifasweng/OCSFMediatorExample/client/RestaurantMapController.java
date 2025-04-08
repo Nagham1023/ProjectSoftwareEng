@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.restaurantList;
+
 public class RestaurantMapController {
     boolean offline = false;
     @FXML
@@ -61,7 +63,9 @@ public class RestaurantMapController {
         EventBus.getDefault().register(this);
         setupAutoRefresh();
         // Fetch all restaurants
-        SimpleClient.getClient().sendToServer("getAllRestaurants");
+        if(restaurantList == null)
+            SimpleClient.getClient().sendToServer("getAllRestaurants");
+        else putResturants(restaurantList);
 
         // Add an event listener to the ComboBox
         restaurantsComboBox.setOnAction(event -> handleRestaurantSelection());
@@ -141,6 +145,7 @@ public class RestaurantMapController {
     @Subscribe
     public void putResturants(RestaurantList restaurants) {
         Platform.runLater(() -> {
+            SimpleClient.restaurantList = restaurants;
             System.out.println("Received restaurant list: " + restaurants);
 
             // Clear previous items (except "Pick a Restaurant")

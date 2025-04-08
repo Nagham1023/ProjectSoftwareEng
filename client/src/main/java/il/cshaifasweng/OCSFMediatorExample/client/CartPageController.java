@@ -110,7 +110,7 @@ public class CartPageController {
 
 
 
-    private boolean areCustomizationsEqual(List<CustomizationWithBoolean> list1, List<CustomizationWithBoolean> list2) {
+    private boolean areCustomizationsEqual(Set<CustomizationWithBoolean> list1, Set<CustomizationWithBoolean> list2) {
         if (list1.size() != list2.size()) {
             return false; // Different lengths, cannot be equal
         }

@@ -65,7 +65,7 @@ public class OrdersDB {
         }
     }
 
-    public static void saveCustomizationsbool(List<CustomizationWithBoolean> customs) {
+    public static void saveCustomizationsbool(Set<CustomizationWithBoolean> customs) {
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 

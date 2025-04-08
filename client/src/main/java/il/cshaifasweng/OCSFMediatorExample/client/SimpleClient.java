@@ -21,6 +21,7 @@ public class SimpleClient extends AbstractClient {
 	private static UserCheck UserClient = null;
 	private static boolean logged = false;
 	public static int deliveryPrice = 25;
+	public static RestaurantList restaurantList = null;
 
 	private SimpleClient(String host, int port) {
 		super(host, port);
@@ -325,6 +326,8 @@ public class SimpleClient extends AbstractClient {
 		else if(message.equals("go To payment check")){
 			EventBus.getDefault().post(message);
 		}
+		else if(message.equals("This order has been cancelled"))
+			EventBus.getDefault().post(message);
 		else if(message.startsWith("Cancel Reservation Error:")){
 			//System.out.println("cancleddddd");
 			EventBus.getDefault().post(message);
