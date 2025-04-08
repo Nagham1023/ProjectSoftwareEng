@@ -9,10 +9,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
 
@@ -32,112 +29,89 @@ public class MealsDB {
     }
 
     public static void generateData() throws Exception {
-        customizationsList= new ArrayList<>();
+        customizationsList = new ArrayList<>();
         Transaction transaction = null;
-        try {
-            if (session == null || !session.isOpen()) {
-                try {
-                    SessionFactory sessionFactory = getSessionFactory();
-                    session = sessionFactory.openSession();
-                } catch (HibernateException e) {
-                    System.err.println("Error initializing Hibernate session: " + e.getMessage());
-                    return;
-                }
-            }
+        Session session = null;
 
+        try {
+            SessionFactory sessionFactory = getSessionFactory();
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
-            // Create Customizations
-            Customization moreLettuce = new Customization();
-            moreLettuce.setName("More Lettuce");
+            // Create Customizations (new objects)
+            List<String> customizationNames = Arrays.asList(
+                    "More Lettuce", "Extra Cheese", "More Onion", "High Spicy Level", "Black Bread"
+            );
 
-            Customization extraCheese = new Customization();
-            extraCheese.setName("Extra Cheese");
+            Map<String, Customization> savedCustomizations = new HashMap<>();
 
-            Customization moreOnion = new Customization();
-            moreOnion.setName("More Onion");
+            for (String name : customizationNames) {
+                Customization existing = (Customization) session.createQuery(
+                                "FROM Customization WHERE customizationName = :name")
+                        .setParameter("name", name)
+                        .uniqueResult();
 
-            Customization highSpicyLevel = new Customization();
-            highSpicyLevel.setName("High Spicy Level");
-
-            Customization blackBread = new Customization();
-            blackBread.setName("Black Bread");
-
-            // List of customizations to check and add if not existing
-            List<Customization> customizations = Arrays.asList(moreLettuce, extraCheese, moreOnion, highSpicyLevel, blackBread);
-
-            // Check if customizations already exist in the database and save only new ones
-            for (Customization customization : customizations) {
-                CriteriaBuilder builder = session.getCriteriaBuilder();
-                CriteriaQuery<Customization> query = builder.createQuery(Customization.class);
-                query.from(Customization.class);
-
-                List<Customization> existingCustomizations = session.createQuery(query).getResultList();
-                boolean isDuplicate = existingCustomizations.stream()
-                        .anyMatch(existingCustomization -> existingCustomization.getName().equalsIgnoreCase(customization.getName()));
-
-                if (!isDuplicate) {
+                if (existing == null) {
+                    Customization customization = new Customization();
+                    customization.setName(name);
                     session.save(customization);
-                    customizationsList.add(customization);
-                    System.out.println("Added new customization: " + customization.getName());
+                    savedCustomizations.put(name, customization);
+                    System.out.println("Added new customization: " + name);
                 } else {
-                    System.out.println("Duplicate customization skipped: " + customization.getName());
+                    savedCustomizations.put(name, existing);
+                    System.out.println("Using existing customization: " + name);
                 }
             }
 
-            // Create Meals
+            session.flush(); // Ensure customizations are saved
+
+            // Create Meals and assign the saved (persistent) Customizations
             Meal burger = new Meal();
             burger.setName("Burger");
             burger.setDescription("Juicy beef burger with fresh lettuce");
             burger.setPrice(8.00);
-            burger.setCustomizations(Arrays.asList(moreLettuce));
+            burger.setCustomizations(Arrays.asList(savedCustomizations.get("More Lettuce")));
             burger.setImage(loadImage("burger.jpg"));
 
             Meal spaghetti = new Meal();
             spaghetti.setName("Spaghetti");
             spaghetti.setDescription("Classic Italian spaghetti with cheese");
             spaghetti.setPrice(10.00);
-            spaghetti.setCustomizations(Arrays.asList(extraCheese));
+            spaghetti.setCustomizations(Arrays.asList(savedCustomizations.get("Extra Cheese")));
             spaghetti.setImage(loadImage("spaghetti.jpg"));
 
             Meal avocadoSalad = new Meal();
             avocadoSalad.setName("Avocado Salad");
             avocadoSalad.setDescription("Fresh avocado salad with onions");
             avocadoSalad.setPrice(7.00);
-            avocadoSalad.setCustomizations(Arrays.asList(moreOnion));
+            avocadoSalad.setCustomizations(Arrays.asList(savedCustomizations.get("More Onion")));
             avocadoSalad.setImage(loadImage("avocado_salad.png"));
 
             Meal grills = new Meal();
             grills.setName("Grills");
             grills.setDescription("Mixed grilled meats with spices");
             grills.setPrice(12.00);
-            grills.setCustomizations(Arrays.asList(highSpicyLevel));
+            grills.setCustomizations(Arrays.asList(savedCustomizations.get("High Spicy Level")));
             grills.setImage(loadImage("grills.jpg"));
 
             Meal toastCheese = new Meal();
             toastCheese.setName("Toast Cheese");
             toastCheese.setDescription("Cheese toast with black bread");
             toastCheese.setPrice(5.00);
-            toastCheese.setCustomizations(Arrays.asList(blackBread));
+            toastCheese.setCustomizations(Arrays.asList(savedCustomizations.get("Black Bread")));
             toastCheese.setImage(loadImage("toast_cheese.jpg"));
 
-            // List of meals to add
             List<Meal> newMeals = Arrays.asList(burger, spaghetti, avocadoSalad, grills, toastCheese);
-
-            // Fetch existing meals from the database
-            CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaQuery<Meal> query = builder.createQuery(Meal.class);
-            query.from(Meal.class);
-            List<Meal> existingMeals = session.createQuery(query).getResultList();
-
 
             // Add only unique meals
             for (Meal newMeal : newMeals) {
-                boolean isDuplicate = existingMeals.stream()
-                        .anyMatch(existingMeal -> existingMeal.getName().equalsIgnoreCase(newMeal.getName()) &&
-                                existingMeal.getDescription().equalsIgnoreCase(newMeal.getDescription()));
+                Meal existing = (Meal) session.createQuery(
+                                "FROM Meal WHERE mealName = :name AND description = :description")
+                        .setParameter("name", newMeal.getName())
+                        .setParameter("description", newMeal.getDescription())
+                        .uniqueResult();
 
-                if (!isDuplicate) {
+                if (existing == null) {
                     session.save(newMeal);
                     System.out.println("Added new meal: " + newMeal.getName());
                 } else {
@@ -145,12 +119,11 @@ public class MealsDB {
                 }
             }
 
-            session.flush();
             transaction.commit();
             System.out.println("Transaction committed successfully.");
 
         } catch (Exception e) {
-            if (transaction != null && transaction.isActive()) {
+            if (transaction != null) {
                 transaction.rollback();
                 System.err.println("An error occurred, transaction rolled back: " + e.getMessage());
             }
@@ -162,6 +135,7 @@ public class MealsDB {
             }
         }
     }
+
 
     public static void generateCompanyMeals() throws Exception {
         try (Session session = getSessionFactory().openSession()) {
@@ -743,38 +717,62 @@ public class MealsDB {
         }
     }
     public static String deleteMeal(int mealId) {
-        System.out.println("now I am in the function");
+        System.out.println("Now I am in the function");
         String mealName = null;
         Transaction tx = null;
 
         try (Session session = App.getSessionFactory().openSession()) {
-            session.beginTransaction();
+            tx = session.beginTransaction();
 
+            // Get the meal
             Meal meal = session.get(Meal.class, mealId);
             if (meal != null) {
-                // First, remove associations from restaurants
+                mealName = meal.getName();
+
+                // 1. Remove meal from restaurants
                 for (Restaurant restaurant : meal.getRestaurants()) {
                     restaurant.getMeals().remove(meal);
-                    session.update(restaurant); // Save the updated restaurant
+                    session.update(restaurant);
                 }
-            }
-            if (meal != null) {
-                session.delete(meal); // Will cascade to delete requests
-            }
 
-            session.getTransaction().commit();
-            System.out.println("Meal and associated requests deleted");
-            mealName = meal.getName();
+                // 2. Remove meal from customizations
+                for (Customization customization : meal.getCustomizations()) {
+                    customization.getMeals().remove(meal);
+                    session.update(customization);
+                }
+
+                // 3. Remove associated MealInTheCart entries
+                // First need to delete the MealInTheCart entries that reference personal_Meal
+                String deleteMealInTheCart = "DELETE FROM MealInTheCart mic WHERE mic.meal IN " +
+                        "(SELECT pm FROM personal_Meal pm WHERE pm.meal.id = :mealId)";
+                session.createQuery(deleteMealInTheCart)
+                        .setParameter("mealId", mealId)
+                        .executeUpdate();
+
+                // 4. Remove personal meals
+                String deletePersonalMeal = "DELETE FROM personal_Meal pm WHERE pm.meal.id = :mealId";
+                session.createQuery(deletePersonalMeal)
+                        .setParameter("mealId", mealId)
+                        .executeUpdate();
+
+                // 5. Finally delete the meal
+                session.delete(meal);
+
+                tx.commit();
+                System.out.println("Meal, personal meals, associated mealinthecart entries, and customizations updated/deleted.");
+            }
 
         } catch (Exception e) {
-            if (session.getTransaction() != null) {
-                session.getTransaction().rollback();
-                return "sorry didn't successfully delete meal";
+            if (tx != null) {
+                tx.rollback();
             }
             e.printStackTrace();
+            return "Sorry, couldn't successfully delete meal.";
         }
+
         return mealName;
     }
+
     public static Meal getMealById(String mealId) {
         System.out.println("now I am in the function getMealById");
         Meal meal = null;
