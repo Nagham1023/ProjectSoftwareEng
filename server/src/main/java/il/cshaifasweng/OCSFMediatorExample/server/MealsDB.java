@@ -1089,7 +1089,20 @@ public class MealsDB {
             if ("ALL".equals(newMeal.getBranch().get(0))) // Safe even if branchName is null)
             {
                 newMealEntity.setCompany(true);
-            } else {
+
+                // Get all restaurants from the DB
+                builder = session.getCriteriaBuilder();
+                CriteriaQuery<Restaurant> allRestaurantsQuery = builder.createQuery(Restaurant.class);
+                allRestaurantsQuery.from(Restaurant.class);
+                List<Restaurant> allRestaurants = session.createQuery(allRestaurantsQuery).getResultList();
+
+                for (Restaurant restaurant : allRestaurants) {
+                    if (!restaurant.getMeals().contains(newMealEntity)) {
+                        restaurant.getMeals().add(newMealEntity);
+                        session.update(restaurant);
+                    }
+                }
+            }else {
                 newMealEntity.setCompany(false);
                 List<String> newBranches = newMeal.getBranch();
 
@@ -1125,7 +1138,20 @@ public class MealsDB {
                 allMeals.add(newMealEntity);
             }
             for (String branchName : newMeal.getBranch()) {
-                if ("ALL".equalsIgnoreCase(branchName)) continue;
+                if ("ALL".equalsIgnoreCase(branchName))
+                {
+                    for (Restaurant restaurant : RestMealsList) {
+                        List<Meal> mealsInBranch = restaurant.getMeals();
+                        if (mealsInBranch == null) {
+                            mealsInBranch = new ArrayList<>();
+                            restaurant.setMeals(mealsInBranch);
+                        }
+                        if (!mealsInBranch.contains(newMealEntity)) {
+                            mealsInBranch.add(newMealEntity);
+                        }
+                    }
+                    break;
+                }
 
                 for (Restaurant restaurant : RestMealsList) {
                     if (restaurant.getRestaurantName().equalsIgnoreCase(branchName)) {
