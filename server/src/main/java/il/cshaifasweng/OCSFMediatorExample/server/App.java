@@ -31,10 +31,10 @@ import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.OrdersDB.generateOrders;
 import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.addPersonalDetails;
 import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.getAllRestaurants;
-import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.allcust;
-import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.getAllCustomizations;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.generateBasicUser1;
 import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.printAllUsers;
+
 public class App {
 
     private static Session session;
@@ -201,9 +201,8 @@ public class App {
             shada.setAge(22);
 
 
-
             // List of Orders to add
-            List<Users> newOrders = Arrays.asList(nagham,shada);
+            List<Users> newOrders = Arrays.asList(nagham, shada);
 
             // Fetch existing meals from the database
             CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -230,11 +229,10 @@ public class App {
     }
 
     private static void generateRestaurants() throws Exception {
-        if(getAllRestaurants() != null && !getAllRestaurants().isEmpty()) {
+        if (getAllRestaurants() != null && !getAllRestaurants().isEmpty()) {
             System.out.println("there are restaurants in the database");
             return;
-        }
-        else
+        } else
             System.out.println("no restaurants in the database");
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
@@ -278,11 +276,11 @@ public class App {
             List<Meal> telavivMeals = new ArrayList<>();
             List<Meal> sakhninMeals = new ArrayList<>();
             for (Meal meal : meals) {
-                if (i % 2 == 0){
+                if (i % 2 == 0) {
                     nazarethMeals.add(meal);
                     sakhninMeals.add(meal);
                 }
-                if(i% 3 ==0) {
+                if (i % 3 == 0) {
                     haifaMeals.add(meal);
                 }
                 telavivMeals.add(meal);
@@ -311,25 +309,24 @@ public class App {
     private static void generateTheComplains() throws Exception {
         List<Complain> complains = getAllComplains();
 
-        if(complains != null && !complains.isEmpty()) {
+        if (complains != null && !complains.isEmpty()) {
             System.out.println("there are some Complains in the database");
             return;
-        }
-        else
+        } else
             System.out.println("no complains in the database");
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
 
-            LocalDate date1 = LocalDate.of(2025, 2,23); // 10:00 AM
-            LocalDate date2 = LocalDate.of(2024, 1,1); // 10:00 PM
-            LocalDate date3 = LocalDate.of(2025,5, 15);
-            LocalDate date4 = LocalDate.of(2025,11, 11);
+            LocalDate date1 = LocalDate.of(2025, 2, 23); // 10:00 AM
+            LocalDate date2 = LocalDate.of(2024, 1, 1); // 10:00 PM
+            LocalDate date3 = LocalDate.of(2025, 5, 15);
+            LocalDate date4 = LocalDate.of(2025, 11, 11);
 
-            LocalDateTime time1 = LocalDateTime.of(2025,3,3,9,45);
-            LocalDateTime time2 = LocalDateTime.of(2025,2,25,23,23);
-            LocalDateTime time3 = LocalDateTime.of(2025,3,23,22,23);
-            LocalDateTime time4 = LocalDateTime.of(2025,3,16,11,11);
+            LocalDateTime time1 = LocalDateTime.of(2025, 3, 3, 9, 45);
+            LocalDateTime time2 = LocalDateTime.of(2025, 2, 25, 23, 23);
+            LocalDateTime time3 = LocalDateTime.of(2025, 3, 23, 22, 23);
+            LocalDateTime time4 = LocalDateTime.of(2025, 3, 16, 11, 11);
 
             Complain complain1 = new Complain();
             complain1.setKind("Complaint");
@@ -409,12 +406,8 @@ public class App {
             //generateOrders();
 
 
-
-
-
-
             generateRestaurants();
-            generateCompanyMeals();
+            //generateCompanyMeals();
 
             generateOrders();
 
@@ -424,7 +417,8 @@ public class App {
 
             //generateTheComplains();
             initializeSampleTables();
-            generateBasicUser1();
+            fetching_reservation();
+            //generateBasicUser1();
             // Register a shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 System.out.println("Shutdown initiated. Performing cleanup...");
@@ -441,6 +435,7 @@ public class App {
             exception.printStackTrace();
         }
     }
+
     public static void deleteAllTablesAndRelatedData() {
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction(); // Start the transaction
@@ -486,11 +481,21 @@ public class App {
             session.beginTransaction(); // Start the transaction
 
             // Check if tables already exist in the database
-            Query<Long> tableCountQuery = session.createQuery("SELECT COUNT(*) FROM TableNode", Long.class);
-            long tableCount = tableCountQuery.uniqueResult();
+            List<TableNode> tableCountQuery = session.createQuery("FROM TableNode", TableNode.class).list();
+            int tableCount = tableCountQuery.size();
+
+            // Initialize lazy-loaded fields
+            for (TableNode table : tableCountQuery) {
+                Hibernate.initialize(table.getReservationStartTimes());
+                Hibernate.initialize(table.getReservationEndTimes());
+                Hibernate.initialize(table.getRestaurant()); // if needed
+            }
+
+            SimpleServer.allTables = tableCountQuery;
 
             if (tableCount > 0) {
                 System.out.println("Tables already exist in the database. Skipping sample table generation.");
+                session.getTransaction().commit();
                 return; // Exit the method if tables exist
             }
 
@@ -503,13 +508,13 @@ public class App {
             for (Restaurant restaurant : restaurants) {
                 List<TableNode> tables = new ArrayList<>();
                 for (int i = 0; i < 15; i++) { // Add 15 tables for each restaurant
-                    // Randomly choose capacity (2, 3, or 4)
                     int capacity = capacities.get(random.nextInt(capacities.size()));
-
                     TableNode table = new TableNode(restaurant, random.nextBoolean(), capacity, "available");
-                    tables.add(table);
+
                     // Save table to the session
                     session.save(table);
+                    allTables.add(table);
+                    tables.add(table);
                 }
 
                 // Save the tables in the restaurant
@@ -522,6 +527,7 @@ public class App {
             e.printStackTrace();
         }
     }
+
 
     public static List<Restaurant> Get_Restaurant(String queryString, String restaurantName) {
         List<Restaurant> result = new ArrayList<>();
@@ -547,6 +553,28 @@ public class App {
 
         return result;
     }
+
+    public static void fetching_reservation() {
+        List<Restaurant> result = new ArrayList<>();
+
+        try (Session session = getSessionFactory().openSession()) { // Auto-closing session
+            session.beginTransaction();
+
+            // Fetch all ReservationSave objects from the database
+            allSavedReservation = session.createQuery("FROM ReservationSave", ReservationSave.class).list();
+
+            // Initialize the tables collection for each ReservationSave object
+            for (ReservationSave reservation : allSavedReservation) {
+                Hibernate.initialize(reservation.getTables()); // Initialize the lazy-loaded tables collection
+            }
+
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            System.err.println("Error executing the query: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
 //    public static void relateMealsWithRestaurants() throws Exception {
 //        // Example data generation
 //        List<Meal> meals = getAllMeals();  // Assuming this method generates the list of meals

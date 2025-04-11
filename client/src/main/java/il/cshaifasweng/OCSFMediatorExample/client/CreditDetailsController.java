@@ -29,8 +29,10 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -388,7 +390,6 @@ public class CreditDetailsController {
         // This method gets called when a CreditCardCheck object is posted to the EventBus
         if(creditCardCheck.getMode().equals("Order")){
             Platform.runLater(() -> {
-
                 System.out.println("Credit card is valid." + creditCardCheck.getOrder());
                 errorLabel.setText(creditCardCheck.getResponse());
                 done_Order = creditCardCheck.getOrder();
@@ -407,7 +408,7 @@ public class CreditDetailsController {
                     errorLabel.setText(creditCardCheck.getResponse());
                     done_Reservation = creditCardCheck.getReservationEvent();
                     if(!(creditCardCheck.getResponse().equals("Payment Failed"))){
-                    sendReservationConfirmationEmail(CreditDetailsController.personalDetails,done_Reservation.getReservationSaveID(), done_Reservation.getRestaurantName(),done_Reservation.getSeats() );
+                    sendReservationConfirmationEmail(CreditDetailsController.personalDetails,done_Reservation.getReservationSaveID(), done_Reservation.getRestaurantName(),done_Reservation.getSeats(), done_Reservation.getReservationDateTime());
                     App.setRoot("mainScreen");
                     }
                 } catch (IOException e) {
@@ -471,6 +472,7 @@ public class CreditDetailsController {
             } catch (IOException e) {
                 System.err.println("Error sending credit card details to server: " + e.getMessage());
                 errorLabel.setText("Failed to send data to server.");  // Update UI to show error message
+                e.printStackTrace();
             }
         } catch (DateTimeParseException e) {
             System.err.println("Failed to parse expiry date: " + e.getMessage());
@@ -501,31 +503,48 @@ public class CreditDetailsController {
     }
 
     public static void sendReservationConfirmationEmail(PersonalDetails customer, int orderNumber,
-                                                  String restaurantName, int seats) {
-        // Create the subject
-        String subject = "Reservation Confirmation - Order #" + orderNumber;
+                                                        String restaurantName, int seats,LocalDateTime reservationDateTime) {
+        // Email configuration
+        String subject = String.format("%s Reservation Confirmed (#%d)", restaurantName, orderNumber);
 
-        // Format the date
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String currentDate = dateFormat.format(new Date());
+        // Define the desired format
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM dd, yyyy 'at' hh:mm a");
 
-        // Construct the body of the email
-        StringBuilder body = new StringBuilder();
-        body.append("Dear ").append(customer.getName()).append(",\n\n");
-        body.append("Thank you for your order at ").append(restaurantName).append("!\n\n");
-        body.append("Here are the details of your reservation").append("\n");
-        body.append("Order Date: ").append(currentDate).append("\n\n");
-        body.append("number of seats:\n");
+        // Format the LocalDateTime
+        String formattedDate = reservationDateTime.format(formatter);
 
-        body.append("- ").append(seats).append("\n");
+        // Build email body
+        StringBuilder body = new StringBuilder()
+                .append("\n――――――――――――――――――――――――――――――――――――――――――――――\n")
+                .append("               RESERVATION CONFIRMATION          \n")
+                .append("――――――――――――――――――――――――――――――――――――――――――――――\n\n")
+                .append("Dear ").append(properCase(customer.getName())).append(",\n\n")
+                .append("Thank you for choosing ").append(restaurantName).append("!\n")
+                .append("Below are your reservation details:\n\n")
+                .append("◈ Order Number:    #").append(orderNumber).append("\n")
+                .append("◈ Restaurant:      ").append(restaurantName).append("\n")
+                .append("◈ Reservation Date: ").append(formattedDate).append("\n")
+                .append("◈ Number of Guests: ").append(seats).append(" ")
+                .append(seats == 1 ? "person" : "people").append("\n\n")
+                .append("Important Information:\n")
+                .append("• Contact us for special dietary requirements\n")
+                .append("We look forward to serving you!\n\n")
+                .append("Best regards,\n")
+                .append(restaurantName).append(" Team\n")
+                .append("――――――――――――――――――――――――――――――――――――――――――――――");
 
-        body.append("\nWe hope you enjoy your visit!\n\n");
-        body.append("Best regards,\n");
-        body.append("Mama's Restaurant Team");
-
-        // Now you can call the email sender with the subject, body, and the customer's email
+        // Send email
         EmailSender.sendEmail(subject, body.toString(), customer.getEmail());
     }
+
+    private static String properCase(String name) {
+        if (name == null || name.isEmpty()) return "";
+        return Arrays.stream(name.split("\\s+"))
+                .map(word -> Character.toUpperCase(word.charAt(0))
+                        + word.substring(1).toLowerCase())
+                .collect(Collectors.joining(" "));
+    }
+
     @Subscribe
     public void goBackToReservation(FaildPayRes event){
         Platform.runLater(() -> {

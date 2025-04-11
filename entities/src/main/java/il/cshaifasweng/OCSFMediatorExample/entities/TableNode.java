@@ -4,6 +4,7 @@ import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +104,40 @@ public class TableNode implements Serializable {
         // If not occupied or reserved, the table is available
         return "available";
     }
+
+    public String getTodayStatus() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate currentDate = now.toLocalDate();  // Get the current date (ignoring time)
+
+        boolean hasFutureReservation = false;
+
+        for (int i = 0; i < reservationStartTimes.size(); i++) {
+            LocalDateTime startTime = reservationStartTimes.get(i);
+            LocalDateTime endTime = reservationEndTimes.get(i);
+
+            // Check if the reservation is for the current day
+            if (startTime.toLocalDate().isEqual(currentDate)) {
+                // Check if the table is currently occupied
+                if (now.isAfter(startTime) && now.isBefore(endTime)) {
+                    return "occupied";  // Table is currently occupied
+                }
+
+                // Check if there is a future reservation today
+                if (now.isBefore(startTime)) {
+                    hasFutureReservation = true;
+                }
+            }
+        }
+
+        // If there are any future reservations today, the table is considered "reserved"
+        if (hasFutureReservation) {
+            return "reserved";
+        }
+
+        // If no current or future reservations for today, the table is available
+        return "available";
+    }
+
     public void setStatus(String status) {
         this.status = status;
     }

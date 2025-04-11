@@ -317,8 +317,8 @@ public class SimpleClient extends AbstractClient {
 		else if (message.equals("Reservation confirmed successfully.")) {
 			EventBus.getDefault().post(message);
 		}
-		else if(message.startsWith("Cancle Reservation ")){
-			EventBus.getDefault().post(message.substring("Cancle Reservation ".length()).trim());}
+		else if(message.startsWith("Cancel Reservation ")){
+			EventBus.getDefault().post(message.substring("Cancel Reservation ".length()).trim());}
 		else if (message.equals("Registration completed successfully")) {
 			EventBus.getDefault().post(message);
 
