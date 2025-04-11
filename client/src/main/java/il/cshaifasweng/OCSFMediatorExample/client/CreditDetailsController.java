@@ -399,17 +399,16 @@ public class CreditDetailsController {
                     throw new RuntimeException(e);
                 }
             });
-        } else {
+        } else if(creditCardCheck.getMode().equals("Reservation")){
 
             Platform.runLater(() -> {
-                errorLabel.setText(creditCardCheck.getResponse());
                 try {
-                    //errorLabel.setText(creditCardCheck.getResponse());
+                    System.out.println("Reservation is valid.");
                     errorLabel.setText(creditCardCheck.getResponse());
                     done_Reservation = creditCardCheck.getReservationEvent();
                     if(!(creditCardCheck.getResponse().equals("Payment Failed"))){
                     sendReservationConfirmationEmail(CreditDetailsController.personalDetails,done_Reservation.getReservationSaveID(), done_Reservation.getRestaurantName(),done_Reservation.getSeats(), done_Reservation.getReservationDateTime());
-                    App.setRoot("mainScreen");
+                    App.setRoot("receipt");
                     }
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -449,6 +448,9 @@ public class CreditDetailsController {
 
             if(savedCardsComboBox.getValue() != null) {
                 System.out.println("selected credit card");
+                creditcard.setCardNumber(savedCardsComboBox.getValue().getCardNumber());
+                System.out.println("credit card num is "+creditcard.getCardNumber());
+                //System.out.println("cc num is : " + savedCardsComboBox.getValue().getCardNumber());
                 if(mode.equals("Order")) {
                     paymentCheck = new PaymentCheck(savedCardsComboBox.getValue(), personalDetails, done_Order, "Order");
                 } else {
@@ -485,7 +487,7 @@ public class CreditDetailsController {
         Platform.runLater(() -> {
             System.out.println("getting from server");
             savedCardsComboBox.getItems().clear();
-            savedCardsComboBox.getItems().add(null); // First option
+            savedCardsComboBox.getItems().add(null);
             for (CreditCard creditCard : creditCards.getCreditCards()) {
                 savedCardsComboBox.getItems().add(creditCard);
             }

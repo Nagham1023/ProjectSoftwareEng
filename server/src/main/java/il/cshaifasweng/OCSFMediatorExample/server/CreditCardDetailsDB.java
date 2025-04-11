@@ -11,12 +11,15 @@ import java.util.List;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
 import static il.cshaifasweng.OCSFMediatorExample.server.OrdersDB.saveOrder;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.allCreditCards;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.allPersonalDetails;
 
 public class CreditCardDetailsDB {
     private static Session session;
 
     public static void addCreditCardDetails(CreditCard newCardDetails, PersonalDetails personalDetails, Order newOrder) {
         try {
+            System.out.println("Adding personal and credit card details");
             if (session == null || !session.isOpen()) {
                 SessionFactory sessionFactory = getSessionFactory();
                 session = sessionFactory.openSession();
@@ -25,8 +28,16 @@ public class CreditCardDetailsDB {
             // Start the transaction
             session.beginTransaction();
 
+
+            for(MealInTheCart meal : newOrder.getMeals()) {
+                for (CustomizationWithBoolean custom : meal.getMeal().getCustomizationsList()) {
+                    session.saveOrUpdate(custom);  // Use saveOrUpdate to handle both new and existing entities}
+                }
+            }
             // If the personalDetails object doesn't already exist, save it
             if (personalDetails != null) {
+
+
 
 
                 personalDetails.addCreditCard(newCardDetails);
@@ -35,11 +46,13 @@ public class CreditCardDetailsDB {
                 newCardDetails.setPersonalDetails(personalDetails);
                 session.save(newCardDetails);
 
-                //saveOrder(newOrder);
+
                 session.saveOrUpdate(newOrder);
 
 
                 session.getTransaction().commit();
+                allCreditCards.add(newCardDetails);
+                allPersonalDetails.add(personalDetails);
             } else {
                 session.getTransaction().rollback(); // Explicit rollback if personalDetails is null
                 throw new RuntimeException("PersonalDetails cannot be null");
@@ -61,11 +74,11 @@ public class CreditCardDetailsDB {
     public static void addCreditCardToExistingPersonalDetails(CreditCard newCreditCard,PersonalDetails PersonalDetails,Order newOrder) {
         Transaction transaction = null;
         try {
+            System.out.println("Adding personal and credit card details");
             // Ensure session is open
             if (session == null || !session.isOpen()) {
                 SessionFactory sessionFactory = getSessionFactory();
                 session = sessionFactory.openSession();
-                //System.out.println("Session opened");
             }
 
             transaction = session.beginTransaction();
@@ -74,7 +87,11 @@ public class CreditCardDetailsDB {
             if (PersonalDetails == null || newCreditCard == null) {
                 throw new IllegalArgumentException("PersonalDetails or CreditCard cannot be null");
             }
-
+            for(MealInTheCart meal : newOrder.getMeals()) {
+                for (CustomizationWithBoolean custom : meal.getMeal().getCustomizationsList()) {
+                    session.saveOrUpdate(custom);  // Use saveOrUpdate to handle both new and existing entities}
+                }
+            }
 
 
 
@@ -85,6 +102,12 @@ public class CreditCardDetailsDB {
             // Associate new credit card
             newCreditCard.setPersonalDetails(managedPersonalDetails);
             managedPersonalDetails.getCreditCardDetails().add(newCreditCard);
+            allCreditCards.add(newCreditCard);
+            for(PersonalDetails details : allPersonalDetails) {
+                if(details.getEmail().equals(PersonalDetails.getEmail())) {
+                    details.getCreditCardDetails().add(newCreditCard);
+                }
+            }
 
             // Save the credit card (no duplicate error)
             session.save(newCreditCard);
@@ -113,83 +136,8 @@ public class CreditCardDetailsDB {
     }
 
 
-
-
-
-
-
-    public static boolean isCreditCardNew(CreditCard credit) throws HibernateException {
-        boolean isNew = false;
-        try {
-            if (session == null || !session.isOpen()) {
-                SessionFactory sessionFactory = getSessionFactory();
-                session = sessionFactory.openSession();
-            }
-
-            CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaQuery<Long> query = builder.createQuery(Long.class);
-            Root<CreditCard> root = query.from(CreditCard.class);
-            query.select(builder.count(root))
-                    .where(
-                            builder.and(
-                                    builder.equal(root.get("cardNumber"), credit.getCardNumber())
-                            )
-                    );
-
-            Long count = session.createQuery(query).getSingleResult();
-            isNew = (count == 0);
-            //System.out.println("there is a new credit card details: " + isNew );
-        } catch (Exception e) {
-            // You might want to log the exception here or handle specific exceptions
-            throw new HibernateException("Failed to check if credit card is new", e);
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close(); // Ensure session is closed in the finally block
-            }
-        }
-        return isNew;
-    }
-
-
-
-    public static List<CreditCard> getCreditCardDetailsByPersonalEmail(String personalEmail) {
-        Session session = null;
-        try {
-            session = getSessionFactory().openSession();
-            PersonalDetails personalDetails = session.bySimpleNaturalId(PersonalDetails.class).load(personalEmail);
-            if (personalDetails != null && personalDetails.getCreditCardDetails() != null) {
-                // Initialize the proxy to fetch the credit cards if lazy loading
-                Hibernate.initialize(personalDetails.getCreditCardDetails());
-                return personalDetails.getCreditCardDetails();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-        return Collections.emptyList(); // Return an empty list if there are no details or in case of exceptions
-    }
-
-
-    public static List<CreditCard> getAllCreditCardDetails() {
-        try {
-            session = getSessionFactory().openSession();
-            CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaQuery<CreditCard> query = builder.createQuery(CreditCard.class);
-            query.from(CreditCard.class);
-            return session.createQuery(query).getResultList();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (session != null) session.close();
-        }
-        return null;
-    }
-
-
     public static void addPersonalDetailsAndAssociateWithCreditCard(PersonalDetails newPersonalDetails, CreditCard existingCreditCard,Order newOrder) {
+        System.out.println("Adding personal and credit card details");
         try {
             // Open session if not already open
             if (session == null || !session.isOpen()) {
@@ -199,18 +147,22 @@ public class CreditCardDetailsDB {
 
             // Begin transaction
             session.beginTransaction();
-
+            for(MealInTheCart meal : newOrder.getMeals()) {
+                for (CustomizationWithBoolean custom : meal.getMeal().getCustomizationsList()) {
+                    session.saveOrUpdate(custom);  // Use saveOrUpdate to handle both new and existing entities}
+                }
+            }
             // Check if newPersonalDetails is null
             if (newPersonalDetails == null) {
-                //System.out.println("newPersonalDetails is null");
                 return; // Exit early if the PersonalDetails is null
             }
 
 
-            // Also, add the CreditCard to the PersonalDetails' list of associated CreditCards
+
+
             newPersonalDetails.addCreditCard(existingCreditCard);
 
-            // Save the new PersonalDetails to the database
+
             session.save(newPersonalDetails);
 
 
@@ -225,6 +177,14 @@ public class CreditCardDetailsDB {
 
             // Commit the transaction
             session.getTransaction().commit();
+            allPersonalDetails.add(newPersonalDetails);
+
+            for(CreditCard cc :allCreditCards)
+            {
+                if(cc.getCardNumber().equals(existingCreditCard.getCardNumber())) {
+                    cc.getPersonalDetails().add(newPersonalDetails);
+                }
+            }
 
         } catch (Exception e) {
             if (session.getTransaction() != null && session.getTransaction().isActive()) {
@@ -240,6 +200,7 @@ public class CreditCardDetailsDB {
     }
 
     public static void addCreditCardToPersonalDetailsIfBothExists(PersonalDetails existingPersonalDetails, CreditCard existingCreditCard,Order newOrder) {
+        System.out.println("Adding personal and credit card details");
         try {
             // Open session if not already open
             if (session == null || !session.isOpen()) {
@@ -247,10 +208,17 @@ public class CreditCardDetailsDB {
                 session = sessionFactory.openSession();
             }
 
+
             //System.out.println("The credit card and the personal details are both exist and now associating with the credit card.");
 
             // Begin transaction
             session.beginTransaction();
+
+            for(MealInTheCart meal : newOrder.getMeals()) {
+                for (CustomizationWithBoolean custom : meal.getMeal().getCustomizationsList()) {
+                    session.saveOrUpdate(custom);  // Use saveOrUpdate to handle both new and existing entities}
+                }
+            }
 
             // Retrieve the entities from the session to avoid duplicate entity issue
             CreditCard dbCreditCard = session.get(CreditCard.class, existingCreditCard.getId());
@@ -259,9 +227,19 @@ public class CreditCardDetailsDB {
             // Associate if not already associated
             if (!dbPersonalDetails.getCreditCardDetails().contains(dbCreditCard)) {
                 dbPersonalDetails.addCreditCard(dbCreditCard);
+                for(PersonalDetails details : allPersonalDetails) {
+                    if(details.getEmail().equals(existingPersonalDetails.getEmail())) {
+                        details.addCreditCard(dbCreditCard);
+                    }
+                }
             }
 
             if (!dbCreditCard.getPersonalDetails().contains(dbPersonalDetails)) {
+                for(CreditCard cc : allCreditCards) {
+                    if(cc.getCardNumber().equals(existingCreditCard.getCardNumber())) {
+                        cc.getPersonalDetails().add(dbPersonalDetails);
+                    }
+                }
                 dbCreditCard.getPersonalDetails().add(dbPersonalDetails);
             }
 
@@ -293,25 +271,23 @@ public class CreditCardDetailsDB {
 
 
     public static CreditCard getCreditCardDetailsByCardNumber(String cardNumber) {
-        if (session == null || !session.isOpen()) {
-            SessionFactory sessionFactory = getSessionFactory();
-            session = sessionFactory.openSession();
+        for(CreditCard cc : allCreditCards) {
+            if(cc.getCardNumber().equals(cardNumber)) {
+                return cc;
+            }
         }
-            //session.beginTransaction();
-
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<CreditCard> query = builder.createQuery(CreditCard.class);
-        Root<CreditCard> root = query.from(CreditCard.class);
-
-        query.select(root).where(builder.equal(builder.lower(root.get("cardNumber")), cardNumber));
-
-        CreditCard cc = session.createQuery(query).uniqueResult();
-        if (session != null && session.isOpen()) {
-            session.close(); // Close the session after operation
+        return null;
+    }
+    public static List<CreditCard> getAllCreditCards() {
+        try (Session localSession = getSessionFactory().openSession()) {
+            CriteriaBuilder builder = localSession.getCriteriaBuilder();
+            CriteriaQuery<CreditCard> query = builder.createQuery(CreditCard.class);
+            query.from(CreditCard.class);
+            return localSession.createQuery(query).getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-            //session.getTransaction().commit();
-
-        return cc;
+        return null;
     }
 
     //**************************** for reservation purposes***************************************************************//
@@ -329,12 +305,15 @@ public class CreditCardDetailsDB {
             if (personalDetails != null) {
 
 
+
                 personalDetails.addCreditCard(newCardDetails);
                 session.save(personalDetails);
 
                 newCardDetails.setPersonalDetails(personalDetails);
                 session.save(newCardDetails);
 
+                allPersonalDetails.add(personalDetails);
+                allCreditCards.add(newCardDetails);
 
                 session.saveOrUpdate(finalReservationEvent);
                 session.getTransaction().commit();
@@ -372,8 +351,6 @@ public class CreditCardDetailsDB {
 
 
 
-
-
             // Load existing entities from the session to avoid duplicates
             PersonalDetails managedPersonalDetails = session.get(PersonalDetails.class, PersonalDetails.getId());
 
@@ -387,6 +364,13 @@ public class CreditCardDetailsDB {
             // Update other entities
             session.saveOrUpdate(managedPersonalDetails);
             session.saveOrUpdate(finalReservationEvent);
+
+            allCreditCards.add(newCreditCard);
+            for(PersonalDetails details : allPersonalDetails) {
+                if(details.getEmail().equals(PersonalDetails.getEmail())) {
+                    details.addCreditCard(newCreditCard);
+                }
+            }
 
 
             transaction.commit();
@@ -424,6 +408,7 @@ public class CreditCardDetailsDB {
             }
 
 
+
             // Also, add the CreditCard to the PersonalDetails' list of associated CreditCards
             newPersonalDetails.addCreditCard(existingCreditCard);
 
@@ -441,6 +426,12 @@ public class CreditCardDetailsDB {
             session.saveOrUpdate(finalReservationEvent);
             // Commit the transaction
             session.getTransaction().commit();
+            allPersonalDetails.add(newPersonalDetails);
+            for(CreditCard cc : allCreditCards) {
+                if(cc.getCardNumber().equals(existingCreditCard.getCardNumber())) {
+                    cc.getPersonalDetails().add(newPersonalDetails);
+                }
+            }
 
         } catch (Exception e) {
             if (session.getTransaction() != null && session.getTransaction().isActive()) {
@@ -474,10 +465,20 @@ public class CreditCardDetailsDB {
             // Associate if not already associated
             if (!dbPersonalDetails.getCreditCardDetails().contains(dbCreditCard)) {
                 dbPersonalDetails.addCreditCard(dbCreditCard);
+                for(CreditCard cc : allCreditCards) {
+                    if(cc.getCardNumber().equals(existingCreditCard.getCardNumber())) {
+                        cc.getPersonalDetails().add(dbPersonalDetails);
+                    }
+                }
             }
 
             if (!dbCreditCard.getPersonalDetails().contains(dbPersonalDetails)) {
                 dbCreditCard.getPersonalDetails().add(dbPersonalDetails);
+                for(CreditCard cc : allCreditCards) {
+                    if(cc.getCardNumber().equals(existingCreditCard.getCardNumber())) {
+                        cc.getPersonalDetails().add(dbPersonalDetails);
+                    }
+                }
             }
 
             // Save or update the CreditCard and PersonalDetails objects

@@ -26,14 +26,14 @@ import java.nio.file.Paths;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.addCreditCardDetails;
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.getAllComplains;
+import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.getAllCreditCards;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.OrdersDB.generateOrders;
-import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.addPersonalDetails;
+import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.getAllPersonalDetails;
 import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.getAllRestaurants;
 import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.*;
-import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.generateBasicUser1;
-import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.printAllUsers;
+import static il.cshaifasweng.OCSFMediatorExample.server.UsersDB.*;
 
 public class App {
 
@@ -401,16 +401,15 @@ public class App {
             deleteAllTablesAndRelatedData();
             generateData();
             printAllData();
+            allPersonalDetails = getAllPersonalDetails();
+            allCreditCards = getAllCreditCards();
             //generateBasicUser();
             //printAllUsers();
             //generateOrders();
-
-
+            allUsers = getUsers();
             generateRestaurants();
             //generateCompanyMeals();
-
             generateOrders();
-
             getAllRestMeals();
             System.out.println("getting all custom");
             allcust = getAllCustomizations();

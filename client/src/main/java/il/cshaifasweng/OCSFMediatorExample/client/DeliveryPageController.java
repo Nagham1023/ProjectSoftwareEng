@@ -80,6 +80,7 @@ public class DeliveryPageController {
     }
 
     private void setupOrderTimeComboBox() {
+        System.out.println("setupOrderTimeComboBox");
         List<String> availableTimes = calculateTimes();
         orderTimeComboBox.getItems().setAll(availableTimes);
         orderTimeComboBox.getSelectionModel().selectFirst(); // Optionally select the first available time.
@@ -91,16 +92,19 @@ public class DeliveryPageController {
         final LocalTime endLimit = LocalTime.of(22, 0); // End of the time limit at 10:00 PM
         final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         // Adjust start time to 10:30 AM if it's earlier than that or to the next half hour slot if it's later
-        if (startTime.isBefore(startLimit)) {
-            startTime = startLimit;
-        } else if (startTime.isAfter(endLimit)) {
-            startTime = endLimit.plusMinutes(30); // Next day's first slot if after 10 PM
+        // If current time is after the delivery window, show tomorrow's slots
+        if (startTime.isAfter(endLimit)) {
+            startTime = startLimit; // Start from 10:30 tomorrow
+        } else if (startTime.isBefore(startLimit)) {
+            startTime = startLimit; // Clamp to 10:30 if too early
         }
-        // Loop to add times but ensure it's within the 10:00 AM to 10:00 PM bounds
-        while (startTime.isBefore(endLimit.plusMinutes(30))) { // Include 10:00 PM time slot
+
+        // Add times every 30 mins up to 10:00 PM
+        while (!startTime.isAfter(endLimit)) {
             times.add(startTime.format(timeFormatter));
-            startTime = startTime.plusMinutes(30); // Increment by 30 minutes
+            startTime = startTime.plusMinutes(30);
         }
+
         return times;
     }
     private void setupArrowButton() {

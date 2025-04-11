@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
-import static il.cshaifasweng.OCSFMediatorExample.client.CreditDetailsController.done_Order;
+import static il.cshaifasweng.OCSFMediatorExample.client.CreditDetailsController.*;
 import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.deliveryPrice;
 
 public class receiptController {
@@ -40,25 +40,36 @@ public class receiptController {
 
 
     public void initialize() {
-        int paid = done_Order.getTotal_price();
-        OrderNumField.setText("Order Number: "+done_Order.getId());
-        branchField.setText(done_Order.getRestaurantName());
-        dateField.setText(String.valueOf(done_Order.getDate()));
-        String ccNumber = done_Order.getCreditCard_num();
-        String lastFour = ccNumber.length() > 4 ? ccNumber.substring(ccNumber.length() - 4) : ccNumber;
-        PaidField.setText("Paid "+paid+"₪ with Credit Card ends with "+lastFour);
-        fillMealDetailsContainer();
-        String[] mealsOrdered = new String[done_Order.getMeals().size()];
-        int index = 0;
-        for (MealInTheCart meal : done_Order.getMeals()) {
-            String mealDetails = meal.getMeal().getMeal().getName() + " - Quantity: " + meal.getQuantity() + " - Price: $" + meal.getMeal().getMeal().getPrice();
-            mealsOrdered[index] = mealDetails;
-            index++;
+        if(mode.equals("Order")) {
+            int paid = done_Order.getTotal_price();
+            OrderNumField.setText("Order Number: " + done_Order.getId());
+            branchField.setText(done_Order.getRestaurantName());
+            dateField.setText(String.valueOf(done_Order.getDate()));
+            String ccNumber = done_Order.getCreditCard_num();
+            String lastFour = ccNumber.length() > 4 ? ccNumber.substring(ccNumber.length() - 4) : ccNumber;
+            PaidField.setText("Paid " + paid + "₪ with Credit Card ends with " + lastFour);
+            fillMealDetailsContainer();
+            String[] mealsOrdered = new String[done_Order.getMeals().size()];
+            int index = 0;
+            for (MealInTheCart meal : done_Order.getMeals()) {
+                String mealDetails = meal.getMeal().getMeal().getName() + " - Quantity: " + meal.getQuantity() + " - Price: $" + meal.getMeal().getMeal().getPrice();
+                mealsOrdered[index] = mealDetails;
+                index++;
+            }
+            sendOrderConfirmationEmail(CreditDetailsController.personalDetails, done_Order.getId(), done_Order.getRestaurantName(), mealsOrdered);
+            if (done_Order.getOrderType().equals("Delivery")) {
+                addDelivery();
+            }
         }
-        sendOrderConfirmationEmail(CreditDetailsController.personalDetails,done_Order.getId(), done_Order.getRestaurantName(),mealsOrdered );
-        if(done_Order.getOrderType().equals("Delivery"))
-        {
-            addDelivery();
+        else if(mode.equals("Reservation")) {
+            OrderNumField.setText("Reservation Number: " + done_Reservation.getReservationSaveID());
+            branchField.setText(done_Reservation.getRestaurantName());
+            dateField.setText(String.valueOf(done_Reservation.getReservationDateTime()));
+            String ccNumber = done_Reservation.getCreditCard_num();
+            String lastFour = ccNumber.length() > 4 ? ccNumber.substring(ccNumber.length() - 4) : ccNumber;
+            PaidField.setText("Paid with Credit Card ends with " + lastFour);
+            addReserved();
+
         }
     }
 
@@ -233,6 +244,39 @@ public class receiptController {
         deliveryPrice.setStyle("-fx-font-weight: bold;");
 
         DeliveryInfo.getChildren().addAll(text,deliveryPrice, new Text("\n"));
+
+        deliveryRow.getChildren().add(DeliveryInfo);
+
+        mealDetailsContainer.getChildren().add(deliveryRow);
+    }
+    public void addReserved() {
+        StringBuilder orderDetails = new StringBuilder();
+
+        HBox deliveryRow = new HBox(10);
+        deliveryRow.setSpacing(10);
+
+
+        Image delivery = new Image(getClass().getResourceAsStream("/images/reserved.png"));
+
+        ImageView imageView = new ImageView(delivery);
+        imageView.setFitHeight(100);
+        imageView.setFitWidth(100);
+        imageView.setPreserveRatio(true);
+
+        Rectangle clip = new Rectangle(100, 100);
+        clip.setArcWidth(20);
+        clip.setArcHeight(20);
+        imageView.setClip(clip);
+
+        deliveryRow.getChildren().add(imageView);
+
+        // Add meal info text (name and quantity)
+        TextFlow DeliveryInfo = new TextFlow();
+
+        Text text = new Text("Reservation ");
+        text.setStyle("-fx-font-weight: bold;");
+
+        DeliveryInfo.getChildren().addAll(text, new Text("\n"));
 
         deliveryRow.getChildren().add(DeliveryInfo);
 

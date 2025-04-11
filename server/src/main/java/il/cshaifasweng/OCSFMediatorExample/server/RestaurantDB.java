@@ -93,23 +93,11 @@ public class RestaurantDB {
     public static int getRestaurantIdByName(String restaurantName) {
         int restaurantId = -1;  // Default value if not found
 
-        try (Session session = App.getSessionFactory().openSession()) {
-            session.beginTransaction();
-
-            // Assuming 'Restaurant' is your entity class and 'name' is the column storing the restaurant name
-            Restaurant restaurant = (Restaurant) session.createQuery("FROM Restaurant WHERE restaurantName = :name")
-                    .setParameter("name", restaurantName)
-                    .uniqueResult();
-
-            if (restaurant != null) {
-                restaurantId = restaurant.getId();  // Get the ID of the restaurant
+        for (Restaurant restaurant : restaurants) {
+            if (restaurant.getRestaurantName().equals(restaurantName)) {
+                restaurantId = restaurant.getId();
             }
-
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
         return restaurantId;
     }
 
