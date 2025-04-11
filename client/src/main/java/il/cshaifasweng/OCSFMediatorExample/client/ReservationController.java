@@ -20,6 +20,7 @@ import org.greenrobot.eventbus.Subscribe;
 
 import static il.cshaifasweng.OCSFMediatorExample.client.CreditDetailsController.done_Order;
 import static il.cshaifasweng.OCSFMediatorExample.client.CreditDetailsController.done_Reservation;
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.restaurantList;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -87,7 +88,14 @@ public class ReservationController {
         loadingGif.setImage(loadingImage);
 
         // Fetch all restaurants
-        SimpleClient.getClient().sendToServer("getAllRestaurants");
+        if(restaurantList == null) {
+            System.out.println("RestaurantList is null");
+            SimpleClient.getClient().sendToServer("getAllRestaurants");
+        }
+        else {
+            System.out.println("RestaurantList is loaded");
+            putResturants(restaurantList);
+        }
         startLoading();
     }
 
@@ -217,6 +225,8 @@ public class ReservationController {
         alert.showAndWait();
     }
 
+
+
     private void handleTimeButtonClick(String buttonText) throws IOException {
         boolean reservationSuccessful = false;
         //hasBeenHereBefore= noValidation;
@@ -248,6 +258,7 @@ public class ReservationController {
             ButtonType confirmButtonType = new ButtonType("Confirm", ButtonBar.ButtonData.OK_DONE);
             dialog.getDialogPane().getButtonTypes().addAll(confirmButtonType, ButtonType.CANCEL);
 
+
             GridPane grid = new GridPane();
             grid.setHgap(10);
             grid.setVgap(10);
@@ -269,6 +280,20 @@ public class ReservationController {
             grid.add(new Label("Email:"), 0, 2);
             grid.add(emailField, 1, 2);
             grid.add(errorLabel, 0, 3, 2, 1);
+
+            Node confirmButton = dialog.getDialogPane().lookupButton(confirmButtonType);
+            confirmButton.setDisable(true);
+
+
+            fullNameField.textProperty().addListener((obs, oldVal, newVal) -> {
+                confirmButton.setDisable(!validateUserInputs(fullNameField.getText(), phoneNumberField.getText(), emailField.getText()));
+            });
+            phoneNumberField.textProperty().addListener((obs, oldVal, newVal) -> {
+                confirmButton.setDisable(!validateUserInputs(fullNameField.getText(), phoneNumberField.getText(), emailField.getText()));
+            });
+            emailField.textProperty().addListener((obs, oldVal, newVal) -> {
+                confirmButton.setDisable(!validateUserInputs(fullNameField.getText(), phoneNumberField.getText(), emailField.getText()));
+            });
 
             dialog.getDialogPane().setContent(grid);
 

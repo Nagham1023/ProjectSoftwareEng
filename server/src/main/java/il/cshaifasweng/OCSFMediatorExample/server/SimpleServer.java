@@ -52,7 +52,12 @@ public class SimpleServer extends AbstractServer {
     public static List<Customization> allcust;
     public static List<TableNode> allTables;
     public static List<ReservationSave> allSavedReservation;
+    public static List<Users> allUsers = new ArrayList<>();
+    public static List<PersonalDetails> allPersonalDetails = new ArrayList<>();
+    public static List<CreditCard> allCreditCards = new ArrayList<>();
+
     private record ReservationPeriod(LocalDateTime start, LocalDateTime end) {}
+
 
 
     public SimpleServer(int port) {
@@ -423,10 +428,10 @@ public class SimpleServer extends AbstractServer {
         }
         else if (msg instanceof String && ((String)msg).equals("Get all users")) {
             System.out.println("Getting all users");
-            List<Users> users= UsersDB.getUsers();
+            //List<Users> users= UsersDB.getUsers();
             try {
-                client.sendToClient(users);
-                sendToAll(users);
+                client.sendToClient(allUsers);
+                //sendToAll(allUsers);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -453,27 +458,16 @@ public class SimpleServer extends AbstractServer {
         //Payment Processing -Adan
         else if (msg instanceof PaymentCheck) {
             PaymentCheck paymentCheck = (PaymentCheck) msg;
-            //System.out.println("Processing request for card number: " + paymentCheck.getCreditCard().getCardNumber());
-
             try {
-
                 PersonalDetails personalDetailsDB = getPersonalDetailsByEmail(paymentCheck.getPersonalDetails().getEmail());
                 CreditCard cc = getCreditCardDetailsByCardNumber(paymentCheck.getCreditCard().getCardNumber());
                 CreditCard newCC = paymentCheck.getCreditCard();
                 PersonalDetails newPD = paymentCheck.getPersonalDetails();
 
                 if(paymentCheck.getMode().equals("Order")){
-                Order newOrder = paymentCheck.getOrder();
-                newOrder.setRestaurantId(getRestaurantIdByName(newOrder.getRestaurantName()));
-
-
-                /*saves the customizations of every meal in the order*/
-                for(MealInTheCart meal : newOrder.getMeals())
-                    saveCustomizationsbool(meal.getMeal().getCustomizationsList());
-
-
-
-                if (cc == null) {
+                    Order newOrder = paymentCheck.getOrder();
+                    newOrder.setRestaurantId(getRestaurantIdByName(newOrder.getRestaurantName()));
+                    if (cc == null) {
 
 
                         if (personalDetailsDB == null) {
@@ -506,7 +500,7 @@ public class SimpleServer extends AbstractServer {
                             paymentCheck.setResponse("Updated the personal details to the database.");
 
                             newOrder.setCreditCard_num(cc.getCardNumber());
-
+                            System.out.println("cc num is : " + cc.getCardNumber());
                             addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc, newOrder);
                         }
                         client.sendToClient(paymentCheck);
@@ -530,11 +524,10 @@ public class SimpleServer extends AbstractServer {
                         }
                         else {
                             //System.out.println("the personal details is already added but cc is null");
-
+                            newReservation.setCreditCard_num(newCC.getCardNumber());
                             result= handleSavingReservation(newReservation, client);
                             if(result){
                                 paymentCheck.setResponse("Added the Credit Card to the database.");
-                                newReservation.setCreditCard_num(newCC.getCardNumber());
                                 addCreditCardToExistingPersonalDetailsForRes(newCC, personalDetailsDB,newReservation);
                             }
                             else{
@@ -548,25 +541,21 @@ public class SimpleServer extends AbstractServer {
                         if(personalDetailsDB == null) {
                             //System.out.println("personal details null but cc is not null");
                             //System.out.println("new personal details");
+                            newReservation.setCreditCard_num(cc.getCardNumber());
                             result= handleSavingReservation(newReservation, client);
                             if(result){
-                                newReservation.setCreditCard_num(cc.getCardNumber());
-
                                 paymentCheck.setResponse("Added the personal details to the database");
                                 addPersonalDetailsAndAssociateWithCreditCardForRes(newPD, cc,newReservation);
                             }
                             else{
                                 paymentCheck.setResponse("Payment Failed");
                             }
-
                         }
-
                         else {
                             //System.out.println("not null both");
-
+                            newReservation.setCreditCard_num(cc.getCardNumber());
                             result =handleSavingReservation(newReservation, client);
                             if(result){
-                                newReservation.setCreditCard_num(cc.getCardNumber());
                                 paymentCheck.setResponse("Updated the personal details to the database.");
                                 addCreditCardToPersonalDetailsIfBothExistsForRes(personalDetailsDB, cc,newReservation);
                             }
@@ -589,9 +578,7 @@ public class SimpleServer extends AbstractServer {
                 System.out.println(personal.getName() + " simple server personal details");
                 // Fetch personal details from the database based on the email
                 PersonalDetails personalDetailsDB = getPersonalDetailsByEmail(personal.getEmail());
-                System.out.println("hosam **************");
                 if (personalDetailsDB != null) {
-                    System.out.println("adan **************");
                     // Process credit card details if found
                     List<CreditCard> creditCards = personalDetailsDB.getCreditCardDetails();
                     if (creditCards != null && !creditCards.isEmpty()) {

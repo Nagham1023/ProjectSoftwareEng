@@ -65,21 +65,6 @@ public class OrdersDB {
         }
     }
 
-    public static void saveCustomizationsbool(Set<CustomizationWithBoolean> customs) {
-        try (Session session = getSessionFactory().openSession()) {
-            session.beginTransaction();
-
-            for (CustomizationWithBoolean custom : customs) {
-                session.saveOrUpdate(custom);  // Use saveOrUpdate to handle both new and existing entities}
-            }
-
-            session.flush();
-
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
 
     /// ///////**************************generate Data********************************************///////////

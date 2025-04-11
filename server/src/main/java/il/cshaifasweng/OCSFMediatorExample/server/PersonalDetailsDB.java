@@ -16,6 +16,7 @@ import java.util.List;
 import org.hibernate.query.Query;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.allPersonalDetails;
 
 public class PersonalDetailsDB {
     private static Session session;
@@ -31,6 +32,7 @@ public class PersonalDetailsDB {
         }
         return null;
     }
+
 
     public static boolean checkPersonalDetailsByEmail(String email) {
         try (Session localSession = getSessionFactory().openSession()) {
@@ -84,25 +86,13 @@ public class PersonalDetailsDB {
 
 
     public static PersonalDetails getPersonalDetailsByEmail(String email) throws Exception {
-        if (session == null || !session.isOpen()) {
-            SessionFactory sessionFactory = getSessionFactory();
-            session = sessionFactory.openSession();
-        }
-        CriteriaBuilder builder = session.getCriteriaBuilder();
-        CriteriaQuery<PersonalDetails> query = builder.createQuery(PersonalDetails.class);
-        Root<PersonalDetails> root = query.from(PersonalDetails.class);
 
-        query.select(root)
-                .where(
-                        builder.and(
-                                builder.equal(root.get("email"), email)
-                        )
-                );
-        PersonalDetails pd = session.createQuery(query).uniqueResult();
-        if (session != null && session.isOpen()) {
-            session.close(); // Close the session after operation
+        for(PersonalDetails pd : allPersonalDetails) {
+            if(pd.getEmail().equals(email)) {
+                return pd;
+            }
         }
-        return pd;
+        return null;
     }
 
 
@@ -121,31 +111,6 @@ public class PersonalDetailsDB {
 //        }
 //    }
 
-    // Add personal details to the database
-    public static void addPersonalDetails(PersonalDetails personalDetails) throws Exception {
-        if (session == null || !session.isOpen()) {
-            SessionFactory sessionFactory = getSessionFactory();
-            session = sessionFactory.openSession();
-        }
-
-        session.beginTransaction();
-        try {
-            session.save(personalDetails);
-            session.flush();
-            session.getTransaction().commit();
-
-        } catch (Exception e) {
-            if (session.getTransaction() != null) {
-                session.getTransaction().rollback();
-            }
-            e.printStackTrace();
-            throw new Exception("An error occurred while generating orders.", e);
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
-    }
 
     /*public static boolean hasCreditCardDetails(String email) {
         Transaction transaction = null;
