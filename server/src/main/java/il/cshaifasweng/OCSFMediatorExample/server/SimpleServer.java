@@ -13,6 +13,7 @@ import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -49,6 +50,10 @@ public class SimpleServer extends AbstractServer {
     public static List<Restaurant> RestMealsList;
     public static List<Meal> allMeals;
     public static List<Customization> allcust;
+    public static List<TableNode> allTables;
+    public static List<ReservationSave> allSavedReservation;
+    private record ReservationPeriod(LocalDateTime start, LocalDateTime end) {}
+
 
     public SimpleServer(int port) {
         super(port);
@@ -65,9 +70,7 @@ public class SimpleServer extends AbstractServer {
             while(ReservationOperation) {}
             ReservationOperation = true;
             ReservationEvent reservation = (ReservationEvent) msg;
-            printAllTablesInRestaurant(reservation.getRestaurantName());
             List<ReservationEvent> availableReservation = check_Available_Reservation(reservation);
-            System.out.println("the available times are :" + availableReservation);
             if (!availableReservation.isEmpty()) {
                 try {
                     client.sendToClient(availableReservation);
@@ -75,10 +78,6 @@ public class SimpleServer extends AbstractServer {
                     e.printStackTrace();
                 }
             } else {
-                System.out.println("*********************************************");
-                System.out.println("No available tables for the selected time and seats.");
-                System.out.println("Checking other time slots...");
-                System.out.println("*********************************************");
                 // Define restaurant opening and closing times
                 LocalTime closingTime = getRestaurantByName(reservation.getRestaurantName()).getClosingTime();// 10:00 PM
                 LocalTime start = getRestaurantByName(reservation.getRestaurantName()).getOpeningTime().plusMinutes(15); // e.g., 10:00 AM
@@ -86,34 +85,17 @@ public class SimpleServer extends AbstractServer {
                 LocalDateTime startTime = LocalDateTime.of(currentDate, start); // Combine date and time
                 // Iterate through all time slots from the current time to the closing time
                 List<LocalDateTime> availableTimeSlots = new ArrayList<>();
-                System.out.println("*********************************************");
-                System.out.println("the opening hour is: " + start);
-                System.out.println("the closing hour is: " + closingTime);
-                System.out.println("the start time is: " + startTime);
-                System.out.println("*********************************************");
                 while (startTime.toLocalTime().isBefore(closingTime.minusMinutes(30))) {
                     // Check if tables are available for this time slot
-                    System.out.println("*********************************************");
-                    System.out.println("checking this tims slot: " + startTime);
-                    System.out.println("*********************************************");
                     List<TableNode> tablesForSlot = getAvailableTables(reservation.getRestaurantName(), startTime, reservation.getSeats(), reservation.isInside());
                     if (!tablesForSlot.isEmpty() && startTime.isAfter(LocalDateTime.now())) {
                         // If tables are available, add the time slot to the list
                         availableTimeSlots.add(startTime);
-                    } else {
-                        System.out.println("there is no availale tables for this slot -" + startTime);
                     }
                     // Move to the next time slot (e.g., increment by 0.5 hour)
                     startTime = startTime.plusMinutes(30);
                 }
                 if (!availableTimeSlots.isEmpty()) {
-                    // Notify the client of available time slots
-                    System.out.println("*********************************************");
-                    System.out.println("Available time slots for the restaurant:");
-                    for (LocalDateTime slot : availableTimeSlots) {
-                        System.out.println("  - " + slot.toLocalTime());
-                    }
-                    System.out.println("*********************************************");
                     try {
                         // Create a new ReservationEvent with all available time slots
                         DifferentResrvation available_Reservation_for_client = new DifferentResrvation(reservation.getRestaurantName(), // Use the restaurant name from the event
@@ -128,9 +110,6 @@ public class SimpleServer extends AbstractServer {
                     }
                 } else {
                     // Notify the client that no tables are available at any time
-                    System.out.println("*********************************************");
-                    System.out.println("No available tables at any time for the selected seats.");
-                    System.out.println("*********************************************");
                     List<ReservationEvent> reservationList = new ArrayList<>();
                     // Create a new ReservationEvent with all available time slots
                     ReservationEvent available_Reservation_for_client = new ReservationEvent(reservation.getRestaurantName(), reservation.getSeats(), reservation.isInside());
@@ -151,7 +130,6 @@ public class SimpleServer extends AbstractServer {
                 FinalReservationEvent event = (FinalReservationEvent) msg;
 
                 // Print all the tables in the specified restaurant
-                printAllTablesInRestaurant(event.getRestaurantName());
 
                 // Fetch available tables for the restaurant and time
                 List<TableNode> availableTables = getAvailableTables(event.getRestaurantName(), event.getReservationDateTime(), event.getSeats(), event.isInside());
@@ -230,8 +208,7 @@ public class SimpleServer extends AbstractServer {
 
                     // Assign tables to the reservation
 
-                    assignTablesToReservation(availableTables, event.getReservationDateTime(), event.isInside(), event.getRestaurantName());
-                    printAllTablesInRestaurant(event.getRestaurantName());
+//                    assignTablesToReservation(availableTables, event.getReservationDateTime(), event.isInside(), event.getRestaurantName());
 
                     // Create a new ReservationSave entity to save the reservation and tables
                     ReservationSave reservationSave = new ReservationSave(event.getRestaurantName(), event.getReservationDateTime(), event.getSeats(), event.isInside(), event.getFullName(), event.getPhoneNumber(), event.getEmail(), availableTables);
@@ -263,7 +240,6 @@ public class SimpleServer extends AbstractServer {
             }catch(Exception e){
                 e.printStackTrace();
             }
-            printAllReservationSaves();
             sendToAll(new ReConfirmEvent());
             ReservationOperation = false;
 
@@ -603,7 +579,7 @@ public class SimpleServer extends AbstractServer {
                 }
             } catch (Exception e) {
                 paymentCheck.setResponse("Error processing request: " + e.getMessage());
-                throw new RuntimeException("Failed to process credit card request", e);
+                e.printStackTrace();
             }
         }
         else if (msg instanceof PersonalDetails) {
@@ -905,6 +881,8 @@ public class SimpleServer extends AbstractServer {
         }
         else if (msg instanceof TableNode) {
             try {
+                System.out.println("hellllllllo123");
+                debugAllTablesDetails();
                 client.sendToClient("table details: " + getTableDetails(((TableNode) msg).getTableID()));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -1160,71 +1138,18 @@ public class SimpleServer extends AbstractServer {
     }
 
     public Restaurant getRestaurantByName(String restaurantName) {
+        // Search for the restaurant in the cached list
         for (Restaurant restaurant : RestMealsList) {
             if (restaurant.getRestaurantName().equalsIgnoreCase(restaurantName)) {
                 return restaurant;
             }
         }
 
-        Restaurant restaurant = null;
-
-        try (Session session = getSessionFactory().openSession()) {
-            session.beginTransaction();
-
-            // Create a query to fetch the restaurant by name
-            Query<Restaurant> query = session.createQuery("FROM Restaurant WHERE restaurantName = :restaurantName", Restaurant.class);
-            query.setParameter("restaurantName", restaurantName);
-
-            // Execute the query and get the result
-            restaurant = query.uniqueResult(); // Use uniqueResult() since restaurant names should be unique
-            RestMealsList.add(restaurant);
-
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Handle exceptions (e.g., log the error or throw a custom exception)
-        }
-
-        return restaurant; // Returns null if no restaurant is found
+        // If not found, do nothing (no DB access)
+        return null;
     }
 
-    private List<TableNode> getAvailableTables(String restaurantName, LocalDateTime reservationDateTime, int seats, boolean isInside) {
-        List<TableNode> availableTables = new ArrayList<>();
 
-        try (Session session = getSessionFactory().openSession()) {
-            session.beginTransaction();
-
-            // Fetch tables for the restaurant that match the inside/outside preference
-            Query<TableNode> query = session.createQuery("SELECT t FROM TableNode t WHERE t.restaurant.restaurantName = :restaurantName AND t.isInside = :isInside", TableNode.class);
-            query.setParameter("restaurantName", restaurantName);
-            query.setParameter("isInside", isInside);
-            List<TableNode> tables = query.getResultList();
-
-            // Filter tables based on availability
-            List<TableNode> availableForReservation = new ArrayList<>();
-            for (TableNode table : tables) {
-                // Initialize the collections within the session
-                Hibernate.initialize(table.getReservationStartTimes());
-                Hibernate.initialize(table.getReservationEndTimes());
-
-                if (isTableAvailable(table, reservationDateTime)) {
-                    availableForReservation.add(table);
-                }
-            }
-
-            // Sort tables by capacity in descending order
-            availableForReservation.sort((t1, t2) -> Integer.compare(t2.getCapacity(), t1.getCapacity()));
-
-            // Find the minimal number of tables to accommodate the seats
-            availableTables = findMinimalTableCombination(availableForReservation, seats, reservationDateTime);
-
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return availableTables;
-    }
 
     private List<TableNode> findMinimalTableCombination(List<TableNode> tables, int seats, LocalDateTime reservationDateTime) {
         // Sort tables in descending order by capacity
@@ -1252,40 +1177,12 @@ public class SimpleServer extends AbstractServer {
         }
 
         // Call the debug print function
-        debugPrintTableSelection(selectedTables, seats, reservationDateTime);
 
         return selectedTables;
     }
 
 
-    private void debugPrintTableSelection(List<TableNode> selectedTables, int requiredSeats, LocalDateTime reservationDateTime) {
-        System.out.println("********************************************************");
-        System.out.println("DEBUGGING TABLE SELECTION");
-        System.out.println("Reservation Time: " + reservationDateTime);
-        System.out.println("Required Seats: " + requiredSeats);
 
-        // Check if selection was successful
-        if (selectedTables.isEmpty()) {
-            System.out.println("No valid table combination found!");
-            System.out.println("********************************************************");
-            return;
-        }
-
-        // Print the selected tables
-        int totalSeatsAllocated = 0;
-        System.out.println("\nSelected Tables:");
-        for (TableNode table : selectedTables) {
-            System.out.println("Table ID: " + table.getTableID() + ", Capacity: " + table.getCapacity() + ", Status: " + table.getStatus() + ", Available: " + isTableAvailable(table, reservationDateTime));
-            totalSeatsAllocated += table.getCapacity();
-        }
-
-        // Print additional debugging details
-        System.out.println("\nTotal Seats Allocated: " + totalSeatsAllocated);
-        int wastedSeats = totalSeatsAllocated - requiredSeats;
-        System.out.println("Wasted Seats: " + wastedSeats);
-
-        System.out.println("********************************************************\n");
-    }
 
 
     private boolean isTableAvailable(TableNode table, LocalDateTime reservationDateTime) {
@@ -1302,43 +1199,60 @@ public class SimpleServer extends AbstractServer {
         return true; // Table is available
     }
 
-    private void assignTablesToReservation(List<TableNode> tables, LocalDateTime reservationDateTime, boolean isInside, String restaurantName) {
+
+    private void assignTablesToReservation(List<TableNode> tables, LocalDateTime reservationDateTime, boolean isInside, String restaurantName,ReservationSave reservation) {
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
+
+            // Get the closing time of the restaurant
             LocalTime closingHour = getRestaurantByName(restaurantName).getClosingTime();
+
+            // Set the end time based on the reservation duration
             LocalDateTime endTime = reservationDateTime.plusHours(1); // Assume reservation lasts 1.5 hours
             endTime = endTime.plusMinutes(30);
-            if (reservationDateTime.toLocalTime().plusHours(1).equals(closingHour) || reservationDateTime.toLocalTime().plusHours(1).isAfter(closingHour)) {
-                endTime = reservationDateTime.plusHours(1); // Assume reservation lasts 1 hours
-            } else {
 
-                endTime = reservationDateTime.plusHours(1); // Assume reservation lasts 1.5 hours
+            if (reservationDateTime.toLocalTime().plusHours(1).equals(closingHour) || reservationDateTime.toLocalTime().plusHours(1).isAfter(closingHour)) {
+                endTime = reservationDateTime.plusHours(1); // Assume reservation lasts 1 hour
+            } else {
+                endTime = reservationDateTime.plusHours(1); // Default to 1.5 hours
                 endTime = endTime.plusMinutes(30);
             }
 
+            // Iterate through each table and update reservations
             for (TableNode table : tables) {
                 // Ensure the collections are initialized
                 Hibernate.initialize(table.getReservationStartTimes());
                 Hibernate.initialize(table.getReservationEndTimes());
 
-                // Update table status and reservation times
-                table.setStatus("reserved");
-
-
+                // Add the reservation times
                 table.getReservationStartTimes().add(reservationDateTime);
                 table.getReservationEndTimes().add(endTime);
 
-                // Save the updated table
+                // Save the updated table to the database
                 session.update(table);
-            }
 
+//                // Update the in-memory allTables list to keep it synchronized
+//                if (allTables != null) {
+//                    for (TableNode cachedTable : allTables) {
+//                        if (cachedTable.getTableID() == table.getTableID()) {
+//                            cachedTable.getReservationStartTimes().add(reservationDateTime);
+//                            cachedTable.getReservationEndTimes().add(endTime);
+//                            break;
+//                        }
+//                    }
+//                }
+            }
+            session.save(reservation);
+            allSavedReservation.add(reservation);
+            // Commit the transaction to save changes to the database
             session.getTransaction().commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("i am in assigdTablesToReservation ");
 
+        System.out.println("i am in assignTablesToReservation");
     }
+
 
 
 
@@ -1359,14 +1273,11 @@ public class SimpleServer extends AbstractServer {
             // Validate that the requested reservation time is within business hours
             LocalTime requestedLocalTime = requestedTime.toLocalTime();
             if (requestedLocalTime.isBefore(openingTime) || requestedLocalTime.isAfter(closingTime)) {
-                System.out.println("Requested time is outside of business hours!");
                 return availableReservations; // Return empty list
             }
 
             // Fetch tables for the restaurant
-            System.out.println("Fetching tables for restaurant: " + restaurantName);
             List<TableNode> tables = getTablesByRestaurant(restaurantName);
-            System.out.println("Fetched tables: " + tables);
 
             // Define the time range (from requested time to one hour after)
             LocalTime startTime = requestedLocalTime;
@@ -1376,7 +1287,6 @@ public class SimpleServer extends AbstractServer {
             if (endTime.isAfter(closingTime)) {
                 endTime = closingTime;
             }
-            System.out.println("Valid reservation time range: " + startTime + " to " + endTime);
 
             // Iterate over 15-minute time slots within the valid range
 //            for (LocalTime currentTimeSlot = startTime; currentTimeSlot.isBefore(endTime) || currentTimeSlot.equals(endTime); currentTimeSlot = currentTimeSlot.plusMinutes(15)) {
@@ -1437,18 +1347,15 @@ public class SimpleServer extends AbstractServer {
 //                }
 //            }
             for (LocalTime currentTimeSlot = startTime; currentTimeSlot.isBefore(endTime) || currentTimeSlot.equals(endTime); currentTimeSlot = currentTimeSlot.plusMinutes(15)) {
-                System.out.println("the current slot of time is: " + currentTimeSlot);
-                System.out.println("the requested time is: " + requestedTime);
+
                 // Skip if the time slot is outside business hours
                 if (currentTimeSlot.isBefore(openingTime) || currentTimeSlot.isAfter(closingTime)) {
-                    System.out.println("Requested time is outside of business hours!");
 
                     requestedTime = requestedTime.plusMinutes(15);
                     continue;
                 }
 
                 LocalTime nextTimeSlot = currentTimeSlot.plusMinutes(15);
-                System.out.println("Checking time slot: " + currentTimeSlot + " to " + nextTimeSlot);
 
                 // Check for available tables in this time slot
                 List<TableNode> tablesForSlot = getAvailableTables(restaurantName, requestedTime, requestedSeats, isInside);
@@ -1457,14 +1364,10 @@ public class SimpleServer extends AbstractServer {
                     // If tables are available, create a reservation event
                     ReservationEvent availableReservation = new ReservationEvent(restaurantName, requestedTime, requestedSeats, isInside);
                     availableReservations.add(availableReservation);
-                    System.out.println("Available reservation found: " + availableReservation);
-                } else {
-                    System.out.println("No available tables for this time slot: " + currentTimeSlot);
                 }
                 requestedTime = requestedTime.plusMinutes(15);
             }
 
-            System.out.println("Available reservations: " + availableReservations);
         } catch (Exception e) {
             System.out.println("Exception occurred during the reservation availability check: " + e.getMessage());
             e.printStackTrace();
@@ -1501,39 +1404,16 @@ public class SimpleServer extends AbstractServer {
 
 
     private List<TableNode> getTablesByRestaurant(String restaurantName) {
-        List<Restaurant> result = new ArrayList<>();
-
-        try (Session session = getSessionFactory().openSession()) { // Auto-closing session
-            session.beginTransaction();
-
-            // Correct the query by structuring the JOIN FETCH properly
-            String queryString = "SELECT r FROM Restaurant r LEFT JOIN FETCH r.tables WHERE r.restaurantName = :restaurantName";
-            Query<Restaurant> query = session.createQuery(queryString, Restaurant.class);
-
-            // Bind the named parameter
-            query.setParameter("restaurantName", restaurantName);
-
-            // Execute the query and retrieve the result
-            result = query.getResultList();
-
-            List<TableNode> tables = result.get(0).getTables();
-            for (TableNode table : tables) {
-                Hibernate.initialize(table.getReservationStartTimes());
-                Hibernate.initialize(table.getReservationEndTimes());
-            }
-
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            System.err.println("Error executing the query: " + e.getMessage());
-            e.printStackTrace();
+        // Ensure restaurant is available (but don't fetch from DB if missing)
+        Restaurant restaurant = getRestaurantByName(restaurantName);
+        if (restaurant == null) {
+            return new ArrayList<>(); // No such restaurant, return empty list
         }
 
-        if (result.isEmpty()) {
-            return new ArrayList<>(); // Return an empty list if no restaurant is found
-        }
-
-        // Return the tables of the first matching restaurant
-        return result.get(0).getTables();
+        // Filter and return tables that belong to the restaurant
+        return allTables.stream()
+                .filter(table -> table.getRestaurant().getRestaurantName().equalsIgnoreCase(restaurantName))
+                .collect(Collectors.toList());
     }
 
 
@@ -1835,142 +1715,183 @@ public class SimpleServer extends AbstractServer {
 
     private String getTableDetails(int tableID) {
         StringBuilder details = new StringBuilder();
+        TableNode table = allTables.stream()
+                .filter(t -> t.getTableID() == tableID)
+                .findFirst()
+                .orElse(null);
 
-        try (Session session = App.getSessionFactory().openSession()) {
-            session.beginTransaction();
-
-            // Fetch the table by its ID
-            TableNode table = session.get(TableNode.class, tableID);
-
-            if (table == null) {
-                details.append("Error: Table not found.");
-                return details.toString();
-            }
-
-            // Initialize lazy-loaded collections
-            Hibernate.initialize(table.getReservationStartTimes());
-            Hibernate.initialize(table.getReservationEndTimes());
-
-            session.getTransaction().commit();
-
-            // Build the details string
-            details.append("Table ID: ").append(table.getTableID()).append("\n");
-            details.append("Restaurant: ").append(table.getRestaurant().getRestaurantName()).append("\n");
-            details.append("Is Inside: ").append(table.isInside() ? "Yes" : "No").append("\n");
-            details.append("Capacity: ").append(table.getCapacity()).append("\n");
-            details.append("Status: ").append(table.getStatus()).append("\n");
-
-            // Get current date and time
-            LocalDate currentDate = LocalDate.now();
-            LocalTime currentTime = LocalTime.now();
-
-            // For occupied tables, show all reservations (past and future)
-            if ("occupied".equalsIgnoreCase(table.getStatus())) {
-                // Show all start times for today
-                details.append("Current Reservation:\n");
-                if (table.getReservationStartTimes() == null || table.getReservationStartTimes().isEmpty()) {
-                    details.append("  No start time recorded\n");
-                } else {
-                    // Find the most recent past start time
-                    table.getReservationStartTimes().stream()
-                            .filter(startTime -> startTime.toLocalDate().equals(currentDate))
-                            .sorted()
-                            .reduce((first, second) -> second) // get last element
-                            .ifPresentOrElse(
-                                    startTime -> details.append("  - Started at: ").append(startTime).append("\n"),
-                                    () -> details.append("  No start time recorded for today\n")
-                            );
-                }
-
-                // Show upcoming end time
-                if (table.getReservationEndTimes() == null || table.getReservationEndTimes().isEmpty()) {
-                    details.append("  No end time recorded\n");
-                } else {
-                    table.getReservationEndTimes().stream()
-                            .filter(endTime -> endTime.toLocalDate().equals(currentDate))
-                            .sorted()
-                            .findFirst() // get the earliest future end time
-                            .ifPresentOrElse(
-                                    endTime -> details.append("  - Will end at: ").append(endTime).append("\n"),
-                                    () -> details.append("  No end time recorded for today\n")
-                            );
-                }
-            } else {
-                // For non-occupied tables, show only future reservations
-                details.append("Upcoming Reservations (Today and after current time):\n");
-
-                // Pair start and end times
-                List<LocalDateTime> starts = table.getReservationStartTimes() != null ?
-                        new ArrayList<>(table.getReservationStartTimes()) : Collections.emptyList();
-                List<LocalDateTime> ends = table.getReservationEndTimes() != null ?
-                        new ArrayList<>(table.getReservationEndTimes()) : Collections.emptyList();
-
-                // Sort both lists
-                starts.sort(LocalDateTime::compareTo);
-                ends.sort(LocalDateTime::compareTo);
-
-                // Find matching pairs (assuming they're in order)
-                int count = 0;
-                for (int i = 0; i < starts.size(); i++) {
-                    LocalDateTime start = starts.get(i);
-                    if (start.toLocalDate().equals(currentDate) && start.toLocalTime().isAfter(currentTime)) {
-                        LocalDateTime end = i < ends.size() ? ends.get(i) : null;
-                        details.append("  - ").append(start);
-                        if (end != null) {
-                            details.append(" to ").append(end);
-                        }
-                        details.append("\n");
-                        count++;
-                    }
-                }
-                if (count == 0) {
-                    details.append("  No upcoming reservations\n");
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            details.append("Error: Failed to fetch table details.");
+        if (table == null) {
+            return "Error: Table not found.";
         }
 
-        // Return the constructed string
+        // Basic table info
+        appendSectionHeader(details, "Table Details");
+        details.append(String.format("ID: %d\nRestaurant: %s\nLocation: %s\nCapacity: %d\nStatus: %s\n",
+                table.getTableID(),
+                table.getRestaurant().getRestaurantName(),
+                table.isInside() ? "Inside" : "Outside",
+                table.getCapacity(),
+                table.getStatus().toUpperCase()));
+
+        LocalDateTime now = LocalDateTime.now();
+        List<LocalDateTime> starts = table.getReservationStartTimes() != null ?
+                new ArrayList<>(table.getReservationStartTimes()) : Collections.emptyList();
+        List<LocalDateTime> ends = table.getReservationEndTimes() != null ?
+                new ArrayList<>(table.getReservationEndTimes()) : Collections.emptyList();
+
+        if ("OCCUPIED".equalsIgnoreCase(table.getStatus())) {
+            // Current reservation
+            appendSectionHeader(details, "Current Reservation");
+            findCurrentReservation(starts, ends, now)
+                    .ifPresentOrElse(
+                            period -> details.append(String.format("Started: %s\nEnds: %s\n",
+                                    formatDateTime(period.start()),
+                                    formatDateTime(period.end()))),
+                            () -> details.append("No active reservation found\n")
+                    );
+
+            // Upcoming reservations
+            appendSectionHeader(details, "Upcoming Reservations");
+            appendReservationList(details, starts, ends, now, false);
+        } else {
+            // All future reservations
+            appendSectionHeader(details, "Future Reservations");
+            appendReservationList(details, starts, ends, now, true);
+        }
+
         return details.toString();
     }
 
+    // Helper methods
+    private void appendReservationList(StringBuilder details,
+                                       List<LocalDateTime> starts,
+                                       List<LocalDateTime> ends,
+                                       LocalDateTime now,
+                                       boolean includeAllFuture) {
+        if (starts.isEmpty()) {
+            details.append("No reservations\n");
+            return;
+        }
+
+        int count = 0;
+        for (int i = 0; i < starts.size(); i++) {
+            LocalDateTime start = starts.get(i);
+            LocalDateTime end = i < ends.size() ? ends.get(i) : null;
+
+            if (includeAllFuture ? start.isAfter(now) : start.isAfter(now)) {
+                details.append(String.format("  %d. %s", ++count, formatReservationPeriod(start, end)));
+            }
+        }
+
+        if (count == 0) {
+            details.append("No upcoming reservations\n");
+        }
+    }
+
+    private Optional<ReservationPeriod> findCurrentReservation(List<LocalDateTime> starts,
+                                                               List<LocalDateTime> ends,
+                                                               LocalDateTime now) {
+        for (int i = 0; i < starts.size(); i++) {
+            LocalDateTime start = starts.get(i);
+            LocalDateTime end = i < ends.size() ? ends.get(i) : null;
+
+            if ((start.isBefore(now) || start.isEqual(now)) &&
+                    (end == null || end.isAfter(now))) {
+                return Optional.of(new ReservationPeriod(start, end));
+            }
+        }
+        return Optional.empty();
+    }
+
+    private String formatDateTime(LocalDateTime dateTime) {
+        return dateTime != null ?
+                dateTime.format(DateTimeFormatter.ofPattern("EEE, MMM dd HH:mm")) :
+                "Not specified";
+    }
+
+    private String formatReservationPeriod(LocalDateTime start, LocalDateTime end) {
+        return String.format("%s - %s\n",
+                formatDateTime(start),
+                end != null ? formatDateTime(end) : "Open-ended");
+    }
+
+    private void appendSectionHeader(StringBuilder sb, String title) {
+        sb.append("\n--- ").append(title).append(" ---\n");
+    }
+
+    // CORRECTED helper method (was missing end parameter)
+    private String formatReservationPeriod1(LocalDateTime start, LocalDateTime end) {
+        return String.format("%s - %s",
+                formatDateTime(start),
+                end != null ? formatDateTime(end) : "Open-ended");
+    }
+
+    // UPDATED debug method (fixed parameter passing)
+    public void debugAllTablesDetails() {
+        if (allTables.isEmpty()) {
+            System.out.println("[DEBUG] No tables found in the system");
+            return;
+        }
+
+        System.out.println("\n=== DEBUG ALL TABLES (" + allTables.size() + " tables) ===");
+
+        for (int i = 0; i < allTables.size(); i++) {
+            TableNode table = allTables.get(i);
+            System.out.println("\n--- Table " + (i+1) + " of " + allTables.size() + " ---");
+            System.out.println("ID: " + table.getTableID());
+            System.out.println("Restaurant: " + table.getRestaurant().getRestaurantName());
+            System.out.println("Location: " + (table.isInside() ? "Inside" : "Outside"));
+            System.out.println("Capacity: " + table.getCapacity());
+            System.out.println("Status: " + table.getStatus().toUpperCase());
+
+            List<LocalDateTime> starts = table.getReservationStartTimes();
+            List<LocalDateTime> ends = table.getReservationEndTimes();
+
+            System.out.println("\nRaw reservation starts: " + starts);
+            System.out.println("Raw reservation ends: " + ends);
+
+            System.out.println("Formatted reservations:");
+            for (int j = 0; j < starts.size(); j++) {
+                LocalDateTime endTime = j < ends.size() ? ends.get(j) : null;
+                String status = getReservationStatus(starts.get(j), endTime, LocalDateTime.now());
+
+                System.out.println(String.format("  %d. %s (%s)",
+                        j+1,
+                        formatReservationPeriod1(starts.get(j), endTime),  // Fixed parameter passing
+                        status));
+            }
+        }
+        System.out.println("\n=== END DEBUG - " + allTables.size() + " tables shown ===\n");
+    }
+
+    private String getReservationStatus(LocalDateTime start, LocalDateTime end, LocalDateTime now) {
+        if (start.isAfter(now)) return "UPCOMING";
+        if (end != null && end.isAfter(now)) return "ACTIVE";
+        return "COMPLETED";
+    }
+
     public tablesStatus getTablesStatus(String restaurantName) {
-        try (Session session = App.getSessionFactory().openSession()) {
-            session.beginTransaction();
+        try {
+            // Step 1: Filter tables by restaurant name from in-memory list
+            List<TableNode> tables = allTables.stream()
+                    .filter(table -> table.getRestaurant().getRestaurantName().equalsIgnoreCase(restaurantName))
+                    .collect(Collectors.toList());
 
-            // Fetch tables for the specified restaurant
-            Query<TableNode> query = session.createQuery(
-                    "FROM TableNode t WHERE t.restaurant.restaurantName = :restaurantName", TableNode.class
-            );
-            query.setParameter("restaurantName", restaurantName); // Set the restaurant name parameter
-            List<TableNode> tables = query.getResultList();
+            // Step 2: Extract statuses using the new logic (getTodayOrCurrentStatus)
+            List<String> statuses = tables.stream()
+                    .map(TableNode::getTodayStatus)
+                    .collect(Collectors.toList());
 
-            // Initialize lazy-loaded fields for each table
-            for (TableNode table : tables) {
-                Hibernate.initialize(table.getReservationStartTimes()); // Initialize reservationStartTimes
-                Hibernate.initialize(table.getReservationEndTimes());   // Initialize reservationEndTimes
-            }
-
-            session.getTransaction().commit();
-
-            // Determine the status for each table
-            List<String> statuses = new ArrayList<>();
-            for (TableNode table : tables) {
-                String status = table.getStatus(); // Use the getStatus method to determine the status
-                statuses.add(status);
-            }
-
-            // Create and return a tablesStatus object
+            // Step 3: Return the status object
             return new tablesStatus(tables, statuses);
+
         } catch (Exception e) {
             e.printStackTrace();
-            // Return an empty tablesStatus object in case of an error
             return new tablesStatus(new ArrayList<>(), new ArrayList<>());
         }
     }
+
+
 
 
     /********************adan*************************/
@@ -2052,61 +1973,79 @@ public class SimpleServer extends AbstractServer {
     }
 
     public String cancelReservation(String name, int reservationId) {
-        Session session = App.getSessionFactory().openSession();
-        try {
+        if(allSavedReservation==null){
+            App.fetching_reservation();
+        }
+        // Step 1: Find the reservation in memory
+        ReservationSave reservationToCancel = null;
+
+        for (ReservationSave reservation : allSavedReservation) {
+            if (reservation.getReservationSaveID() == reservationId) {
+                reservationToCancel = reservation;
+                break;
+            }
+        }
+
+        if (reservationToCancel == null) {
+            return "Error: No reservation found with ID " + reservationId;
+        }
+
+        if (!reservationToCancel.getFullName().equalsIgnoreCase(name)) {
+            return "Error: Name doesn't match the reservation";
+        }
+
+        // Step 2: Check if the reservation is in the future
+        LocalDateTime now = LocalDateTime.now();
+        if (reservationToCancel.getReservationDateTime().isBefore(now)) {
+            return "Error: Cannot cancel past reservation";
+        }
+
+        // Step 3: Free up the tables in memory
+        for (TableNode table : reservationToCancel.getTables()) {
+            for (TableNode t : allTables) {
+                if (t.getTableID() == table.getTableID()) {
+                    List<LocalDateTime> starts = t.getReservationStartTimes();
+                    List<LocalDateTime> ends = t.getReservationEndTimes();
+
+                    for (int i = 0; i < starts.size(); i++) {
+                        if (starts.get(i).equals(reservationToCancel.getReservationDateTime())) {
+                            starts.remove(i);
+                            ends.remove(i);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Step 4: Remove from memory
+        allSavedReservation.remove(reservationToCancel);
+
+        // Step 5: Remove from database
+        try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
-            // Get reservation by ID
-            ReservationSave reservationToCancel = session.get(ReservationSave.class, reservationId);
 
-            // Validate reservation exists and name matches
-            if (reservationToCancel == null) {
-                return "Error: No reservation found with ID " + reservationId;
+            ReservationSave dbReservation = session.get(ReservationSave.class, reservationId);
+            if (dbReservation != null) {
+                session.delete(dbReservation);
             }
-
-            if (!reservationToCancel.getFullName().equalsIgnoreCase(name)) {
-                return "Error: Name doesn't match the reservation";
-            }
-
-            // Check if reservation is in the future
-            LocalDateTime now = LocalDateTime.now();
-            if (reservationToCancel.getReservationDateTime().isBefore(now)) {
-                return "Error: Cannot cancel past reservation";
-            }
-            // Calculate charge
-            int charge = calculateCancellationCharge(reservationToCancel, now);
-
-            // Free tables and remove reservation
-            Hibernate.initialize(reservationToCancel.getTables());
-            for (TableNode table : reservationToCancel.getTables()) {
-                Hibernate.initialize(table.getReservationStartTimes());
-                Hibernate.initialize(table.getReservationEndTimes());
-                removeReservationTimes(table, reservationToCancel.getReservationDateTime());
-                session.update(table);
-            }
-            session.delete(reservationToCancel);
 
             session.getTransaction().commit();
-
-            // Send cancellation email
-            String emailContent = buildCancellationEmail(reservationToCancel, charge);
-            EmailSender.sendEmail("Reservation Cancellation Confirmation",
-                    emailContent,
-                    reservationToCancel.getEmail());
-
-
-            return charge > 0 ?
-                    "Success: Cancelled with charge of " + charge + " ILS" :
-                    "Success: Cancelled with no charge";
-
         } catch (Exception e) {
-            if (session.getTransaction().isActive()) {
-                session.getTransaction().rollback();
-            }
-            return "Error: Failed to cancel reservation - " + e.getMessage();
-        } finally {
-            session.close();
+            return "Error: Failed to remove from database - " + e.getMessage();
         }
+
+        // Step 6: Send email confirmation
+        int charge = calculateCancellationCharge(reservationToCancel, now);
+        String emailContent = buildCancellationEmail(reservationToCancel, charge);
+        EmailSender.sendEmail("Reservation Cancellation Confirmation", emailContent, reservationToCancel.getEmail());
+
+        return charge > 0 ?
+                "Success: Cancelled with charge of " + charge + " ILS" :
+                "Success: Cancelled with no charge";
     }
+
 
     private String buildCancellationEmail(ReservationSave reservation, int charge) {
         return String.format(
@@ -2204,112 +2143,149 @@ public class SimpleServer extends AbstractServer {
 
         // Fetch available tables for the restaurant and time
         List<TableNode> availableTables = getAvailableTables(event.getRestaurantName(), event.getReservationDateTime(), event.getSeats(), event.isInside());
-
-        if (availableTables.isEmpty()) {
-            System.out.println("*********************************************");
-            System.out.println("No available tables for the selected time and seats.");
-            System.out.println("Checking other time slots...");
-            System.out.println("*********************************************");
-
-            // Define restaurant opening and closing times
-            LocalTime closingTime = getRestaurantByName(event.getRestaurantName()).getClosingTime(); // 10:00 PM
-            LocalTime start = getRestaurantByName(event.getRestaurantName()).getOpeningTime(); // e.g., 10:00 AM
-            LocalDate currentDate = event.getReservationDateTime().toLocalDate(); // Get the current date
-            LocalDateTime startTime = LocalDateTime.of(currentDate, start); // Combine date and time
-
-            // Iterate through all time slots from the current time to the closing time
-            List<LocalDateTime> availableTimeSlots = new ArrayList<>();
-
-            while (startTime.toLocalTime().isBefore(closingTime)) {
-                // Check if tables are available for this time slot
-                List<TableNode> tablesForSlot = getAvailableTables(event.getRestaurantName(), startTime, event.getSeats(), event.isInside());
-
-                if (!tablesForSlot.isEmpty()) {
-                    // If tables are available, add the time slot to the list
-                    availableTimeSlots.add(startTime);
-                }
-
-                // Move to the next time slot (e.g., increment by 1 hour)
-                startTime = startTime.plusMinutes(15);
-            }
-
-            if (!availableTimeSlots.isEmpty()) {
-                // Notify the client of available time slots
+        try{
+            if (availableTables.isEmpty()) {
                 System.out.println("*********************************************");
-                System.out.println("Available time slots for the restaurant:");
-                for (LocalDateTime slot : availableTimeSlots) {
-                    System.out.println("  - " + slot.toLocalTime());
-                }
+                System.out.println("No available tables for the selected time and seats.");
+                System.out.println("Checking other time slots...");
                 System.out.println("*********************************************");
 
-                try {
-                    // Create a new ReservationEvent with all available time slots
-                    ReservationEvent available_Reservation_for_client = new ReservationEvent(event.getRestaurantName(), // Use the restaurant name from the event
-                            event.getSeats(),         // Use the number of seats from the event
-                            event.isInside(),          // Use the inside/outside preference from the event
-                            availableTimeSlots         // Pass all available time slots
-                    );
+                // Define restaurant opening and closing times
+                LocalTime closingTime = getRestaurantByName(event.getRestaurantName()).getClosingTime(); // 10:00 PM
+                LocalTime start = getRestaurantByName(event.getRestaurantName()).getOpeningTime(); // e.g., 10:00 AM
+                LocalDate currentDate = event.getReservationDateTime().toLocalDate(); // Get the current date
+                LocalDateTime startTime = LocalDateTime.of(currentDate, start); // Combine date and time
+
+                // Iterate through all time slots from the current time to the closing time
+                List<LocalDateTime> availableTimeSlots = new ArrayList<>();
+                System.out.println("*********************************************");
+                System.out.println("hello");
+
+                System.out.println("*********************************************");
+                while (startTime.toLocalTime().isBefore(closingTime)) {
+                    // Check if tables are available for this time slot
+                    System.out.println("hello1");
+                    List<TableNode> tablesForSlot = getAvailableTables(event.getRestaurantName(), startTime, event.getSeats(), event.isInside());
+                    System.out.println("hello2");
+
+                    if (!tablesForSlot.isEmpty()) {
+                        // If tables are available, add the time slot to the list
+                        availableTimeSlots.add(startTime);
+                    }
+                    System.out.println("hello3");
+
+                    // Move to the next time slot (e.g., increment by 1 hour)
+                    startTime = startTime.plusMinutes(15);
+                    System.out.println("hello4");
+                }
+                System.out.println("*********************************************");
+                System.out.println("helllllllo");
+
+                System.out.println("*********************************************");
+                if (!availableTimeSlots.isEmpty()) {
+                    // Notify the client of available time slots
+                    System.out.println("*********************************************");
+                    System.out.println("Available time slots for the restaurant:");
+                    for (LocalDateTime slot : availableTimeSlots) {
+                        System.out.println("  - " + slot.toLocalTime());
+                    }
+                    System.out.println("*********************************************");
+
+                    try {
+                        // Create a new ReservationEvent with all available time slots
+                        ReservationEvent available_Reservation_for_client = new ReservationEvent(event.getRestaurantName(), // Use the restaurant name from the event
+                                event.getSeats(),         // Use the number of seats from the event
+                                event.isInside(),          // Use the inside/outside preference from the event
+                                availableTimeSlots         // Pass all available time slots
+                        );
+                        List<ReservationEvent> reservationList = new ArrayList<>();
+                        reservationList.add(available_Reservation_for_client);
+                        FaildPayRes object = new FaildPayRes(reservationList);
+                        // Send the available reservation to the client
+                        client.sendToClient(object);
+                        return false;
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to send available time slots to the client.", e);
+                    }
+                } else {
+                    // Notify the client that no tables are available at any time
+                    System.out.println("*********************************************");
+                    System.out.println("No available tables at any time for the selected seats.");
+                    System.out.println("*********************************************");
                     List<ReservationEvent> reservationList = new ArrayList<>();
+                    // Create a new ReservationEvent with all available time slots
+                    ReservationEvent available_Reservation_for_client = new ReservationEvent(event.getRestaurantName(), event.getSeats(), event.isInside());
                     reservationList.add(available_Reservation_for_client);
                     FaildPayRes object = new FaildPayRes(reservationList);
-                    // Send the available reservation to the client
-                    client.sendToClient(object);
-                    return false;
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to send available time slots to the client.", e);
+                    try {
+                        client.sendToClient(object);
+                        return false;
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             } else {
-                // Notify the client that no tables are available at any time
                 System.out.println("*********************************************");
-                System.out.println("No available tables at any time for the selected seats.");
+                System.out.println("The available tables are: " + availableTables);
                 System.out.println("*********************************************");
-                List<ReservationEvent> reservationList = new ArrayList<>();
-                // Create a new ReservationEvent with all available time slots
-                ReservationEvent available_Reservation_for_client = new ReservationEvent(event.getRestaurantName(), event.getSeats(), event.isInside());
-                reservationList.add(available_Reservation_for_client);
-                FaildPayRes object = new FaildPayRes(reservationList);
+
+                // Assign tables to the reservation and save the reservatio in the DB
+
+                assignTablesToReservation(availableTables, event.getReservationDateTime(), event.isInside(), event.getRestaurantName(),reservation);
+
+                // Create a new ReservationSave entity to save the reservation and tables
+                //ReservationSave reservationSave = new ReservationSave(event.getRestaurantName(), event.getReservationDateTime(), event.getSeats(), event.isInside(), event.getFullName(), event.getPhoneNumber(), event.getEmail(), availableTables);
+
+                // Notify the client that the reservation was successful
+                System.out.println("Reservation confirmed successfully.");
+                //client.sendToClient("Reservation confirmed successfully.");
+                /// in zoom
+
                 try {
-                    client.sendToClient(object);
-                    return false;
+                    System.out.println("wa Save the reservation after payment");
+                    client.sendToClient(reservation);
+                    wait(500);
+                    sendToAll(new ReConfirmEvent());
+                    return true;
+                    //printAllReservationSaves();
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    e.printStackTrace();
+                    // Notify the client of the error
+                    System.out.println("Failed to save reservation.");
                 }
             }
-        } else {
-            System.out.println("*********************************************");
-            System.out.println("The available tables are: " + availableTables);
-            System.out.println("*********************************************");
-
-            // Assign tables to the reservation
-
-            assignTablesToReservation(availableTables, event.getReservationDateTime(), event.isInside(), event.getRestaurantName());
-            printAllTablesInRestaurant(event.getRestaurantName());
-
-            // Create a new ReservationSave entity to save the reservation and tables
-            //ReservationSave reservationSave = new ReservationSave(event.getRestaurantName(), event.getReservationDateTime(), event.getSeats(), event.isInside(), event.getFullName(), event.getPhoneNumber(), event.getEmail(), availableTables);
-
-            // Save the reservation to the database
-            saveReservationToDatabase(reservation);
-            // Notify the client that the reservation was successful
-            System.out.println("Reservation confirmed successfully.");
-            //client.sendToClient("Reservation confirmed successfully.");
-            /// in zoom
-
-            try {
-                System.out.println("wa Save the reservation after payment");
-                client.sendToClient(reservation);
-                wait(500);
-                sendToAll(new ReConfirmEvent());
-                return true;
-                //printAllReservationSaves();
-            } catch (Exception e) {
-                e.printStackTrace();
-                // Notify the client of the error
-                System.out.println("Failed to save reservation.");
-            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return true;
     }
 
+
+    public List<TableNode> fetchAvailableTables(String restaurantName, LocalDateTime time, int seats, boolean isInside) {
+        return allTables.stream()
+                .filter(t -> t.getRestaurant().getRestaurantName().equals(restaurantName)
+                        && t.getCapacity() >= seats
+                        && t.isInside() == isInside
+                        && isTableAvailable(t, time))
+                .collect(Collectors.toList());
+    }
+
+    private List<TableNode> getAvailableTables(String restaurantName, LocalDateTime reservationDateTime, int seats, boolean isInside) {
+        // Filter tables by restaurant name and inside/outside preference
+        List<TableNode> matchingTables = allTables.stream()
+                .filter(t -> t.getRestaurant().getRestaurantName().equals(restaurantName)
+                        && t.isInside() == isInside)
+                .collect(Collectors.toList());
+
+        // Filter by availability
+        List<TableNode> availableForReservation = matchingTables.stream()
+                .filter(t -> isTableAvailable(t, reservationDateTime))
+                .sorted((t1, t2) -> Integer.compare(t2.getCapacity(), t1.getCapacity())) // Sort descending by capacity
+                .collect(Collectors.toList());
+
+        // Find best table combination
+        return findMinimalTableCombination(availableForReservation, seats, reservationDateTime);
+    }
 
 }
