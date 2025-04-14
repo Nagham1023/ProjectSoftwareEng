@@ -15,8 +15,22 @@ public class UpdatePriceRequest implements Serializable {
     private Meal meal; // Reference to the Meal entity
     private double oldPrice;
     private double newPrice;
+    private double oldDiscount;
+    private double newDiscount;
 
 
+    public double getOldDiscount(){
+        return oldDiscount;
+    }
+    public void setOldDiscount(double oldDiscount){
+        this.oldDiscount = oldDiscount;
+    }
+    public double getNewDiscount(){
+        return newDiscount;
+    }
+    public void setNewDiscount(double newDiscount){
+        this.newDiscount = newDiscount;
+    }
     public Meal getMeal() {
         return meal;
     }

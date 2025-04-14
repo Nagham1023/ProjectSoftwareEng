@@ -5,16 +5,25 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.update_menu_controller" spacing="20" style="-fx-padding: 20;">
+<VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="il.cshaifasweng.OCSFMediatorExample.client.update_menu_controller"
+      spacing="20" style="-fx-padding: 20;">
+
     <!-- Meal Name -->
     <Label fx:id="mealNameLabel" style="-fx-font-size: 20px; -fx-font-weight: bold;" text="Meal Name" />
 
     <!-- Current Price -->
     <Label fx:id="currentPriceLabel" style="-fx-font-size: 16px; -fx-text-fill: #757575;" text="Current Price: ₪" />
 
+    <!-- Current Discount -->
+    <Label fx:id="currentDiscountLabel" style="-fx-font-size: 16px; -fx-text-fill: #757575;" text="Current Discount: 0%" />
+
     <!-- Input Field for New Price -->
     <TextField fx:id="priceField" promptText="Enter new price" />
 
+    <!-- Input Field for Discount -->
+    <TextField fx:id="discountField" promptText="Enter discount percentage (0-100)" />
+
     <!-- Update Button -->
-    <Button text="Update Price" onAction="#updatePrice" />
+    <Button text="Save Changes" onAction="#updatePrice" />
 </VBox>

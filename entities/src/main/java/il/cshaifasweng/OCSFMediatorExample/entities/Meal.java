@@ -29,6 +29,7 @@ public class Meal implements Serializable {
     private double price;
     private boolean isCompany;
     private boolean isDelivery;
+    private double discount_percentage = 0;
 
 
     @Lob
@@ -153,6 +154,13 @@ public class Meal implements Serializable {
                 ", isDelivery=" + isDelivery +
                 ", imageSize=" + (image != null ? image.length : 0) + " bytes" +
                 '}';
+    }
+
+    public double getDiscount_percentage() {
+        return discount_percentage;
+    }
+    public void setDiscount_percentage(double discount_percentage) {
+        this.discount_percentage = discount_percentage;
     }
 
 }

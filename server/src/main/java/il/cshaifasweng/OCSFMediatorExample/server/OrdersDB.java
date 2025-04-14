@@ -2,9 +2,11 @@ package il.cshaifasweng.OCSFMediatorExample.server;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -13,11 +15,36 @@ import java.util.*;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.getAllMeals;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.allOrders;
 
 public class OrdersDB {
 
+
+    public static List<Order> getOrders() {
+        List<Order> orders = new ArrayList<>();
+
+        // try-with-resources ensures the session is closed automatically
+        try (Session session = getSessionFactory().openSession()) {
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Order> query = builder.createQuery(Order.class);
+            query.from(Order.class);
+
+            orders = session.createQuery(query).getResultList();
+        } catch (Exception e) {
+            e.printStackTrace(); // You could also log this if you have a logger
+        }
+
+        return orders;
+    }
+
     public static Order getOrderById(int orderId) {
         System.out.println("now I am in the function");
+        System.out.println("now I am in the function");
+        for(Order order : allOrders) {
+            if(order.getId() == orderId) {
+                order.setOrderStatus("Cancelled");
+            }
+        }
         Order order = null;
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
@@ -40,18 +67,16 @@ public class OrdersDB {
 
 
     public static Order OrderById(int orderId) {
-        Order order = null;
-        try (Session session = getSessionFactory().openSession()) {
-            session.beginTransaction();
-
-            order = session.get(Order.class, orderId);
-        } catch (Exception e) {
-            e.printStackTrace();
+        for(Order order : allOrders) {
+            if(order.getId() == orderId) {
+                return order;
+            }
         }
-        return order;
+        return null;
     }
 
     public static void saveOrder(Order order) {
+        allOrders.add(order);
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
@@ -72,43 +97,49 @@ public class OrdersDB {
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
-            if (!session.createQuery("FROM Order", Order.class).list().isEmpty()) {
+            // Check if orders already exist
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<Order> orderQuery = builder.createQuery(Order.class);
+            Root<Order> orderRoot = orderQuery.from(Order.class);  // This was missing
+            if (!session.createQuery(orderQuery).getResultList().isEmpty()) {
                 System.out.println("Orders already exist in database");
                 return;
             }
 
-            // Fetch existing meals from the database
-            CriteriaBuilder builder = session.getCriteriaBuilder();
-            CriteriaQuery<Restaurant> query = builder.createQuery(Restaurant.class);
-            query.from(Restaurant.class);
-            List<Restaurant> restaurants = session.createQuery(query).getResultList();
+            // Get restaurants with proper CriteriaQuery
+            CriteriaQuery<Restaurant> restaurantQuery = builder.createQuery(Restaurant.class);
+            Root<Restaurant> restaurantRoot = restaurantQuery.from(Restaurant.class);
+            List<Restaurant> restaurants = session.createQuery(restaurantQuery).getResultList();
 
-            //I imported static function here
-            List<Meal> meals = getAllMeals();
+            // Get meals with proper CriteriaQuery
+            CriteriaQuery<Meal> mealQuery = builder.createQuery(Meal.class);
+            Root<Meal> mealRoot = mealQuery.from(Meal.class);
+            List<Meal> meals = session.createQuery(mealQuery).getResultList();
 
-            List<Order> orders = new ArrayList<>();
-
-            // Generate orders for each month
-            int currentYear = 2025; // Use target report year
-            orders.addAll(createOrdersForMonth(currentYear, Month.JANUARY, 10, restaurants, meals));
-            orders.addAll(createOrdersForMonth(currentYear, Month.FEBRUARY, 5, restaurants, meals));
-            orders.addAll(createOrdersForMonth(currentYear, Month.MARCH, 8, restaurants, meals));
-
-            // Save orders (cascades will handle nested entities)
-            for (Order order : orders) {
-                session.persist(order); // Cascades to MealInTheCart -> personal_Meal -> CustomizationWithBoolean
+            if (restaurants.isEmpty() || meals.isEmpty()) {
+                System.err.println("No restaurants or meals found in database.");
+                return;
             }
 
-            session.flush(); // Ensure orders get IDs
-            System.out.println("Generated " + orders.size() + " orders with customizations");
+            List<Order> orders = new ArrayList<>();
+            int currentYear = 2025;
 
+            // Generate orders for months
+            orders.addAll(createOrdersForMonth(currentYear, Month.JANUARY, 20, restaurants, meals));
+            orders.addAll(createOrdersForMonth(currentYear, Month.FEBRUARY, 22, restaurants, meals));
+            orders.addAll(createOrdersForMonth(currentYear, Month.MARCH, 18, restaurants, meals));
+            orders.addAll(createOrdersForMonth(currentYear, Month.APRIL, 50, restaurants, meals));
 
+            // Persist orders
+            for (Order order : orders) {
+                session.persist(order);
+            }
 
-            // Generate complaints for random orders
+            session.flush();
             generateComplaints(session, orders);
-
             session.getTransaction().commit();
-            System.out.println("Generated " + orders.size() + " orders and complaints");
+
+            System.out.println("Successfully generated " + orders.size() + " orders");
         }
     }
 
@@ -117,41 +148,52 @@ public class OrdersDB {
                                                     List<Meal> meals) {
         List<Order> orders = new ArrayList<>();
         Random random = new Random();
-        LocalDateTime now = LocalDateTime.now(); // Get current time
-        int total = 0;
+        LocalDateTime now = LocalDateTime.now();
 
         for (int i = 0; i < count; i++) {
             Order order = new Order();
             Restaurant restaurant = restaurants.get(random.nextInt(restaurants.size()));
 
-            total= 50;
-
-            // Generate order time
-            LocalDateTime orderTime = getRandomDateTimeInMonth(2025, month);
-
-            // Determine status based on time difference
+            // Set basic order info
+            LocalDateTime orderTime = getRandomDateTimeInMonth(year, month);
             boolean isWithin24Hours = orderTime.isAfter(now.minusHours(24));
-            String status = isWithin24Hours ? "Do" : "Done";
 
-            // Set order properties
             order.setRestaurantId(restaurant.getId());
             order.setRestaurantName(restaurant.getRestaurantName());
             order.setDate(orderTime.toLocalDate());
             order.setOrderTime(orderTime);
-            order.setTotal_price(total);
-            order.setOrderType(random.nextBoolean() ? "Delivery" : "Pickup");
-            order.setOrderStatus(status); // Set determined status
-            order.setCustomerEmail("naghammnsor@gmail.com");
+            order.setOrderStatus(isWithin24Hours ? "Do" : "Done");
+            order.setOrderType(random.nextBoolean() ? "Delivery" : "Self PickUp");
+            order.setCustomerEmail("customer" + i + "@example.com");
             order.setCreditCard_num(String.format("4111-1111-1111-%04d", i));
 
-            // Rest of meal creation code remains the same...
-            // [Keep existing meal and customization logic here]
+            // Add meals to order
+            List<MealInTheCart> cartMeals = new ArrayList<>();
+            int mealCount = 1 + random.nextInt(3); // 1-3 meals per order
+            double total = 0;
 
+            for (int j = 0; j < mealCount; j++) {
+                Meal meal = meals.get(random.nextInt(meals.size()));
+
+                MealInTheCart mic = new MealInTheCart();
+                mic.setQuantity(1 + random.nextInt(3)); // 1-3 quantity
+                mic.setOrder(order);
+
+                personal_Meal pm = new personal_Meal();
+                pm.setMeal(meal);
+                pm.setCustomizationsList(new HashSet<>());
+                mic.setMeal(pm);
+
+                total += meal.getPrice() * mic.getQuantity();
+                cartMeals.add(mic);
+            }
+
+            order.setTotal_price((int) total);
+            order.setMeals(cartMeals);
             orders.add(order);
         }
         return orders;
     }
-
     private static Order createDynamicOrder(List<Restaurant> restaurants, List<Meal> meals) {
         Order order = new Order();
         Random random = new Random();
@@ -229,6 +271,8 @@ public class OrdersDB {
             }
         }
     }
+
+
 
     // Helper methods
     private static LocalDate getRandomDateInMonth(int year, Month month) {

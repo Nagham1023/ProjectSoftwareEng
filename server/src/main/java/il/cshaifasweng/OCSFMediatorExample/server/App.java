@@ -30,6 +30,7 @@ import static il.cshaifasweng.OCSFMediatorExample.server.CreditCardDetailsDB.get
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.ComplainDB.*;
 import static il.cshaifasweng.OCSFMediatorExample.server.OrdersDB.generateOrders;
+import static il.cshaifasweng.OCSFMediatorExample.server.OrdersDB.getOrders;
 import static il.cshaifasweng.OCSFMediatorExample.server.PersonalDetailsDB.getAllPersonalDetails;
 import static il.cshaifasweng.OCSFMediatorExample.server.RestaurantDB.getAllRestaurants;
 import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.*;
@@ -307,89 +308,82 @@ public class App {
     }
 
     private static void generateTheComplains() throws Exception {
-        List<Complain> complains = getAllComplains();
-
-        if (complains != null && !complains.isEmpty()) {
-            System.out.println("there are some Complains in the database");
+        if (allComplains != null && !allComplains.isEmpty()) {
+            System.out.println("There are already some complains in the database.");
             return;
-        } else
-            System.out.println("no complains in the database");
+        }
+
+        System.out.println("Generating sample complains...");
+
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
+            Random random = new Random();
+            String[] types = {"Complaint", "Feedback", "Suggestion"};
+            String[] statuses = {"Do", "Done"};
+            String[] sampleTells = {
+                    "The order was cold.",
+                    "The driver was rude.",
+                    "Great experience!",
+                    "Food arrived late.",
+                    "Loved the meal.",
+                    "Too expensive.",
+                    "The order was missing items.",
+                    "Best restaurant ever!",
+                    "Didn't like the packaging.",
+                    "Please add more vegan options.",
+                    "Food was soggy.",
+                    "Staff was polite.",
+                    "Took too long to prepare.",
+                    "No napkins included.",
+                    "Food quality was amazing.",
+                    "Wish you delivered to my area.",
+                    "Wrong item received.",
+                    "Loved the app experience.",
+                    "Order was canceled without reason.",
+                    "Thank you for the refund.",
+            };
 
-            LocalDate date1 = LocalDate.of(2025, 2, 23); // 10:00 AM
-            LocalDate date2 = LocalDate.of(2024, 1, 1); // 10:00 PM
-            LocalDate date3 = LocalDate.of(2025, 5, 15);
-            LocalDate date4 = LocalDate.of(2025, 11, 11);
+            for (int i = 1; i <= 60; i++) {
+                Complain complain = new Complain();
+                String kind = types[random.nextInt(types.length)];
+                String status = statuses[random.nextInt(statuses.length)];
+                String name = "User" + i;
+                String email = "user" + i + "@example.com";
+                String tell = sampleTells[random.nextInt(sampleTells.length)];
+                int year = 2024 + random.nextInt(2); // 2024 or 2025
+                int month = 1 + random.nextInt(12);
+                int day = 1 + random.nextInt(28); // Keep it safe for all months
+                int hour = random.nextInt(24);
+                int minute = random.nextInt(60);
 
-            LocalDateTime time1 = LocalDateTime.of(2025, 3, 3, 9, 45);
-            LocalDateTime time2 = LocalDateTime.of(2025, 2, 25, 23, 23);
-            LocalDateTime time3 = LocalDateTime.of(2025, 3, 23, 22, 23);
-            LocalDateTime time4 = LocalDateTime.of(2025, 3, 16, 11, 11);
+                LocalDate date = LocalDate.of(year, month, day);
+                LocalDateTime time = LocalDateTime.of(year, month, day, hour, minute);
 
-            Complain complain1 = new Complain();
-            complain1.setKind("Complaint");
-            complain1.setName("Hala1");
-            complain1.setEmail("7ala.saloty@gmail.com");
-            complain1.setTell("the order come 3 minutes late");
-            complain1.setDate(date1);
-            complain1.setTime(time1);
-            complain1.setStatus("Do");
-            complain1.setResponse("");
-            complain1.setOrderNum("1");
-            complain1.setRefund(0);
+                complain.setKind(kind);
+                complain.setName(name);
+                complain.setEmail(email);
+                complain.setTell(tell);
+                complain.setDate(date);
+                complain.setTime(time);
+                complain.setStatus(status);
+                complain.setResponse(status.equals("Done") ? "We have taken care of it." : "");
+                complain.setOrderNum(kind.equals("Feedback") || kind.equals("Suggestion") ? "" : String.valueOf(random.nextInt(200) + 1));
+                complain.setRefund(kind.equals("Complaint") && status.equals("Done") ? random.nextInt(21) : 0);
 
-            Complain complain2 = new Complain();
-            complain2.setKind("Complaint");
-            complain2.setName("Hala2");
-            complain2.setEmail("7ala.saloty@gmail.com");
-            complain2.setTell("the order was cold when we gut it");
-            complain2.setDate(date2);
-            complain2.setTime(time2);
-            complain2.setStatus("Done");
-            complain2.setResponse("sorry for tasting our food cold in this cold days you will gut a refund of 10");
-            complain2.setOrderNum("97");
-            complain2.setRefund(10);
-
-            Complain complain3 = new Complain();
-            complain3.setKind("Feedback");
-            complain3.setName("Hala3");
-            complain3.setEmail("7ala.saloty@gmail.com");
-            complain3.setTell("i enjoyed being in your restaurant");
-            complain3.setDate(date3);
-            complain3.setTime(time3);
-            complain3.setStatus("Do");
-            complain3.setResponse("");
-            complain3.setOrderNum("");
-            complain3.setRefund(0);
-
-            Complain complain4 = new Complain();
-            complain4.setKind("Suggestion");
-            complain4.setName("Hala4");
-            complain4.setEmail("7ala.saloty@gmail.com");
-            complain4.setTell("the meals costs to much");
-            complain4.setDate(date4);
-            complain4.setTime(time4);
-            complain4.setStatus("Done");
-            complain4.setResponse("the cost is big because we give you the biggest quality ever!, thanks for sharing your suggest");
-            complain4.setOrderNum("");
-            complain4.setRefund(0);
-
-            session.save(complain1);
-            session.save(complain2);
-            session.save(complain3);
-            session.save(complain4);
+                session.save(complain);
+                allComplains.add(complain);
+            }
 
             session.flush();
             session.getTransaction().commit();
-            System.out.println("Successfully generated new complains.");
+            System.out.println("Successfully generated 60 sample complains.");
         } catch (Exception e) {
             e.printStackTrace();
             throw new Exception("An error occurred while generating complains.", e);
         }
-
     }
+
 
 
     private static SimpleServer server;
@@ -403,20 +397,20 @@ public class App {
             printAllData();
             allPersonalDetails = getAllPersonalDetails();
             allCreditCards = getAllCreditCards();
-            //generateBasicUser();
-            //printAllUsers();
-            //generateOrders();
             allUsers = getUsers();
+            generateBasicUser1();
             generateRestaurants();
             //generateCompanyMeals();
-            generateOrders();
             getAllRestMeals();
             System.out.println("getting all custom");
             allcust = getAllCustomizations();
 
-            //generateTheComplains();
+            allComplains = getAllComplains();
+            generateTheComplains();
             initializeSampleTables();
             fetching_reservation();
+            generateOrders();
+            allOrders = getOrders();
             //generateBasicUser1();
             // Register a shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {

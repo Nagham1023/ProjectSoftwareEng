@@ -9,6 +9,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -19,10 +20,12 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -283,7 +286,7 @@ public class menu_controller {
         return true;
     }
 
-    public void onAddMealClicked(Meal meal) {
+    /*public void onAddMealClicked(Meal meal) {
         // Create a new meal row (HBox)
         HBox mealRow = new HBox(20);
         mealRow.setStyle("-fx-background-color: #ffffff; -fx-border-color: #000000; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;");
@@ -368,7 +371,117 @@ public class menu_controller {
         mealPriceLabels.put(String.valueOf(meal.getId()), priceLabel);
         mealrowMap.put(String.valueOf(meal.getId()), mealRow);
         mealsL.put(meal.getName(), meal);
+    }*/
+    public void onAddMealClicked(Meal meal) {
+        // Create meal container
+        HBox mealRow = new HBox(20);
+        mealRow.setStyle("-fx-background-color: #ffffff; -fx-border-color: #000000; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;");
+        mealRow.setAlignment(Pos.CENTER_LEFT);
+
+        // Meal Image
+        ImageView imageView = new ImageView();
+        if (meal.getImage() != null) {
+            try {
+                imageView.setImage(new Image(new ByteArrayInputStream(meal.getImage())));
+            } catch (Exception e) {
+                System.err.println("Error loading meal image: " + e.getMessage());
+            }
+        }
+        imageView.setFitHeight(80);
+        imageView.setFitWidth(80);
+        imageView.setPreserveRatio(true);
+
+        // Meal Details
+        VBox detailsBox = new VBox(5);
+        Label nameLabel = new Label(meal.getName());
+        nameLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        String mealType = meal.isCompany() ? "Company meal" : "Special meal";
+        Label descriptionLabel = new Label(meal.getDescription() + "\nThis meal is - " + mealType);
+        descriptionLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #757575;");
+        detailsBox.getChildren().addAll(nameLabel, descriptionLabel);
+
+        // Price Display - Will differ based on discount
+        VBox priceBox = new VBox(5);
+        double discount = meal.getDiscount_percentage();
+        double price = meal.getPrice();
+
+        // Solution for lambda expression issue - using a final array
+        final Label[] priceLabelRef = new Label[1];
+
+        if (discount > 0) {
+            // Discounted meal version
+            double discountedPrice = price * (1 - discount / 100);
+
+            // Original price with strikethrough - Using Text for reliable strikethrough
+            Text originalPriceText = new Text(String.format("Original: %.2f₪", price));
+            originalPriceText.setStyle("-fx-strikethrough: true; -fx-font-size: 14px; -fx-fill: #999999;");
+            // Wrap in StackPane for proper layout
+            StackPane originalPricePane = new StackPane(originalPriceText);
+            originalPricePane.setAlignment(Pos.CENTER_LEFT);
+
+            // Create a Label version of the original price for the reference
+            Label originalPriceLabel = new Label(String.format("Original: %.2f₪", price));
+            originalPriceLabel.setStyle("-fx-strikethrough: true; -fx-font-size: 14px; -fx-text-fill: #999999;");
+            priceLabelRef[0] = originalPriceLabel; // Store the original price label
+
+            // Discounted price
+            Label discountedPriceLabel = new Label(String.format("Now: %.2f₪", discountedPrice));
+            discountedPriceLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #b70236;");
+
+            // Discount badge
+            Label discountBadge = new Label(discount + "% OFF");
+            discountBadge.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: white; " +
+                    "-fx-background-color: #fe3b30; -fx-background-radius: 5; -fx-padding: 2 5;");
+
+            priceBox.getChildren().addAll(originalPricePane, discountedPriceLabel, discountBadge);
+        } else {
+            // Regular meal version
+            Label priceLabel = new Label(String.format("%.2f₪", price));
+            priceLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #b70236;");
+            priceBox.getChildren().add(priceLabel);
+            priceLabelRef[0] = priceLabel;
+        }
+
+        // Add to Cart Button
+        Button addToCartBtn = new Button("Add to Cart");
+        addToCartBtn.setStyle("-fx-background-color: #222222; -fx-text-fill: white; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
+        addToCartBtn.setOnAction(event -> openMealPopup(meal));
+
+        // Worker mode controls
+        if (isWorkerMode) {
+            add_meal.setVisible(true);
+            addToCartBtn.setVisible(false);
+
+            Button changePriceBtn = new Button("Change Price");
+            changePriceBtn.setStyle("-fx-background-color: #b70236; -fx-text-fill: white; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
+            changePriceBtn.setOnAction(event -> openChangePricePage(meal.getName(), priceLabelRef[0], String.valueOf(meal.getId()), meal.getDiscount_percentage()));
+
+            Button deleteBtn = new Button("Delete");
+            deleteBtn.setStyle("-fx-background-color: #d9534f; -fx-text-fill: white; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
+            deleteBtn.setOnAction(event -> handleDeleteMealClicked(String.valueOf(meal.getId())));
+
+            Button updateBtn = new Button("Update");
+            updateBtn.setStyle("-fx-background-color: #5bc0de; -fx-text-fill: white; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
+            updateBtn.setOnAction(event -> handleUpdateMealClicked(meal.getName(), String.valueOf(meal.getId())));
+
+            mealRow.getChildren().addAll(imageView, detailsBox, priceBox, changePriceBtn, deleteBtn, updateBtn);
+        } else {
+            mealRow.getChildren().addAll(imageView, detailsBox, priceBox, addToCartBtn);
+        }
+
+        // Add to main container
+        menuContainer.getChildren().add(mealRow);
+
+        // Store references
+        mealDescribitionLabels.put(String.valueOf(meal.getId()), descriptionLabel);
+        addToCartButtons.put(String.valueOf(meal.getId()), addToCartBtn);
+        mealPriceLabels.put(String.valueOf(meal.getId()), priceLabelRef[0]);
+        mealrowMap.put(String.valueOf(meal.getId()), mealRow);
+        mealsL.put(meal.getName(), meal);
     }
+
+
 
     private void handleUpdateMealClicked(String text, String text1) {
         try {
@@ -420,7 +533,6 @@ public class menu_controller {
             });
         } else {
             System.out.println("Meal not found: " + mealId);
-            // Optional: Refresh list if meal exists but wasn't in UI
             refreshMenu();
         }
     }
@@ -438,6 +550,7 @@ public class menu_controller {
 //        } else {
 //            System.out.println("Meal not found: " + mealId);
 //            // Optional: Refresh list if meal exists but wasn't in UI
+        System.out.println("im in updateRowMeal");
             refreshMenu();
        // }
 
@@ -502,7 +615,7 @@ public class menu_controller {
             e.printStackTrace();
         }
     }
-    private void openChangePricePage(String mealName, Label priceLabel,String Id){
+    private void openChangePricePage(String mealName, Label priceLabel,String Id,double discount){
     try {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/update_menu.fxml"));
         Stage stage = new Stage();
@@ -511,7 +624,7 @@ public class menu_controller {
 
         // Pass data to the Change Price Controller
         update_menu_controller controller = loader.getController();
-        controller.setMealDetails(mealName, priceLabel,Id);
+        controller.setMealDetails(mealName, priceLabel,Id,discount);
 
         stage.show();
     } catch (IOException e) {
@@ -669,8 +782,9 @@ public class menu_controller {
 
     @Subscribe
     public void updateMealPrice(updatePrice updatePrice) {
-        //System.out.println("changing price now!");
-        String mealId = String.valueOf(updatePrice.getIdMeal());
+        System.out.println("changing price now!");
+        refreshMenu();
+       /* String mealId = String.valueOf(updatePrice.getIdMeal());
         String newPrice = String.valueOf(updatePrice.getNewPrice());
         // Check if the mealId exists in the map
         Label priceLabel = mealPriceLabels.get(mealId);
@@ -680,7 +794,7 @@ public class menu_controller {
             });
         } else {
             System.out.println("Meal with ID " + mealId + " not found.");
-        }
+        }*/
     }
     @FXML
     void showSearchOptionsDialog(ActionEvent event) {

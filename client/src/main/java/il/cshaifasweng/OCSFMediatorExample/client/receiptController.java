@@ -41,7 +41,7 @@ public class receiptController {
 
     public void initialize() {
         if(mode.equals("Order")) {
-            int paid = done_Order.getTotal_price();
+            double paid = done_Order.getTotal_price();
             OrderNumField.setText("Order Number: " + done_Order.getId());
             branchField.setText(done_Order.getRestaurantName());
             dateField.setText(String.valueOf(done_Order.getDate()));
@@ -52,7 +52,18 @@ public class receiptController {
             String[] mealsOrdered = new String[done_Order.getMeals().size()];
             int index = 0;
             for (MealInTheCart meal : done_Order.getMeals()) {
-                String mealDetails = meal.getMeal().getMeal().getName() + " - Quantity: " + meal.getQuantity() + " - Price: $" + meal.getMeal().getMeal().getPrice();
+                double price = meal.getMeal().getMeal().getPrice();
+                double discount = meal.getMeal().getMeal().getDiscount_percentage();
+                double finalPrice = discount > 0 ? price * (1 - discount / 100) : price;
+
+                String mealDetails = meal.getMeal().getMeal().getName() +
+                        " - Quantity: " + meal.getQuantity() +
+                        " - Price: " + String.format("%.2f₪", finalPrice);
+
+                if (discount > 0) {
+                    mealDetails += String.format(" (Original: %.2f₪, %d%% OFF)", price, (int)discount);
+                }
+
                 mealsOrdered[index] = mealDetails;
                 index++;
             }
@@ -127,15 +138,6 @@ public class receiptController {
         StringBuilder orderDetails = new StringBuilder();
         double totalAmount = 0.0;
 
-        // Loop through the meals and update the summary
-        for (MealInTheCart meal : done_Order.getMeals()) {
-            totalAmount += meal.getMeal().getMeal().getPrice() * meal.getQuantity();
-            orderDetails.append("\n");
-        }
-
-        // Prepare the total amount text
-        String totalAmountText = "Total: " + totalAmount + "₪";
-
         // Clear the existing content in the meal details container
         mealDetailsContainer.getChildren().clear();
 
@@ -143,6 +145,12 @@ public class receiptController {
         for (MealInTheCart meal : done_Order.getMeals()) {
             HBox mealRow = new HBox(10);
             mealRow.setSpacing(10);
+
+            // Calculate price with discount if applicable
+            double discount = meal.getMeal().getMeal().getDiscount_percentage();
+            double price = meal.getMeal().getMeal().getPrice();
+            double finalPrice = discount > 0 ? price * (1 - discount / 100) : price;
+            totalAmount += finalPrice * meal.getQuantity();
 
             // Display the meal image (if exists)
             byte[] imageBytes = meal.getMeal().getMeal().getImage();
@@ -163,56 +171,91 @@ public class receiptController {
                 mealRow.getChildren().add(imageView);
             }
 
-            // Add meal info text (name and quantity)
-            TextFlow mealInfoTextFlow = new TextFlow();
+            // Create container for all text content
+            VBox textContainer = new VBox(5);
 
+            // Add meal name and quantity
+            HBox nameQuantityBox = new HBox(5);
             Text mealName = new Text(meal.getMeal().getMeal().getName() + " - ");
             Text boldX = new Text("X");
             boldX.setStyle("-fx-font-weight: bold;");
             Text quantity = new Text(String.valueOf(meal.getQuantity()));
             quantity.setStyle("-fx-font-weight: bold;");
+            nameQuantityBox.getChildren().addAll(mealName, boldX, quantity);
+            textContainer.getChildren().add(nameQuantityBox);
 
-            Text mealPrice = new Text(" (" + meal.getMeal().getMeal().getPrice() + "₪)\n");
-            mealPrice.setStyle("-fx-font-weight: bold;");
+            // Add price information
+            if (discount > 0) {
+                // Original price with strikethrough
+                HBox originalPriceBox = new HBox(5);
+                Text originalPriceLabel = new Text("Original: ");
+                Text originalPrice = new Text(String.format("%.2f₪", price));
+                originalPrice.setStyle("-fx-strikethrough: true; -fx-fill: #999999;");
+                originalPriceBox.getChildren().addAll(originalPriceLabel, originalPrice);
+                textContainer.getChildren().add(originalPriceBox);
 
-            mealInfoTextFlow.getChildren().addAll(mealName, boldX, quantity,mealPrice, new Text("\n"));
+                // Discounted price
+                HBox discountedPriceBox = new HBox(5);
+                Text discountedPriceLabel = new Text("Price: ");
+                Text discountedPrice = new Text(String.format("%.2f₪", finalPrice));
+                discountedPrice.setStyle("-fx-font-weight: bold; -fx-fill: black;");
+                discountedPriceBox.getChildren().addAll(discountedPriceLabel, discountedPrice);
+                textContainer.getChildren().add(discountedPriceBox);
+
+                // Discount badge
+                Text discountBadge = new Text(String.format("(%d%% OFF)", (int)discount));
+                discountBadge.setStyle("-fx-font-weight: bold; -fx-fill: #fe3b30;");
+                textContainer.getChildren().add(discountBadge);
+            } else {
+                // Regular price
+                HBox priceBox = new HBox(5);
+                Text priceLabel = new Text("Price: ");
+                Text priceText = new Text(String.format("%.2f₪", price));
+                priceText.setStyle("-fx-font-weight: bold;");
+                priceBox.getChildren().addAll(priceLabel, priceText);
+                textContainer.getChildren().add(priceBox);
+            }
 
             // Add meal description (if available)
             if (meal.getMeal().getMeal().getDescription() != null && !meal.getMeal().getMeal().getDescription().isEmpty()) {
-                Text description = new Text(meal.getMeal().getMeal().getDescription() + "\n");
-                mealInfoTextFlow.getChildren().add(description);
+                Text description = new Text(meal.getMeal().getMeal().getDescription());
+                textContainer.getChildren().add(description);
             }
 
             // Add customizations (with check/uncheck images)
             if (meal.getMeal().getCustomizationsList() != null && !meal.getMeal().getCustomizationsList().isEmpty()) {
-                Text customizationsTitle = new Text("Customizations:\n");
+                Text customizationsTitle = new Text("Customizations:");
                 customizationsTitle.setStyle("-fx-font-weight: bold;");
-                mealInfoTextFlow.getChildren().add(customizationsTitle);
+                textContainer.getChildren().add(customizationsTitle);
 
                 Image checkedImage = new Image(getClass().getResourceAsStream("/images/newcheck.png"));
                 Image uncheckedImage = new Image(getClass().getResourceAsStream("/images/newradio.png"));
 
                 for (CustomizationWithBoolean customWithBool : meal.getMeal().getCustomizationsList()) {
                     HBox customRow = new HBox(5);
-                    Label customLabel = new Label(customWithBool.getCustomization().getName());
-                    customLabel.setStyle("-fx-text-fill: black;");
+                    Text customText = new Text(customWithBool.getCustomization().getName());
+                    customText.setStyle("-fx-fill: black;");
 
                     ImageView checkImageView = new ImageView(customWithBool.getValue() ? checkedImage : uncheckedImage);
                     checkImageView.setFitWidth(20);
                     checkImageView.setFitHeight(20);
                     checkImageView.setPreserveRatio(true);
 
-                    customRow.getChildren().addAll(checkImageView, customLabel);
-                    mealInfoTextFlow.getChildren().add(customRow);
+                    customRow.getChildren().addAll(checkImageView, customText);
+                    textContainer.getChildren().add(customRow);
                 }
             }
 
-            // Add the meal info to the row
-            mealRow.getChildren().add(mealInfoTextFlow);
+            // Add the text container to the row
+            mealRow.getChildren().add(textContainer);
 
             // Add the row to the meal details container
             mealDetailsContainer.getChildren().add(mealRow);
         }
+
+        // Update the total amount text (now includes any discounts)
+        //String totalAmountText = String.format("Total: %.2f₪", totalAmount);
+        // You'll need to update whatever displays the total amount with this new value
     }
     public void addDelivery() {
         StringBuilder orderDetails = new StringBuilder();

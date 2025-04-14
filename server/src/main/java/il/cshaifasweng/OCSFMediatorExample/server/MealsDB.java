@@ -353,10 +353,12 @@ public class MealsDB {
         //System.out.println("Changing the price in database.");
         int mealId = updatePrice.getIdMeal();
         double newPrice = updatePrice.getNewPrice();
+        double newDiscount = updatePrice.getDiscount();
         if(allMeals != null) {
             for(Meal meal : allMeals) {
                 if (meal.getId() == mealId) {
                     meal.setPrice(newPrice);
+                    meal.setDiscount_percentage(newDiscount);
                     break;
                 }
             }
@@ -367,6 +369,7 @@ public class MealsDB {
                     for (Meal meal : restaurant.getMeals()) {
                         if (meal.getId() == mealId) {
                             meal.setPrice(newPrice);
+                            meal.setDiscount_percentage(newDiscount);
                             break;
                         }
                     }
@@ -394,6 +397,7 @@ public class MealsDB {
             if (meal != null) {
                 //System.out.println("Found Meal: " + meal.getName() + " with current price: " + meal.getPrice());
                 meal.setPrice(newPrice); // Update the price
+                meal.setDiscount_percentage(newDiscount);
                 session.update(meal); // Persist the changes
                 session.getTransaction().commit(); // Commit the transaction
                 updateMealPriceById(mealId, newPrice);
@@ -730,10 +734,11 @@ public class MealsDB {
                         meal.getDescription(),
                         meal.getImage(),
                         existing.getOldPrice(),
-                        existing.getNewPrice()
+                        existing.getNewPrice(),
+                        existing.getOldDiscount(),
+                        existing.getNewDiscount()
                 );
                 return result;
-
             }
 
             // Create a new request and link it to the Meal
@@ -741,6 +746,8 @@ public class MealsDB {
             updateRequest.setMeal(meal); // Link the Meal object
             updateRequest.setOldPrice(meal.getPrice());
             updateRequest.setNewPrice(newPrice);
+            updateRequest.setOldDiscount(meal.getDiscount_percentage());
+            updateRequest.setNewDiscount(priceRequest.getDiscount());
 
             meal.getPriceRequests().add(updateRequest); // Update the Meal's list
             session.save(updateRequest);
@@ -754,7 +761,9 @@ public class MealsDB {
                     meal.getDescription(),
                     meal.getImage(),
                     meal.getPrice(),  // old price
-                    newPrice
+                    newPrice,
+                    meal.getDiscount_percentage(),
+                    priceRequest.getDiscount()
             );
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();

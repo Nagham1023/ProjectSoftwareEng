@@ -10,21 +10,40 @@ public class MealUpdateRequest implements Serializable {
     private double newPrice;
     private String status;
     private byte[] image;
+    private double oldDiscount;
+    private double newDiscount;
 
     // Constructor, getters, and setters
     public MealUpdateRequest(String mealId, String mealName, String mealDescription, byte[] image,
-                             double oldPrice, double newPrice) {
+                             double oldPrice, double newPrice,double oldDiscount, double newDiscount) {
         this.mealId = mealId;
         this.mealName = mealName;
         this.mealDescription = mealDescription;
         this.image = image;
         this.oldPrice = oldPrice;
         this.newPrice = newPrice;
+        this.oldDiscount = oldDiscount;
+        this.newDiscount = newDiscount;
         this.status = "New";
     }
 
     public MealUpdateRequest() {
 
+    }
+
+    public double getNewDiscount() {
+
+        return newDiscount;
+    }
+    public void setNewDiscount(double newDiscount) {
+        this.newDiscount = newDiscount;
+    }
+
+    public double getOldDiscount() {
+        return oldDiscount;
+    }
+    public void setOldDiscount(double oldDiscount) {
+        this.oldDiscount = oldDiscount;
     }
 
     public byte[] getImage() {

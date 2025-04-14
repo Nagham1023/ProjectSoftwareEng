@@ -7,6 +7,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -137,14 +138,13 @@ public class CartPageController {
             // Create a new meal row (HBox) with internal padding
             HBox mealRow = new HBox(20);
             mealRow.setStyle("-fx-background-color: #ffffff; -fx-border-color: #000000; -fx-border-radius: 10; -fx-background-radius: 10;");
-            mealRow.setPadding(new Insets(10)); // Add padding inside the HBox (top, right, bottom, left)
+            mealRow.setPadding(new Insets(10));
 
             // Meal Image
             ImageView mealImage = new ImageView();
-
             if (meal.getMeal().getMeal().getImage() != null) {
                 Image image = new Image(new ByteArrayInputStream(meal.getMeal().getMeal().getImage()));
-                mealImage = new ImageView(image);
+                mealImage.setImage(image);
             } else {
                 System.err.println("Image data is null for the meal.");
             }
@@ -153,33 +153,61 @@ public class CartPageController {
 
             // Meal Details
             VBox detailsBox = new VBox(5);
-
-            // Meal Name
             Label nameLabel = new Label(meal.getMeal().getMeal().getName());
             nameLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-            // Meal Description
             Label descriptionLabel = new Label(meal.getMeal().getMeal().getDescription());
             descriptionLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #757575;");
 
-            // Get unselected customizations and display them with "Without"
+            // Get unselected customizations
             String withoutCustomizations = meal.getMeal().getCustomizationsList().stream()
-                    .filter(customizationWithBoolean -> !customizationWithBoolean.getValue()) // Get unselected ones
+                    .filter(customizationWithBoolean -> !customizationWithBoolean.getValue())
                     .map(customizationWithBoolean -> "Without " + customizationWithBoolean.getCustomization().getName())
                     .collect(Collectors.joining(", "));
 
-            // Label for "Without" customizations (only if there are unselected items)
             if (!withoutCustomizations.isEmpty()) {
                 Label withoutLabel = new Label(withoutCustomizations);
-                withoutLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #000000;"); // Black text color
+                withoutLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #000000;");
                 detailsBox.getChildren().addAll(nameLabel, descriptionLabel, withoutLabel);
             } else {
                 detailsBox.getChildren().addAll(nameLabel, descriptionLabel);
             }
 
-            // Meal Price
-            Label priceLabel = new Label(meal.getMeal().getMeal().getPrice() + "₪");
-            priceLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #000000;");
+            // Price Display - Handle discounted meals
+            double discount = meal.getMeal().getMeal().getDiscount_percentage();
+            double price = meal.getMeal().getMeal().getPrice();
+
+            // Create price container
+            HBox priceContainer = new HBox(10);
+            priceContainer.setAlignment(Pos.CENTER_LEFT);
+
+            if (discount > 0) {
+                double discountedPrice = price * (1 - discount / 100);
+
+                // Original price with strikethrough - Using Text for reliable strikethrough
+                Text originalPriceText = new Text(String.format("₪ %.2f", price));
+                originalPriceText.setStyle("-fx-strikethrough: true; -fx-font-size: 14px; -fx-fill: #999999;");
+
+                // Wrap in StackPane for proper layout
+                StackPane originalPricePane = new StackPane(originalPriceText);
+                originalPricePane.setAlignment(Pos.CENTER_LEFT);
+
+                // Discounted price
+                Label discountedPriceLabel = new Label(String.format("₪ %.2f", discountedPrice));
+                discountedPriceLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #b70236;");
+
+                // Discount badge
+                Label discountBadge = new Label(discount + "% OFF");
+                discountBadge.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: white; " +
+                        "-fx-background-color: #fe3b30; -fx-background-radius: 5; -fx-padding: 2 5;");
+
+                priceContainer.getChildren().addAll(originalPricePane, discountedPriceLabel, discountBadge);
+            } else {
+                // Regular price
+                Label priceLabel = new Label(String.format("₪ %.2f", price));
+                priceLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #b70236;");
+                priceContainer.getChildren().add(priceLabel);
+            }
 
             // Quantity Control
             HBox quantityBox = new HBox(5);
@@ -191,37 +219,37 @@ public class CartPageController {
             minusButton.setStyle("-fx-background-color: #cd0338; -fx-text-fill: white; -fx-background-radius: 5;");
             plusButton.setStyle("-fx-background-color: #cd0338; -fx-text-fill: white; -fx-background-radius: 5;");
 
-            // Make the quantityField smaller
+            // Configure quantity field
             quantityField.setPrefWidth(40);
             quantityField.setMaxWidth(40);
             quantityField.setStyle("-fx-alignment: center;");
 
-            // Restrict quantityField to positive numbers only
+            // Quantity validation
             quantityField.textProperty().addListener((observable, oldValue, newValue) -> {
-                if (!newValue.matches("\\d*")) { // Check if input is a number
-                    quantityField.setText(oldValue); // Revert to last valid value
+                if (!newValue.matches("\\d*")) {
+                    quantityField.setText(oldValue);
                 } else if (!newValue.isEmpty() && Integer.parseInt(newValue) <= 0) {
-                    quantityField.setText("1"); // Enforce positive numbers only
+                    quantityField.setText("1");
                 }
-                updateTotalPrice(); // Update total price when quantity changes
+                updateTotalPrice();
+                meal.setQuantity(Integer.parseInt(quantityField.getText()));
             });
 
-            // Decrease quantity
+            // Quantity buttons
             minusButton.setOnAction(event -> {
                 int currentQty = Integer.parseInt(quantityField.getText());
                 if (currentQty > 1) {
                     quantityField.setText(String.valueOf(currentQty - 1));
-                    updateTotalPrice();
                     meal.setQuantity(currentQty - 1);
                 }
+                updateTotalPrice();
             });
 
-            // Increase quantity
             plusButton.setOnAction(event -> {
                 int currentQty = Integer.parseInt(quantityField.getText());
                 quantityField.setText(String.valueOf(currentQty + 1));
-                updateTotalPrice();
                 meal.setQuantity(currentQty + 1);
+                updateTotalPrice();
             });
 
             quantityBox.getChildren().addAll(minusButton, quantityField, plusButton);
@@ -242,21 +270,18 @@ public class CartPageController {
             });
 
             // Add components to mealRow
-            mealRow.getChildren().addAll(mealImage, detailsBox, priceLabel, quantityBox, deleteButton);
+            mealRow.getChildren().addAll(mealImage, detailsBox, priceContainer, quantityBox, deleteButton);
 
-            // Add a transparent spacer to simulate the gap (keeps the gray background)
+            // Add spacing between items
             Region spacer = new Region();
-            spacer.setPrefHeight(10); // Adjust height for spacing between rows
+            spacer.setPrefHeight(10);
 
-            // Add mealRow and spacer to cartContainer
+            // Add to container
             cartItemsContainer.getChildren().addAll(mealRow, spacer);
-
             mealRowMap.put(meal.getMeal().getMeal().getId(), mealRow);
 
-            // Update total price initially
+            // Update UI
             updateTotalPrice();
-
-            // Hide the empty cart image if meals are added
             emptyCartPane.setVisible(false);
         });
     }
@@ -286,32 +311,22 @@ public class CartPageController {
         }
     }
 
-    // Method to calculate and update the total price
-    // Method to calculate and update the total price
     private void updateTotalPrice() {
-        double total = 0;
-        for (Node node : cartItemsContainer.getChildren()) {
-            if (node instanceof HBox) {
-                HBox mealRow = (HBox) node;
-                // Extract price and quantity from the meal row
-                Label priceLabel = (Label) mealRow.getChildren().get(2); // Price label is at index 2
-                TextField quantityField = (TextField) ((HBox) mealRow.getChildren().get(3)).getChildren().get(1); // Quantity field is at index 3
+        double total = 0.0;
 
-                double price = Double.parseDouble(priceLabel.getText().replace("₪", ""));
-                int quantity = Integer.parseInt(quantityField.getText());
-                total += price * quantity;
-            }
+        for (MealInTheCart meal : listOfMeals) {
+            // Get price directly from meal object
+            double price = meal.getMeal().getMeal().getPrice();
+            double finalPrice = (1 - (double) meal.getMeal().getMeal().getDiscount_percentage() / 100) * price;
+            int quantity = meal.getQuantity();
+            total += finalPrice * quantity;
         }
 
         // Update the total price label
         totalPriceLabel.setText(String.format("Total: %.2f₪", total));
 
-        // Show the empty cart image if the cart is empty
-        if (cartItemsContainer.getChildren().isEmpty()) {
-            emptyCartPane.setVisible(true);
-        } else {
-            emptyCartPane.setVisible(false);
-        }
+        // Show/hide empty cart message
+        emptyCartPane.setVisible(listOfMeals.isEmpty());
     }
 
 
@@ -366,11 +381,14 @@ public class CartPageController {
         double totalAmount = 0.0;
 
         for (MealInTheCart meal : listOfMeals) {
-            totalAmount += meal.getMeal().getMeal().getPrice() * meal.getQuantity();
+            double price = meal.getMeal().getMeal().getPrice();
+            double discount = meal.getMeal().getMeal().getDiscount_percentage();
+            double finalPrice = discount > 0 ? price * (1 - discount / 100) : price;
+            totalAmount += finalPrice * meal.getQuantity();
             orderDetails.append("\n");
         }
 
-        String totalAmountText = "Total: " + totalAmount + "₪";
+        String totalAmountText = "Total: " + String.format("%.2f₪", totalAmount);
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("SummaryWindow.fxml"));
@@ -387,6 +405,7 @@ public class CartPageController {
                 HBox mealRow = new HBox(10);
                 mealRow.setSpacing(10);
 
+                // Meal Image
                 byte[] imageBytes = meal.getMeal().getMeal().getImage();
                 if (imageBytes != null && imageBytes.length > 0) {
                     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(imageBytes);
@@ -405,55 +424,85 @@ public class CartPageController {
                     mealRow.getChildren().add(imageView);
                 }
 
-                TextFlow mealInfoTextFlow = new TextFlow();
+                // Meal Info Container
+                VBox mealInfoContainer = new VBox(5);
 
+                // Meal Name and Quantity
+                HBox nameQuantityBox = new HBox(5);
                 Text mealName = new Text(meal.getMeal().getMeal().getName() + " - ");
                 Text boldX = new Text("X");
                 boldX.setStyle("-fx-font-weight: bold;");
                 Text quantity = new Text(String.valueOf(meal.getQuantity()));
                 quantity.setStyle("-fx-font-weight: bold;");
-                Text mealPrice = new Text(" (" + meal.getMeal().getMeal().getPrice() + "₪)\n");
-                mealPrice.setStyle("-fx-font-weight: bold;");
+                nameQuantityBox.getChildren().addAll(mealName, boldX, quantity);
 
-                mealInfoTextFlow.getChildren().addAll(mealName, boldX, quantity,mealPrice, new Text("\n"));
+                // Price Display
+                double price = meal.getMeal().getMeal().getPrice();
+                double discount = meal.getMeal().getMeal().getDiscount_percentage();
+                Node priceDisplay;
 
-                if (meal.getMeal().getMeal().getDescription() != null && !meal.getMeal().getMeal().getDescription().isEmpty()) {
-                    Text description = new Text(meal.getMeal().getMeal().getDescription() + "\n");
-                    mealInfoTextFlow.getChildren().add(description);
+                if (discount > 0) {
+                    VBox priceBox = new VBox(2);
+                    double discountedPrice = price * (1 - discount / 100);
+
+                    // Original price with strikethrough
+                    Text originalPrice = new Text(String.format("Original: %.2f₪", price));
+                    originalPrice.setStyle("-fx-strikethrough: true; -fx-fill: #999999;");
+
+                    // Discounted price
+                    Text discountedPriceText = new Text(String.format("Price: %.2f₪", discountedPrice));
+                    discountedPriceText.setStyle("-fx-font-weight: bold; -fx-fill: #b70236;");
+
+                    // Discount badge
+                    Text discountBadge = new Text(String.format("(%d%% OFF)", (int)discount));
+                    discountBadge.setStyle("-fx-font-weight: bold; -fx-fill: #fe3b30;");
+
+                    priceBox.getChildren().addAll(originalPrice, discountedPriceText, discountBadge);
+                    priceDisplay = priceBox;
+                } else {
+                    Text priceText = new Text(String.format("Price: %.2f₪", price));
+                    priceText.setStyle("-fx-font-weight: bold;");
+                    priceDisplay = priceText;
                 }
 
-                // Customizations with check/uncheck images
+                // Description
+                TextFlow descriptionFlow = new TextFlow();
+                if (meal.getMeal().getMeal().getDescription() != null && !meal.getMeal().getMeal().getDescription().isEmpty()) {
+                    Text description = new Text(meal.getMeal().getMeal().getDescription() + "\n");
+                    descriptionFlow.getChildren().add(description);
+                }
+
+                // Customizations
                 if (meal.getMeal().getCustomizationsList() != null && !meal.getMeal().getCustomizationsList().isEmpty()) {
                     Text customizationsTitle = new Text("Customizations:\n");
                     customizationsTitle.setStyle("-fx-font-weight: bold;");
-                    mealInfoTextFlow.getChildren().add(customizationsTitle);
+                    descriptionFlow.getChildren().add(customizationsTitle);
 
                     Image checkedImage = new Image(getClass().getResourceAsStream("/images/checked.png"));
                     Image uncheckedImage = new Image(getClass().getResourceAsStream("/images/unchecked.png"));
 
                     for (CustomizationWithBoolean customWithBool : meal.getMeal().getCustomizationsList()) {
                         HBox customRow = new HBox(5);
-                        Label customLabel = new Label(customWithBool.getCustomization().getName());
-                        customLabel.setStyle("-fx-text-fill: black;");
+                        Text customText = new Text(customWithBool.getCustomization().getName());
+                        customText.setStyle("-fx-fill: black;");
 
                         ImageView checkImageView = new ImageView(customWithBool.getValue() ? checkedImage : uncheckedImage);
                         checkImageView.setFitWidth(20);
                         checkImageView.setFitHeight(20);
                         checkImageView.setPreserveRatio(true);
 
-                        // Toggle customization selection
                         checkImageView.setOnMouseClicked(event -> {
                             boolean newValue = !customWithBool.getValue();
                             customWithBool.setValue(newValue);
                             checkImageView.setImage(newValue ? checkedImage : uncheckedImage);
                         });
 
-                        customRow.getChildren().addAll(checkImageView, customLabel);
-                        mealInfoTextFlow.getChildren().add(customRow);
+                        descriptionFlow.getChildren().addAll(checkImageView, customText, new Text("\n"));
                     }
                 }
 
-                mealRow.getChildren().add(mealInfoTextFlow);
+                mealInfoContainer.getChildren().addAll(nameQuantityBox, priceDisplay, descriptionFlow);
+                mealRow.getChildren().add(mealInfoContainer);
                 mealDetailsContainer.getChildren().add(mealRow);
             }
 
@@ -465,12 +514,11 @@ public class CartPageController {
             summaryStage.initModality(Modality.APPLICATION_MODAL);
             summaryStage.initOwner(mainStage);
 
-            summaryStage.setOnHiding(event ->
-                    {
-                        mainStage.getScene().getRoot().setEffect(null);
-                        updateCart();
-                    }
-            );
+            summaryStage.setOnHiding(event -> {
+                mainStage.getScene().getRoot().setEffect(null);
+                updateCart();
+            });
+
             mode = "Order";
             summaryStage.setScene(scene);
             summaryStage.setTitle("Order Summary");

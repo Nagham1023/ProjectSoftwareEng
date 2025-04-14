@@ -7,10 +7,14 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.greenrobot.eventbus.EventBus;
@@ -69,50 +73,88 @@ public class RequestViewController {
     }
 
     // Modified meal row creation with both buttons
-    public void onAddMealClicked(MealUpdateRequest req) {
+    /*public void onAddMealClicked(MealUpdateRequest req) {
         String mealId = req.getMealId();
-        String newPrice = String.valueOf(req.getNewPrice());
-        String key = mealId + newPrice;
+        String key = mealId + req.getNewPrice();
         HBox mealRow = new HBox(20);
         mealRow.setStyle("-fx-background-color: #ffdbe4; -fx-border-color: #881d3a; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;");
 
         // Hidden labels for data storage
         Label idLabel = new Label(req.getMealId());
-        Label newPriceLabel = new Label(String.valueOf(req.getNewPrice()));  // Hidden new price
-        Label oldPriceLabel = new Label(String.valueOf(req.getOldPrice()));  // Hidden old price
+        Label newPriceLabel = new Label(String.valueOf(req.getNewPrice()));
+        Label oldPriceLabel = new Label(String.valueOf(req.getOldPrice()));
+        Label newDiscountLabel = new Label(String.valueOf(req.getNewDiscount()));
+        Label oldDiscountLabel = new Label(String.valueOf(req.getOldDiscount()));
 
         // Make them invisible
         idLabel.setVisible(false);
         newPriceLabel.setVisible(false);
         oldPriceLabel.setVisible(false);
+        newDiscountLabel.setVisible(false);
+        oldDiscountLabel.setVisible(false);
 
         // Image handling
         ImageView imageView = new ImageView();
         if (req.getImage() != null) {
             imageView.setImage(new Image(new ByteArrayInputStream(req.getImage())));
         } else {
-            imageView.setImage(new Image("placeholder.png")); // Add default image
+            imageView.setImage(new Image("placeholder.png"));
         }
         imageView.setFitHeight(80);
         imageView.setFitWidth(80);
 
-        // Price display
-        Label priceLabel = new Label(String.format("%.2f₪ ← %.2f₪",
-                req.getNewPrice(),
-                req.getOldPrice()
-        ));
-        priceLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #bd2743;");
+        // Price display VBox
+        VBox priceBox = new VBox(5);
+
+        // Old price display
+        HBox oldPriceBox = new HBox(5);
+        Label oldPriceText = new Label("Old Price:");
+        Label oldPriceValue = new Label(String.format("%.2f₪", req.getOldPrice()));
+        oldPriceValue.setStyle("-fx-text-fill: #757575;");
+        if (req.getOldDiscount() > 0) {
+            oldPriceValue.setStyle("-fx-text-fill: #757575; -fx-strikethrough: true;");
+            Label oldDiscountBadge = new Label(String.format("(%.2f%%)", req.getOldDiscount()));
+            oldDiscountBadge.setStyle("-fx-text-fill: #fe3b30; -fx-font-weight: bold;");
+            oldPriceBox.getChildren().addAll(oldPriceText, oldPriceValue, oldDiscountBadge);
+        } else {
+            oldPriceBox.getChildren().addAll(oldPriceText, oldPriceValue);
+        }
+
+        // New price display
+        HBox newPriceBox = new HBox(5);
+        Label newPriceText = new Label("New Price:");
+        Label newPriceValue = new Label(String.format("%.2f₪", req.getNewPrice()));
+        newPriceValue.setStyle("-fx-text-fill: #bd2743; -fx-font-weight: bold;");
+        if (req.getNewDiscount() > 0) {
+            Label newDiscountBadge = new Label(String.format("(%.2f%%)", req.getNewDiscount()));
+            newDiscountBadge.setStyle("-fx-text-fill: #fe3b30; -fx-font-weight: bold;");
+            newPriceBox.getChildren().addAll(newPriceText, newPriceValue, newDiscountBadge);
+        } else {
+            newPriceBox.getChildren().addAll(newPriceText, newPriceValue);
+        }
+
+        priceBox.getChildren().addAll(oldPriceBox, newPriceBox);
 
         // Buttons container
         HBox buttonBox = new HBox(10);
         if (isModifyMode) {
             Button acceptButton = new Button("Accept");
             acceptButton.setStyle("-fx-background-color: #A8E6CF; -fx-text-fill: #2E7D32;");
-            acceptButton.setOnAction(e -> handlePriceUpdate(idLabel.getText(), newPriceLabel.getText(), oldPriceLabel.getText(), true));
+            acceptButton.setOnAction(e -> handlePriceUpdate(
+                    idLabel.getText(),
+                    newPriceLabel.getText(),
+                    newDiscountLabel.getText(),
+                    true
+            ));
 
             Button denyButton = new Button("Deny");
             denyButton.setStyle("-fx-background-color: #C75C5C; -fx-text-fill: #FFD9D1;");
-            denyButton.setOnAction(e -> handlePriceUpdate(idLabel.getText(), newPriceLabel.getText(), oldPriceLabel.getText(), false));
+            denyButton.setOnAction(e -> handlePriceUpdate(
+                    idLabel.getText(),
+                    newPriceLabel.getText(),
+                    newDiscountLabel.getText(),
+                    false
+            ));
 
             buttonBox.getChildren().addAll(acceptButton, denyButton);
         }
@@ -120,14 +162,131 @@ public class RequestViewController {
         mealRow.getChildren().addAll(
                 imageView,
                 createDetailsBox(req),
-                priceLabel,
+                priceBox,
                 buttonBox
         );
 
         requestsContainer.getChildren().add(mealRow);
-        System.out.println("showing change price requests for"+ req.getMealId()+req.getNewPrice());
         mealRow.getProperties().put("mealNewPriceKey", key);
-        mealNewPriceLabels.put((req.getMealId()+req.getNewPrice()), mealRow);
+        mealNewPriceLabels.put(key, mealRow);
+        map.computeIfAbsent(req.getMealId(), k -> new ArrayList<>()).add(mealRow);
+    }*/
+    public void onAddMealClicked(MealUpdateRequest req) {
+        String mealId = req.getMealId();
+        String key = mealId + req.getNewPrice();
+        HBox mealRow = new HBox(20);
+        mealRow.setStyle("-fx-background-color: #ffdbe4; -fx-border-color: #881d3a; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 10;");
+        mealRow.setAlignment(Pos.CENTER_LEFT);
+
+        // Hidden labels for data storage
+        Label idLabel = new Label(req.getMealId());
+        Label newPriceLabel = new Label(String.valueOf(req.getNewPrice()));
+        Label oldPriceLabel = new Label(String.valueOf(req.getOldPrice()));
+        Label newDiscountLabel = new Label(String.valueOf(req.getNewDiscount()));
+        Label oldDiscountLabel = new Label(String.valueOf(req.getOldDiscount()));
+
+        // Make them invisible
+        idLabel.setVisible(false);
+        newPriceLabel.setVisible(false);
+        oldPriceLabel.setVisible(false);
+        newDiscountLabel.setVisible(false);
+        oldDiscountLabel.setVisible(false);
+
+        // Image handling
+        ImageView imageView = new ImageView();
+        if (req.getImage() != null) {
+            imageView.setImage(new Image(new ByteArrayInputStream(req.getImage())));
+        } else {
+            imageView.setImage(new Image("placeholder.png"));
+        }
+        imageView.setFitHeight(80);
+        imageView.setFitWidth(80);
+        imageView.setPreserveRatio(true);
+
+        // Price change display - using a GridPane for perfect alignment
+        GridPane priceGrid = new GridPane();
+        priceGrid.setAlignment(Pos.CENTER_LEFT);
+        priceGrid.setHgap(5);
+        priceGrid.setVgap(0);
+
+        // Old price with discount
+        HBox oldPriceBox = new HBox(2);
+        oldPriceBox.setAlignment(Pos.CENTER_LEFT);
+        Label oldPriceValue = new Label(String.format("%.2f₪", req.getOldPrice()));
+        oldPriceValue.setStyle("-fx-text-fill: #757575;");
+
+        if (req.getOldDiscount() > 0) {
+            oldPriceValue.setStyle("-fx-text-fill: #757575; -fx-strikethrough: true;");
+            Label oldDiscountBadge = new Label(String.format(" (%.2f%%)", req.getOldDiscount()));
+            oldDiscountBadge.setStyle("-fx-text-fill: #fe3b30; -fx-font-weight: bold;");
+            oldPriceBox.getChildren().addAll(oldPriceValue, oldDiscountBadge);
+        } else {
+            oldPriceBox.getChildren().add(oldPriceValue);
+        }
+
+        // Arrow with centered alignment
+        Label arrow = new Label("→");
+        arrow.setStyle("-fx-text-fill: #881d3a; -fx-font-weight: bold; -fx-padding: 0 5 0 5;");
+        arrow.setAlignment(Pos.CENTER);
+        arrow.setMinHeight(Control.USE_PREF_SIZE);
+
+        // New price with discount
+        HBox newPriceBox = new HBox(2);
+        newPriceBox.setAlignment(Pos.CENTER_LEFT);
+        Label newPriceValue = new Label(String.format("%.2f₪", req.getNewPrice()));
+        newPriceValue.setStyle("-fx-text-fill: #bd2743; -fx-font-weight: bold;");
+
+        if (req.getNewDiscount() > 0) {
+            Label newDiscountBadge = new Label(String.format(" (%.2f%%)", req.getNewDiscount()));
+            newDiscountBadge.setStyle("-fx-text-fill: #fe3b30; -fx-font-weight: bold;");
+            newPriceBox.getChildren().addAll(newPriceValue, newDiscountBadge);
+        } else {
+            newPriceBox.getChildren().add(newPriceValue);
+        }
+
+        // Add components to grid (row 0 for perfect vertical alignment)
+        priceGrid.add(oldPriceBox, 0, 0);
+        priceGrid.add(arrow, 1, 0);
+        priceGrid.add(newPriceBox, 2, 0);
+        GridPane.setValignment(oldPriceBox, VPos.CENTER);
+        GridPane.setValignment(arrow, VPos.CENTER);
+        GridPane.setValignment(newPriceBox, VPos.CENTER);
+
+        // Buttons container
+        HBox buttonBox = new HBox(10);
+        buttonBox.setAlignment(Pos.CENTER);
+        if (isModifyMode) {
+            Button acceptButton = new Button("Accept");
+            acceptButton.setStyle("-fx-background-color: #A8E6CF; -fx-text-fill: #2E7D32;");
+            acceptButton.setOnAction(e -> handlePriceUpdate(
+                    idLabel.getText(),
+                    newPriceLabel.getText(),
+                    newDiscountLabel.getText(),
+                    true
+            ));
+
+            Button denyButton = new Button("Deny");
+            denyButton.setStyle("-fx-background-color: #C75C5C; -fx-text-fill: #FFD9D1;");
+            denyButton.setOnAction(e -> handlePriceUpdate(
+                    idLabel.getText(),
+                    newPriceLabel.getText(),
+                    newDiscountLabel.getText(),
+                    false
+            ));
+
+            buttonBox.getChildren().addAll(acceptButton, denyButton);
+        }
+
+        mealRow.getChildren().addAll(
+                imageView,
+                createDetailsBox(req),
+                priceGrid,
+                buttonBox
+        );
+
+        requestsContainer.getChildren().add(mealRow);
+        mealRow.getProperties().put("mealNewPriceKey", key);
+        mealNewPriceLabels.put(key, mealRow);
         map.computeIfAbsent(req.getMealId(), k -> new ArrayList<>()).add(mealRow);
     }
 
@@ -143,14 +302,14 @@ public class RequestViewController {
         return detailsBox;
     }
 
-    private void handlePriceUpdate(String mealId, String newPrice, String oldPrice, boolean approve) {
+    private void handlePriceUpdate(String mealId, String newPrice, String newDiscount, boolean approve) {
         try {
             if(approve) {
-                updatePrice request = new updatePrice(Double.parseDouble(newPrice), Integer.parseInt(mealId) ,"changing");
+                updatePrice request = new updatePrice(Double.parseDouble(newPrice), Integer.parseInt(mealId),Double.parseDouble(newDiscount) ,"changing");
                 SimpleClient.getClient().sendToServer(request);
             }
             else{
-                updatePrice request = new updatePrice(Double.parseDouble(newPrice), Integer.parseInt(mealId) ,"denying");
+                updatePrice request = new updatePrice(Double.parseDouble(newPrice), Integer.parseInt(mealId),Double.parseDouble(newDiscount) ,"denying");
                 SimpleClient.getClient().sendToServer(request);
             }
 

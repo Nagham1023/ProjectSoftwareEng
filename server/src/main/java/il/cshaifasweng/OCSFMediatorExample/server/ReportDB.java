@@ -78,7 +78,7 @@ public class ReportDB {
 
             // Build report header
             reportBuilder.append("Revenue Report - ")
-                    .append(timeFrame == TimeFrame.MONTHLY ? "Daily\n" : "Yearly\n")
+                    .append(timeFrame == TimeFrame.MONTHLY ? "Monthly\n" : "Yearly\n")
                     .append("Period: ").append(month.getMonth()).append(" ").append(month.getYear())
                     .append("\nRestaurant: ")
                     .append("ALL".equalsIgnoreCase(restaurantName) ? "All Restaurants" : restaurantName)
@@ -100,7 +100,7 @@ public class ReportDB {
             // Fill with actual data
             results.forEach(row -> {
                 Integer period = (Integer) row[0];
-                Long revenue = (Long) row[1];
+                Long revenue = ((Number) row[1]).longValue();
                 periodData.put(period, revenue);
             });
 
@@ -219,6 +219,8 @@ public class ReportDB {
             // 8. Fill with actual data
             results.forEach(row -> periodData.put((Integer) row[0], (Long) row[1]));
 
+
+            System.out.println("Results size: " + results.size());
             // 9. Format output lines
             periodData.forEach((period, count) -> {
                 String periodLabel = timeFrame == TimeFrame.YEARLY ? "Month " : "Day ";
@@ -296,7 +298,7 @@ public class ReportDB {
 
             // Format report header to match client expectations
             reportBuilder.append("Complaint Report - ");
-            reportBuilder.append(timeFrame == TimeFrame.MONTHLY ? "Daily\n\n" : "Yearly\n\n"); // Use "Yearly" instead of "Monthly"
+            reportBuilder.append(timeFrame == TimeFrame.MONTHLY ? "Monthly\n\n" : "Yearly\n\n"); // Use "Yearly" instead of "Monthly"
             reportBuilder.append("Scope: ").append("ONE".equals(note) ? restaurantName : "All Restaurants").append("\n");
 
             if (results.isEmpty()) {
