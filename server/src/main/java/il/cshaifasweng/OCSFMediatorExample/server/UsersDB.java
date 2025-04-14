@@ -169,7 +169,7 @@ public class UsersDB {
 
     public static void signIn(UserCheck user) throws Exception {
         for (Users temp : allUsers) {
-            if (temp.getUsername().equalsIgnoreCase(user.getUsername())) {
+            if (temp.getUsername().equalsIgnoreCase(user.getUsername())&& temp.getPassword().equals(user.getPassword())) {
                 if (temp.getSigned()) {
                     user.setRespond("Already Signed in");
                     return;
@@ -180,7 +180,7 @@ public class UsersDB {
                 return;
             }
         }
-
+        user.setRespond("Username or password incorrect");
     }
 
 
@@ -360,6 +360,13 @@ public class UsersDB {
             salha.setUsername("salhaTheCustomerService");
             salha.setGender("female");
             salha.setAge(55);
+            Users knani = new Users();
+            knani.setRole("CustomerService");
+            knani.setEmail("yousefknani9@gmail.com");
+            knani.setPassword("123");
+            knani.setUsername("yousef");
+            knani.setGender("male");
+            knani.setAge(32);
             Users yousef = new Users();
             yousef.setRole("CompanyManager");
             yousef.setEmail("yousefknani9@gmail.com");
@@ -374,17 +381,15 @@ public class UsersDB {
             shada.setUsername("shada");
             shada.setGender("other");
             shada.setAge(22);
-            allUsers.add(nagham);
-            allUsers.add(salha);
-            allUsers.add(yousef);
-            allUsers.add(shada);
             if (!isUserExists("naghamTheManager") ) {
+                allUsers.add(nagham);
                 session.save(nagham);
                 System.out.println("User has been created: " + nagham.getUsername());
             }
 
             // Ensure you are checking for existing user
             if (!isUserExists("salhaTheCustomerService")) {
+                allUsers.add(salha);
                 // Save the new user to the database
                 session.save(salha);
                 System.out.println("User has been created: " + salha.getUsername());
@@ -392,12 +397,19 @@ public class UsersDB {
 
             // Create orders
             if (!isUserExists("ceo") ) {
+                allUsers.add(yousef);
                 session.save(yousef);
                 System.out.println("User has been created: " + yousef.getUsername());
             }
             if (!isUserExists("shada") ) {
+                allUsers.add(shada);
                 session.save(shada);
                 System.out.println("User has been created: " + shada.getUsername());
+            }
+            if (!isUserExists("yousef") ) {
+                allUsers.add(knani);
+                session.save(knani);
+                System.out.println("User has been created: " + knani.getUsername());
             }
             session.flush();
             session.getTransaction().commit(); // Commit the transaction

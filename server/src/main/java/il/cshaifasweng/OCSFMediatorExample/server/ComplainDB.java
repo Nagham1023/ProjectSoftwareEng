@@ -11,6 +11,7 @@ import org.hibernate.query.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
@@ -23,6 +24,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.allComplains;
+
 public class ComplainDB {
     private static Session session;
     public static List<Complain> complainslist;
@@ -96,6 +99,13 @@ public class ComplainDB {
             //System.out.println("Started transaction to update meal price.");
             // Fetch the meal by ID from the current session
             Complain complain = session.get(Complain.class, Idcomp);
+            for(Complain comp : allComplains) {
+                if(comp.getId() == Idcomp) {
+                    comp.setResponse(newRes);
+                    comp.setStatus("Done");
+                    comp.setRefund(refund);
+                }
+            }
             if (complain != null) {
                 //System.out.println("Found Meal: " + meal.getName() + " with current price: " + meal.getPrice());
                 complain.setResponse(newRes); // Update the response
@@ -139,6 +149,8 @@ public class ComplainDB {
             newComp.setOrderNum(newComplain.getOrderNum());
             newComp.setRefund(newComplain.getRefund());
             newComp.setRestaurant(newComplain.getRestaurant());
+
+            allComplains.add(newComp);
             session.save(newComp);
             transaction.commit();
             complaintAutoResponse(newComp,client);
@@ -158,47 +170,39 @@ public class ComplainDB {
         // Calculate 24 hours in milliseconds
         long dayToFinish = TimeUnit.HOURS.toMillis(24);
         // Schedule the autoRespondToComplaint method to run after the delay
-        scheduler.schedule(() -> autoRespondToComplaint(complaint, client), dayToFinish, TimeUnit.MILLISECONDS);
+        scheduler.schedule(() -> {
+            try {
+                autoRespondToComplaint(complaint, client);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }, dayToFinish, TimeUnit.MILLISECONDS);
     }
 
-    private static void autoRespondToComplaint(Complain complaint, ConnectionToClient client) {
+    private static void autoRespondToComplaint(Complain complaint, ConnectionToClient client) throws IOException {
         System.out.println("SchedulerService DEBUG: Auto-responding to complaint: " + complaint.getId());
         autoRespond(complaint, client);
     }
 
-    private static void autoRespond(Complain complaint, ConnectionToClient client) {
-        Session session = null;
-        Transaction transaction = null;
-        int complaintId = complaint.getId();
+    private static void autoRespond(Complain complaint, ConnectionToClient client) throws IOException {
         String response = "We regret that we couldn't resolve your complaint within 24 hours. \" +\n" +
                 "                \"A full refund of 75 NIS has been issued. We apologize for the inconvenience.";
-        try {
-            SessionFactory sessionFactory = getSessionFactory();
-            session = sessionFactory.openSession();
-            transaction = session.beginTransaction();
-            String hql = "FROM Complain c WHERE c.id = :id " +
-                    "AND c.kind_complain = 'Complaint' " +
-                    "AND c.status_complaint = 'Do'";
-            Query<Complain> query = session.createQuery(hql, Complain.class);
-            query.setParameter("id", complaintId);
-            Complain complain = query.uniqueResult();
 
-            session.getTransaction().commit();
-
-            if (complain != null && complain.getStatus().equals("Do")) {
-                updateResponse ur=new updateResponse(response, complaintId,complaint.getEmail(),complaint.getOrderNum(),75);
-                updateComplainResponseInDatabase(ur);
-                client.sendToClient(ur);
-
-            } else if(complaint==null) {
-                System.out.println("AutoRespond: Complaint not found for ID: " + complaintId);
-            } else {
-                System.out.println("complaintAutoRespond: Complaint for ID: " + complaintId+ "is Done");
+        int complaintId = complaint.getId();
+        Complain complain = null;
+        for(Complain comp: allComplains) {
+            if(comp.getId() == complaintId && comp.getKind().equals("Complaint") && comp.getStatus().equals("Do")) {
+                complain = comp;
+                break;
             }
-            transaction.commit();
-        } catch (Exception e) {
-            System.err.println("complaintAutoRespond: Error responding to complaint: " + e.getMessage());
-            e.printStackTrace();
+        }
+        if (complain != null) {
+            updateResponse ur=new updateResponse(response, complaintId,complaint.getEmail(),complaint.getOrderNum(),75);
+            updateComplainResponseInDatabase(ur);
+            client.sendToClient(ur);
+
+        } else{
+            System.out.println("AutoRespond: Complaint not found for ID: " + complaintId);
         }
     }
 }

@@ -6,12 +6,14 @@ public class updatePrice implements Serializable {
     private double newPrice;
     private int idMeal;
     private String purpose;
+    private double discount;
     private static final long serialVersionUID = -8224097662914849957L;
 
-    public updatePrice(double newPrice, int idMeal,String purpose) {
+    public updatePrice(double newPrice, int idMeal,double discount,String purpose) {
         this.newPrice = newPrice;
         this.idMeal = idMeal;
         this.purpose = purpose;
+        this.discount = discount;
     }
     public double getNewPrice() {
         return newPrice;
@@ -27,6 +29,12 @@ public class updatePrice implements Serializable {
     }
     public String getPurpose() {
         return purpose;
+    }
+    public double getDiscount() {
+        return discount;
+    }
+    public void setDiscount(double discount) {
+        this.discount = discount;
     }
 
     public void setPurpose(String purpose) {

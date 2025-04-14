@@ -15,6 +15,8 @@ public class MealInTheCart implements Serializable {
     private personal_Meal meal;
     private int quantity;
     private String RestaurantName;
+    private double discount_percentage = 0;
+    private double price; //price before discount
 
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)  // Maps to the 'Order' entity
@@ -67,5 +69,18 @@ public class MealInTheCart implements Serializable {
                 ", Quantity=" + quantity +
                 ", Restaurant Name='" + RestaurantName + '\'' +
                 '}';
+    }
+
+    public double getDiscount_percentage() {
+        return discount_percentage;
+    }
+    public void setDiscount_percentage(double discount_percentage) {
+        this.discount_percentage = discount_percentage;
+    }
+    public double getPrice() {
+        return price;
+    }
+    public void setPrice(double price) {
+        this.price = price;
     }
 }

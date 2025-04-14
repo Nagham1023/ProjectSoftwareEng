@@ -54,7 +54,7 @@ public class ReportsViewController {
             if(restaurantList == null)
                 client.sendToServer("getAllRestaurants");
             else fillComboBox(restaurantList);
-            System.out.println("here first");
+            //System.out.println("here first");
         } catch (Exception e) {
             e.printStackTrace(); // In a real application, log this error or show an error message to the user
         }
@@ -82,18 +82,21 @@ public class ReportsViewController {
 
     @Subscribe
     public void handleReportResponse(ReportResponseEvent event) {
+
+        System.out.println("received report");
         String reportOutput = event.getReport();
         Platform.runLater(() -> loadChartData(reportOutput));
     }
 
     public void loadChartData(String reportOutput) {
-        System.out.println("Raw Report Data:\n" + reportOutput); // Debug log
+        //System.out.println("Raw Report Data:\n" + reportOutput); // Debug log
 
         // Parse the report output
         String[] lines = reportOutput.split("\n");
         Map<String, Double> revenueData = new LinkedHashMap<>();
         LocalDate baseDate = LocalDate.now();
-        boolean isMonthly = reportOutput.contains("Daily");
+        boolean isMonthly = reportOutput.contains("Monthly");
+
 
         try {
             // Parse header for date context
@@ -158,6 +161,17 @@ public class ReportsViewController {
     @FXML
     private void handleCellClick(javafx.event.ActionEvent event) {
         ReportRequest req;
+
+        if (timeValue == null) timeValue = timeStamp.getValue();
+        if (typeValue == null) typeValue = reportType.getValue();
+        if (nameValue == null && !currentWorker.equals("ChainManager")) {
+            nameValue = restaurant_name.getValue();
+        }
+        if (timeValue == null || typeValue == null || (!currentWorker.equals("ChainManager") && nameValue == null)) {
+            System.out.println("Please fill all fields before generating the report.");
+            return;
+        }
+
         // Create the ReportRequest object
         if(currentWorker.equals("ChainManager")) {
             req=new ReportRequest(
@@ -175,6 +189,7 @@ public class ReportsViewController {
             );}
         // Now we have to tell the server
         try {
+            //System.out.println("Sending request: time=" + timeValue + ", type=" + typeValue + ", name=" + (currentWorker.equals("ChainManager") ? currentRestaurant : nameValue));
             SimpleClient.getClient().sendToServer(req);
         } catch (IOException e) {
             e.printStackTrace();

@@ -51,7 +51,6 @@ public class OrderSummaryController {
     @FXML
     void CheckOut(ActionEvent event) {
 
-        System.out.println("CheckOut");
         Order newOrder = new Order();
         newOrder.setRestaurantName(branchName);
         newOrder.setTotal_price(calculateTotalPrice(meals));
@@ -62,6 +61,8 @@ public class OrderSummaryController {
         for (MealInTheCart mealInTheCart : meals) {
             mealInTheCart.setRestaurantName(branchName); // Ensure this is set
             mealInTheCart.setOrder(newOrder); // Associate MealInTheCart with the Order
+            mealInTheCart.setPrice(mealInTheCart.getMeal().getMeal().getPrice());
+            mealInTheCart.setDiscount_percentage(mealInTheCart.getMeal().getMeal().getDiscount_percentage());
         }
 
         newOrder.setMeals(meals); // Set the meals in the order
@@ -76,13 +77,14 @@ public class OrderSummaryController {
         }
     }
 
-    public static int calculateTotalPrice(List<MealInTheCart> meals) {
-        int totalPrice = 0;
+    public static double calculateTotalPrice(List<MealInTheCart> meals) {
+        double totalPrice = 0;
 
         for (MealInTheCart mealInTheCart : meals) {
             int mealPrice = (int) mealInTheCart.getMeal().getMeal().getPrice();  // Make sure to cast to the appropriate type
+            double finalPrice = (1 - (double) mealInTheCart.getMeal().getMeal().getDiscount_percentage() / 100) * mealPrice;
             int quantity = mealInTheCart.getQuantity();
-            totalPrice += mealPrice * quantity; // Multiply price by quantity and add to total
+            totalPrice += finalPrice * quantity; // Multiply price by quantity and add to total
         }
 
         return totalPrice;

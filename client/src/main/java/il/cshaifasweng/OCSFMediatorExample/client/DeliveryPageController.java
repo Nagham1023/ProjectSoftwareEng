@@ -256,7 +256,7 @@ public class DeliveryPageController {
             addressField.setVisible(true);
             homeNumberField.setVisible(true);
             done_Order.setOrderType("Delivery");
-            int newPrice = done_Order.getTotal_price() + deliveryPrice;
+            double newPrice = done_Order.getTotal_price() + deliveryPrice;
             price.setText(newPrice + "₪");
         }
     }

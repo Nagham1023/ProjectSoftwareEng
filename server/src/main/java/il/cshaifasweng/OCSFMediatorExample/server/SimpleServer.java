@@ -55,6 +55,8 @@ public class SimpleServer extends AbstractServer {
     public static List<Users> allUsers = new ArrayList<>();
     public static List<PersonalDetails> allPersonalDetails = new ArrayList<>();
     public static List<CreditCard> allCreditCards = new ArrayList<>();
+    public static List<Order> allOrders = new ArrayList<>();
+    public static List<Complain> allComplains = new ArrayList<>();
 
     private record ReservationPeriod(LocalDateTime start, LocalDateTime end) {}
 
@@ -693,29 +695,27 @@ public class SimpleServer extends AbstractServer {
         }
         else if (msg instanceof String && msg.equals("getAllComplaints6")) {
             try {
-                List<Complain> complainList = getAllComplainss();
-                for (Complain Complain : complainList) {
+                for (Complain Complain : allComplains) {
                     Complain.toString();
                 }
 
                 // for complain and do
                 List<Complain> List1 = new ArrayList<>();
-                for (Complain complain : complainList) {
+                for (Complain complain : allComplains) {
                     if (complain.getKind().equals("Complaint") && complain.getStatus().equals("Do"))
                         List1.add(complain);
-                    //System.out.println("fill list 1");
                 }
 
                 // for complain amd done
                 List<Complain> List2 = new ArrayList<>();
-                for (Complain complain : complainList) {
+                for (Complain complain : allComplains) {
                     if (complain.getKind().equals("Complaint") && complain.getStatus().equals("Done"))
                         List2.add(complain);
                     //System.out.println("fill list 2");
                 }
                 // for Feedback and do
                 List<Complain> List3 = new ArrayList<>();
-                for (Complain complain : complainList) {
+                for (Complain complain : allComplains) {
                     if (complain.getKind().equals("Feedback") && complain.getStatus().equals("Do"))
                         List3.add(complain);
                     //System.out.println("fill list 3");
@@ -723,14 +723,14 @@ public class SimpleServer extends AbstractServer {
 
                 // for Feedback amd done
                 List<Complain> List4 = new ArrayList<>();
-                for (Complain complain : complainList) {
+                for (Complain complain : allComplains) {
                     if (complain.getKind().equals("Feedback") && complain.getStatus().equals("Done"))
                         List4.add(complain);
                     //System.out.println("fill list 4");
                 }
                 // for Suggestion and do
                 List<Complain> List5 = new ArrayList<>();
-                for (Complain complain : complainList) {
+                for (Complain complain : allComplains) {
                     if (complain.getKind().equals("Suggestion") && complain.getStatus().equals("Do"))
                         List5.add(complain);
                     //System.out.println("fill list 5");
@@ -738,7 +738,7 @@ public class SimpleServer extends AbstractServer {
 
                 // for Suggestion amd done
                 List<Complain> List6 = new ArrayList<>();
-                for (Complain complain : complainList) {
+                for (Complain complain : allComplains) {
                     if (complain.getKind().equals("Suggestion") && complain.getStatus().equals("Done"))
                         List6.add(complain);
                     //System.out.println("fill list 6");
@@ -752,7 +752,7 @@ public class SimpleServer extends AbstractServer {
         else if (msg instanceof String && msg.equals("getAllComplaints")) {
             try {
                 ComplainList complist = new ComplainList();
-                complist.setComplainList(getAllComplains()); // Set list to send
+                complist.setComplainList(allComplains); // Set list to send
                 System.out.println(complist.getComplainList());
                 client.sendToClient(complist); // send to client
             } catch (IOException e) {
@@ -766,7 +766,7 @@ public class SimpleServer extends AbstractServer {
                 String status = specificComplains.getSpecificStatus();
                 ComplainList SpecificList = new ComplainList();
                 ComplainList Allcomplist = new ComplainList();
-                Allcomplist.setComplainList(getAllComplains()); // Set list to send
+                Allcomplist.setComplainList(allComplains); // Set list to send
 
                 for (Complain complain : Allcomplist.getComplainList()) {
                     if (kind.equals(complain.getKind()) && status.equals(complain.getStatus())) {
@@ -843,6 +843,7 @@ public class SimpleServer extends AbstractServer {
 
             // Send the response message to the client (it can be a string with the report content)
             String message = "ReportResponse\n" + response;
+            System.out.println("Generated report:\n" + response);
             try {
                 client.sendToClient(message);
             } catch (IOException e) {
@@ -1034,7 +1035,6 @@ public class SimpleServer extends AbstractServer {
                     deletePriceChangeReq( ((updatePrice) msg).getIdMeal());
                     client.sendToClient(msg);
                     sendToAll(msg);
-
                 } else{
                     MealUpdateRequest req= new MealUpdateRequest();
                     req=AddUpdatePriceRequest((updatePrice) msg);
@@ -1556,24 +1556,6 @@ public class SimpleServer extends AbstractServer {
         }
     }
 
-    public List<Complain> getAllComplainss() {
-        try (Session session = getSessionFactory().openSession()) {
-            session.beginTransaction();
-
-            // Fetch all the complains from the database
-            Query<Complain> query = session.createQuery("FROM Complain ", Complain.class);
-            List<Complain> COMPS = query.getResultList();
-
-            session.getTransaction().commit();
-
-            // Return a copy of the list to avoid external modifications
-            return new ArrayList<>(COMPS);
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Return an empty list in case of an error
-            return new ArrayList<>();
-        }
-    }
 
     public static List<Customization> getAllCustomizations() {
         if(allcust != null)
@@ -1918,7 +1900,9 @@ public class SimpleServer extends AbstractServer {
                         meal.getDescription(),
                         meal.getImage(),
                         request.getOldPrice(),
-                        request.getNewPrice()
+                        request.getNewPrice(),
+                        request.getOldDiscount(),
+                        request.getNewDiscount()
                 ));
             }
 

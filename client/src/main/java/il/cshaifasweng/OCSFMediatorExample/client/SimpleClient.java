@@ -400,7 +400,7 @@ public class SimpleClient extends AbstractClient {
 		String[] parts = message.split("\n", 2);
 		if (parts.length == 2) {
 			String report = parts[1]; // The actual report content
-			System.out.println("Received report: " + report);
+			//System.out.println("Received report: " + report);
 			EventBus.getDefault().post(new ReportResponseEvent(report));
 		} else {
 			System.err.println("Malformed report response");
