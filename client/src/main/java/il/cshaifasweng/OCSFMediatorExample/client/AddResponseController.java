@@ -1,6 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ResourceBundle;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.EmailSender;
@@ -10,10 +12,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
@@ -30,9 +29,9 @@ public class AddResponseController {
     @FXML // fx:id="ClientNameLabel"
     private Label ClientNameLabel; // Value injected by FXMLLoader
     @FXML
-    private TextField tellLabel;
+    private TextArea tellLabel;
     @FXML // fx:id="responseField"
-    private TextField responseField; // Value injected by FXMLLoader
+    private TextArea responseField; // Value injected by FXMLLoader
     @FXML // fx:id="refundField"
     private TextField refundField;
     @FXML // fx:id="sendResponse"
@@ -44,6 +43,13 @@ public class AddResponseController {
     private String kindValue;
     private String clientName;
     private String clientTell;
+    private boolean isShowMode = false;
+
+    @FXML private Label emailLabel;
+    @FXML private Label complaintIdLabel;
+    @FXML private Label restaurantLabel;
+    @FXML private Label dateLabel;
+
 
 
     @FXML
@@ -55,11 +61,27 @@ public class AddResponseController {
         assert sendResponse != null : "fx:id=\"sendResponse\" was not injected: check your FXML file 'addResponse.fxml'.";
         assert refundField != null : "fx:id=\"refundField\" was not injected: check your FXML file 'addResponse.fxml'.";
     }
+    public void setShowMode(boolean isShow) {
+        this.isShowMode = isShow;
+        if (isShow) {
+            sendResponse.setText("Close Response");
+            responseField.setEditable(false);
+            refundField.setEditable(false);
+            sendResponse.setOnAction(e -> sendResponse.getScene().getWindow().hide()); // Close window
+        }
+        else {
+            sendResponse.setText("Send Response");
+            responseField.setEditable(true);
+            refundField.setEditable(true);
+            sendResponse.setOnAction(e->SendResponse());
+        }
+    }
+
 
     // Set complain details
-    public void setCompDetails(String clientName, String clientTell, int idComplain, String kind, String emailComplain, String ordernum) {
+    public void setCompDetails(String clientName, String clientTell, int idComplain, String kind, String emailComplain, String ordernum, String restaurantName, LocalDateTime date) {
         this.ClientNameLabel.setText("Response to: " + clientName);
-        this.tellLabel.setText("The Client Says: " + clientTell);
+        this.tellLabel.setText(clientTell);
         this.clientTell = clientTell;
         this.tellLabel.setEditable(false);
         this.idComplain = idComplain;
@@ -67,9 +89,33 @@ public class AddResponseController {
         this.ordernumComplain = ordernum;
         this.kindValue = kind;
         this.clientName = clientName;
+        //@FXML private Label emailLabel;
+        //    @FXML private Label complaintIdLabel;
+        //    @FXML private Label restaurantLabel;
+        //    @FXML private Label dateLabel;
+        emailLabel.setText(emailComplain);
+        complaintIdLabel.setText(String.valueOf(idComplain));
+        restaurantLabel.setText(restaurantName);
+        dateLabel.setText(date.toString());
+
 
         if (kindValue.equals("Complaint"))
             refundField.setVisible(true);
+        else
+            refundField.setVisible(false);
+    }
+    public void showResp(String clientName, String clientTell, String response,double refund,String kind,String email,int idC,String restaurantName,LocalDateTime date) {
+        this.ClientNameLabel.setText("Response to: " + clientName);
+        this.tellLabel.setText(clientTell);
+        responseField.setText(response);
+        emailLabel.setText(email);
+        complaintIdLabel.setText(String.valueOf(idC));
+        restaurantLabel.setText(restaurantName);
+        dateLabel.setText(date.toString());
+        if (kind.equals("Complaint")) {
+            refundField.setVisible(true);
+            refundField.setText(String.valueOf(refund));
+        }
         else
             refundField.setVisible(false);
     }

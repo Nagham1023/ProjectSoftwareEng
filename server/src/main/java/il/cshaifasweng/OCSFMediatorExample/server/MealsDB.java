@@ -13,8 +13,7 @@ import java.io.InputStream;
 import java.util.*;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
-import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.RestMealsList;
-import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.allMeals;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.*;
 
 public class MealsDB {
 
@@ -419,6 +418,92 @@ public class MealsDB {
         }
         //System.out.println("Finished updating the price in the database.");
     }
+
+    public static void updatePriceDeleteReq(updatePrice updatePrice) {
+        //System.out.println("Changing the price in database.");
+        int mealId = updatePrice.getIdMeal();
+        double newPrice = updatePrice.getNewPrice();
+        double newDiscount = updatePrice.getDiscount();
+        if(allMeals != null) {
+            for(Meal meal : allMeals) {
+                if (meal.getId() == mealId) {
+                    meal.setPrice(newPrice);
+                    meal.setDiscount_percentage(newDiscount);
+                    break;
+                }
+            }
+        }
+        if (RestMealsList != null) {
+            for (Restaurant restaurant : RestMealsList) {
+                if (restaurant.getMeals() != null) {
+                    for (Meal meal : restaurant.getMeals()) {
+                        if (meal.getId() == mealId) {
+                            meal.setPrice(newPrice);
+                            meal.setDiscount_percentage(newDiscount);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        try {
+            if (session == null || !session.isOpen()) {
+                //System.out.println("Session is not initialized. Creating a new session.");
+                SessionFactory sessionFactory = getSessionFactory();
+                session = sessionFactory.openSession();
+            }
+
+            if (session.getTransaction().isActive()) {
+                //System.out.println("Transaction already active. Rolling it back.");
+                session.getTransaction().rollback();
+            }
+
+            session.beginTransaction();
+            //System.out.println("Started transaction to update meal price.");
+
+            // Fetch the meal by ID from the current session
+            Meal meal = session.get(Meal.class, mealId);
+            if (meal != null) {
+                //System.out.println("Found Meal: " + meal.getName() + " with current price: " + meal.getPrice());
+                meal.setPrice(newPrice); // Update the price
+                meal.setDiscount_percentage(newDiscount);
+                session.update(meal); // Persist the changes
+                session.getTransaction().commit(); // Commit the transaction
+                updateMealPriceById(mealId, newPrice);
+                //System.out.println("Updated price for Meal ID " + mealId + " to " + newPrice);
+            } else {
+                //System.out.println("Meal with ID " + mealId + " not found in the database.");
+            }
+            /*delete req*/
+            // Find all requests linked to this meal
+            CriteriaBuilder builder = session.getCriteriaBuilder();
+            CriteriaQuery<UpdatePriceRequest> query = builder.createQuery(UpdatePriceRequest.class);
+            Root<UpdatePriceRequest> root = query.from(UpdatePriceRequest.class);
+            query.where(builder.equal(root.get("meal"), meal));
+
+            List<UpdatePriceRequest> requests = session.createQuery(query).getResultList();
+
+
+            // Delete all found requests
+            for (UpdatePriceRequest req : requests) {
+                allUpdateRequests.removeIf(up -> Objects.equals(up.getMealId(), String.valueOf(mealId)));
+                session.delete(req);
+            }
+        } catch (Exception e) {
+            //System.out.println("An error occurred during the update operation.");
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback(); // Rollback on error
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close(); // Close the session after operation
+                //System.out.println("Session closed.");
+            }
+        }
+        //System.out.println("Finished updating the price in the database.");
+    }
 //    public static String AddNewMeal(mealEvent newMeal) {
 //        List<Customization> customizations = new ArrayList<>();
 //        // Extract data from the mealEvent object
@@ -558,7 +643,10 @@ public class MealsDB {
                     newMealEntity.getCustomizations().add(customization);
                 }
             }
-
+            if(allMeals == null) {
+                allMeals = new ArrayList<>();
+            }
+            allMeals.add(newMealEntity);
             // 5. Save to database
             session.persist(newMealEntity);
             transaction.commit();
@@ -595,11 +683,11 @@ public class MealsDB {
 
         for (Restaurant restaurant : RestMealsList) {
             if (restaurant.getRestaurantName().equalsIgnoreCase(branchName)) {
-                System.out.println("Found restaurant: " + restaurant.getRestaurantName());
+                //System.out.println("Found restaurant: " + restaurant.getRestaurantName());
                 return restaurant.getMeals();
             }
         }
-        System.out.println("No restaurant found");
+        //System.out.println("No restaurant found");
 
         List<Meal> meals = new ArrayList<>();
 
@@ -750,6 +838,7 @@ public class MealsDB {
             updateRequest.setNewDiscount(priceRequest.getDiscount());
 
             meal.getPriceRequests().add(updateRequest); // Update the Meal's list
+
             session.save(updateRequest);
             session.flush();
             transaction.commit(); // Explicit commit
@@ -765,6 +854,7 @@ public class MealsDB {
                     meal.getDiscount_percentage(),
                     priceRequest.getDiscount()
             );
+            allUpdateRequests.add(result);
         } catch (Exception e) {
             if (transaction != null) transaction.rollback();
             result.setStatus("error");
@@ -797,6 +887,13 @@ public class MealsDB {
 
             // Delete all found requests
             for (UpdatePriceRequest req : requests) {
+                for(MealUpdateRequest up :allUpdateRequests)
+                {
+                    if(Objects.equals(up.getMealId(), String.valueOf(mealId)))
+                    {
+                        allUpdateRequests.remove(req);
+                    }
+                }
                 session.delete(req);
             }
 
@@ -823,13 +920,6 @@ public class MealsDB {
 
             mealName = meal.getName();
 
-            try {
-                session.createNativeQuery("DELETE FROM customizations_meals WHERE meals_id = :mealId")
-                        .setParameter("mealId", mealId)
-                        .executeUpdate();
-            } catch (Exception e) {
-                // Ignore if table doesn't exist
-            }
 
             session.createNativeQuery("DELETE FROM meal_customizations WHERE meal_id = :mealId")
                     .setParameter("mealId", mealId)
@@ -851,6 +941,13 @@ public class MealsDB {
             session.createQuery("DELETE FROM personal_Meal pm WHERE pm.meal.id = :mealId")
                     .setParameter("mealId", mealId)
                     .executeUpdate();
+
+
+            meal.getRestaurants().clear();
+            meal.getCustomizations().clear();
+            meal.getPriceRequests().clear();
+            meal.getPersonalMeals().clear();
+            allUpdateRequests.removeIf(l -> Integer.parseInt(l.getMealId()) == mealId);
 
             session.refresh(meal);
             session.delete(meal);
@@ -881,22 +978,16 @@ public class MealsDB {
     }
 
 
-
     public static Meal getMealById(String mealId) {
         System.out.println("now I am in the function getMealById");
-        Meal meal = null;
-        int id=Integer.parseInt(mealId);
-        try (Session session = App.getSessionFactory().openSession()) {
-            session.beginTransaction();
-
-            meal = session.get(Meal.class,id);
-            if (meal != null) {
-                session.update(meal);
+        for(Meal meal:allMeals)
+        {
+            if(meal.getId() == Integer.parseInt(mealId))
+            {
+                return meal;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-        return meal;
+        return null;
     }
 
     public static void updateMealDetailsById(Meal mealS) {
@@ -911,7 +1002,7 @@ public class MealsDB {
         for (int i = 0; i < allMeals.size(); i++) {
             if (allMeals.get(i).getId() == mealS.getId()) {
                 allMeals.set(i, mealS); // Replace the actual object in the list
-                System.out.println("updated the meal details");
+                //System.out.println("updated the meal details");
                 break;
             }
         }
@@ -924,7 +1015,7 @@ public class MealsDB {
                 Meal meal = meals.get(i);
                 if (meal.getId() == mealS.getId()) {
                     meals.set(i, mealS); // Replace old meal with the updated one
-                    System.out.println("Updated meal in restaurant: " + restaurant.getRestaurantName());
+                    //System.out.println("Updated meal in restaurant: " + restaurant.getRestaurantName());
                 }
             }
         }
@@ -986,11 +1077,35 @@ public class MealsDB {
                 for (Restaurant restaurant : meal.getRestaurants()) {
                     restaurant.getMeals().remove(meal);  // Update owning side
                 }
+                for(Restaurant restaurant : RestMealsList)
+                {
+                    restaurant.getMeals().removeIf(tempMeal -> tempMeal.getId() == meal.getId());
+                }
                 meal.getRestaurants().clear();
+                 CriteriaBuilder builder = session.getCriteriaBuilder();
+                 CriteriaQuery<Restaurant> query = builder.createQuery(Restaurant.class);
+                 query.from(Restaurant.class);
+                 List<Restaurant> allRestaurants = session.createQuery(query).getResultList();
+
+                 for (Restaurant restaurant : RestMealsList) {
+                     restaurant.getMeals().add(meal);
+                 }
+                 for (Restaurant restaurant : allRestaurants) {
+                     if (!restaurant.getMeals().contains(meal)) {
+                         restaurant.getMeals().add(meal);
+                         session.merge(restaurant); // Make sure restaurant gets updated
+                     }
+                     meal.getRestaurants().add(restaurant); // Maintain both sides
+                     //System.out.println("added rest to meal");
+                 }
             } else {
                 meal.setCompany(false);
                 List<String> newBranches = msg.getNewBranches();
 
+                for(Restaurant restaurant : RestMealsList)
+                {
+                    restaurant.getMeals().removeIf(tempMeal -> tempMeal.getId() == meal.getId());
+                }
                 // Clear existing restaurants
                 for (Restaurant existingRestaurant : meal.getRestaurants()) {
                     existingRestaurant.getMeals().remove(meal); // Update owning side
@@ -1010,18 +1125,23 @@ public class MealsDB {
                     if (restaurant == null) {
                         return "Restaurant '" + branchName + "' not found";
                     }
+                    for(Restaurant rest : RestMealsList)
+                    {
+                        if(rest.getRestaurantName().equals(branchName))
+                            rest.getMeals().add(meal);
+                    }
 
                     // Add meal to the restaurant (owning side)
                     if (!restaurant.getMeals().contains(meal)) {
                         restaurant.getMeals().add(meal);
                         session.merge(restaurant);
                     }
+                    meal.getRestaurants().add(restaurant); // Maintain both sides
                 }
             }
 
             session.merge(meal);
             transaction.commit();
-            System.out.println("im in here!!");
             updateMealDetailsById(meal);
 
             return "updated";
@@ -1063,6 +1183,7 @@ public class MealsDB {
 
             // 3. Create and configure the new meal
             Meal newMealEntity = new Meal();
+            newMealEntity.setDiscount_percentage(Double.parseDouble(newMeal.getDiscount()));
             newMealEntity.setName(newMeal.getMealName());
             newMealEntity.setDescription(newMeal.getMealDisc());
             newMealEntity.setPrice(Integer.parseInt(newMeal.getPrice()));
@@ -1104,6 +1225,7 @@ public class MealsDB {
                 CriteriaQuery<Restaurant> allRestaurantsQuery = builder.createQuery(Restaurant.class);
                 allRestaurantsQuery.from(Restaurant.class);
                 List<Restaurant> allRestaurants = session.createQuery(allRestaurantsQuery).getResultList();
+                newMealEntity.setRestaurants(allRestaurants);
 
                 for (Restaurant restaurant : allRestaurants) {
                     if (!restaurant.getMeals().contains(newMealEntity)) {
@@ -1114,7 +1236,7 @@ public class MealsDB {
             }else {
                 newMealEntity.setCompany(false);
                 List<String> newBranches = newMeal.getBranch();
-
+                List<Restaurant> newRest = new ArrayList<>();
                 // Add new restaurants from the list (skip "ALL" if present)
                 for (String branchName : newBranches) {
                     if ("ALL".equalsIgnoreCase(branchName)) continue; // Skip "ALL"
@@ -1128,12 +1250,14 @@ public class MealsDB {
                     if (restaurant == null) {
                         return null;
                     }
+                    newRest.add(restaurant);
                     // Add meal to restaurant (now meal has an ID)
                     if (!restaurant.getMeals().contains(newMealEntity)) {
                         restaurant.getMeals().add(newMealEntity);
                         session.update(restaurant);
                     }
                 }
+                newMealEntity.setRestaurants(newRest);
             }
 
             // 5. Save to database
@@ -1161,7 +1285,6 @@ public class MealsDB {
                     }
                     break;
                 }
-
                 for (Restaurant restaurant : RestMealsList) {
                     if (restaurant.getRestaurantName().equalsIgnoreCase(branchName)) {
                         List<Meal> mealsInBranch = restaurant.getMeals();

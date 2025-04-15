@@ -11,8 +11,7 @@ import java.util.List;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
 import static il.cshaifasweng.OCSFMediatorExample.server.OrdersDB.saveOrder;
-import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.allCreditCards;
-import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.allPersonalDetails;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.*;
 
 public class CreditCardDetailsDB {
     private static Session session;
@@ -53,6 +52,7 @@ public class CreditCardDetailsDB {
                 session.getTransaction().commit();
                 allCreditCards.add(newCardDetails);
                 allPersonalDetails.add(personalDetails);
+                allOrders.add(newOrder);
             } else {
                 session.getTransaction().rollback(); // Explicit rollback if personalDetails is null
                 throw new RuntimeException("PersonalDetails cannot be null");
@@ -115,6 +115,7 @@ public class CreditCardDetailsDB {
             // Update other entities
             session.saveOrUpdate(managedPersonalDetails);
             session.saveOrUpdate(newOrder);
+            allOrders.add(newOrder);
 
 
             transaction.commit();
@@ -174,6 +175,7 @@ public class CreditCardDetailsDB {
             session.saveOrUpdate(existingCreditCard);
 
             session.saveOrUpdate(newOrder);
+            allOrders.add(newOrder);
 
             // Commit the transaction
             session.getTransaction().commit();
@@ -216,6 +218,7 @@ public class CreditCardDetailsDB {
 
             for(MealInTheCart meal : newOrder.getMeals()) {
                 for (CustomizationWithBoolean custom : meal.getMeal().getCustomizationsList()) {
+                    session.clear();
                     session.saveOrUpdate(custom);  // Use saveOrUpdate to handle both new and existing entities}
                 }
             }
@@ -247,6 +250,7 @@ public class CreditCardDetailsDB {
             session.saveOrUpdate(dbPersonalDetails);
             session.saveOrUpdate(dbCreditCard);
             session.saveOrUpdate(newOrder);
+            allOrders.add(newOrder);
 
             // Commit the transaction
             session.getTransaction().commit();

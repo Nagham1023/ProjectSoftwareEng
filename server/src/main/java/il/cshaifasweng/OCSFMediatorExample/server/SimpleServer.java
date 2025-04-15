@@ -57,6 +57,7 @@ public class SimpleServer extends AbstractServer {
     public static List<CreditCard> allCreditCards = new ArrayList<>();
     public static List<Order> allOrders = new ArrayList<>();
     public static List<Complain> allComplains = new ArrayList<>();
+    public static List<MealUpdateRequest> allUpdateRequests = new ArrayList<>();
 
     private record ReservationPeriod(LocalDateTime start, LocalDateTime end) {}
 
@@ -70,7 +71,7 @@ public class SimpleServer extends AbstractServer {
     protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
         System.out.println("Received message from client ");
         String msgString = msg.toString();
-        System.out.println(msgString);
+        //System.out.println(msgString);
 
         //Reservation Management - omar
         if (msg instanceof ReservationEvent) {
@@ -264,7 +265,7 @@ public class SimpleServer extends AbstractServer {
             try {
                 RestaurantList restaurantList = new RestaurantList();
                 restaurantList.setRestaurantList(getAllRestaurants()); // Set list to send
-                System.out.println(restaurantList.getRestaurantList());
+                //System.out.println(restaurantList.getRestaurantList());
                 client.sendToClient(restaurantList); // send to client
             } catch (IOException e) {
                 e.printStackTrace();
@@ -304,11 +305,12 @@ public class SimpleServer extends AbstractServer {
         }
         else if (msg instanceof String && msgString.startsWith("menu")) {
             String branch = msgString.substring(4);
-            System.out.println("getting a menu to " + branch);
-            List<Meal> ml=null;
+            //System.out.println("getting a menu to " + branch);
+            List<Meal> ml;
             try {
                 if(branch.equals("ALL")) {
                     ml = MealsDB.GetAllMeals();
+                    //System.out.println("Rests is : "+ml.get(0).getRestaurants());
                 }
                 else{
                     ml = getmealsb(branch);
@@ -339,23 +341,19 @@ public class SimpleServer extends AbstractServer {
 
         }
         else if (msg.toString().startsWith("DeleteMeal")){
-            System.out.println("Deleting MEAL");
+            //System.out.println("Deleting MEAL");
             String mealId = msgString.substring(6);
             int mealIdn = Integer.parseInt(msgString.replaceAll("\\D+", ""));
-            System.out.println(mealIdn);
+            //System.out.println(mealIdn);
             String S=deleteMeal(mealIdn);
 
 
             // Build structured message
             String response = "delete"+" "+mealId+" "+S;
 
-            try {
-                System.out.println("Sending " + response);
-                client.sendToClient(response); // Send to requesting client
-                sendToAll(response); // Broadcast to all clients
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            //System.out.println("Sending " + response);
+            //client.sendToClient(response);
+            sendToAll(response); // Broadcast to all clients
 
         }
 
@@ -429,7 +427,7 @@ public class SimpleServer extends AbstractServer {
             }
         }
         else if (msg instanceof String && ((String)msg).equals("Get all users")) {
-            System.out.println("Getting all users");
+            //System.out.println("Getting all users");
             //List<Users> users= UsersDB.getUsers();
             try {
                 client.sendToClient(allUsers);
@@ -502,7 +500,7 @@ public class SimpleServer extends AbstractServer {
                             paymentCheck.setResponse("Updated the personal details to the database.");
 
                             newOrder.setCreditCard_num(cc.getCardNumber());
-                            System.out.println("cc num is : " + cc.getCardNumber());
+                            //System.out.println("cc num is : " + cc.getCardNumber());
                             addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc, newOrder);
                         }
                         client.sendToClient(paymentCheck);
@@ -584,8 +582,8 @@ public class SimpleServer extends AbstractServer {
                     // Process credit card details if found
                     List<CreditCard> creditCards = personalDetailsDB.getCreditCardDetails();
                     if (creditCards != null && !creditCards.isEmpty()) {
-                        System.out.println("in personal details simple server");
-                        System.out.println(creditCards + " ^6666^^^^^^^^^");
+                        //System.out.println("in personal details simple server");
+                        //System.out.println(creditCards + " ^6666^^^^^^^^^");
                         ListOfCC loc= new ListOfCC(creditCards);
                         client.sendToClient(loc);  // Send credit card details back to the client
                     } else {
@@ -1023,36 +1021,29 @@ public class SimpleServer extends AbstractServer {
         else if (msg instanceof updatePrice) {
             System.out.println("Received update price message from client ");
             //sendToAllClients(msg);
-            try {
-                if(((updatePrice) msg).getPurpose().equals("changing")){
-                    updatePrice req=(updatePrice)msg;
-                    updateMealPriceInDatabase(req);
-                    //String mealId = String.valueOf(req.getIdMeal());
-                    deletePriceChangeReq(req.getIdMeal());
-                    client.sendToClient(msg);
-                    sendToAll(msg);
-                } else if (((updatePrice) msg).getPurpose().equals("denying")) {
-                    deletePriceChangeReq( ((updatePrice) msg).getIdMeal());
-                    client.sendToClient(msg);
-                    sendToAll(msg);
-                } else{
-                    MealUpdateRequest req= new MealUpdateRequest();
-                    req=AddUpdatePriceRequest((updatePrice) msg);
-                    client.sendToClient(req);
-                    sendToAll(req);
-                }
-
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            if(((updatePrice) msg).getPurpose().equals("changing")){
+                updatePrice req=(updatePrice)msg;
+                updatePriceDeleteReq(req);
+                //client.sendToClient(msg);
+                sendToAll(msg);
+            } else if (((updatePrice) msg).getPurpose().equals("denying")) {
+                deletePriceChangeReq( ((updatePrice) msg).getIdMeal());
+                //client.sendToClient(msg);
+                sendToAll(msg);
+            } else{
+                MealUpdateRequest req= new MealUpdateRequest();
+                req=AddUpdatePriceRequest((updatePrice) msg);
+                //client.sendToClient(req);
+                sendToAll(req);
             }
+
 
         }
         else if (msg instanceof String && msgString.equals("show change price requests")){
-            List<MealUpdateRequest> requests=null;
+            //List<MealUpdateRequest> requests=null;
             try {
-                requests = getAllRequestsWithMealDetails();
-                PCRequestsList sending = new PCRequestsList(requests);
+                //requests = getAllRequestsWithMealDetails();
+                PCRequestsList sending = new PCRequestsList(allUpdateRequests);
                 client.sendToClient(sending);
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -1534,7 +1525,7 @@ public class SimpleServer extends AbstractServer {
 
     public List<Restaurant> getAllRestaurants() {
         if(RestMealsList != null) {
-            System.out.println("the RestMeals is not null");
+            //System.out.println("the RestMeals is not null");
             return RestMealsList;
         }
         try (Session session = getSessionFactory().openSession()) {
@@ -1876,7 +1867,7 @@ public class SimpleServer extends AbstractServer {
     }*/
 /********************************adan************************/
     /// ////work fine
-    public List<MealUpdateRequest> getAllRequestsWithMealDetails() {
+    public static List<MealUpdateRequest> getAllRequestsWithMealDetails() {
         try (Session session = App.getSessionFactory().openSession()) {
             session.beginTransaction();
 

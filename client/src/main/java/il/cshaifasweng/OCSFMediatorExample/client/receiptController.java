@@ -47,7 +47,7 @@ public class receiptController {
             dateField.setText(String.valueOf(done_Order.getDate()));
             String ccNumber = done_Order.getCreditCard_num();
             String lastFour = ccNumber.length() > 4 ? ccNumber.substring(ccNumber.length() - 4) : ccNumber;
-            PaidField.setText("Paid " + paid + "₪ with Credit Card ends with " + lastFour);
+            PaidField.setText(String.format("Paid %.2f ₪ with Credit Card ends with %s", paid, lastFour));
             fillMealDetailsContainer();
             String[] mealsOrdered = new String[done_Order.getMeals().size()];
             int index = 0;

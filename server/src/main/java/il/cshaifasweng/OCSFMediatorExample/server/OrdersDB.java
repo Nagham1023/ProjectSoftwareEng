@@ -156,13 +156,13 @@ public class OrdersDB {
 
             // Set basic order info
             LocalDateTime orderTime = getRandomDateTimeInMonth(year, month);
-            boolean isWithin24Hours = orderTime.isAfter(now.minusHours(24));
+            //boolean isWithin24Hours = orderTime.isAfter(now.minusHours(24));
 
             order.setRestaurantId(restaurant.getId());
             order.setRestaurantName(restaurant.getRestaurantName());
             order.setDate(orderTime.toLocalDate());
             order.setOrderTime(orderTime);
-            order.setOrderStatus(isWithin24Hours ? "Do" : "Done");
+            order.setOrderStatus("pending");
             order.setOrderType(random.nextBoolean() ? "Delivery" : "Self PickUp");
             order.setCustomerEmail("customer" + i + "@example.com");
             order.setCreditCard_num(String.format("4111-1111-1111-%04d", i));
@@ -177,6 +177,9 @@ public class OrdersDB {
 
                 MealInTheCart mic = new MealInTheCart();
                 mic.setQuantity(1 + random.nextInt(3)); // 1-3 quantity
+                mic.setPrice(meal.getPrice());
+                mic.setRestaurantName(restaurant.getRestaurantName());
+                mic.setDiscount_percentage(random.nextDouble(50));
                 mic.setOrder(order);
 
                 personal_Meal pm = new personal_Meal();
@@ -184,11 +187,11 @@ public class OrdersDB {
                 pm.setCustomizationsList(new HashSet<>());
                 mic.setMeal(pm);
 
-                total += meal.getPrice() * mic.getQuantity();
+                total += meal.getPrice() *(1 - mic.getDiscount_percentage()/100) * mic.getQuantity();
                 cartMeals.add(mic);
             }
 
-            order.setTotal_price((int) total);
+            order.setTotal_price(total);
             order.setMeals(cartMeals);
             orders.add(order);
         }

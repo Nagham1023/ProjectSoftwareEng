@@ -121,8 +121,8 @@ public class menu_controller {
             showAlert("Error", "Please select at least one filter.");
         } else {
             // Display the selected filters
-            System.out.println("Selected Restaurants: " + selectedRestaurants);
-            System.out.println("Selected Customizations: " + selectedCustomizations);
+            //System.out.println("Selected Restaurants: " + selectedRestaurants);
+            //System.out.println("Selected Customizations: " + selectedCustomizations);
 
             SearchOptions searchOptions;
             if(isWorkerMode){
@@ -501,6 +501,7 @@ public class menu_controller {
             for(Restaurant restaurant : m.getRestaurants()){
                 r.add(restaurant.getRestaurantName());
             }
+            //System.out.println("!!The restaurants is : "+r);
             controller.setMealDetails(m.getName(), text1, m.getDescription(), h,r);
 
             stage.show();
@@ -518,7 +519,7 @@ public class menu_controller {
     @Subscribe
     public void deleteRowMeal(DeleteMealEvent event) {
         String mealId = event.getId();
-        System.out.println("Received delete event for ID: " + mealId + ", Name: " + event.getMealName());
+        //System.out.println("Received delete event for ID: " + mealId + ", Name: " + event.getMealName());
         HBox mealRow = mealrowMap.get(mealId);
 
         if (mealRow != null && menuContainer.getChildren().contains(mealRow)) {
@@ -550,7 +551,7 @@ public class menu_controller {
 //        } else {
 //            System.out.println("Meal not found: " + mealId);
 //            // Optional: Refresh list if meal exists but wasn't in UI
-        System.out.println("im in updateRowMeal");
+        //System.out.println("im in updateRowMeal");
             refreshMenu();
        // }
 
@@ -761,8 +762,11 @@ public class menu_controller {
 
             if (avMeals.getMeals() != null) {
                 // Add new meals after the header
-                avMeals.getMeals().forEach(meal ->
-                        onAddMealClicked(meal)
+                //System.out.println("adding meal 1");
+                //for(Meal meal : avMeals.getMeals()) {
+                //    System.out.println(meal.getMealName() + " " + meal.getRestaurants());
+                //}
+                avMeals.getMeals().forEach(this::onAddMealClicked
                 );
             }
         });
@@ -773,6 +777,7 @@ public class menu_controller {
         System.out.println("Meal's id is " + meal.getId());
         Platform.runLater(() -> {
             if(!mealPriceLabels.containsKey(meal.getId())) {
+                //System.out.println("adding meal 2");
                 onAddMealClicked(meal.getMeal());
             }
         });

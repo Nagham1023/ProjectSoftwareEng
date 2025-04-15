@@ -230,17 +230,47 @@ public class App {
     }
 
     private static void generateRestaurants() throws Exception {
-        if (getAllRestaurants() != null && !getAllRestaurants().isEmpty()) {
-            System.out.println("there are restaurants in the database");
-            return;
-        } else
-            System.out.println("no restaurants in the database");
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
 
+            if (getAllRestaurants() != null && !getAllRestaurants().isEmpty()) {
+                Restaurant nazareth = getAllRestaurants().get(0);
+                Restaurant haifa = getAllRestaurants().get(1);
+                Restaurant telAviv = getAllRestaurants().get(2);
+                Restaurant Sakhnin = getAllRestaurants().get(3);
+                List<Meal> meals = getAllMeals();
+                int i = 0;
+                for (Meal meal : meals) {
+                    if (meal.getRestaurants() == null || meal.getRestaurants().isEmpty()) {
+                        if (i % 2 == 0) {
+                            meal.getRestaurants().add(nazareth);
+                            meal.getRestaurants().add(Sakhnin);
+                            nazareth.getMeals().add(meal);
+                            Sakhnin.getMeals().add(meal);
+                        }
+                        if (i % 3 == 0) {
+                            meal.getRestaurants().add(haifa);
+                            haifa.getMeals().add(meal);
+                        }
+                        meal.getRestaurants().add(telAviv);
+                        telAviv.getMeals().add(meal);
+                        i++;
+                    }
+                }
+                session.update(nazareth);
+                session.update(haifa);
+                session.update(telAviv);
+                session.update(Sakhnin);
 
-            LocalTime openingTime = LocalTime.of(0, 0); // 10:00 AM
-            LocalTime closingTime = LocalTime.of(23, 59); // 10:00 PM
+                session.flush();
+                session.getTransaction().commit();
+                System.out.println("there are restaurants in the database");
+                return;
+            } else
+                System.out.println("no restaurants in the database");
+
+            LocalTime openingTime = LocalTime.of(10, 0); // 10:00 AM
+            LocalTime closingTime = LocalTime.of(22, 0); // 10:00 PM
 
             Restaurant nazareth = new Restaurant();
             nazareth.setRestaurantName("Nazareth");
@@ -278,12 +308,16 @@ public class App {
             List<Meal> sakhninMeals = new ArrayList<>();
             for (Meal meal : meals) {
                 if (i % 2 == 0) {
+                    meal.getRestaurants().add(nazareth);
+                    meal.getRestaurants().add(Sakhnin);
                     nazarethMeals.add(meal);
                     sakhninMeals.add(meal);
                 }
                 if (i % 3 == 0) {
+                    meal.getRestaurants().add(haifa);
                     haifaMeals.add(meal);
                 }
+                meal.getRestaurants().add(telAviv);
                 telavivMeals.add(meal);
                 i++;
             }
@@ -367,9 +401,10 @@ public class App {
                 complain.setDate(date);
                 complain.setTime(time);
                 complain.setStatus(status);
-                complain.setResponse(status.equals("Done") ? "We have taken care of it." : "");
-                complain.setOrderNum(kind.equals("Feedback") || kind.equals("Suggestion") ? "" : String.valueOf(random.nextInt(200) + 1));
+                complain.setResponse(status.equals("Done") ? "We have taken care of it." : "takeeen care");
+                complain.setOrderNum(kind.equals("Feedback") || kind.equals("Suggestion") ? "" : String.valueOf(random.nextInt(100) + 1));
                 complain.setRefund(kind.equals("Complaint") && status.equals("Done") ? random.nextInt(21) : 0);
+                complain.setRestaurant(RestMealsList.get(random.nextInt(RestMealsList.size())));
 
                 session.save(complain);
                 allComplains.add(complain);
@@ -411,6 +446,7 @@ public class App {
             fetching_reservation();
             generateOrders();
             allOrders = getOrders();
+            allUpdateRequests = getAllRequestsWithMealDetails();
             //generateBasicUser1();
             // Register a shutdown hook
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {

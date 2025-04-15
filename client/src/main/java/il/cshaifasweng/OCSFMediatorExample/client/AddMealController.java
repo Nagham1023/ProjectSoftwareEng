@@ -64,6 +64,9 @@ public class AddMealController {
     private List<String> chosenRestaurantsNames= new ArrayList<>();
     private Map<String, HBox> customrowMap = new HashMap<>();
     private Map<String, HBox> restaurantrowMap = new HashMap<>();
+    @FXML
+    private TextField discountField;
+
 
 
     public static byte[] imageToByteArray(Image image) {
@@ -106,7 +109,7 @@ public class AddMealController {
             return; // Stop if validation fails
         }
         byte[] imageBytes = imageToByteArray(mealImageView.getImage());
-        MealEventUpgraded ME= new MealEventUpgraded(mealNameField.getText(), mealDescriptionField.getText(), mealPriceField.getText(), imageBytes, restaurant_name.getValue().equals("ALL"), chosenCustomizationNames, chosenRestaurantsNames);
+        MealEventUpgraded ME= new MealEventUpgraded(mealNameField.getText(), mealDescriptionField.getText(), mealPriceField.getText(), imageBytes, restaurant_name.getValue().equals("ALL"), chosenCustomizationNames, chosenRestaurantsNames,discountField.getText());
 
         SimpleClient client;
         client = SimpleClient.getClient();
@@ -310,6 +313,12 @@ public class AddMealController {
         String selectedValue = costumazation_name.getValue();
         String customizationName;
 
+        // Validation
+        if (selectedValue == null || selectedValue.isEmpty()) {
+            showError(errorLabel,"Please enter/select a customization!");
+            return;
+        }
+
         // Handle "Write Other" selection
         if ("Write Other".equals(selectedValue)) {
             customizationName = costumazation_name.getEditor().getText().trim();
@@ -318,11 +327,6 @@ public class AddMealController {
             System.out.println("customizationName: " + customizationName);
         }
 
-        // Validation
-        if (customizationName.isEmpty()) {
-            showError(errorLabel,"Please enter/select a customization!");
-            return;
-        }
 
         // Check duplicates
         if (customrowMap.containsKey(customizationName)) {
@@ -341,6 +345,11 @@ public class AddMealController {
         String selectedValue = restaurant_name.getValue();
         String restaurantName;
 
+
+        if (selectedValue == null || selectedValue.isEmpty()) {
+            showError(errorLabel1,"Please enter/select a restaurant!");
+            return;
+        }
         // Handle "All" selection
         if ("ALL".equals(selectedValue)) {
             Iterator<String> iterator = chosenRestaurantsNames.iterator();
@@ -360,10 +369,7 @@ public class AddMealController {
         restaurantName = selectedValue.trim();
 
         // Validation
-        if (restaurantName.isEmpty()) {
-            showError(errorLabel1,"Please enter/select a restaurant!");
-            return;
-        }
+
 
         // Check duplicates
         if (restaurantrowMap.containsKey(restaurantName)) {
@@ -441,18 +447,39 @@ public class AddMealController {
 
         // Validate meal price
         String priceText = mealPriceField.getText().trim();
-        if (priceText.isEmpty()) {
+        if (priceText.isEmpty() || mealPriceField.getText() == null) {
             errorMessage.append("Meal price is required.\n");
             isValid = false;
         } else {
             try {
-                int price = Integer.parseInt(priceText);
+                double price = Double.parseDouble(priceText);
                 if (price <= 0) {
                     errorMessage.append("Price must be a positive number.\n");
                     isValid = false;
                 }
             } catch (NumberFormatException e) {
                 errorMessage.append("Invalid price format. Please enter a valid number.\n");
+                isValid = false;
+            }
+        }
+
+        // Validate discount
+        String discountText = discountField.getText().trim();
+        if (discountText.isEmpty() || discountField.getText() == null) {
+            isValid = false;
+            errorMessage.append("Discount is required.\n");
+        }
+        else
+        {
+            try {
+                double discount = Double.parseDouble(discountText);
+                if (discount < 0 || discount > 100) {
+                    errorMessage.append("Discount must be between 0 and 100%.\n");
+                    isValid = false;
+                }
+            }
+            catch (NumberFormatException e) {
+                errorMessage.append("Invalid discount format. Please enter a number between 0 and 100.\n");
                 isValid = false;
             }
         }
@@ -475,13 +502,9 @@ public class AddMealController {
             errorMessage.append("Please select a restaurant option.\n");
             isValid = false;
         } else {
-            if (selectedRestaurant.equals("ALL")) {
-                // "ALL" selected, no need for specific restaurants
-            } else {
-                if (chosenRestaurantsNames.isEmpty()) {
-                    errorMessage.append("At least one restaurant must be selected unless 'ALL' is chosen.\n");
-                    isValid = false;
-                }
+            if (!selectedRestaurant.equals("ALL") && chosenRestaurantsNames.isEmpty()) {
+                errorMessage.append("At least one restaurant must be selected unless 'ALL' is chosen.\n");
+                isValid = false;
             }
         }
 
@@ -499,6 +522,7 @@ public class AddMealController {
 
         return isValid;
     }
+
 
 
 }

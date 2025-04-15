@@ -32,6 +32,10 @@ public class Meal implements Serializable {
     private double discount_percentage = 0;
 
 
+
+    @OneToMany(mappedBy = "meal", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<personal_Meal> personalMeals = new ArrayList<>();
+
     @Lob
     @Column(name = "image", columnDefinition = "MEDIUMBLOB") // Or LONGBLOB if needed
     private byte[] image;
@@ -55,6 +59,14 @@ public class Meal implements Serializable {
 //    // Relationship with Restaurant (separate)
 //    @ManyToMany(mappedBy = "meals", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
 //    private List<Restaurant> restaurantAssociations = new ArrayList<>();
+
+
+    public List<personal_Meal> getPersonalMeals() {
+        return personalMeals;
+    }
+    public void setPersonalMeals(List<personal_Meal> personalMeals) {
+        this.personalMeals = personalMeals;
+    }
 
     public int getId() {
         return id;
