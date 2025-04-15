@@ -99,10 +99,11 @@ public class UpdateMeal {
         });
     }
     public void setMealDetails(String name, String id, String description, List<String> customizations, List<String> restaurants) {
+        //System.out.println("The restaurants is : "+restaurants);
+
         this.mealNameLabel.setText("Update: " + name);
         this.mealId = id;
         this.mealDescriptionField.setText(description);
-
         // Load customizations from parameters instead of server
         customizations.forEach(this::fillRow);
         restaurants.forEach(this::fillRowRestaurants);
@@ -110,7 +111,7 @@ public class UpdateMeal {
         originalRestaurantsNames =restaurants;
         this.originalDescription = description;
         //customizationOriginal.forEach(this::fillChoosen);
-        System.out.println("Customizations: " + customizations);
+        //System.out.println("Customizations: " + customizations);
     }
 
     private void fillChosen(List<String> chosen,String s) {
@@ -186,7 +187,7 @@ public class UpdateMeal {
 
 
             dynamicCustomizationContainer.getChildren().add(mealRow);
-            System.out.println("showing customization for meal");
+            //System.out.println("showing customization for meal");
             chosenCustomizationNames.add(customizationName);
             customrowMap.put(key, mealRow);
         });
@@ -220,7 +221,7 @@ public class UpdateMeal {
 
 
             dynamicRestaurantContainer.getChildren().add(mealRow);
-            System.out.println("showing customization for meal");
+            //System.out.println("showing customization for meal");
             chosenRestaurantsNames.add(restaurantName);
             restaurantrowMap.put(key, mealRow);
         });
@@ -235,7 +236,7 @@ public class UpdateMeal {
             customizationName = costumazation_name.getEditor().getText().trim();
         } else {
             customizationName = selectedValue.trim();
-            System.out.println("customizationName: " + customizationName);
+            //System.out.println("customizationName: " + customizationName);
         }
 
         // Validation
@@ -259,7 +260,7 @@ public class UpdateMeal {
     }
 
     public void addToListRestaurant(ActionEvent actionEvent) {
-        System.out.println("0:  "+chosenRestaurantsNames.size());
+        //System.out.println("0:  "+chosenRestaurantsNames.size());
         String selectedValue = restaurant_name.getValue();
         String restaurantName;
 
@@ -299,7 +300,16 @@ public class UpdateMeal {
             printMap(restaurantrowMap);
             return;
         }
-
+        if (!"ALL".equals(restaurantName)) {
+            // Remove "ALL" if it was previously selected
+            if (chosenRestaurantsNames.contains("ALL")) {
+                chosenRestaurantsNames.remove("ALL");
+                HBox row = restaurantrowMap.remove("ALL");
+                if (row != null) {
+                    dynamicRestaurantContainer.getChildren().remove(row);
+                }
+            }
+        }
 
         // Add to UI and storage
         //chosenRestaurantsNames.add(restaurantName);
@@ -333,7 +343,7 @@ public class UpdateMeal {
     }
 
     private void handleDeleteRestaurant(String restaurantName) {
-        System.out.println(chosenRestaurantsNames.size());
+        //System.out.println(chosenRestaurantsNames.size());
         HBox row = restaurantrowMap.get(restaurantName);
         if (row != null) {
             // Remove from UI immediately

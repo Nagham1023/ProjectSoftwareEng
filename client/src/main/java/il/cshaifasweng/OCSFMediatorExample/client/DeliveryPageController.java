@@ -75,7 +75,8 @@ public class DeliveryPageController {
         setupHomeNumberField();
         PlaceYourOrder.setDisable(true);
         PlaceYourOrder.setVisible(false);
-        price.setText(done_Order.getTotal_price()+"₪");
+        price.setText(String.format("%.2f₪", done_Order.getTotal_price()));
+
 
     }
 
@@ -247,7 +248,7 @@ public class DeliveryPageController {
             addressField.setVisible(false);
             homeNumberField.setVisible(false);
             done_Order.setOrderType("Self PickUp");
-            price.setText(done_Order.getTotal_price()+"₪");
+            price.setText(String.format("%.2f₪", done_Order.getTotal_price()));
         } else {
             // Delivery selected
             Delivery.setStyle("-fx-background-color: #832018; -fx-text-fill: white; -fx-background-radius: 20; -fx-border-color: #832018; -fx-border-width: 2; -fx-border-radius: 20;");
@@ -257,7 +258,7 @@ public class DeliveryPageController {
             homeNumberField.setVisible(true);
             done_Order.setOrderType("Delivery");
             double newPrice = done_Order.getTotal_price() + deliveryPrice;
-            price.setText(newPrice + "₪");
+            price.setText(String.format("%.2f₪", newPrice));
         }
     }
     // Don't forget to unregister when no longer needed

@@ -80,9 +80,10 @@ public class OrderCancellationController {
                 try {
                     String subject = "Refund from Mamas-Restaurant ";
                     String body = "Hi,\n\nWe've received a request to cancel your order. "
-                            + "Your refund is : " + refundAmount + "\n\n"
+                            + "Your refund is : " + String.format("%.2f", refundAmount) + "\n\n"
                             + "If you didn't request this, please ignore this email.\n\n"
                             + "Best regards,\nMamas-Restaurant Team";
+
 
                     EmailSender.sendEmail(subject,body, cancelOrderEvent.getOrder().getCustomerEmail());
                     CancelButton.getScene().getWindow().hide();

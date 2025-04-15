@@ -15,6 +15,7 @@ public class MealEventUpgraded implements Serializable {
     private List<String> customizationList;
     private List<String> branch;
     private Meal meal;
+    private String discount;
 
     public MealEventUpgraded(String mealName, String mealDisc, String price, String Id, byte[] image) {
         this.mealName = mealName;
@@ -32,7 +33,7 @@ public class MealEventUpgraded implements Serializable {
 
     }
 
-    public MealEventUpgraded(String mealName, String mealDisc, String price, byte[] image, boolean isCompany, List<String> customizationList, List<String> branch) {
+    public MealEventUpgraded(String mealName, String mealDisc, String price, byte[] image, boolean isCompany, List<String> customizationList, List<String> branch,String discount) {
         this.mealName = mealName;
         this.mealDisc = mealDisc;
         this.price = price;
@@ -40,6 +41,14 @@ public class MealEventUpgraded implements Serializable {
         this.isCompany = isCompany;
         this.customizationList = customizationList;
         this.branch = branch;
+        this.discount = discount;
+    }
+
+    public String getDiscount() {
+        return discount;
+    }
+    public void setDiscount(String discount) {
+        this.discount = discount;
     }
 
     public byte[] getImage() {

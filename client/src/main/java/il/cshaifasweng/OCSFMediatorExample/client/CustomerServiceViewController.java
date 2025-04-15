@@ -191,13 +191,19 @@ public class CustomerServiceViewController {
             stage.setScene(scene);
             // Get the controller and set meal details
             AddResponseController addResponseController = loader.getController();
+            String restName;
+            if(complain.getRestaurant() != null)
+                restName = complain.getRestaurant().getRestaurantName();
+            else restName = "null";
             addResponseController.setCompDetails(
                     complain.getName(),
                     complain.getTell(),
                     complain.getId(),
                     complain.getKind(),
                     complain.getEmail(),
-                    complain.getOrderNum()
+                    complain.getOrderNum(),
+                    restName,
+                    complain.getTime()
             );
             stage.show();
         } catch (IOException e) {
@@ -230,11 +236,26 @@ public class CustomerServiceViewController {
 
         // Complaint Details
         VBox detailsBox = new VBox(5);
+
+        // Complain ID
+        Label idShownLabel = new Label("ID: " + complain.getId());
+        idShownLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333;");
+
+        // Restaurant
+        Label restaurantLabel;
+        if(complain.getRestaurant() != null)
+             restaurantLabel = new Label("Restaurant: " + complain.getRestaurant().getRestaurantName());
+        else restaurantLabel = new Label("Restaurant is null");
+        restaurantLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #333333;");
+
+        // Name & Tell
         Label nameLabel = new Label(complain.getName());
         nameLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
         Label tellLabel = new Label(complain.getTell());
         tellLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #757575;");
-        detailsBox.getChildren().addAll(nameLabel, tellLabel);
+
+        detailsBox.getChildren().addAll(idShownLabel, restaurantLabel, nameLabel, tellLabel);
+
 
         // Complaint Date
         Label dateLabel = new Label(complain.getDate() + "");
@@ -250,6 +271,12 @@ public class CustomerServiceViewController {
         showOrderBTN.setStyle("-fx-background-color: #0044cc; -fx-text-fill: #ffffff; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
         showOrderBTN.setOnAction(event -> openOrderDetails(complain.getOrderNum()));
 
+        // Show Response Button for all done statuses
+        Button showResponseBTN = new Button("Show Response");
+        showResponseBTN.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
+        showResponseBTN.setOnAction(event -> openShowResponsePopup(complain));
+
+
         // Add buttons and details based on status and kind
         if ("Do".equals(complain.getStatus())) {
             if ("Complaint".equals(complain.getKind())) {
@@ -259,17 +286,55 @@ public class CustomerServiceViewController {
             }
         } else {
             if ("Complaint".equals(complain.getKind())) {
-                compRow.getChildren().addAll(detailsBox, dateLabel, showOrderBTN);
+                compRow.getChildren().addAll(detailsBox, dateLabel, showOrderBTN, showResponseBTN);
             } else {
-                compRow.getChildren().addAll(detailsBox, dateLabel);
+                compRow.getChildren().addAll(detailsBox, dateLabel, showResponseBTN);
             }
         }
-
+        //complain.get
         // Add complaint row to the container
         ListCompContainer.getChildren().add(compRow);
 
         addResponseButtons.put(String.valueOf(complain.getId()), responseBTN);
     }
+
+    private void openShowResponsePopup(Complain complain) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("addResponse.fxml"));
+            Parent root = loader.load();
+            AddResponseController controller = loader.getController();
+
+
+
+            controller.setShowMode(true); // to turn off editing and change button text
+            String restName;
+            if(complain.getRestaurant() != null)
+                 restName = complain.getRestaurant().getRestaurantName();
+            else restName = "null";
+            // Set data to show
+            controller.showResp(
+                    complain.getName(),
+                    complain.getTell(),
+                    complain.getResponse(),
+                    complain.getRefund(),
+                    complain.getKind(),
+                    complain.getEmail(),
+                    complain.getId(),
+                    restName,
+                    complain.getTime()
+            );
+            //complain.get
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Show Response");
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void openOrderDetails(String orderNum) {
         try {
             System.out.println("openOrderDetails: " + orderNum);
@@ -309,10 +374,7 @@ public class CustomerServiceViewController {
         StringBuilder orderDetails = new StringBuilder();
         double totalAmount = order.getTotal_price();
 
-        if(order.getOrderType().equals("Delivery"))
-            totalAmount += deliveryPrice;
-
-        String totalAmountText = "Total: " + totalAmount + "₪";
+        String totalAmountText = String.format("Total: %.2f₪", totalAmount);
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("SummaryWindow.fxml"));

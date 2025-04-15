@@ -21,8 +21,6 @@
 <?import javafx.scene.paint.Stop?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.collections.FXCollections?>
-<?import java.lang.String?>
 <StackPane fx:id="stackPane" prefHeight="600" prefWidth="800" style="-fx-background-color: #f8f5f1;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AddMealController">
 
     <!-- Main Scrollable Content -->
@@ -76,6 +74,14 @@
 
                 <!-- Dynamic Customization List -->
                 <VBox fx:id="dynamicCustomizationContainer" spacing="10" style="-fx-padding: 10;" />
+
+                <!-- Discount Field -->
+                <HBox spacing="10" style="-fx-alignment: center-left;">
+                    <Label text="Discount (%):" style="-fx-font-size: 16px; -fx-text-fill: #333;" />
+                    <TextField fx:id="discountField" promptText="0 - 100" prefWidth="100"
+                               style="-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-padding: 5px;" />
+                </HBox>
+                <Label fx:id="discountErrorLabel" style="-fx-text-fill: red; -fx-font-size: 14px;" text="" />
 
                 <!-- Select Image -->
                 <Button fx:id="selectImageButton" onAction="#onSelectImageClicked" style="-fx-background-color: #b70236; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10px;" text="Select Image" />

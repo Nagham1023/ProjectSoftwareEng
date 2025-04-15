@@ -81,8 +81,8 @@ public class OrderSummaryController {
         double totalPrice = 0;
 
         for (MealInTheCart mealInTheCart : meals) {
-            int mealPrice = (int) mealInTheCart.getMeal().getMeal().getPrice();  // Make sure to cast to the appropriate type
-            double finalPrice = (1 - (double) mealInTheCart.getMeal().getMeal().getDiscount_percentage() / 100) * mealPrice;
+            double mealPrice = mealInTheCart.getMeal().getMeal().getPrice();  // Make sure to cast to the appropriate type
+            double finalPrice = (1 - mealInTheCart.getMeal().getMeal().getDiscount_percentage() / 100) * mealPrice;
             int quantity = mealInTheCart.getQuantity();
             totalPrice += finalPrice * quantity; // Multiply price by quantity and add to total
         }
