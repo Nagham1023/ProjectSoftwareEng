@@ -100,6 +100,7 @@ public class ReportsViewController {
 
         try {
             // Parse header for date context
+
             if (lines.length > 1 && lines[1].startsWith("Period: ")) {
                 String[] dateParts = lines[1].split("Period: ")[1].split(" ");
                 Month month = Month.valueOf(dateParts[0].toUpperCase());
@@ -131,7 +132,17 @@ public class ReportsViewController {
         chart.setTitle(lines[0]);
 
         XYChart.Series<String, Number> series = new XYChart.Series<>();
-        series.setName("Revenue");
+        String seriesName = switch (lines[0].split("-")[0]) {
+            case "Revenue Report " -> "Revenue";
+            case "Delivery Count Report " -> "Delivery Orders";
+            case "Self PickUp Count Report " -> "Pickup Orders";
+            case "ALL Count Report " -> "All Orders";
+            case "Complaint Report " -> "Customer Complaints";
+            default -> "Report";
+        };
+        series.setName(seriesName);
+
+        chart.getStylesheets().add(getClass().getResource("chart-style.css").toExternalForm());
 
         // Fill complete timeline
         if (isMonthly) {
@@ -213,6 +224,7 @@ public class ReportsViewController {
     }
     public void setBranch(String role) {
         this.currentRestaurant = role;
+        System.out.println("Current restaurant: " + currentRestaurant);
         restaurant_name.setVisible(false);
     }
 }

@@ -381,6 +381,22 @@ public class UsersDB {
             shada.setUsername("shada");
             shada.setGender("other");
             shada.setAge(22);
+
+            Users Lamis = new Users();
+            Lamis.setRole("Host Nazareth");
+            Lamis.setEmail("shadamazzawi@gmail.com");
+            Lamis.setPassword("123");
+            Lamis.setUsername("lamis");
+            Lamis.setGender("other");
+            Lamis.setAge(22);
+
+            Users adan = new Users();
+            adan.setRole("ChainManager Nazareth");
+            adan.setEmail("shadamazzawi@gmail.com");
+            adan.setPassword("123");
+            adan.setUsername("adan");
+            adan.setGender("other");
+            adan.setAge(22);
             if (!isUserExists("naghamTheManager") ) {
                 allUsers.add(nagham);
                 session.save(nagham);
@@ -410,6 +426,16 @@ public class UsersDB {
                 allUsers.add(knani);
                 session.save(knani);
                 System.out.println("User has been created: " + knani.getUsername());
+            }
+            if (!isUserExists("adan") ) {
+                allUsers.add(adan);
+                session.save(adan);
+                System.out.println("User has been created: " + adan.getUsername());
+            }
+            if (!isUserExists("lamis") ) {
+                allUsers.add(Lamis);
+                session.save(Lamis);
+                System.out.println("User has been created: " + Lamis.getUsername());
             }
             session.flush();
             session.getTransaction().commit(); // Commit the transaction
