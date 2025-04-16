@@ -463,7 +463,6 @@ public class MealsDB {
     }
 
     public static void updatePriceDeleteReq(updatePrice updatePrice) {
-        //System.out.println("Changing the price in database.");
         int mealId = updatePrice.getIdMeal();
         double newPrice = updatePrice.getNewPrice();
         double newDiscount = updatePrice.getDiscount();
@@ -512,11 +511,8 @@ public class MealsDB {
                 meal.setPrice(newPrice); // Update the price
                 meal.setDiscount_percentage(newDiscount);
                 session.update(meal); // Persist the changes
-                session.getTransaction().commit(); // Commit the transaction
+                //session.getTransaction().commit(); // Commit the transaction
                 updateMealPriceById(mealId, newPrice);
-                //System.out.println("Updated price for Meal ID " + mealId + " to " + newPrice);
-            } else {
-                //System.out.println("Meal with ID " + mealId + " not found in the database.");
             }
             /*delete req*/
             // Find all requests linked to this meal
@@ -530,11 +526,12 @@ public class MealsDB {
 
             // Delete all found requests
             for (UpdatePriceRequest req : requests) {
+                System.out.println("Deleting request");
                 allUpdateRequests.removeIf(up -> Objects.equals(up.getMealId(), String.valueOf(mealId)));
                 session.delete(req);
             }
+            session.getTransaction().commit();
         } catch (Exception e) {
-            //System.out.println("An error occurred during the update operation.");
             if (session.getTransaction() != null) {
                 session.getTransaction().rollback(); // Rollback on error
             }
@@ -542,10 +539,8 @@ public class MealsDB {
         } finally {
             if (session != null && session.isOpen()) {
                 session.close(); // Close the session after operation
-                //System.out.println("Session closed.");
             }
         }
-        //System.out.println("Finished updating the price in the database.");
     }
 //    public static String AddNewMeal(mealEvent newMeal) {
 //        List<Customization> customizations = new ArrayList<>();
@@ -1243,6 +1238,7 @@ public class MealsDB {
                     customization = new Customization();
                     customization.setName(customizationName);
                     session.persist(customization);  // Save new customization
+                    allcust.add(customization);
                 }
 
                 // Sync both sides of the relationship
