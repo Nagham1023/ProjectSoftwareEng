@@ -40,9 +40,24 @@ public class MealsDB {
             session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
-            // Create Customizations (new objects)
+            // Expanded list of customization names
             List<String> customizationNames = Arrays.asList(
-                    "More Lettuce", "Extra Cheese", "More Onion", "High Spicy Level", "Black Bread"
+                    // Common burger components
+                    "Regular Bread", "Black Bread", "Lettuce", "Tomato", "Pickles", "Onion",
+                    "Beef Patty", "Chicken Patty", "Cheese", "Extra Cheese",
+                    "Ketchup", "Mayonnaise", "Spicy Sauce", "Mustard",
+
+                    // Pasta related
+                    "Grated Cheese", "Extra Sauce", "Basil",
+
+                    // Salad related
+                    "Avocado", "Olive Oil", "Vinaigrette", "Red Onion",
+
+                    // Grill components
+                    "High Spicy Level", "BBQ Sauce", "Garlic Sauce",
+
+                    // Toast
+                    "White Cheese", "Toast Black Bread"
             );
 
             Map<String, Customization> savedCustomizations = new HashMap<>();
@@ -65,47 +80,73 @@ public class MealsDB {
                 }
             }
 
-            session.flush(); // Ensure customizations are saved
+            session.flush(); // Make sure customizations are saved before assigning
 
-            // Create Meals and assign the saved (persistent) Customizations
+            // Meals with expanded customizations
             Meal burger = new Meal();
             burger.setName("Burger");
             burger.setDescription("Juicy beef burger with fresh lettuce");
             burger.setPrice(8.00);
-            burger.setCustomizations(Set.of(savedCustomizations.get("More Lettuce")));
+            burger.setCustomizations(Set.of(
+                    savedCustomizations.get("Regular Bread"),
+                    savedCustomizations.get("Lettuce"),
+                    savedCustomizations.get("Tomato"),
+                    savedCustomizations.get("Pickles"),
+                    savedCustomizations.get("Onion"),
+                    savedCustomizations.get("Beef Patty"),
+                    savedCustomizations.get("Cheese"),
+                    savedCustomizations.get("Ketchup"),
+                    savedCustomizations.get("Mayonnaise"),
+                    savedCustomizations.get("Spicy Sauce")
+            ));
             burger.setImage(loadImage("burger.jpg"));
 
             Meal spaghetti = new Meal();
             spaghetti.setName("Spaghetti");
             spaghetti.setDescription("Classic Italian spaghetti with cheese");
             spaghetti.setPrice(10.00);
-            spaghetti.setCustomizations(Set.of(savedCustomizations.get("Extra Cheese")));
+            spaghetti.setCustomizations(Set.of(
+                    savedCustomizations.get("Grated Cheese"),
+                    savedCustomizations.get("Extra Sauce"),
+                    savedCustomizations.get("Basil")
+            ));
             spaghetti.setImage(loadImage("spaghetti.jpg"));
 
             Meal avocadoSalad = new Meal();
             avocadoSalad.setName("Avocado Salad");
             avocadoSalad.setDescription("Fresh avocado salad with onions");
             avocadoSalad.setPrice(7.00);
-            avocadoSalad.setCustomizations(Set.of(savedCustomizations.get("More Onion")));
+            avocadoSalad.setCustomizations(Set.of(
+                    savedCustomizations.get("Avocado"),
+                    savedCustomizations.get("Red Onion"),
+                    savedCustomizations.get("Olive Oil"),
+                    savedCustomizations.get("Vinaigrette")
+            ));
             avocadoSalad.setImage(loadImage("avocado_salad.png"));
 
             Meal grills = new Meal();
             grills.setName("Grills");
             grills.setDescription("Mixed grilled meats with spices");
             grills.setPrice(12.00);
-            grills.setCustomizations(Set.of(savedCustomizations.get("High Spicy Level")));
+            grills.setCustomizations(Set.of(
+                    savedCustomizations.get("High Spicy Level"),
+                    savedCustomizations.get("BBQ Sauce"),
+                    savedCustomizations.get("Garlic Sauce")
+            ));
             grills.setImage(loadImage("grills.jpg"));
 
             Meal toastCheese = new Meal();
             toastCheese.setName("Toast Cheese");
             toastCheese.setDescription("Cheese toast with black bread");
             toastCheese.setPrice(5.00);
-            toastCheese.setCustomizations(Set.of(savedCustomizations.get("Black Bread")));
+            toastCheese.setCustomizations(Set.of(
+                    savedCustomizations.get("White Cheese"),
+                    savedCustomizations.get("Toast Black Bread")
+            ));
             toastCheese.setImage(loadImage("toast_cheese.jpg"));
 
             List<Meal> newMeals = Arrays.asList(burger, spaghetti, avocadoSalad, grills, toastCheese);
 
-            // Add only unique meals
             for (Meal newMeal : newMeals) {
                 Meal existing = (Meal) session.createQuery(
                                 "FROM Meal WHERE mealName = :name")
@@ -136,6 +177,8 @@ public class MealsDB {
             }
         }
     }
+
+
 
     public static void getAllRestMeals() {
         Session session = null;
@@ -887,13 +930,7 @@ public class MealsDB {
 
             // Delete all found requests
             for (UpdatePriceRequest req : requests) {
-                for(MealUpdateRequest up :allUpdateRequests)
-                {
-                    if(Objects.equals(up.getMealId(), String.valueOf(mealId)))
-                    {
-                        allUpdateRequests.remove(req);
-                    }
-                }
+                allUpdateRequests.removeIf(up -> Objects.equals(up.getMealId(), String.valueOf(mealId)));
                 session.delete(req);
             }
 

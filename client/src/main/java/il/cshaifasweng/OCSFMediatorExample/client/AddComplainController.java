@@ -279,7 +279,7 @@ public class AddComplainController {
             else if (msg.equals("Not same restaurant!")) {
                 checkLabel.setText("The order was not completed at the same restaurant!");
             }
-            else if (msg.equals("This order has been cancelled")) {
+            else if (msg.equals("Not the same Email")) {
                 checkLabel.setText(msg);
             }
         });

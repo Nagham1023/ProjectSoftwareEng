@@ -326,6 +326,9 @@ public class SimpleClient extends AbstractClient {
 		else if(message.equals("go To payment check")){
 			EventBus.getDefault().post(message);
 		}
+		else if(message.equals("Not the same Email")){
+			EventBus.getDefault().post(message);
+		}
 		else if(message.equals("This order has been cancelled"))
 			EventBus.getDefault().post(message);
 		else if(message.startsWith("Cancel Reservation Error:")){
