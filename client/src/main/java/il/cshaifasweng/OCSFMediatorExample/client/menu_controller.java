@@ -85,6 +85,9 @@ public class menu_controller {
     private Button add_meal;
 
     @FXML
+    private Button backButton;
+
+    @FXML
 
     private Label textmenu;
 
@@ -452,6 +455,7 @@ public class menu_controller {
         if (isWorkerMode) {
             add_meal.setVisible(true);
             addToCartBtn.setVisible(false);
+            backButton.setVisible(false);
 
             Button changePriceBtn = new Button("Change Price");
             changePriceBtn.setStyle("-fx-background-color: #b70236; -fx-text-fill: white; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
