@@ -664,21 +664,29 @@ public class SimpleServer extends AbstractServer {
                 }
                 else
                 {
-                    if(order.getOrderStatus().equals("Cancelled")) {
+                    /*if(order.getOrderStatus().equals("Cancelled")) {
                         try {
                             client.sendToClient("This order has been cancelled");
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
                     }
-                    else if(Objects.equals(order.getRestaurantName(), ce.getRestaurant().getRestaurantName())) {
+                    else*/
+                    if(Objects.equals(order.getRestaurantName(), ce.getRestaurant().getRestaurantName()) && Objects.equals(order.getCustomerEmail(),ce.getEmail())) {
                         addComplainIntoDatabase(ce,client);
                         sendToAll(msg);
                     }
-                    else
+                    else if(!Objects.equals(order.getRestaurantName(), ce.getRestaurant().getRestaurantName()))
                     {
-                        try {
+                        try{
                             client.sendToClient("Not same restaurant!");
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    else {
+                        try {
+                            client.sendToClient("Not the same Email");
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
