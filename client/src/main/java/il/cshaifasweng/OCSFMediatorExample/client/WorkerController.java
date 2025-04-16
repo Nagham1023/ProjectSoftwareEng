@@ -78,10 +78,14 @@ public class WorkerController {
 
             }
 
+            if(currentWorker.startsWith("Host")) {
+                tables_reservation.setVisible(true);
+                currentBranch = currentWorker.substring(5);
+                currentWorker = "Host";
+
+            }
+
             switch (currentWorker) {
-                case "Host":
-                    tables_reservation.setVisible(true);
-                    break;
                 case "CustomerService":
                     complaint_center.setVisible(true);
                     break;
