@@ -165,6 +165,7 @@ public class WorkerController {
                 ReportsViewController controller = loader.getController();
                 if(currentWorker.equals("ChainManager")) {
                     controller.setBranch(currentBranch);
+                    controller.setRole(currentWorker);
                 }
 
             }
