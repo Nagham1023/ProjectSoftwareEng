@@ -15,7 +15,7 @@ public class FinalReservationEvent implements Serializable {
 
     private String email; // New field for user's email
     private String creditCard_num;
-
+    private boolean isWorker = false;
 
     // Constructor with all fields
     public FinalReservationEvent(String restaurantName, LocalDateTime reservationDateTime, int seats, boolean isInside,
@@ -27,6 +27,17 @@ public class FinalReservationEvent implements Serializable {
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
         this.email = email;
+    }
+    public FinalReservationEvent(boolean isWorker, String restaurantName, LocalDateTime reservationDateTime, int seats, boolean isInside,
+                                 String fullName, String phoneNumber, String email) {
+        this.restaurantName = restaurantName;
+        this.reservationDateTime = reservationDateTime;
+        this.seats = seats;
+        this.isInside = isInside;
+        this.fullName = fullName;
+        this.phoneNumber = phoneNumber;
+        this.email = email;
+        this.isWorker = isWorker;
     }
 
     // Getters and Setters
@@ -64,6 +75,10 @@ public class FinalReservationEvent implements Serializable {
 
     public void setInside(boolean isInside) {
         this.isInside = isInside;
+    }
+
+    public boolean isWorker() {
+        return isWorker;
     }
 
     public String getFullName() {

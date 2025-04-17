@@ -11,13 +11,20 @@ public class ReservationEvent implements Serializable {
     private int seats;
     private boolean isInside;
     private List<LocalDateTime> availableTimeSlots; // New field for multiple time slots
-
+    private boolean isWorker = false;
     // Constructor for single reservation
     public ReservationEvent(String restaurantName, LocalDateTime reservationDateTime, int seats, boolean isInside) {
         this.restaurantName = restaurantName;
         this.reservationDateTime = reservationDateTime;
         this.seats = seats;
         this.isInside = isInside;
+    }
+    public ReservationEvent(boolean isWorker, String restaurantName, LocalDateTime reservationDateTime, int seats, boolean isInside) {
+        this.restaurantName = restaurantName;
+        this.reservationDateTime = reservationDateTime;
+        this.seats = seats;
+        this.isInside = isInside;
+        this.isWorker = isWorker;
     }
     // Constructor for single reservation
     public ReservationEvent(String restaurantName, int seats, boolean isInside) {
@@ -63,6 +70,10 @@ public class ReservationEvent implements Serializable {
 
     public boolean isInside() {
         return isInside;
+    }
+
+    public boolean isWorker() {
+        return isWorker;
     }
 
     public void setInside(boolean isInside) {

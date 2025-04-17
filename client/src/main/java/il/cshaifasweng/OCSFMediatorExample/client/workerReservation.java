@@ -28,6 +28,7 @@ import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.restaurant
 
 
 public class workerReservation {
+    private boolean isFinished = false;
     @FXML
     private ScrollPane scrollPane; // Inject the ScrollPane from the FXML file
 
@@ -54,7 +55,7 @@ public class workerReservation {
     @FXML
     public void initialize() throws IOException {
         EventBus.getDefault().register(this);
-
+        isFinished = false;
         addMouseGlowEffect(confirmButton);
 
 
@@ -152,7 +153,7 @@ public class workerReservation {
         boolean isInside = insideOutsideComboBox.getSelectionModel().getSelectedItem().equals("Inside");
 
         // Create ReservationEvent with seats and isInside
-        ReservationEvent reservationEvent = new ReservationEvent(restaurantName, selectedDateTime, seats, isInside);
+        ReservationEvent reservationEvent = new ReservationEvent(true, restaurantName, selectedDateTime, seats, isInside);
         SimpleClient.getClient().sendToServer(reservationEvent); // Send it to the server
     }
     @Subscribe
@@ -262,11 +263,9 @@ public class workerReservation {
 
     @Subscribe
     public void reservationConfirmed(String msg) {
-        Platform.runLater(() -> {
-            if (msg.equals("Reservation confirmed successfully.")) {
-
-                showAlert("Reservation Confirmed", "Your reservation has been confirmed successfully!");
-
+        if (msg.equals("Reservation confirmed successfully.")) {
+            isFinished = true;
+            Platform.runLater(() -> {
                 // Clear all fields and reset the page
                 clearAllFields();
                 // Stop loading animation
@@ -276,12 +275,13 @@ public class workerReservation {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            }
-        });
+            });
+        }
     }
 
     @Subscribe
     public void reConfirmFunction(ReConfirmEvent reConfirmEvent) {
+        if(isFinished)return;
         try {
             handleConfirm();
         } catch (IOException e) {
@@ -364,7 +364,7 @@ public class workerReservation {
 
             // Send reservation event
             FinalReservationEvent finalReservationEvent = new FinalReservationEvent(
-                    restaurantName, selectedDateTime, seats, isInside, fullName, phoneNumber, email
+                    true, restaurantName, selectedDateTime, seats, isInside, fullName, phoneNumber, email
             );
 
             try {
