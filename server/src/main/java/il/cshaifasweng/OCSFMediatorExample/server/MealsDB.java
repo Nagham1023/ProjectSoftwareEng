@@ -1100,11 +1100,12 @@ public class MealsDB {
                 }
                 meal.getCustomizations().add(customization);
             }
+            meal.setCompany(msg.isCompany());
 
             // 4. Process Restaurants ----------------------------------------------
             if ("ALL".equals(msg.getNewBranches().get(0))) // Safe even if branchName is null)
              {
-                meal.setCompany(true);
+                //meal.setCompany(true);
                 // Clear restaurant associations for company-wide meals
                 for (Restaurant restaurant : meal.getRestaurants()) {
                     restaurant.getMeals().remove(meal);  // Update owning side
@@ -1131,7 +1132,7 @@ public class MealsDB {
                      //System.out.println("added rest to meal");
                  }
             } else {
-                meal.setCompany(false);
+                //meal.setCompany(false);
                 List<String> newBranches = msg.getNewBranches();
 
                 for(Restaurant restaurant : RestMealsList)
@@ -1248,10 +1249,11 @@ public class MealsDB {
                 newMealEntity.getCustomizations().add(customization);
             }
 
+            newMealEntity.setCompany(newMeal.isCompany());
             // 4. Process Restaurants
             if ("ALL".equals(newMeal.getBranch().get(0))) // Safe even if branchName is null)
             {
-                newMealEntity.setCompany(true);
+                //newMealEntity.setCompany(true);
 
                 // Get all restaurants from the DB
                 builder = session.getCriteriaBuilder();
@@ -1267,7 +1269,7 @@ public class MealsDB {
                     }
                 }
             }else {
-                newMealEntity.setCompany(false);
+                //newMealEntity.setCompany(false);
                 List<String> newBranches = newMeal.getBranch();
                 List<Restaurant> newRest = new ArrayList<>();
                 // Add new restaurants from the list (skip "ALL" if present)

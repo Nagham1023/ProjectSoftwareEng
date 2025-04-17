@@ -26,6 +26,7 @@ public class Order implements Serializable{
     private String customerEmail;
     private LocalDateTime orderTime;
     private String creditCard_num;
+    private String payment_method;
 
 
     /***yousef***/
@@ -49,6 +50,13 @@ public class Order implements Serializable{
         this.orderTime = order.getOrderTime();
         this.meals = order.getMeals();
         this.creditCard_num =order.getCreditCard_num();
+    }
+
+    public String getPayment_method() {
+        return payment_method;
+    }
+    public void setPayment_method(String payment_method) {
+        this.payment_method = payment_method;
     }
 
     public String getCreditCard_num() {

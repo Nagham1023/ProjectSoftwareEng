@@ -109,7 +109,23 @@ public class AddMealController {
             return; // Stop if validation fails
         }
         byte[] imageBytes = imageToByteArray(mealImageView.getImage());
-        MealEventUpgraded ME= new MealEventUpgraded(mealNameField.getText(), mealDescriptionField.getText(), mealPriceField.getText(), imageBytes, restaurant_name.getValue().equals("ALL"), chosenCustomizationNames, chosenRestaurantsNames,discountField.getText());
+
+
+
+        Iterator<String> iterator = restaurantNames.iterator();
+
+        boolean isCompany = true;
+        if(!chosenRestaurantsNames.get(0).equals("ALL")) {
+            while (iterator.hasNext()) {
+                String restaurant = iterator.next();
+                if (!chosenRestaurantsNames.contains(restaurant)) {
+                    isCompany = false;
+                }
+            }
+        }
+
+
+        MealEventUpgraded ME= new MealEventUpgraded(mealNameField.getText(), mealDescriptionField.getText(), mealPriceField.getText(), imageBytes, isCompany, chosenCustomizationNames, chosenRestaurantsNames,discountField.getText());
 
         SimpleClient client;
         client = SimpleClient.getClient();

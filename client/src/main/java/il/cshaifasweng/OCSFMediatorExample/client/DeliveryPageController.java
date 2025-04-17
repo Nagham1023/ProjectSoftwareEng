@@ -157,6 +157,7 @@ public class DeliveryPageController {
 
         LocalDateTime dateTime = LocalDateTime.of(today, time);
         done_Order.setOrderTime(dateTime);
+        done_Order.setPayment_method("Visa");
         App.setRoot("CreditDetails");
     }
     private boolean isDeliveryOrPickupSelected() {
@@ -195,6 +196,7 @@ public class DeliveryPageController {
 
         LocalDateTime dateTime = LocalDateTime.of(today, time);
         done_Order.setOrderTime(dateTime);
+        done_Order.setPayment_method("Mastercard");
         App.setRoot("CreditDetails");
     }
 
@@ -225,6 +227,7 @@ public class DeliveryPageController {
 
         LocalDateTime dateTime = LocalDateTime.of(today, time);
         done_Order.setOrderTime(dateTime);
+        done_Order.setPayment_method("Cash");
         App.setRoot("CreditDetails");
     }
 

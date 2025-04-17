@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
+import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.RestMealsList;
 
 
 public class RestaurantDB {
@@ -29,7 +30,7 @@ public class RestaurantDB {
     /**From here all the functions have to update and talk with the database*/
 
 
-    public static List<Restaurant> getAllRestaurants() {
+    public static List<Restaurant> getAllRestaurants(Session session) {
         // Ensure the session is open
         if (session == null || !session.isOpen()) {
             try {
@@ -44,7 +45,7 @@ public class RestaurantDB {
         List<Restaurant> result = new ArrayList<>();
         try {
             // Begin the transaction for querying
-            session.beginTransaction();
+            //session.beginTransaction();
 
             // Create a query to find all meals without any constraint
             String queryString = "FROM Restaurant";  // No WHERE clause, fetch all meals
@@ -55,7 +56,7 @@ public class RestaurantDB {
             restaurants = result;
 
             // Commit the transaction
-            session.getTransaction().commit();
+            //session.getTransaction().commit();
         } catch (Exception e) {
             // Rollback the transaction if something went wrong
             if (session.getTransaction() != null && session.getTransaction().isActive()) {
@@ -63,11 +64,6 @@ public class RestaurantDB {
             }
             System.err.println("Error executing the query: " + e.getMessage());
             e.printStackTrace();
-        } finally {
-            // Ensure session is closed after use
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
         }
 
         return result;
@@ -93,7 +89,7 @@ public class RestaurantDB {
     public static int getRestaurantIdByName(String restaurantName) {
         int restaurantId = -1;  // Default value if not found
 
-        for (Restaurant restaurant : restaurants) {
+        for (Restaurant restaurant : RestMealsList) {
             if (restaurant.getRestaurantName().equals(restaurantName)) {
                 restaurantId = restaurant.getId();
             }

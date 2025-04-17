@@ -402,15 +402,16 @@ public class UpdateMeal {
             return;
         }
 
-        Iterator<String> iterator = chosenRestaurantsNames.iterator();
+        Iterator<String> iterator = restaurantNames.iterator();
 
 
         if(!chosenRestaurantsNames.get(0).equals("ALL")) {
             while (iterator.hasNext()) {
                 String restaurant = iterator.next();
-                if (!restaurantNames.contains(restaurant)) {
+                if (!chosenRestaurantsNames.contains(restaurant)) {
                     isCompany = false;
                 }
+                //else System.out.println("Restaurant " + restaurant + " already exist..");
             }
         }
 
@@ -419,7 +420,8 @@ public class UpdateMeal {
                 mealId,
                 newDescription,
                 chosenCustomizationNames,
-                chosenRestaurantsNames
+                chosenRestaurantsNames,
+                isCompany
         );
 
         try {

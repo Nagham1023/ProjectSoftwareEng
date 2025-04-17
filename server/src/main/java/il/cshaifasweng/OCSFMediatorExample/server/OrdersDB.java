@@ -143,7 +143,7 @@ public class OrdersDB {
         }
     }
 
-    private static List<Order> createOrdersForMonth(int year, Month month, int count,
+    public static List<Order> createOrdersForMonth(int year, Month month, int count,
                                                     List<Restaurant> restaurants,
                                                     List<Meal> meals) {
         List<Order> orders = new ArrayList<>();
@@ -223,7 +223,7 @@ public class OrdersDB {
         return order;
     }
 
-    private static void generateComplaints(Session session, List<Order> orders) {
+    public static void generateComplaints(Session session, List<Order> orders) {
         Random random = new Random();
         String[] firstNames = {"John", "Alice", "Bob", "Emma", "David"};
         String[] lastNames = {"Smith", "Johnson", "Brown", "Wilson", "Taylor"};
