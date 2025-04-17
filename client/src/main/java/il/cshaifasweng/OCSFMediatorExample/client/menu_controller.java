@@ -779,8 +779,9 @@ public class menu_controller {
     public void addnewmeal(mealEvent meal) {
         System.out.println("adding new meal for this client");
         System.out.println("Meal's id is " + meal.getId());
+        boolean tempRestaurantCheck = meal.getMeal().getRestaurants().stream().anyMatch(tempRes -> Objects.equals(tempRes.getRestaurantName(), branchName));
         Platform.runLater(() -> {
-            if(!mealPriceLabels.containsKey(meal.getId())) {
+            if(!mealPriceLabels.containsKey(meal.getId()) && (tempRestaurantCheck|| branchName.equals("ALL"))) {
                 //System.out.println("adding meal 2");
                 onAddMealClicked(meal.getMeal());
             }

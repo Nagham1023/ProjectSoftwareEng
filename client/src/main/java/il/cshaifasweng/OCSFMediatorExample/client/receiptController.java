@@ -47,7 +47,12 @@ public class receiptController {
             dateField.setText(String.valueOf(done_Order.getDate()));
             String ccNumber = done_Order.getCreditCard_num();
             String lastFour = ccNumber.length() > 4 ? ccNumber.substring(ccNumber.length() - 4) : ccNumber;
-            PaidField.setText(String.format("Paid %.2f ₪ with Credit Card ends with %s", paid, lastFour));
+            switch (done_Order.getPayment_method()) {
+                case "Visa" -> PaidField.setText(String.format("Paid %.2f ₪ with Visa ends with %s", paid, lastFour));
+                case "Mastercard" ->
+                        PaidField.setText(String.format("Paid %.2f ₪ with MasterCard ends with %s", paid, lastFour));
+                case "Cash" -> PaidField.setText(String.format("Paying %.2f ₪ with Cash", paid));
+            }
             fillMealDetailsContainer();
             String[] mealsOrdered = new String[done_Order.getMeals().size()];
             int index = 0;
@@ -67,7 +72,7 @@ public class receiptController {
                 mealsOrdered[index] = mealDetails;
                 index++;
             }
-            sendOrderConfirmationEmail(CreditDetailsController.personalDetails, done_Order.getId(), done_Order.getRestaurantName(), mealsOrdered);
+            sendOrderConfirmationEmail(CreditDetailsController.personalDetails, done_Order.getId(), done_Order.getRestaurantName(), mealsOrdered, done_Order.getPayment_method());
             if (done_Order.getOrderType().equals("Delivery")) {
                 addDelivery();
             }
@@ -86,7 +91,7 @@ public class receiptController {
 
 
     public static void sendOrderConfirmationEmail(PersonalDetails customer, int orderNumber,
-                                                  String restaurantName, String[] mealsOrdered) {
+                                                  String restaurantName, String[] mealsOrdered,String paymentMethod) {
         // Create the subject
         String subject = "Order Confirmation - Order #" + orderNumber;
 
@@ -113,6 +118,18 @@ public class receiptController {
 
         if(done_Order.getOrderType().equals("Delivery"))
             body.append("\nDelivery Fee: ").append(deliveryPrice).append("₪\n");
+        switch (paymentMethod) {
+            case "Mastercard" -> {
+                body.append("\nPayment Method: Mastercard\n");
+            }
+            case "Cash" -> {
+                body.append("\nPayment Method: Cash\n");
+            }
+            case "Visa" -> {
+                body.append("\nPayment Method: Visa\n");
+            }
+        }
+
 
         body.append("Total Price: ").append(done_Order.getTotal_price()).append("₪\n");
 

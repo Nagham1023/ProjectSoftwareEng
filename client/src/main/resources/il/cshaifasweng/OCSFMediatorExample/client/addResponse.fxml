@@ -24,6 +24,10 @@
     <Label text="Date:" style="-fx-font-weight: bold;" />
     <Label fx:id="dateLabel" />
 
+    <Label text="Order Status:" style="-fx-font-weight: bold;" />
+    <Label fx:id="orderStatusLabel" />
+
+
     <Label text="Client says:" style="-fx-font-weight: bold;" />
     <TextArea fx:id="tellLabel" editable="false" wrapText="true"
               prefHeight="80.0" prefWidth="360.0"

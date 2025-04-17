@@ -44,6 +44,8 @@ public class AddResponseController {
     private String clientName;
     private String clientTell;
     private boolean isShowMode = false;
+    @FXML
+    private Label orderStatusLabel;
 
     @FXML private Label emailLabel;
     @FXML private Label complaintIdLabel;
@@ -79,7 +81,7 @@ public class AddResponseController {
 
 
     // Set complain details
-    public void setCompDetails(String clientName, String clientTell, int idComplain, String kind, String emailComplain, String ordernum, String restaurantName, LocalDateTime date) {
+    public void setCompDetails(String clientName, String clientTell, int idComplain, String kind, String emailComplain, String ordernum, String restaurantName, LocalDateTime date,String orderStatus) {
         this.ClientNameLabel.setText("Response to: " + clientName);
         this.tellLabel.setText(clientTell);
         this.clientTell = clientTell;
@@ -97,16 +99,19 @@ public class AddResponseController {
         complaintIdLabel.setText(String.valueOf(idComplain));
         restaurantLabel.setText(restaurantName);
         dateLabel.setText(date.toString());
-
-
-        if (kindValue.equals("Complaint"))
-            refundField.setVisible(true);
-        else
-            refundField.setVisible(false);
+        orderStatusLabel.setVisible(kindValue.equals("Complaint"));
+        if(kind.equals("Complaint")) {
+            orderStatusLabel.setText(orderStatus);
+        }
+        refundField.setVisible(kindValue.equals("Complaint"));
     }
-    public void showResp(String clientName, String clientTell, String response,double refund,String kind,String email,int idC,String restaurantName,LocalDateTime date) {
+    public void showResp(String clientName, String clientTell, String response,double refund,String kind,String email,int idC,String restaurantName,LocalDateTime date,String orderStatus) {
         this.ClientNameLabel.setText("Response to: " + clientName);
         this.tellLabel.setText(clientTell);
+        orderStatusLabel.setVisible(kind.equals("Complaint"));
+        if(kind.equals("Complaint")) {
+            orderStatusLabel.setText(orderStatus);
+        }
         responseField.setText(response);
         emailLabel.setText(email);
         complaintIdLabel.setText(String.valueOf(idC));

@@ -29,6 +29,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.deliveryPrice;
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.getClient;
 
 public class CustomerServiceViewController {
     public static String statusVal = null;
@@ -67,6 +68,8 @@ public class CustomerServiceViewController {
     private List<Complain> list4= new ArrayList<>();
     private List<Complain> list5= new ArrayList<>();
     private List<Complain> list6= new ArrayList<>();
+    private Complain complainToDo = null;
+    private int caseToDo ; // 0 if add response 1 if show response 2 if show order
     @FXML
     void DoButton(ActionEvent event) {
         statusVal = "Do";
@@ -182,7 +185,7 @@ public class CustomerServiceViewController {
         });
     }
 
-    private void openAddResponseView(Complain complain) {
+    private void openAddResponseView(Complain complain,Order order) {
         try {
             // Load popup FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource("addResponse.fxml"));
@@ -195,6 +198,10 @@ public class CustomerServiceViewController {
             if(complain.getRestaurant() != null)
                 restName = complain.getRestaurant().getRestaurantName();
             else restName = "null";
+            String orderStatus;
+            if(order != null)
+                orderStatus = order.getOrderStatus();
+            else orderStatus = "null";
             addResponseController.setCompDetails(
                     complain.getName(),
                     complain.getTell(),
@@ -203,7 +210,8 @@ public class CustomerServiceViewController {
                     complain.getEmail(),
                     complain.getOrderNum(),
                     restName,
-                    complain.getTime()
+                    complain.getTime(),
+                    orderStatus
             );
             stage.show();
         } catch (IOException e) {
@@ -264,17 +272,47 @@ public class CustomerServiceViewController {
         // Response Button
         Button responseBTN = new Button("Response");
         responseBTN.setStyle("-fx-background-color: #222222; -fx-text-fill: #f3f3f3; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
-        responseBTN.setOnAction(event -> openAddResponseView(complain));
+        responseBTN.setOnAction(event ->
+
+        {
+            caseToDo = 0;
+            try {
+                controller(complain);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        );
 
         // Show Order Button (Only for 'Complaint' kind)
         Button showOrderBTN = new Button("Show Order");
         showOrderBTN.setStyle("-fx-background-color: #0044cc; -fx-text-fill: #ffffff; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
-        showOrderBTN.setOnAction(event -> openOrderDetails(complain.getOrderNum()));
+        showOrderBTN.setOnAction(event ->
+                {
+                  caseToDo = 2;
+                    try {
+                        controller(complain);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                //openOrderDetails(complain.getOrderNum())
+        );
 
         // Show Response Button for all done statuses
         Button showResponseBTN = new Button("Show Response");
         showResponseBTN.setStyle("-fx-background-color: #28a745; -fx-text-fill: white; -fx-background-radius: 20px; -fx-padding: 10px 15px;");
-        showResponseBTN.setOnAction(event -> openShowResponsePopup(complain));
+        showResponseBTN.setOnAction(event ->
+                {
+                    caseToDo = 1;
+                    try {
+                        controller(complain);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                //openShowResponsePopup(complain)
+        );
 
 
         // Add buttons and details based on status and kind
@@ -297,8 +335,36 @@ public class CustomerServiceViewController {
 
         addResponseButtons.put(String.valueOf(complain.getId()), responseBTN);
     }
+    private void controller(Complain complain) throws IOException {
+        switch(caseToDo) {
+            case 0: {
+                if(complain.getKind().equals("Complaint")) {
+                    complainToDo = complain;
+                    getClient().sendToServer("showorder"+complain.getOrderNum());
+                }
+                else openAddResponseView(complain,null);
+                break;
+            }
+            case 1:
+            {
+                if (complain.getKind().equals("Complaint")) {
+                    complainToDo = complain;
+                    getClient().sendToServer("showorder"+complain.getOrderNum());
+                }
+                else openShowResponsePopup(complain,null);
+                break;
+            }
+            case 2:
+            {
+                complainToDo = complain;
+                getClient().sendToServer("showorder"+complain.getOrderNum());
+                break;
+            }
+        }
+    }
 
-    private void openShowResponsePopup(Complain complain) {
+
+    private void openShowResponsePopup(Complain complain,Order order) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("addResponse.fxml"));
             Parent root = loader.load();
@@ -312,6 +378,10 @@ public class CustomerServiceViewController {
                  restName = complain.getRestaurant().getRestaurantName();
             else restName = "null";
             // Set data to show
+            String orderStatus;
+            if(order != null)
+                 orderStatus = order.getOrderStatus();
+            else orderStatus = "null";
             controller.showResp(
                     complain.getName(),
                     complain.getTell(),
@@ -321,7 +391,8 @@ public class CustomerServiceViewController {
                     complain.getEmail(),
                     complain.getId(),
                     restName,
-                    complain.getTime()
+                    complain.getTime(),
+                    orderStatus
             );
             //complain.get
 
@@ -335,13 +406,8 @@ public class CustomerServiceViewController {
         }
     }
 
-    private void openOrderDetails(String orderNum) {
-        try {
-            System.out.println("openOrderDetails: " + orderNum);
-            SimpleClient.getClient().sendToServer("showorder"+orderNum);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private void openOrderDetails(Order order) {
+        ShowTheMeals(order);
     }
     @Subscribe
     public void gotTheOrder(Order order){
@@ -353,11 +419,23 @@ public class CustomerServiceViewController {
                 alert.setContentText("The order you are looking for does not exist!");
                 alert.showAndWait();
             } else {
-                System.out.println("gotTheOrder: " + order);
-                ShowTheMeals(order);
+                switch (caseToDo)
+                {
+                    case 0: {
+                        openAddResponseView(complainToDo,order);
+                        break;
+                    }
+                    case 1: {
+                        openShowResponsePopup(complainToDo,order);
+                        break;
+                    }
+                    case 2: {
+                        openOrderDetails(order);
+                        break;
+                    }
+                }
             }
         });
-
     }
     @Subscribe
     public void emptyOrder(String msg) {

@@ -9,6 +9,7 @@ public class UpdateMealRequest implements Serializable {
     List<String> newCustomizations;
     List<String> newBranches;
     String branchName;
+    boolean isCompany;
 
     public UpdateMealRequest(String mealId, String newDescription, List<String> newCustomizations, String branchName) {
         this.mealId = mealId;
@@ -17,11 +18,19 @@ public class UpdateMealRequest implements Serializable {
         this.branchName = branchName;
     }
 
-    public UpdateMealRequest(String mealId, String newDescription, List<String> newCustomizations, List<String> newBranches) {
+    public UpdateMealRequest(String mealId, String newDescription, List<String> newCustomizations, List<String> newBranches,Boolean isCompany) {
         this.mealId = mealId;
         this.newDescription = newDescription;
         this.newCustomizations = newCustomizations;
         this.newBranches = newBranches;
+        this.isCompany = isCompany;
+    }
+
+    public boolean isCompany() {
+        return isCompany;
+    }
+    public void setCompany(boolean isCompany) {
+        this.isCompany = isCompany;
     }
 
     public String getMealId() {
