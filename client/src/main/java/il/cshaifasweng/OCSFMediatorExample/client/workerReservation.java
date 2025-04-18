@@ -330,11 +330,14 @@ public class workerReservation {
             String restaurantPart = parts[2].replace("Restaurant: ", "");
             String seatsPart = parts[3].replace("Seats: ", "");
             String insideOutsidePart = parts[4];
-
+            String datePart = parts[0].replace("Date: ", "");
+            String timePart = parts[1].replace("Time: ", "");
+            LocalDate date = LocalDate.parse(datePart);         // Format: "yyyy-MM-dd"
+            LocalTime time = LocalTime.parse(timePart);         // Format: "HH:mm"
+            LocalDateTime selectedDateTime = LocalDateTime.of(date, time);
             String restaurantName = restaurantPart;
             int seats = Integer.parseInt(seatsPart);
             boolean isInside = insideOutsidePart.equals("Inside");
-            LocalDateTime selectedDateTime = LocalDateTime.of(currentDate, currentTime);
 
             // Worker details (predefined)
             String fullName = "worker";
