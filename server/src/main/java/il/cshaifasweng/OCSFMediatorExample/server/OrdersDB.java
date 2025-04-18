@@ -14,6 +14,7 @@ import java.time.Year;
 import java.util.*;
 
 import static il.cshaifasweng.OCSFMediatorExample.server.App.getSessionFactory;
+import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.customizationsList;
 import static il.cshaifasweng.OCSFMediatorExample.server.MealsDB.getAllMeals;
 import static il.cshaifasweng.OCSFMediatorExample.server.SimpleServer.allOrders;
 
@@ -34,6 +35,16 @@ public class OrdersDB {
             e.printStackTrace(); // You could also log this if you have a logger
         }
 
+        return orders;
+    }
+
+    public static List<Order> getOrdersByRestaurant(String restaurantName) {
+        List<Order> orders = new ArrayList<>();
+        for (Order order : allOrders) {
+            if(order.getRestaurantName().equals(restaurantName) && Objects.equals(order.getOrderStatus(), "pending")) {
+                orders.add(order);
+            }
+        }
         return orders;
     }
 
@@ -89,6 +100,32 @@ public class OrdersDB {
             e.printStackTrace();
         }
     }
+
+    public static void doneOrder(int orderId) {
+        try (Session session = getSessionFactory().openSession()) {
+            session.beginTransaction();
+
+            Order order = session.get(Order.class, orderId);
+            if (order != null) {
+                order.setOrderStatus("Done");
+                session.update(order);
+                for(Order tempOrder:allOrders)
+                {
+                    if(tempOrder.getId() == orderId)
+                        tempOrder.setOrderStatus("Done");
+                }
+            } else {
+                System.out.println("Order not found with ID: " + orderId);
+            }
+            session.flush();
+            session.getTransaction().commit();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 
 
@@ -184,7 +221,12 @@ public class OrdersDB {
 
                 personal_Meal pm = new personal_Meal();
                 pm.setMeal(meal);
-                pm.setCustomizationsList(new HashSet<>());
+                Set<CustomizationWithBoolean> cs = new HashSet<>();
+                for(Customization custo:meal.getCustomizations())
+                {
+                    cs.add(new CustomizationWithBoolean(custo,new Random().nextBoolean()));
+                }
+                pm.setCustomizationsList(cs);
                 mic.setMeal(pm);
 
                 total += meal.getPrice() *(1 - mic.getDiscount_percentage()/100) * mic.getQuantity();

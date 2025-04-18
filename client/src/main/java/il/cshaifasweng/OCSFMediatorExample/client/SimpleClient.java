@@ -120,6 +120,9 @@ public class SimpleClient extends AbstractClient {
             String message = (String) msg;
 			handleStringMessage((String) msg);
         }
+		else if(msg instanceof newOrderAdded) {
+			EventBus.getDefault().post(msg);
+		}
         /*
 		if(msg instanceof String) {
 			String message = (String) msg;
@@ -263,6 +266,9 @@ public class SimpleClient extends AbstractClient {
 			}
 			EventBus.getDefault().post(list);
 		}
+		else if(firstItem instanceof Order) {
+			EventBus.getDefault().post(list);
+		}
 		else if (firstItem instanceof ReservationEvent) {
 			EventBus.getDefault().post(list);
 		}
@@ -310,6 +316,10 @@ public class SimpleClient extends AbstractClient {
 		}
 		else if (message.startsWith("ReportResponse")) {
 			handleReportResponse(message);
+		}
+		else if (message.equals("orderisdone"))
+		{
+			EventBus.getDefault().post("orderisdone");
 		}
 		else if (message.contains("delete")) {
 			handleDeleteMessage(message);

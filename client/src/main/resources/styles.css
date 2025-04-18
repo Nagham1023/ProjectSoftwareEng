@@ -1,0 +1,150 @@
+/* Main styles */
+.root {
+    -fx-font-family: 'Arial';
+    -fx-background-color: #fbebf4; /* Matching the pink background */
+}
+
+/* Header styles - matching the personal details header */
+.header {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-alignment: center;
+    -fx-padding: 15px;
+    -fx-background-color: #832018; /* Matching the burgundy color */
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);
+}
+
+/* Order container styles - matching the text field styling */
+.order-container {
+    -fx-pref-width: 450px;
+    -fx-max-height: 300px;
+    -fx-padding: 15px;
+    -fx-border-color: #832018; /* Burgundy border */
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-background-color: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 0);
+}
+
+/* Order header styles */
+.order-header {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #832018; /* Burgundy text */
+    -fx-padding: 0 0 10px 0;
+}
+
+/* Meals scroll pane */
+.meals-scroll {
+    -fx-fit-to-width: true;
+    -fx-pref-height: 180px;
+    -fx-background-color: transparent;
+    -fx-padding: 5px;
+}
+
+.meals-scroll .viewport {
+    -fx-background-color: transparent;
+}
+
+.meals-scroll .scroll-bar:vertical {
+    -fx-pref-width: 10px;
+    -fx-background-color: #fbebf4; /* Pink background for scrollbar */
+}
+
+.meals-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #832018; /* Burgundy thumb */
+}
+
+/* Meal name styles */
+.meal-name {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #832018; /* Burgundy text */
+    -fx-padding: 5px 0 0 0;
+}
+
+/* Customizations box */
+.customizations-box {
+    -fx-padding: 0 0 0 15px;
+    -fx-spacing: 3px;
+}
+
+/* Customization item styles */
+.customization-item {
+    -fx-alignment: center-left;
+    -fx-spacing: 5px;
+}
+
+/* Selection indicators */
+.selected-indicator {
+    -fx-text-fill: #27ae60; /* Green for selected */
+    -fx-font-weight: bold;
+}
+
+.not-selected-indicator {
+    -fx-text-fill: #e74c3c; /* Red for not selected */
+    -fx-font-weight: bold;
+}
+
+/* Customization text */
+.customization-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: #832018; /* Burgundy text */
+}
+
+/* Button styles - matching the continue button */
+.ready-button {
+    -fx-background-color: #832018; /* Burgundy background */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 15px;
+    -fx-background-radius: 20px; /* Rounded corners like the continue button */
+    -fx-cursor: hand;
+    -fx-font-size: 17px;
+}
+
+.ready-button:hover {
+    -fx-background-color: #a52a2a; /* Darker burgundy on hover */
+}
+
+.ready-button:disabled {
+    -fx-opacity: 1.0;
+    -fx-background-color: #95a5a6; /* Gray when disabled */
+}
+
+/* Completed order style */
+.completed-order {
+    -fx-opacity: 0.7;
+    -fx-border-color: #27ae60;
+}
+
+/* Slider styles */
+.order-slider {
+    -fx-padding: 10px 20px;
+    -fx-control-inner-background: #fbebf4; /* Pink track background */
+}
+
+.order-slider .thumb {
+    -fx-background-color: #832018; /* Burgundy thumb */
+    -fx-pref-height: 15px;
+    -fx-pref-width: 15px;
+}
+
+.order-slider .track {
+    -fx-background-color: #d3a9a9; /* Light burgundy track */
+    -fx-pref-height: 5px;
+}
+
+.order-slider:disabled {
+    -fx-opacity: 1.0;
+    -fx-control-inner-background: transparent;
+}
+
+/* Row container styles */
+.order-row {
+    -fx-padding: 15px;
+    -fx-spacing: 20px;
+    -fx-background-color: transparent;
+}

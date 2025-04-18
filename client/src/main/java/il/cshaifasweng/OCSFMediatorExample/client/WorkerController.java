@@ -45,6 +45,9 @@ public class WorkerController {
     private Button update_meals;
 
     @FXML
+    private Button ordersButton;
+
+    @FXML
     private Button Reservation;
 
     private String currentWorker = "";
@@ -70,6 +73,7 @@ public class WorkerController {
             tables_map.setVisible(true);
             tables_reservation.setVisible(false);
             update_meals.setVisible(false);
+            ordersButton.setVisible(false);
 
             if(currentWorker.startsWith("ChainManager")) {
                 reports_center.setVisible(true);
@@ -82,6 +86,15 @@ public class WorkerController {
                 tables_reservation.setVisible(true);
                 currentBranch = currentWorker.substring(5);
                 currentWorker = "Host";
+
+            }
+            if(currentWorker.startsWith("Kitchen")) {
+               tables_map.setVisible(false);
+               tables_reservation.setVisible(false);
+               ordersButton.setVisible(true);
+               currentBranch = currentWorker.substring(8);
+               currentWorker = "Kitchen";
+
 
             }
 
@@ -169,6 +182,12 @@ public class WorkerController {
                 }
 
             }
+            if (message.equals("orders")) {
+                KitchenController controller = loader.getController();
+                if(currentWorker.startsWith("Kitchen")) {
+                    controller.setBranch(currentBranch);
+                }
+            }
 
                 Platform.runLater(() -> {
                 if (chartArea != null) {
@@ -235,6 +254,10 @@ public class WorkerController {
 
                 switchScreen("register","register");
                 break;
+            }
+            case "ordersButton":
+            {
+                switchScreen("kitchenView","orders");
             }
             default: {
                 System.out.println("Unknown screen: " + screenName);
