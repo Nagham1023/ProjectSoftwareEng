@@ -121,7 +121,7 @@ public class mainScreenController {
     void goToReservation(ActionEvent event) {
         Platform.runLater(() -> {
             try {
-                App.setRoot("Reservation");
+                App.setRoot("Reservation");//Reservation
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

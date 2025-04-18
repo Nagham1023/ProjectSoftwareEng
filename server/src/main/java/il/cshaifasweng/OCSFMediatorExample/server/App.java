@@ -658,6 +658,14 @@ public class App {
             adan.setUsername("adan");
             adan.setGender("other");
             adan.setAge(22);
+            Users yos = new Users();
+            yos.setRole("Kitchen Nazareth");
+            yos.setEmail("yousefknani9@gmail.com");
+            yos.setPassword("123");
+            yos.setUsername("kitchen");
+            yos.setGender("male");
+            yos.setAge(22);
+
             if (!isUserExists("naghamTheManager") ) {
                 allUsers.add(nagham);
                 session.save(nagham);
@@ -697,6 +705,11 @@ public class App {
                 allUsers.add(Lamis);
                 session.save(Lamis);
                 System.out.println("User has been created: " + Lamis.getUsername());
+            }
+            if (!isUserExists("kitchen") ) {
+                allUsers.add(yos);
+                session.save(yos);
+                System.out.println("User has been created: " + yos.getUsername());
             }
 
             session.flush();

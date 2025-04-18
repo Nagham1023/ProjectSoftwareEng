@@ -468,6 +468,7 @@ public class SimpleServer extends AbstractServer {
                             newOrder.setCreditCard_num(newCC.getCardNumber());
                             addCreditCardToExistingPersonalDetails(newCC, personalDetailsDB, newOrder);
                         }
+                        sendToAll(new newOrderAdded(newOrder));
                         client.sendToClient(paymentCheck);
                     } else {
                         //System.out.println("not new credit card");
@@ -486,6 +487,7 @@ public class SimpleServer extends AbstractServer {
                             //System.out.println("cc num is : " + cc.getCardNumber());
                             addCreditCardToPersonalDetailsIfBothExists(personalDetailsDB, cc, newOrder);
                         }
+                        sendToAll(new newOrderAdded(newOrder));
                         client.sendToClient(paymentCheck);
                     }
                 } else {
@@ -572,6 +574,17 @@ public class SimpleServer extends AbstractServer {
                 System.err.println("Error processing PersonalDetails: " + e.getMessage());
             }
         }
+        else if(msg instanceof String str && str.startsWith("doneOrder")) {
+            String numberStr = str.replaceAll("\\D+", ""); // يشيل كل شيء مش رقم
+            int orderNumber = Integer.parseInt(numberStr);
+            doneOrder(orderNumber);
+            try {
+                client.sendToClient("orderisdone");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
 
         //Order Management -Yousef Lamis Omar
         else if (msg instanceof CancelOrderEvent) {
@@ -585,6 +598,7 @@ public class SimpleServer extends AbstractServer {
                 if (order == null) {
                     event.setStatus("Order not found");
                 } else {
+                    sendToAll(new newOrderAdded(order));
                     if (order.getCustomerEmail().equals(email)) {
                         if (order.getOrderStatus().equals("Cancelled")) {
                             event.setStatus("Cancelled before");
@@ -717,7 +731,14 @@ public class SimpleServer extends AbstractServer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (msg instanceof String && msg.equals("getAllComplaints")) {
+        }else if(msg instanceof String && msg.equals("getOrdersNazareth")) {
+            try {
+                client.sendToClient(getOrdersByRestaurant("Nazareth"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else if (msg instanceof String && msg.equals("getAllComplaints")) {
             try {
                 ComplainList complist = new ComplainList();
                 complist.setComplainList(allComplains); // Set list to send
