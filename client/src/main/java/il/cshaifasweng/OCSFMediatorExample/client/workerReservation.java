@@ -41,8 +41,8 @@ public class workerReservation {
 
     // Other injected components
 
-    @FXML
-    private ComboBox<String> restaurantsComboBox;
+    //@FXML
+    //private ComboBox<String> restaurantsComboBox;
     @FXML
     private TextField seatsTextField;
     @FXML
@@ -70,14 +70,16 @@ public class workerReservation {
         Image loadingImage = new Image(getClass().getResourceAsStream("/images/Loading.gif"));
         loadingGif.setImage(loadingImage);
 
+
+
         // Fetch all restaurants
-        if(restaurantList == null)
+        /*if(restaurantList == null)
             SimpleClient.getClient().sendToServer("getAllRestaurants");
-        else putResturants(restaurantList);
-        startLoading();
+        else putResturants(restaurantList);*/
+        //startLoading();
     }
 
-    @Subscribe
+    /*@Subscribe
     public void putResturants(RestaurantList restaurants) {
         Platform.runLater(() -> {
             SimpleClient.restaurantList = restaurants;
@@ -90,7 +92,7 @@ public class workerReservation {
             );
             stopLoading();
         });
-    }
+    }*/
 
     // Show loading animation and disable UI
     private void startLoading() {
@@ -118,7 +120,7 @@ public class workerReservation {
         LocalTime selectedTime = roundUpToNearest15Minutes(LocalTime.now());
         LocalDateTime selectedDateTime = LocalDateTime.of(selectedDate, selectedTime);
 
-        String restaurantName = restaurantsComboBox.getValue();
+        String restaurantName = currentRestaurant;
         String seatsInput = seatsTextField.getText(); // Get user input for seats
         // Validate selections
         if (selectedDate == null) {
@@ -301,8 +303,6 @@ public class workerReservation {
             // Reset the inside/outside combo box
             insideOutsideComboBox.getSelectionModel().clearSelection();
 
-            // Clear the restaurant combo box
-            restaurantsComboBox.getSelectionModel().clearSelection();
 
             // Clear any additional UI elements (e.g., buttons, labels, etc.)
             anchorPane.getChildren().removeIf(node -> node.getId() != null && node.getId().equals("reservationButton"));
@@ -331,7 +331,7 @@ public class workerReservation {
 
             // Extract reservation details (excluding date and time since they are automatic)
             String[] parts = buttonText.split(", ");
-            String restaurantPart = parts[2].replace("Restaurant: ", "");
+            //String restaurantPart = parts[2].replace("Restaurant: ", "");
             String seatsPart = parts[3].replace("Seats: ", "");
             String insideOutsidePart = parts[4];
             String datePart = parts[0].replace("Date: ", "");
@@ -339,14 +339,14 @@ public class workerReservation {
             LocalDate date = LocalDate.parse(datePart);         // Format: "yyyy-MM-dd"
             LocalTime time = LocalTime.parse(timePart);         // Format: "HH:mm"
             LocalDateTime selectedDateTime = LocalDateTime.of(date, time);
-            String restaurantName = restaurantPart;
+            String restaurantName = currentRestaurant;
             int seats = Integer.parseInt(seatsPart);
             boolean isInside = insideOutsidePart.equals("Inside");
 
             // Worker details (predefined)
-            String fullName = currentWorker;
+            String fullName = SimpleClient.getUser().getUsername();
             String phoneNumber = "1234567891";
-            String email = "worker@gmail.com";
+            String email = SimpleClient.getUser().getEmail();
 
             // Confirmation message
             String resultMessage = String.format("""
