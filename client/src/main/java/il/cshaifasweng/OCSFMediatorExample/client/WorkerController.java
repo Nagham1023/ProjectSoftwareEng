@@ -14,6 +14,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
+
 import static il.cshaifasweng.OCSFMediatorExample.client.menu_controller.branchName;
 
 public class WorkerController {
@@ -75,14 +76,14 @@ public class WorkerController {
             update_meals.setVisible(false);
             ordersButton.setVisible(false);
 
-            if(currentWorker.startsWith("ChainManager")) {
+            if (currentWorker.startsWith("ChainManager")) {
                 reports_center.setVisible(true);
                 currentBranch = currentWorker.substring(13);
                 currentWorker = "ChainManager";
 
             }
 
-            if(currentWorker.startsWith("Host")) {
+            if (currentWorker.startsWith("Host")) {
                 tables_reservation.setVisible(true);
                 currentBranch = currentWorker.substring(5);
                 currentWorker = "Host";
@@ -116,7 +117,6 @@ public class WorkerController {
                     System.err.println("Unknown role: " + currentWorker);
                     break;
             }
-
             EventBus.getDefault().register(this);
         } catch (Exception e) {
             e.printStackTrace();
@@ -132,7 +132,7 @@ public class WorkerController {
         this.currentWorker = role;
     }
 
-//    @FXML
+    //    @FXML
 //    public void onReportsButtonClick() {
 //        try {
 //            FXMLLoader loader = new FXMLLoader(getClass().getResource("ReportsView.fxml"));
@@ -155,9 +155,9 @@ public class WorkerController {
 //            System.err.println("Failed to load ReportsView.fxml: " + e.getMessage());
 //        }
 //    }
-    public void loadView(String fxmlFile,String message)  {
+    public void loadView(String fxmlFile, String message) {
         try {
-            branchName="ALL";
+            branchName = "ALL";
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlFile));
             Node view = loader.load();
             if (message.equals("diet")) {
@@ -167,21 +167,26 @@ public class WorkerController {
             }
             if (message.equals("request")) {
                 RequestViewController controller = loader.getController();
-                if(currentWorker.equals("CompanyManager")) {
+                if (currentWorker.equals("CompanyManager")) {
                     controller.setModifyMode(true);
-                }
-                else{
+                } else {
                     controller.setModifyMode(false);
                 }
             }
-            if(message.equals("report")) {
+            if (message.equals("report")) {
                 ReportsViewController controller = loader.getController();
-                if(currentWorker.equals("ChainManager")) {
+                if (currentWorker.equals("ChainManager")) {
                     controller.setBranch(currentBranch);
                     controller.setRole(currentWorker);
                 }
 
             }
+            if (message.equals("Wroker-Reservation")) {
+                workerReservation controller = loader.getController();
+                    controller.setBranch(currentBranch);
+                    controller.setRole(currentWorker);
+ 
+            }  
             if (message.equals("orders")) {
                 KitchenController controller = loader.getController();
                 if(currentWorker.startsWith("Kitchen")) {
@@ -189,7 +194,7 @@ public class WorkerController {
                 }
             }
 
-                Platform.runLater(() -> {
+            Platform.runLater(() -> {
                 if (chartArea != null) {
                     chartArea.getChildren().clear();
                     chartArea.getChildren().add(view);
@@ -204,10 +209,10 @@ public class WorkerController {
     }
 
     @FXML
-    public void switchScreen(String screenName,String message) {
-            Platform.runLater(() -> {
-                loadView(screenName + ".fxml", message);
-            });
+    public void switchScreen(String screenName, String message) {
+        Platform.runLater(() -> {
+            loadView(screenName + ".fxml", message);
+        });
     }
 
     @FXML
@@ -215,44 +220,41 @@ public class WorkerController {
         clickedButton = (Button) event.getSource();
         changeScreen();
     }
-    public void changeScreen (){
+
+    public void changeScreen() {
 
         String screenName = clickedButton.getId(); // Get the fx:id of the button
-        switch (screenName){
+        switch (screenName) {
             case "complaint_center":
                 switchScreen("customerServiceView", "customerService");
                 break;
             case "reports_center":
-                switchScreen("ReportsView","report");
+                switchScreen("ReportsView", "report");
                 break;
             case "update_meals":
-                switchScreen("menu","diet");
+                switchScreen("menu", "diet");
                 break;
             case "priceChange_requist":
-                switchScreen("requestsView","request");
+                switchScreen("requestsView", "request");
                 break;
-            case "personalInf":
-            {
+            case "personalInf": {
 
-                switchScreen("Personal_Information","Personal_Information");
-                break;
-            }
-            case "tables_map":
-            {
-
-                switchScreen("RestaurantMap","RestaurantMap");
+                switchScreen("Personal_Information", "Personal_Information");
                 break;
             }
-            case "tables_reservation":
-            {
+            case "tables_map": {
 
-                switchScreen("Wroker-Reservation","Wroker-Reservation");
+                switchScreen("RestaurantMap", "RestaurantMap");
                 break;
             }
-            case "branches_managment":
-            {
+            case "tables_reservation": {
 
-                switchScreen("register","register");
+                switchScreen("Wroker-Reservation", "Wroker-Reservation");
+                break;
+            }
+            case "branches_managment": {
+
+                switchScreen("register", "register");
                 break;
             }
             case "ordersButton":
@@ -288,7 +290,7 @@ public class WorkerController {
         try {
             //Send to server logout.
             UserCheck us = SimpleClient.getClient().getUser();
-            System.out.println("signing out from "+us.getUsername());
+            System.out.println("signing out from " + us.getUsername());
             SimpleClient.getClient().setUser(null);
             us.setState(4);
             SimpleClient.getClient().sendToServer(us);
@@ -309,6 +311,7 @@ public class WorkerController {
         });
 
     }
+
     @FXML
     void goToReservation(ActionEvent event) {
         Platform.runLater(() -> {

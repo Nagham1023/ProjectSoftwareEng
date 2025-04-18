@@ -29,6 +29,10 @@ import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.restaurant
 
 public class workerReservation {
     private boolean isFinished = false;
+
+    private String currentWorker;
+    private String currentRestaurant;
+
     @FXML
     private ScrollPane scrollPane; // Inject the ScrollPane from the FXML file
 
@@ -330,14 +334,17 @@ public class workerReservation {
             String restaurantPart = parts[2].replace("Restaurant: ", "");
             String seatsPart = parts[3].replace("Seats: ", "");
             String insideOutsidePart = parts[4];
-
+            String datePart = parts[0].replace("Date: ", "");
+            String timePart = parts[1].replace("Time: ", "");
+            LocalDate date = LocalDate.parse(datePart);         // Format: "yyyy-MM-dd"
+            LocalTime time = LocalTime.parse(timePart);         // Format: "HH:mm"
+            LocalDateTime selectedDateTime = LocalDateTime.of(date, time);
             String restaurantName = restaurantPart;
             int seats = Integer.parseInt(seatsPart);
             boolean isInside = insideOutsidePart.equals("Inside");
-            LocalDateTime selectedDateTime = LocalDateTime.of(currentDate, currentTime);
 
             // Worker details (predefined)
-            String fullName = "worker";
+            String fullName = currentWorker;
             String phoneNumber = "1234567891";
             String email = "worker@gmail.com";
 
@@ -423,5 +430,13 @@ public class workerReservation {
         double y = event.getY() - 20;
         effect.setOffsetX(x);
         effect.setOffsetY(y);
+    }
+
+    public void setBranch(String currentBranch) {
+        this.currentRestaurant = currentBranch;
+    }
+
+    public void setRole(String currentWorker) {
+        this.currentWorker= currentWorker;
     }
 }
