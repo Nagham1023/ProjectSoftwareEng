@@ -29,6 +29,10 @@ import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.restaurant
 
 public class workerReservation {
     private boolean isFinished = false;
+
+    private String currentWorker;
+    private String currentRestaurant;
+
     @FXML
     private ScrollPane scrollPane; // Inject the ScrollPane from the FXML file
 
@@ -340,7 +344,7 @@ public class workerReservation {
             boolean isInside = insideOutsidePart.equals("Inside");
 
             // Worker details (predefined)
-            String fullName = "worker";
+            String fullName = currentWorker;
             String phoneNumber = "1234567891";
             String email = "worker@gmail.com";
 
@@ -426,5 +430,13 @@ public class workerReservation {
         double y = event.getY() - 20;
         effect.setOffsetX(x);
         effect.setOffsetY(y);
+    }
+
+    public void setBranch(String currentBranch) {
+        this.currentRestaurant = currentBranch;
+    }
+
+    public void setRole(String currentWorker) {
+        this.currentWorker= currentWorker;
     }
 }
