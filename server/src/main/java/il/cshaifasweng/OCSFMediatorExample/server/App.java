@@ -427,35 +427,6 @@ public class App {
             session.beginTransaction(); // Start the transaction
 
 
-            /*deleteAllTablesAndRelatedData()*/
-            // Step 1: Delete dependent rows in `reservation_save_tables`
-            Query<?> deleteReservationSaveTablesQuery = session.createNativeQuery(
-                    "DELETE FROM reservation_save_tables WHERE table_id IN (SELECT tableID FROM tables)"
-            );
-            int deletedReservationSaveTablesCount = deleteReservationSaveTablesQuery.executeUpdate();
-            System.out.println("Deleted " + deletedReservationSaveTablesCount + " rows from reservation_save_tables.");
-
-            // Step 2: Delete dependent rows in `tablenode_reservationendtimes`
-            Query<?> deleteEndTimesQuery = session.createNativeQuery(
-                    "DELETE FROM tablenode_reservationendtimes WHERE TableNode_tableID IN (SELECT tableID FROM tables)"
-            );
-            int deletedEndTimesCount = deleteEndTimesQuery.executeUpdate();
-            System.out.println("Deleted " + deletedEndTimesCount + " rows from tablenode_reservationendtimes.");
-
-            // Step 3: Delete dependent rows in `tablenode_reservationstarttimes`
-            Query<?> deleteStartTimesQuery = session.createNativeQuery(
-                    "DELETE FROM tablenode_reservationstarttimes WHERE TableNode_tableID IN (SELECT tableID FROM tables)"
-            );
-            int deletedStartTimesCount = deleteStartTimesQuery.executeUpdate();
-            System.out.println("Deleted " + deletedStartTimesCount + " rows from tablenode_reservationstarttimes.");
-
-            // Step 4: Delete all existing tables
-            Query<?> deleteTablesQuery = session.createQuery("DELETE FROM TableNode");
-            int deletedTablesCount = deleteTablesQuery.executeUpdate();
-            System.out.println("Deleted " + deletedTablesCount + " existing tables.");
-
-
-            System.out.println("deleteAllTablesAndRelatedData");
 
             /*generateData() from MealsDB*/
             List<String> customizationNames = Arrays.asList(

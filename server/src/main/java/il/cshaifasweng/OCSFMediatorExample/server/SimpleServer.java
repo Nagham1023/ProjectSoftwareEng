@@ -1181,23 +1181,20 @@ public class SimpleServer extends AbstractServer {
                 Hibernate.initialize(table.getReservationStartTimes());
                 Hibernate.initialize(table.getReservationEndTimes());
 
-                // Add the reservation times
-                table.getReservationStartTimes().add(reservationDateTime);
-                table.getReservationEndTimes().add(endTime);
 
+
+                // Update the in-memory allTables list to keep it synchronized
+                if (allTables != null) {
+                    for (TableNode cachedTable : allTables) {
+                        if (cachedTable.getTableID() == table.getTableID()) {
+                            cachedTable.getReservationStartTimes().add(reservationDateTime);
+                            cachedTable.getReservationEndTimes().add(endTime);
+                            break;
+                        }
+                    }
+                }
                 // Save the updated table to the database
                 session.update(table);
-
-//                // Update the in-memory allTables list to keep it synchronized
-//                if (allTables != null) {
-//                    for (TableNode cachedTable : allTables) {
-//                        if (cachedTable.getTableID() == table.getTableID()) {
-//                            cachedTable.getReservationStartTimes().add(reservationDateTime);
-//                            cachedTable.getReservationEndTimes().add(endTime);
-//                            break;
-//                        }
-//                    }
-//                }
             }
             session.save(reservation);
             allSavedReservation.add(reservation);
