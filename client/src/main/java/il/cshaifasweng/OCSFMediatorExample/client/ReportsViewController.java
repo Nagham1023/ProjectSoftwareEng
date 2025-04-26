@@ -62,7 +62,7 @@ public class ReportsViewController {
         // Add options to the ComboBox
         //restaurant_name.getItems().addAll("Option 1", "Nazareth", "ALL");
         // Add options to the ComboBox
-        reportType.getItems().addAll("revenueReport", "deliveryReport", "pickupReport","allOrdersReport", "ComplainReport");
+        reportType.getItems().addAll("revenueReport", "deliveryReport", "pickupReport","allOrdersReport", "ComplainReport", "VisitorsReport");
         // Add options to the ComboBox
         timeStamp.getItems().addAll("MONTHLY", "YEARLY");
 
@@ -138,6 +138,7 @@ public class ReportsViewController {
             case "Self PickUp Count Report " -> "Pickup Orders";
             case "ALL Count Report " -> "All Orders";
             case "Complaint Report " -> "Customer Complaints";
+            case "Visitors Report " -> "Visitors";
             default -> "Report";
         };
         series.setName(seriesName);

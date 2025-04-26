@@ -251,7 +251,8 @@ public class SimpleServer extends AbstractServer {
             sendToAll(new ReConfirmEvent());
             ReservationOperation = false;
 
-        } else if (msg instanceof FaildPayRes) {
+        }
+        else if (msg instanceof FaildPayRes) {
             try {
                 client.sendToClient(msg);
             } catch (Exception e) {
@@ -269,7 +270,8 @@ public class SimpleServer extends AbstractServer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (msg instanceof mealEvent) {
+        }
+        else if (msg instanceof mealEvent) {
             //here we're adding new meal !!
             //System.out.println("Received adding new mealEvent ");
             Meal addResult = AddNewMeal((mealEvent) msg);//if "added" then successed if "exist" then failed bcs there is a meal like that
@@ -278,26 +280,30 @@ public class SimpleServer extends AbstractServer {
             sendToAll(msg);
 
 
-        } else if (msg instanceof MealEventUpgraded) {
+        }
+        else if (msg instanceof MealEventUpgraded) {
             MealEventUpgraded UpdateMealEvent = (MealEventUpgraded) msg;
             Meal addResult = AddNewMealUpgraded((MealEventUpgraded) msg);
             mealEvent messagee = new mealEvent(UpdateMealEvent.getMealName(), UpdateMealEvent.getPrice(), String.valueOf(addResult.getId()), addResult);
             sendToAll(messagee);
             //if (addResult != null)
             //sendToAll("added");
-        } else if (msg instanceof UpdateMealRequest) {
+        }
+        else if (msg instanceof UpdateMealRequest) {
             String addResult = updateMeal((UpdateMealRequest) msg);//if "added" then successed if "not exist" then failed bcs there is no meal like that
             System.out.println("Added new UpdateMealRequest to the database");
             sendToAll(msg);
 
-        } else if (msg instanceof String && msgString.equals("toMenuPage")) {
+        }
+        else if (msg instanceof String && msgString.equals("toMenuPage")) {
             try {
                 client.sendToClient(getmealEvent());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
 
-        } else if (msg instanceof String && msgString.startsWith("menu")) {
+        }
+        else if (msg instanceof String && msgString.startsWith("menu")) {
             String branch = msgString.substring(4);
             //System.out.println("getting a menu to " + branch);
             List<Meal> ml;
@@ -314,7 +320,8 @@ public class SimpleServer extends AbstractServer {
                 throw new RuntimeException(e);
             }
 
-        } else if (msg instanceof UpdateMealEvent) {
+        }
+        else if (msg instanceof UpdateMealEvent) {
             UpdateMealEvent UpdateMealEvent = (UpdateMealEvent) msg;
             String mealId = UpdateMealEvent.getMealId();
             Meal meal = MealsDB.getMealById(mealId);
@@ -331,7 +338,8 @@ public class SimpleServer extends AbstractServer {
                 e.printStackTrace();
             }
 
-        } else if (msg.toString().startsWith("DeleteMeal")) {
+        }
+        else if (msg.toString().startsWith("DeleteMeal")) {
             //System.out.println("Deleting MEAL");
             String mealId = msgString.substring(6);
             int mealIdn = Integer.parseInt(msgString.replaceAll("\\D+", ""));
@@ -414,7 +422,8 @@ public class SimpleServer extends AbstractServer {
                     throw new RuntimeException(e);
                 }
             }
-        } else if (msg instanceof String && ((String) msg).equals("Get all users")) {
+        }
+        else if (msg instanceof String && ((String) msg).equals("Get all users")) {
             //System.out.println("Getting all users");
             //List<Users> users= UsersDB.getUsers();
             try {
@@ -423,7 +432,8 @@ public class SimpleServer extends AbstractServer {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        } else if (msg instanceof UserManagement) {
+        }
+        else if (msg instanceof UserManagement) {
             if (((UserManagement) msg).getMethod().equals("update")) {
                 // String response = UsersDB.UpdateUser((UserManagement) msg);
             } else {
@@ -549,7 +559,8 @@ public class SimpleServer extends AbstractServer {
                 paymentCheck.setResponse("Error processing request: " + e.getMessage());
                 e.printStackTrace();
             }
-        } else if (msg instanceof PersonalDetails) {
+        }
+        else if (msg instanceof PersonalDetails) {
             try {
                 PersonalDetails personal = (PersonalDetails) msg;
                 // Log the actual name of the PersonalDetails object
@@ -617,7 +628,8 @@ public class SimpleServer extends AbstractServer {
                 e.printStackTrace();
             }
 
-        } else if (msg instanceof String && ((String) msg).startsWith("showorder")) {
+        }
+        else if (msg instanceof String && ((String) msg).startsWith("showorder")) {
             //System.out.println("im in show order");
             int orderNum = Integer.parseInt(((String) msg).substring(9)); // Extract from index 9 onwards
             try {
@@ -676,7 +688,8 @@ public class SimpleServer extends AbstractServer {
                 addComplainIntoDatabase(ce, client);
                 sendToAll(msg);
             }
-        } else if (msg instanceof String && msg.equals("getAllComplaints6")) {
+        }
+        else if (msg instanceof String && msg.equals("getAllComplaints6")) {
             try {
                 for (Complain Complain : allComplains) {
                     Complain.toString();
@@ -731,7 +744,8 @@ public class SimpleServer extends AbstractServer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }else if(msg instanceof String && msg.equals("getOrdersNazareth")) {
+        }
+        else if(msg instanceof String && msg.equals("getOrdersNazareth")) {
             try {
                 client.sendToClient(getOrdersByRestaurant("Nazareth"));
             } catch (IOException e) {
@@ -747,7 +761,8 @@ public class SimpleServer extends AbstractServer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (msg instanceof specificComplains) {
+        }
+        else if (msg instanceof specificComplains) {
             try {
                 specificComplains specificComplains = (specificComplains) msg;
                 String kind = specificComplains.getSpecificKind();
@@ -766,7 +781,8 @@ public class SimpleServer extends AbstractServer {
                 throw new RuntimeException(e);
             }
 
-        } else if (msg instanceof updateResponse) {
+        }
+        else if (msg instanceof updateResponse) {
             updateResponse response = (updateResponse) msg;
             //System.out.println("Received updateResponse from client: " + response.getnewResponse());
 
@@ -820,6 +836,13 @@ public class SimpleServer extends AbstractServer {
                         response = complainReport.generate(reportRequest.getDate(), reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "ALL");
                     else
                         response = complainReport.generate(reportRequest.getDate(), reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "ONE");
+                    break;
+                case "VisitorsReport":
+                    VisitorsReport visitorsReport = new VisitorsReport();
+                    if (reportRequest.getTargetRestaurant().equals("ALL"))
+                        response = visitorsReport.generate(reportRequest.getDate(), reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "ALL");
+                    else
+                        response = visitorsReport.generate(reportRequest.getDate(), reportRequest.getTargetRestaurant(), reportRequest.getTimeFrame(), "ONE");
                     break;
 
                 // You can add more cases here for other report types in the future

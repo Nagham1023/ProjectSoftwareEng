@@ -428,6 +428,7 @@ public class App {
 
 
 
+
             /*generateData() from MealsDB*/
             List<String> customizationNames = Arrays.asList(
                     // Common burger components
@@ -1014,6 +1015,70 @@ public class App {
             System.out.println("finished fetching_reservations()");
 
 
+
+
+            /* generateReservations() */
+            CriteriaBuilder builderRes = session.getCriteriaBuilder();
+            CriteriaQuery<ReservationSave> reservationQuery = builderRes.createQuery(ReservationSave.class);
+            Root<ReservationSave> reservationRoot = reservationQuery.from(ReservationSave.class);
+            if (session.createQuery(reservationQuery).getResultList().isEmpty()) {
+
+                // Get restaurants
+                CriteriaQuery<Restaurant> restaurantQuery = builderRes.createQuery(Restaurant.class);
+                Root<Restaurant> restaurantRoot = restaurantQuery.from(Restaurant.class);
+                //List<Restaurant> restaurants = session.createQuery(restaurantQuery).getResultList();
+
+                if (!restaurants.isEmpty()) {
+                    List<ReservationSave> reservations = new ArrayList<>();
+                    Random random9 = new Random();
+
+                    // Generate reservations from Jan 2025 to Apr 2025
+                    LocalDate startDate = LocalDate.of(2025, 1, 1);
+                    LocalDate endDate = LocalDate.of(2025, 4, 25);
+
+                    for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+                        for (Restaurant restaurant : restaurants) {
+                            // Generate 2-5 reservations per day per restaurant
+                            int reservationsPerDay = 2 + random9.nextInt(4);
+                            for (int i = 0; i < reservationsPerDay; i++) {
+                                ReservationSave reservation = new ReservationSave(
+                                        restaurant.getRestaurantName(),
+                                        LocalDateTime.of(date, LocalTime.of(12 + random9.nextInt(6), 0)), // Random time 12:00-17:30
+                                        2 + random9.nextInt(7), // 2-8 seats
+                                        random9.nextBoolean(), // isInside
+                                        "Customer " + (i + 1),
+                                        "050-0000-" + String.format("%04d", random9.nextInt(10000)),
+                                        "customer" + i + "@example.com",
+                                        new ArrayList<>() // Empty tables list
+                                );
+                                reservation.setCreditCard_num("4111-1111-1111-" + String.format("%04d", i));
+                                reservations.add(reservation);
+                            }
+                        }
+                    }
+
+                    // Persist reservations
+                    for (ReservationSave reservation : reservations) {
+                        session.persist(reservation);
+                    }
+                    session.flush();
+                }
+            }
+            System.out.println("finished generateReservations()");
+
+
+
+
+            /* getReservations() */
+            CriteriaBuilder builderResGet = session.getCriteriaBuilder();
+            CriteriaQuery<ReservationSave> resQuery = builderResGet.createQuery(ReservationSave.class);
+            resQuery.from(ReservationSave.class);
+            List<ReservationSave> allReservations = session.createQuery(resQuery).getResultList();
+            // Add to your collection if needed, e.g.: allSavedReservation = allReservations;
+
+            System.out.println("finished getReservations()");
+
+
             /*generateOrders()*/
             CriteriaBuilder builder7 = session.getCriteriaBuilder();
             CriteriaQuery<Order> orderQuery = builder7.createQuery(Order.class);
@@ -1090,6 +1155,11 @@ public class App {
 
             System.out.println("finished getAllRequests()");
 
+            // Generate reservations
+            //TableDB.generateReservations();
+
+            // Fetch existing reservations
+            //fetching_reservation();
 
 
 
