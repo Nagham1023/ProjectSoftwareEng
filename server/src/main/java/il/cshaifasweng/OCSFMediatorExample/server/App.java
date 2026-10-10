@@ -133,7 +133,7 @@ public class App {
 //            four.setDate(LocalDate.parse("2025-03-16"));
 //            four.setTotal_price(150);
 //            four.setRestaurantName("Nazareth");
-//            four.setCustomerEmail("lamisawawdi2003@gmail.com");
+//            four.setCustomerEmail("customer@example.com");
 //            // Create specific order time
 //            LocalDateTime customTime = LocalDateTime.now().plusHours(4);
 //            four.setOrderTime(customTime);
@@ -188,14 +188,14 @@ public class App {
             // Create orders
             Users nagham = new Users();
             nagham.setRole("CompanyManager");
-            nagham.setEmail("naghammnsor@gmail.com");
+            nagham.setEmail("nagham@example.com");
             nagham.setPassword("NaghamYes");
             nagham.setUsername("naghamTheManager");
             nagham.setGender("other");
             nagham.setAge(22);
             Users shada = new Users();
             shada.setRole("Dietation");
-            shada.setEmail("shadamazzawi@gmail.com");
+            shada.setEmail("shada@example.com");
             shada.setPassword("123");
             shada.setUsername("shada");
             shada.setGender("other");
@@ -581,35 +581,35 @@ public class App {
 
             Users nagham = new Users();
             nagham.setRole("CompanyManager");
-            nagham.setEmail("naghammnsor@gmail.com");
+            nagham.setEmail("nagham@example.com");
             nagham.setPassword("NaghamYes");
             nagham.setUsername("naghamTheManager");
             nagham.setGender("other");
             nagham.setAge(22);
             Users salha = new Users();
             salha.setRole("CustomerService");
-            salha.setEmail("salhasalha121314@gmail.com");
+            salha.setEmail("salha@example.com");
             salha.setPassword("salha121314");
             salha.setUsername("salhaTheCustomerService");
             salha.setGender("female");
             salha.setAge(55);
             Users knani = new Users();
             knani.setRole("CustomerService");
-            knani.setEmail("yousefknani9@gmail.com");
+            knani.setEmail("knani@example.com");
             knani.setPassword("123");
             knani.setUsername("yousef");
             knani.setGender("male");
             knani.setAge(32);
             Users yousef = new Users();
             yousef.setRole("CompanyManager");
-            yousef.setEmail("yousefknani9@gmail.com");
+            yousef.setEmail("yousef@example.com");
             yousef.setPassword("212");
             yousef.setUsername("ceo");
             yousef.setGender("male");
             yousef.setAge(24);
             Users shada = new Users();
             shada.setRole("Dietation");
-            shada.setEmail("shadamazzawi@gmail.com");
+            shada.setEmail("shada@example.com");
             shada.setPassword("123");
             shada.setUsername("shada");
             shada.setGender("other");
@@ -617,7 +617,7 @@ public class App {
 
             Users Lamis = new Users();
             Lamis.setRole("Host Nazareth");
-            Lamis.setEmail("shadamazzawi@gmail.com");
+            Lamis.setEmail("lamis@example.com");
             Lamis.setPassword("123");
             Lamis.setUsername("lamis");
             Lamis.setGender("other");
@@ -625,14 +625,14 @@ public class App {
 
             Users adan = new Users();
             adan.setRole("ChainManager Nazareth");
-            adan.setEmail("shadamazzawi@gmail.com");
+            adan.setEmail("adan@example.com");
             adan.setPassword("123");
             adan.setUsername("adan");
             adan.setGender("other");
             adan.setAge(22);
             Users yos = new Users();
             yos.setRole("Kitchen Nazareth");
-            yos.setEmail("yousefknani9@gmail.com");
+            yos.setEmail("yos@example.com");
             yos.setPassword("123");
             yos.setUsername("kitchen");
             yos.setGender("male");

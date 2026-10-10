@@ -256,7 +256,7 @@ public class OrdersDB {
         order.setOrderTime(dynamicTime);
         order.setOrderType("Delivery");
         order.setOrderStatus("Do"); // Special status for dynamic order
-        order.setCustomerEmail("naghammnsor@gmail.com");
+        order.setCustomerEmail("customer@example.com");
         order.setCreditCard_num("5555-5555-5555-5555");
 
         // Rest of meal creation code remains the same...
@@ -283,7 +283,7 @@ public class OrdersDB {
                 Complain complaint = new Complain();
 
                 // Set fixed values
-                complaint.setEmail("naghammnsor@gmail.com");
+                complaint.setEmail("customer@example.com");
                 complaint.setKind("Complaint");
 
                 // Generate random name
