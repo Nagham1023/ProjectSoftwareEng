@@ -135,6 +135,17 @@ For payment, use a test card number such as `4111 1111 1111 1111`.
 - **`Failed to delete ... .jar` during `mvn clean`**: a server or client is still running and locking its JAR. Stop both, then rebuild.
 - **Code changes don't show up**: rebuild with `mvn clean package -DskipTests` before running again. Both JARs include the shared `entities` module.
 
+## Challenges & Solutions
+
+**Server stopped responding with multiple clients**
+- *Problem:* The system worked when we ran a single client from IntelliJ, but when we ran clients on two computers, the server stopped responding.
+- *Cause:* Clients requested the menu from the server for almost every action, and the server queried MySQL for each request, even though the menu rarely changes. Course staff helped us identify this.
+- *Solution:* We cached menu data in memory and pushed updates instead of re-fetching:
+    - **Server:** loads restaurants and meals from the database once and serves later requests from memory.
+    - **Client:** keeps the branch list locally and no longer requests the menu on every action.
+    - **Updates:** when a meal is added, updated or deleted, or its price changes, the server updates its in-memory copy and broadcasts the change. Each client updates the displayed menu through EventBus.
+- *Result:* Menu requests no longer hit the database, and the server handled clients on multiple computers.
+
 ## My Contribution
 
 I worked across the client, server and shared entities. The main parts I built:
